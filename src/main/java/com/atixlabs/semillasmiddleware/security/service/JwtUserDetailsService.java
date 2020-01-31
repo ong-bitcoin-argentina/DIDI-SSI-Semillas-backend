@@ -1,20 +1,40 @@
 package com.atixlabs.semillasmiddleware.security.service;
 
-import org.springframework.security.core.userdetails.User;
+import com.atixlabs.semillasmiddleware.security.model.User;
+import com.atixlabs.semillasmiddleware.security.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
+
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 @Service
 public class JwtUserDetailsService implements UserDetailsService {
+
+    @Autowired
+    private UserRepository userRepository;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-        if ("user".equals(username)) {
-            return new User("user", "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6",
-                    new ArrayList<>());
+
+        Optional<User> opUser = userRepository.findByUsername(username);
+
+        if (opUser.isPresent()) {
+            User user =  opUser.get();
+            List<GrantedAuthority> authorities = new ArrayList<>();
+            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
+                    user.getEmail(), user.getPassword(), true, true, true,
+                    true, authorities);
+
+            return userDetails;
+            //return new User("user", "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6",
+             //       new ArrayList<>());
         } else {
             throw new UsernameNotFoundException("User not found with username: " + username);
         }

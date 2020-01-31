@@ -55,4 +55,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
+
+
+    //TODO only for initial dev, delete it
+    /*@Override
+    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
+
+        auth.inMemoryAuthentication()
+                      .withUser("admin").password(passwordEncoder().encode("admin")).roles("ADMIN");
+
+    }*/
 }

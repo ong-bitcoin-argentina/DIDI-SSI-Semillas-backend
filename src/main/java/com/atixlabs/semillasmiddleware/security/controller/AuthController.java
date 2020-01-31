@@ -29,9 +29,12 @@ public class AuthController {
 
     @RequestMapping(value = "/authenticate", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
+        logger.info("__ __ __ __ __ " +authenticationRequest.getUsername()+ authenticationRequest.getPassword());
         this.authenticate(authenticationRequest.getUsername(), authenticationRequest.getPassword());
+        logger.info("authenticationRequest.getUsername()"+authenticationRequest.getUsername());
         final UserDetails userDetails = userDetailsService
                 .loadUserByUsername(authenticationRequest.getUsername());
+        logger.info("__ __ __ __ __ ");
         final String token = jwtTokenProvider.generateToken(userDetails);
         return ResponseEntity.ok(new JwtResponse(token));
     }

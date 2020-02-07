@@ -1,11 +1,13 @@
 package com.atixlabs.semillasmiddleware.security.dto;
 
+import lombok.Builder;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.io.Serializable;
 
+@Builder
 @NoArgsConstructor
 @Getter
 @Setter

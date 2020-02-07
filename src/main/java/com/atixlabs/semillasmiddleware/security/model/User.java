@@ -28,6 +28,7 @@ public class User {
 
     private String phone;
 
+    @Column(nullable = false, unique = true)
     private String username;
 
     @JsonIgnore

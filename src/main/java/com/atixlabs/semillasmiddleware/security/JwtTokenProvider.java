@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.security;
 
+import com.atixlabs.semillasmiddleware.security.util.JwtTokenControlUtil;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.impl.TextCodec;
@@ -24,6 +25,9 @@ public class JwtTokenProvider implements Serializable {
 
     @Autowired
     private DateUtil dateUtil;
+
+    @Autowired
+    private JwtTokenControlUtil jwtTokenControlUtil;
 
     @Value("${security.jwt.secret}")
     private String secret;
@@ -52,6 +56,7 @@ public class JwtTokenProvider implements Serializable {
                         .setExpiration(expiryDate)
                         .signWith(SignatureAlgorithm.HS512, this.getSecret())
                         .compact();
+        jwtTokenControlUtil.setToken(subject,token);
         return token;
     }
 
@@ -59,7 +64,7 @@ public class JwtTokenProvider implements Serializable {
     public Boolean validateToken(String token, UserDetails userDetails) throws UnsupportedEncodingException {
         try {
             final String username = getUsernameFromToken(token);
-            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));
+            return (username.equals(userDetails.getUsername()) && !isTokenExpired(token))&&(jwtTokenControlUtil.isTokenValid(token));
         } catch (SignatureException ex) {
             logger.error("Invalid JWT signature");
         } catch (MalformedJwtException ex) {
@@ -95,6 +100,9 @@ public class JwtTokenProvider implements Serializable {
         return expiration.before(dateUtil.getDateNow());
     }
 
+    public boolean revoqueToken(String username) {
+         return jwtTokenControlUtil.revoqueToken(username);
+    }
 
 }
 

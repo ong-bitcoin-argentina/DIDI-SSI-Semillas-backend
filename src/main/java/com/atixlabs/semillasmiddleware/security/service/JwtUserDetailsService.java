@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.security.service;
 
+import com.atixlabs.semillasmiddleware.security.configuration.CustomUser;
 import com.atixlabs.semillasmiddleware.security.model.User;
 import com.atixlabs.semillasmiddleware.security.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,9 +29,7 @@ public class JwtUserDetailsService implements UserDetailsService {
         if (opUser.isPresent()) {
             User user =  opUser.get();
             List<GrantedAuthority> authorities = new ArrayList<>();
-            UserDetails userDetails = new org.springframework.security.core.userdetails.User(
-                    user.getEmail(), user.getPassword(), true, true, true,
-                    true, authorities);
+            CustomUser userDetails = CustomUser.create(user);
 
             return userDetails;
             //return new User("user", "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6",

@@ -6,10 +6,10 @@ import java.io.Serializable;
 @Getter
 public class JwtResponse implements Serializable {
 
-    private final String jwttoken;
+    private final String accessToken;
 
-    public JwtResponse(String jwttoken) {
-        this.jwttoken = jwttoken;
+    public JwtResponse(String accessToken) {
+        this.accessToken = accessToken;
     }
 
 }

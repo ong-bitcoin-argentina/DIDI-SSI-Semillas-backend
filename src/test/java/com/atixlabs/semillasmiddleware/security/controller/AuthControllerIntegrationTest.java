@@ -10,6 +10,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
+import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -26,62 +27,14 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @RunWith(SpringRunner.class)
 @SpringBootTest(webEnvironment = RANDOM_PORT)
 @Slf4j
-public class AuthControllerIntegrationTest {
-
-    public final String URL_AUTH = "/auth/login";
-    public final String URL_ISAUTH = "/auth/isauth";
-    public final String URL_LOGOUT = "/auth/logout";
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private RoleRepository roleRepository;
+public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
-    @LocalServerPort
-    protected int port;
-
-    @Before
-    public void prepareUsers() {
-
-//        roleRepository.deleteAll();
-        Role roleAdmin = new Role();
-        roleAdmin.setCode("ROLE_ADMIN");
-        roleAdmin.setDescription("Role Admin");
-
-        roleRepository.save(roleAdmin);
-
-  //      userRepository.deleteAll();
-        User admin = new User();
-        admin.setActive(true);
-        admin.setEmail("admin@semillas.com");
-        admin.setName("Admin Name");
-        admin.setLastName("Admin Lastname");
-        admin.setUsername("admin");
-        admin.setPassword("$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6");
-        admin.setRole(roleAdmin);
-
-        userRepository.save(admin);
-
-    }
 
 
-    protected String loginAndGetToken(JwtRequest logging) {
-        Response response = login(logging);
-        return response.andReturn().jsonPath().getString("accessToken");
-    }
 
-    protected Response login(JwtRequest logging) {
-        Response response  = given()
-                .contentType(ContentType.JSON)
-                .body(logging)
-                .when().post(URL_AUTH);
-
-        return response;
-    }
 
     protected boolean logout(String token) {
         Response response = given()
@@ -94,7 +47,7 @@ public class AuthControllerIntegrationTest {
 
     @Test
     public void loginSuccessful() {
-        RestAssured.port = this.port;
+
         Response response = login(JwtRequest.builder().username("admin").password("password").build());
 
         response.then()
@@ -105,7 +58,7 @@ public class AuthControllerIntegrationTest {
 
     @Test
     public void loginUnsuccessful() {
-        RestAssured.port = this.port;
+
         login(JwtRequest.builder().username("invalid user").password("no pass").build())
                 .then()
                 .assertThat()
@@ -123,7 +76,7 @@ public class AuthControllerIntegrationTest {
 
     @Test
     public void logoutSuccesfull() {
-        RestAssured.port = this.port;
+
         String token = loginAndGetToken(JwtRequest.builder().username("admin").password("password").build());
 
         Response response = isAuthCheck(token);

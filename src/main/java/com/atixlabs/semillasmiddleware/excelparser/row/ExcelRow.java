@@ -4,10 +4,13 @@ import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 
+
+/**
+ * parent class of the parsers of each type of row
+ */
 @Getter
 @Setter
 @Slf4j
@@ -23,6 +26,7 @@ public abstract class ExcelRow {
     ExcelRow(Row row) throws InvalidRowException {
         try {
             this.rowNum = row.getRowNum();
+            this.parseRow(row);
         } catch (Exception e) {
             log.error(getStringError(), e);
             throw new InvalidRowException(getStringError() + e.getMessage());
@@ -92,5 +96,8 @@ public abstract class ExcelRow {
     protected String getStringError() {
         return "Cell " + cellIndexName + ", Error: " + cellIndexDescription + " ";
     }
+
+
+    protected abstract void parseRow(Row row);
 }
 

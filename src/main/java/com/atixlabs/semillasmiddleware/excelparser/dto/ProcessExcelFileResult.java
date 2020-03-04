@@ -6,6 +6,9 @@ import lombok.Setter;
 import java.util.ArrayList;
 import java.util.List;
 
+/**
+ * This class represents the final result of the processing of a file
+ */
 @Getter
 @Setter
 public class ProcessExcelFileResult {

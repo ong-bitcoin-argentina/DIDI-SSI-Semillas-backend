@@ -51,6 +51,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.cors()
                     .and().csrf().disable()
                     .authorizeRequests().antMatchers("/auth/login").permitAll()
+                    .antMatchers("/api/file/upload").permitAll()
                     .anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

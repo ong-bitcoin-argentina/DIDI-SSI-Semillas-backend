@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
+import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidQuestionException;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,6 +9,9 @@ import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.util.HashMap;
+import java.util.Map;
 
 
 /**
@@ -102,7 +106,13 @@ public abstract class ExcelRow {
         return "Cell " + cellIndexName + ", Error: " + cellIndexDescription + " ";
     }
 
+    protected Map<String,Object> generateAnswersMap(Map<String,Class<?>> questionsMap){
+        Map<String,Object> answersMap = new HashMap<>();
+        questionsMap.keySet().forEach((key) -> answersMap.put(key,null));
+        return answersMap;
+    }
 
-    protected abstract void parseRow(Row row);
+    protected abstract void parseRow(Row row) throws InvalidQuestionException;
+    protected abstract boolean isValid();
 }
 

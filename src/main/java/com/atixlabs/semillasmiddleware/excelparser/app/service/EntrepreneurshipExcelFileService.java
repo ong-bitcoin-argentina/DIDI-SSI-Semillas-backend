@@ -12,7 +12,7 @@ public class EntrepreneurshipExcelFileService extends CategoryExcelFileService {
             EntrepreneurshipInfo entrepreneurshipInfo = new EntrepreneurshipInfo(row);
             if (entrepreneurshipInfo.isValid()){
                 processExcelFileResult.addValidRows();
-                // do something with the dto?
+                // Credentials creation: do something with the dto
             }
             processExcelFileResult.addTotalRow();
         } catch (Exception e){

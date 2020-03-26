@@ -9,7 +9,7 @@ import java.util.Map;
 import java.time.LocalDate;
 
 public class EntrepreneurshipInfo extends ExcelRow {
-    private static Map<String, Class<?>> questions = new HashMap<>() {{
+    private static Map<String, Class<?>> QUESTIONS = new HashMap<>() {{
         put("INGRESOS - Por día", Double.class);
         put("INGRESOS - Por semana", Double.class);
         put("INGRESOS - Por mes", Double.class);
@@ -49,7 +49,7 @@ public class EntrepreneurshipInfo extends ExcelRow {
         put("Horas por semana", String.class);
     }};
 
-    EntrepreneurshipInfo(Row row) throws InvalidRowException {
+    public EntrepreneurshipInfo(Row row) throws InvalidRowException {
         super(row);
     }
 
@@ -58,9 +58,9 @@ public class EntrepreneurshipInfo extends ExcelRow {
         String question = getCellStringValue(row,15,"Emprendimiento pregunta");
         if (answers.containsKey(question)){
             answers.put(question,getCellStringValue(row,16,"Emprendimiento respuesta"));
+            //IGNORAR TITULOS! EJEMPLO: "Ingresos y Egresos", "Datos del emprendimiento"
         }
         else {
-            //IGNORAR TITULOS! EJEMPLO: "Ingresos y Egresos", "Datos del emprendimiento"
             throw new InvalidQuestionException(question);
         }
     }

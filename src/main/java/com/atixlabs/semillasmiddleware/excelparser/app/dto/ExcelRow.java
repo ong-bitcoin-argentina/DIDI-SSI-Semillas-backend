@@ -29,8 +29,8 @@ public abstract class ExcelRow {
     protected String cellIndexName = "None";
     protected String cellIndexDescription = "";
 
-    protected static Map<String, Class<?>> questions;
-    protected Map<String, Object> answers = generateAnswersMap(questions);
+    protected static Map<String, Class<?>> QUESTIONS;
+    protected Map<String, Object> answers = generateAnswersMap(QUESTIONS);
 
     protected final Logger log = LoggerFactory.getLogger(getClass());
 

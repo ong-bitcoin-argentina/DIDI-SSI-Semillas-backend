@@ -1,7 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.BeneficiaryInfo;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.EntrepreneurshipInfo;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import org.apache.poi.ss.usermodel.Row;

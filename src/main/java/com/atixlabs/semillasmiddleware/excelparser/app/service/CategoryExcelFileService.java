@@ -1,4 +1,4 @@
-package com.atixlabs.semillasmiddleware.excelparser.app;
+package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;

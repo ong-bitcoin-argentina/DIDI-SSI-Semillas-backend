@@ -1,4 +1,4 @@
-package com.atixlabs.semillasmiddleware.excelparser.app;
+package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
 public class CategoryServiceFactory {
     public CategoryExcelFileService create(String category){

@@ -49,8 +49,6 @@ public class EntrepreneurshipInfo extends ExcelRow {
         put("Horas por semana", String.class);
     }};
 
-    private Map<String, Object> answers = generateAnswersMap(questions);
-
     public EntrepreneurshipInfo(Row row) throws InvalidRowException {
         super(row);
         try {
@@ -68,6 +66,7 @@ public class EntrepreneurshipInfo extends ExcelRow {
             answers.put(question,getCellStringValue(row,16,"Emprendimiento respuesta"));
         }
         else {
+            //IGNORAR TITULOS! EJEMPLO: "Ingresos y Egresos", "Datos del emprendimiento"
             throw new InvalidQuestionException(question);
         }
     }

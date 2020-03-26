@@ -5,6 +5,8 @@ public class CategoryServiceFactory {
         switch (category.toUpperCase()){
             case "EMPRENDIMIENTO":
                 return new EntrepreneurshipExcelFileService();
+            case "DATOS DEL BENEFICIARIO":
+                return new BeneficiaryExcelFileService();
         }
         return null;
     }

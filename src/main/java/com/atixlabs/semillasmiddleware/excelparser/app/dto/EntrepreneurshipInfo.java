@@ -49,14 +49,8 @@ public class EntrepreneurshipInfo extends ExcelRow {
         put("Horas por semana", String.class);
     }};
 
-    public EntrepreneurshipInfo(Row row) throws InvalidRowException {
+    EntrepreneurshipInfo(Row row) throws InvalidRowException {
         super(row);
-        try {
-            parseRow(row);
-        } catch (Exception e){
-            log.error(getStringError(), e);
-            throw new InvalidRowException(getStringError() + e.getMessage());
-        }
     }
 
     @Override

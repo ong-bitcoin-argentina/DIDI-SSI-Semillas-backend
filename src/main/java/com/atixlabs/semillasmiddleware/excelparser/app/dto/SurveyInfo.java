@@ -1,8 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.SurveyExcelFileService;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.ExcelRow;
 import lombok.Getter;
 import lombok.Setter;
 import org.apache.poi.ss.usermodel.Row;
@@ -12,7 +10,6 @@ import java.util.Date;
 @Getter
 @Setter
 public class SurveyInfo extends ExcelRow {
-
     public String area;
     public String region;
     public String subregion;
@@ -28,15 +25,8 @@ public class SurveyInfo extends ExcelRow {
     public String fantasyName;
     public String address;
 
-
     public SurveyInfo(Row row) throws InvalidRowException {
         super(row);
-        try {
-            parseRow(row);
-        } catch (Exception e){
-            log.error(getStringError(), e);
-            throw new InvalidRowException(getStringError() + e.getMessage());
-        }
     }
 
     public String getSurveyName(){

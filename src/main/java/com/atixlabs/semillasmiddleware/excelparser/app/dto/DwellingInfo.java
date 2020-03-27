@@ -10,25 +10,9 @@ import java.util.Map;
 
 public class DwellingInfo extends ExcelRow{
     private static Map<String, Class<?>> QUESTIONS = new HashMap<>() {{
-        put("Descripción de materiales", Double.class);
-        put("Ladrillo", Boolean.class);
-        put("Chapa", Boolean.class);
-        put("Madera", Boolean.class);
-        put("Cartón", Boolean.class);
-        put("Condiciones de vivienda", String.class);
         put("Tipo de Tenencia", String.class);
         put("Vivienda", String.class);
-        put("Instalación de luz", String.class);
-        put("Condiciones grales", String.class);
-        put("Tipo de barrio", String.class);
-        put("Servicios Básicos", String.class);
-        put("Red de gas", String.class);
-        put("Garrafa", String.class);
-        put("Red de agua", String.class);
-        put("Pozo/ Bomba", String.class);
-        put("Croquis Mapa", String.class);
-        put("Cantidad de ambientes", String.class);
-        put("Monto Alquiler", String.class);
+        //missing "Distrito de residencia"
     }};
 
     public DwellingInfo(Row row) throws InvalidRowException {

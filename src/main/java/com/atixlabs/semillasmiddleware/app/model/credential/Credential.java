@@ -36,6 +36,6 @@ public abstract class Credential {
      */
     private Long idRelatedCredential;
 
-    private Person beneficiary;
+   // private Person beneficiary;
 
 }

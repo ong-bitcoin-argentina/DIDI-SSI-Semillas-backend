@@ -23,7 +23,7 @@ public abstract class ExcelRow {
     protected String cellIndexName = "None";
     protected String cellIndexDescription = "";
 
-    ExcelRow(Row row) throws InvalidRowException {
+    public ExcelRow(Row row) throws InvalidRowException {
         try {
             this.rowNum = row.getRowNum();
             this.parseRow(row);

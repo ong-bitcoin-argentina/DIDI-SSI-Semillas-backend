@@ -61,7 +61,6 @@ public class SurveyExcelParseService extends ExcelParseService {
 
         while (cellIterator.hasNext()){
             cellString += " | " + cellIterator.next().toString();
-
         }
 
         return cellString;

@@ -1,8 +1,5 @@
 package com.atixlabs.semillasmiddleware.excelparser.service;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.service.CategoryExcelFileService;
-import com.atixlabs.semillasmiddleware.excelparser.app.service.CategoryServiceFactory;
-import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelFileService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
@@ -16,13 +13,11 @@ import org.springframework.stereotype.Service;
 
 import java.io.*;
 import java.util.Iterator;
+import java.util.Optional;
 
 @Service
 @Slf4j
 public abstract class ExcelParseService {
-
-    String surveyName;
-    String category;
 
     @Autowired
     FileUtil fileUtil;
@@ -36,12 +31,9 @@ public abstract class ExcelParseService {
      * @throws FileNotFoundException
      */
     public ProcessExcelFileResult processSingleSheetFile(String filePath) throws IOException, InvalidRowException {
-        String currentSurveyName;
-        String currentCategory;
-
         log.info("Validation for file "+filePath+" begins");
 
-        File xlsxFile = fileUtil.getFileByPath(filePath);
+        File xlsxFile = this.getFileByPath(filePath);
 
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         processExcelFileResult.setFileName(filePath);
@@ -53,53 +45,27 @@ public abstract class ExcelParseService {
         Sheet sheet = workbook.getSheetAt(0);
         Iterator<Row> rowsIterator = sheet.rowIterator();
 
-        if (rowsIterator.hasNext())
-            rowsIterator.next();
+        //está eliminando la linea de cabeceras que por ahora quiero ver:
+        //if (rowsIterator.hasNext())
+        //    rowsIterator.next();
 
-        //process survey specific data
-        if (rowsIterator.hasNext()){
-            Row currentRow = rowsIterator.next();
-            SurveyExcelFileService surveyExcelFileService = new SurveyExcelFileService();
-            surveyExcelFileService.processRow(currentRow, processExcelFileResult);
-            surveyName = getSurveyName(currentRow);
-            category = getCategory(currentRow);
-
-            currentRow = rowsIterator.next();
-            currentSurveyName = getSurveyName(currentRow);
-            currentCategory = getCategory(currentRow);
-
-            while (rowsIterator.hasNext()) {
-                while (rowsIterator.hasNext() && surveyName == currentSurveyName) {
-                    while (rowsIterator.hasNext() && surveyName == currentSurveyName && category == currentCategory) {
-                        CategoryServiceFactory categoryServiceFactory = new CategoryServiceFactory();
-                        CategoryExcelFileService categoryService = categoryServiceFactory.create(category);
-                        categoryService.processRow(currentRow, processExcelFileResult);
-
-                        currentRow = rowsIterator.next();
-                        currentCategory = getCategory(currentRow);
-                        currentSurveyName = getSurveyName(currentRow);
-                    }
-                    category = currentCategory;
-                }
-                surveyName = currentSurveyName;
-            }
-
-            //if processExcelFileResult no tiene errores --> crear credenciales
+        while (rowsIterator.hasNext()) {
+            processRow(rowsIterator.next(), processExcelFileResult);
         }
 
         return processExcelFileResult;
     }
 
-    private String getSurveyName(Row row){
-        return row.getCell(7).getStringCellValue();
+
+    public abstract void processRow(Row fila, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
+
+    private File getFileByPath(String path) throws FileNotFoundException {
+        Optional<File> optionalFile;
+        File file = new File(path);
+        optionalFile = file.exists() ? Optional.of(file) : Optional.empty();
+        //TODO make File manager exeception
+        return optionalFile.orElseThrow(() -> new FileNotFoundException(String.format("File %s not exist.",path)));
     }
-
-    private String getCategory(Row row){
-        return row.getCell(14).getStringCellValue();
-    }
-
-
-    //public abstract void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
 
 
 }

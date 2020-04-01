@@ -27,7 +27,8 @@ public class Person {
 
     private LocalDate birthDate;
 
-   // private List<Credential> credentials;
+    @OneToMany
+    private List<Credential> credentials;
 
     /*
     kinsman (pariente), p1,p2, tiporelacion (kind of kinship)

@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.security;
 
+import com.atixlabs.semillasmiddleware.security.util.JwtTokenControlUtil;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import org.junit.Assert;
 import org.junit.Before;
@@ -18,6 +19,8 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 
+import static org.mockito.ArgumentMatchers.anyString;
+
 @RunWith(SpringRunner.class)
 public class JwtTokenProviderTest {
 
@@ -26,6 +29,9 @@ public class JwtTokenProviderTest {
 
     @Mock
     private DateUtil dateUtil;
+
+    @Mock
+    private JwtTokenControlUtil jwtTokenControlUtil;
 
     @Before
     public void setupMocks(){
@@ -48,6 +54,10 @@ public class JwtTokenProviderTest {
         Date now = Date.from(Instant.ofEpochSecond(1580310));
 
         Mockito.doReturn(now).when(dateUtil).getDateNow();
+
+        Mockito.doReturn(true).when(jwtTokenControlUtil).isTokenValid(anyString());
+
+        Mockito.doReturn(true).when(jwtTokenControlUtil).revoqueToken(anyString());
 
         String token = jwtTokenProvider.generateToken(userDetails);
 
@@ -74,6 +84,8 @@ public class JwtTokenProviderTest {
         Date now = new Date();
 
         Mockito.doReturn(now).when(dateUtil).getDateNow();
+        Mockito.doReturn(true).when(jwtTokenControlUtil).isTokenValid(anyString());
+        Mockito.doReturn(true).when(jwtTokenControlUtil).revoqueToken(anyString());
 
         String token = jwtTokenProvider.generateToken(userDetails);
 

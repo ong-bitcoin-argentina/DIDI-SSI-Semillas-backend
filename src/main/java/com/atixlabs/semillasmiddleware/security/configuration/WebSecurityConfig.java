@@ -46,6 +46,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         return super.authenticationManagerBean();
     }
 
+
     private static final String[] AUTH_WHITELIST = {
             "/docs/**",
             "/favicon.ico",
@@ -60,6 +61,14 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     };
 
 
+    /*@Override
+    protected void configure(HttpSecurity httpSecurity) throws Exception {
+        httpSecurity.cors()
+                .and().csrf().disable()
+                .authorizeRequests().antMatchers("*").permitAll()
+             ;
+    }*/
+//TODO habilitarrrrrr
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 
@@ -68,7 +77,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                     .authorizeRequests()
                     .antMatchers(AUTH_WHITELIST).permitAll().
                     antMatchers("/auth/login").permitAll()
-
+                    .antMatchers("/api/file/upload").permitAll()
                     .anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);

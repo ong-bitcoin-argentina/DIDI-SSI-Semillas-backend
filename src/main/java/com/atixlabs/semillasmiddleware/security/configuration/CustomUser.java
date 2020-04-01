@@ -17,7 +17,7 @@ import java.util.Objects;
 @Setter
 public class CustomUser implements UserDetails {
 
-    private Integer id;
+    private Long id;
 
     private String username;
 
@@ -28,7 +28,7 @@ public class CustomUser implements UserDetails {
 
     public CustomUser(){};
 
-    private CustomUser(Integer id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
+    private CustomUser(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;
         this.username = username;
         this.password = password;

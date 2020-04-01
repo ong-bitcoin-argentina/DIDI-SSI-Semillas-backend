@@ -36,6 +36,7 @@ public abstract class Credential {
      */
     private Long idRelatedCredential;
 
+    @ManyToOne
     private Person beneficiary;
 
 }

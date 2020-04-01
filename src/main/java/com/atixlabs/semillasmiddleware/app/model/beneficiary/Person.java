@@ -27,6 +27,8 @@ public class Person {
 
     private LocalDate birthDate;
 
+    @JoinColumn(name = "ID_CREDENTIAL")
+    @OneToMany
     private List<Credential> credentials;
 
     /*

@@ -15,13 +15,13 @@ public class CategoryServiceFactory {
             case "DATOS ENTREVISTA":
                 return new InterviewExcelFileService();
             case "FOTOS ADICIONALES":
-                return new PicturesExcelFileService();
+                //return new PicturesExcelFileService();
             case "SITUACIÓN PATRIMONIAL":
                 return new PatrimonialSituationExcelFileService();
             case "FINANZAS FAMILIARES":
-                return new FamilyFinancesExcelFileService();
+                //return new FamilyFinancesExcelFileService();
             case "INGRESOS SOLICITANTE":
-                return new ApplicantIncomesExcelFileService();
+                //return new ApplicantIncomesExcelFileService();
             case "DATOS DEL CONYUGE":
                 return new KinsmanExcelFileService("Conyuge");
             case "DATOS HIJO":

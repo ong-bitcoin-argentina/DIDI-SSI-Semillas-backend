@@ -1,11 +1,10 @@
-package com.atixlabs.semillasmiddleware.excelparser.service;
+package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.service.CategoryExcelFileService;
-import com.atixlabs.semillasmiddleware.excelparser.app.service.CategoryServiceFactory;
-import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelFileService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
+import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -14,18 +13,23 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.io.*;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.Iterator;
+import java.util.Optional;
 
 @Service
 @Slf4j
-public abstract class ExcelParseService {
+@NoArgsConstructor
+public class SurveyExcelParseService extends ExcelParseService {
 
     String surveyName;
     String category;
 
-    @Autowired
-    FileUtil fileUtil;
+    //@Autowired
+    //FileUtil fileUtil;
 
     /**
      *
@@ -35,13 +39,14 @@ public abstract class ExcelParseService {
      * @return
      * @throws FileNotFoundException
      */
+    @Override
     public ProcessExcelFileResult processSingleSheetFile(String filePath) throws IOException, InvalidRowException {
         String currentSurveyName;
         String currentCategory;
 
         log.info("Validation for file "+filePath+" begins");
 
-        File xlsxFile = fileUtil.getFileByPath(filePath);
+        File xlsxFile = this.getFileByPath(filePath);
 
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         processExcelFileResult.setFileName(filePath);
@@ -99,7 +104,15 @@ public abstract class ExcelParseService {
     }
 
 
-    //public abstract void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
+    //public void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
+
+    public File getFileByPath(String path) throws FileNotFoundException {
+        Optional<File> optionalFile;
+        File file = new File(path);
+        optionalFile = file.exists() ? Optional.of(file) : Optional.empty();
+        //TODO make File manager exeception
+        return optionalFile.orElseThrow(() -> new FileNotFoundException(String.format("File %s not exist.",path)));
+    }
 
 
 }

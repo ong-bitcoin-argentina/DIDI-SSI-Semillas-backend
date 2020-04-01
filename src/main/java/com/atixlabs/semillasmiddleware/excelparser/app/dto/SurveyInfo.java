@@ -44,7 +44,7 @@ public class SurveyInfo extends ExcelRow {
         this.setPromoter(getCellStringValue(row, 6,"PROMOTOR"));
         this.setSurveyName(getCellStringValue(row, 7,"FORMULARIO"));
         this.setMonth(getCellIntValue(row, 8,"MES"));
-        this.setDate(getCellStringValue(row, 9,"FECHA DE RELEVAMIENTO"));
+        //this.setDate(getCellStringValue(row, 9,"FECHA DE RELEVAMIENTO"));
         this.setPosId(getCellIntValue(row, 10,"PDV"));
         this.setBusinessName(getCellStringValue(row, 11,"RAZON SOCIAL"));
         this.setFantasyName(getCellStringValue(row, 12,"NOMBRE DE FANTASIA"));

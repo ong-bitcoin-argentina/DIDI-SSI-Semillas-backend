@@ -1,5 +1,8 @@
 package com.atixlabs.semillasmiddleware.filemanager.controller;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelParseService;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.exceptionhandler.dto.ApiError;
 import com.atixlabs.semillasmiddleware.security.controller.BasicAuthIntegrationTest;
 import com.atixlabs.semillasmiddleware.security.dto.JwtRequest;
@@ -38,8 +41,8 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
 
     }
 
-    private Response uploadFile(String token) throws IOException {
-        File newFile = new File("src/test/resources/files/exampleFile.xls");
+    private Response uploadFile(String token, String filePath) throws IOException {
+        File newFile = new File(filePath);
         return given()
                 .headers("Authorization", "Bearer " + token)
                 .accept(ContentType.JSON)
@@ -50,18 +53,60 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
     @Test
     public void fileUploadOk() throws IOException {
 
+        String filePath = "src/test/resources/files/exampleFile.xls";
+
+        //borra carpeta tmp local si ya existe algo pre-cargado
         File uploadFile = new File("/tmp/exampleFile.xls");
         if(uploadFile.exists())
             uploadFile.delete();
 
         String token = loginAndGetToken(JwtRequest.builder().username("admin").password("password").build());
 
-        Response response  =  this.uploadFile(token);
+        Response response  =  this.uploadFile(token, filePath);
 
         assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+
         uploadFile = new File("/tmp/exampleFile.xls");
         assertEquals(true, uploadFile.exists());
 
+        log.info("Absolute Path: "+uploadFile.getAbsolutePath());
+        log.info("Path: "+uploadFile.getPath());
+        log.info("Canonical Path: "+uploadFile.getCanonicalPath());
+
+    }
+
+    @Test
+    public void fileUploadSurveyOk() throws IOException, InvalidRowException {
+
+        String fileName = "survey_example.xlsx";
+        String initialFilePath = "src/test/resources/files/"+fileName;
+        String tmpFilePath = "/tmp/"+fileName;
+
+        //revisa si ya existe de forma local y la borra
+        File uploadFile = new File(tmpFilePath);
+        if(uploadFile.exists())
+            uploadFile.delete();
+
+        String token = loginAndGetToken(JwtRequest.builder().username("admin").password("password").build());
+        Response response  =  this.uploadFile(token, initialFilePath);
+        assertEquals(HttpStatus.OK.value(), response.getStatusCode());
+
+        uploadFile = new File(tmpFilePath);
+
+        log.info("Absolute Path: "+uploadFile.getAbsolutePath());
+        log.info("Path: "+uploadFile.getPath());
+        log.info("Canonical Path: "+uploadFile.getCanonicalPath());
+
+        assertEquals(true, uploadFile.exists());
+
+        if(uploadFile.exists()){
+            log.info("file uploaded successfully");
+
+            SurveyExcelParseService surveyExcelParseService = new SurveyExcelParseService();
+            ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(tmpFilePath);
+
+            log.info(processExcelFileResult.toString());
+        }
     }
 
 }

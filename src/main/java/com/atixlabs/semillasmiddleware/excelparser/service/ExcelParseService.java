@@ -46,18 +46,18 @@ public abstract class ExcelParseService {
         Iterator<Row> rowsIterator = sheet.rowIterator();
 
         //está eliminando la linea de cabeceras que por ahora quiero ver:
-        //if (rowsIterator.hasNext())
-        //    rowsIterator.next();
+        if (rowsIterator.hasNext())
+            rowsIterator.next();
 
         while (rowsIterator.hasNext()) {
-            processRow(rowsIterator.next(), processExcelFileResult);
+            processExcelFileResult = processRow(rowsIterator.next(), processExcelFileResult);
         }
 
         return processExcelFileResult;
     }
 
 
-    public abstract void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
+    public abstract ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
 
     private File getFileByPath(String path) throws FileNotFoundException {
         Optional<File> optionalFile;

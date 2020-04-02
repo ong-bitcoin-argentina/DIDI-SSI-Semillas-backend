@@ -18,7 +18,6 @@ import java.io.FileNotFoundException;
 public class SurveyExcelParseService extends ExcelParseService {
 
     /**
-     *
      * Levanta el archivo y lee linea por linea
      *
      * @param row
@@ -27,36 +26,35 @@ public class SurveyExcelParseService extends ExcelParseService {
      */
 
     @Override
-    public void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException {
+    public ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException {
 
         //visualizo cada linea procesada en formato simil tabla.
 
         AnswerRow answerRow = new AnswerRow(row);
         log.info(answerRow.toString());
-        log.info(answerRow.toString(row));
+        //log.info(answerRow.toString(row));
 
-        if(answerRow.isExists()){
+        processExcelFileResult.addTotalRow();
 
-            processExcelFileResult.addTotalRow();
+        //answerRow.validateType();//2 metodos privados invocados x isValid
+        //answerRow.validateData();
 
-            //answerRow.validateType();//2 metodos privados invocados x isValid
-            //answerRow.validateData();
+        if (answerRow.isValid()) {
 
-            if(answerRow.isValid()){
-                processExcelFileResult.addValidRows();
+            //todo: answerRow.isValid deberia verificar si pudo parsear los datos ok. verificación minima viable.
 
-                //TODO: LLAMAR AL FORM Y AGREGAR LA FILA
-                //TODO: DEBERIA HABER metodo que agregue una fila 1 a 1.
-                //surveyForm.addValidRow(answerRow);
-            }
-            else{
-                processExcelFileResult.addRowError("todo: enviar error cacheado");
-            }
+
+
+
+            processExcelFileResult.addValidRows();
+            processExcelFileResult.addInsertedRows();
+            //TODO: LLAMAR AL FORM Y AGREGAR LA FILA
+            //TODO: DEBERIA HABER metodo que agregue una fila 1 a 1.
+            //surveyForm.addValidRow(answerRow);
+        } else {
+            processExcelFileResult.addRowError("todo: enviar error cacheado");
         }
-
-        //return processExcelFileResult;
-
-
+        return processExcelFileResult;
     }
 
 

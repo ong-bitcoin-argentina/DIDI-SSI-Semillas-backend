@@ -87,7 +87,7 @@ public abstract class ExcelRow {
         return row.getCell(cellindex).getBooleanCellValue();
     }
 
-    Long getCellStringToLongValue(Row row, int cellindex, String descripcion) {
+    protected Long getCellStringToLongValue(Row row, int cellindex, String descripcion) {
         return Long.parseLong(getCellStringValue(row, cellindex, descripcion));
     }
 

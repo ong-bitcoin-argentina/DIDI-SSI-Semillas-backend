@@ -48,8 +48,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
 
     private static final String[] AUTH_WHITELIST = {
-            "/docs/**",
-            "/favicon.ico",
+            // -- swagger ui
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "spring-security-rest/**",
+            "/swagger-ui.html**",
+            "/webjars/**",
+            "/",
+            "favicon.ico",
             "/**/*.png",
             "/**/*.gif",
             "/**/*.svg",
@@ -59,6 +68,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/**/*.js"
             // other public endpoints of your API may be appended to this array
     };
+
+
 
 
     /*@Override

@@ -1,14 +1,15 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -23,6 +24,9 @@ public class CredentialController {
     @Autowired
     private CredentialService credentialService;
 
+    @Autowired
+    private CredentialCreditRepository credentialCreditRepository;
+
     @RequestMapping(value = "/createCredit", method = RequestMethod.GET)
     public void createCredit() {
         log.info(" createCredit ");
@@ -32,8 +36,9 @@ public class CredentialController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CredentialDto> findAllCredentials() {
-       List<CredentialDto> credentials = credentialService.findAllCredentialsMock();
-       return credentials;
+       List<CredentialCredit> credentialsCredit = credentialCreditRepository.findAll();
+       List<CredentialDto> credentialsDto = credentialsCredit.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
+       return credentialsDto;
     }
 
 }

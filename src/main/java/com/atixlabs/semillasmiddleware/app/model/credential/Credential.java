@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -27,9 +28,11 @@ public abstract class Credential {
 
     private Long idHistorical;
 
-    private LocalDateTime dateOfIssue;
+    @Temporal(TemporalType.DATE)
+    private Date dateOfIssue;
 
-    private LocalDateTime dateOfExpiry;
+    @Temporal(TemporalType.DATE)
+    private Date dateOfExpiry;
 
     /**
      *

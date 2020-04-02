@@ -128,6 +128,40 @@
 			<version>28.2-jre</version>
 		</dependency>
 
+		<dependency>
+			<groupId>org.apache.maven.plugins</groupId>
+			<artifactId>maven-compiler-plugin</artifactId>
+			<version>3.0</version>
+		</dependency>
+
+		<!--swagger -->
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger2</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-swagger-ui</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>io.springfox</groupId>
+			<artifactId>springfox-bean-validators</artifactId>
+			<version>3.0.0-SNAPSHOT</version>
+		</dependency>
+
+		<dependency>
+			<groupId>org.springframework.plugin</groupId>
+			<artifactId>spring-plugin-core</artifactId>
+			<version>2.0.0.RELEASE</version>
+		</dependency>
+
+
+
+
 
 		<!-- TESTING -->
 		<dependency>
@@ -181,79 +215,25 @@
 		</dependencies>
 	</dependencyManagement>
 
-	<properties>
-		<snippetsDirectory>${project.build.directory}/generated-snippets</snippetsDirectory>
-	</properties>
-
 
 	<build>
 		<plugins>
-			<!-- SPRING REST DOCS (asciidoctor) -->
-			<plugin>
-				<groupId>org.asciidoctor</groupId>
-				<artifactId>asciidoctor-maven-plugin</artifactId>
-				<version>1.5.8</version>
-				<executions>
-					<execution>
-						<id>generate-docs</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>process-asciidoc</goal>
-						</goals>
-						<configuration>
-							<backend>html</backend>
-							<doctype>book</doctype>
-							<attributes>
-								<snippets>${snippetsDirectory}</snippets>
-							</attributes>
-							<sourceDirectory>src/main/java/docs/asciidocs</sourceDirectory>
-							<outputDirectory>target/generated-docs</outputDirectory>
-						</configuration>
-					</execution>
-				</executions>
-				<dependencies>
-					<dependency>
-						<groupId>org.springframework.restdocs</groupId>
-						<artifactId>spring-restdocs-asciidoctor</artifactId>
-						<version>${spring-restdocs.version}</version>
-					</dependency>
-				</dependencies>
-			</plugin>
-
-
-			<plugin>
-				<artifactId>maven-resources-plugin</artifactId>
-				<version>2.7</version>
-				<executions>
-					<execution>
-						<id>copy-resources</id>
-						<phase>prepare-package</phase>
-						<goals>
-							<goal>copy-resources</goal>
-						</goals>
-						<configuration>
-							<outputDirectory>
-								${project.build.outputDirectory}/target/generated-docs
-							</outputDirectory>
-							<resources>
-								<resource>
-									<directory>
-										${project.build.directory}/generated-docs
-									</directory>
-								</resource>
-							</resources>
-						</configuration>
-					</execution>
-				</executions>
-			</plugin>
-
-
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>3.8.0</version>
+				<configuration>
+					<release>11</release>  <!--or <release>10</release>-->
+				</configuration>
+			</plugin>
+
 		</plugins>
 	</build>
+
 
 	<repositories>
 		<repository>
@@ -268,6 +248,11 @@
 			<snapshots>
 				<enabled>true</enabled>
 			</snapshots>
+		</repository>
+		<repository>
+			<id>jcenter-snapshots</id>
+			<name>jcenter</name>
+			<url>http://oss.jfrog.org/artifactory/oss-snapshot-local/</url>
 		</repository>
 	</repositories>
 	<pluginRepositories>
@@ -284,6 +269,7 @@
 				<enabled>true</enabled>
 			</snapshots>
 		</pluginRepository>
+
 	</pluginRepositories>
 
 </project>

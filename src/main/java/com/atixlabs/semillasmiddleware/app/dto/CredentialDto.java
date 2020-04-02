@@ -1,9 +1,12 @@
 package com.atixlabs.semillasmiddleware.app.dto;
 
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
+import java.util.Date;
 
 @Getter
 @Setter
@@ -13,11 +16,9 @@ public class CredentialDto {
 
     private Long idDidiCredential;
 
-    private Long idHistorical;
+    private Date dateOfIssue;
 
-    private LocalDateTime dateOfIssue;
-
-    private LocalDateTime dateOfExpiry;
+    private Date dateOfExpiry;
 
     private String name;
 
@@ -25,15 +26,26 @@ public class CredentialDto {
 
     private String creditState;
 
-    public CredentialDto(Long id, Long idDidiCredential, Long idHistorical, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState) {
+    //tipo de credencial ?
+
+    public CredentialDto(Long id, Long idDidiCredential, Date dateOfIssue, Date dateOfExpiry, String name, Long dniBeneficiary, String creditState) {
         this.id = id;
         this.idDidiCredential = idDidiCredential;
-        this.idHistorical = idHistorical;
         this.dateOfIssue = dateOfIssue;
         this.dateOfExpiry = dateOfExpiry;
         this.name = name;
         this.dniBeneficiary = dniBeneficiary;
         this.creditState = creditState;
+    }
+
+    public CredentialDto(CredentialCredit credential) {
+        this.id = credential.getId();
+        this.idDidiCredential = credential.getIdDidiCredential();
+        this.dateOfIssue = credential.getDateOfIssue();
+        this.dateOfExpiry = credential.getDateOfExpiry();
+        this.name = credential.getBeneficiary().getName();
+        this.dniBeneficiary = credential.getBeneficiary().getDocumentNumber();
+        this.creditState = credential.getCreditState();
     }
 
 

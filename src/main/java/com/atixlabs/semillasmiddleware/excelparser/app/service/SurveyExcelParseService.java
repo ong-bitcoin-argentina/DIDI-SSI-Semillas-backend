@@ -1,56 +1,63 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
-import java.util.Iterator;
 
 @Service
 @Slf4j
 @NoArgsConstructor
 public class SurveyExcelParseService extends ExcelParseService {
 
-    String surveyName;
-    String category;
-
     /**
      *
      * Levanta el archivo y lee linea por linea
      *
-     * @param filePath
+     * @param row
      * @return
      * @throws FileNotFoundException
      */
 
-    public String getSurveyName(Row row){
-        return row.getCell(7).getStringCellValue();
-    }
-
-    public String getCategory(Row row){
-        return row.getCell(14).getStringCellValue();
-    }
-
     @Override
-    public void processRow(Row row, ProcessExcelFileResult processExcelFileResult) {
+    public void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException {
 
         //visualizo cada linea procesada en formato simil tabla.
-        log.info(stringifyRow(row));
-    }
 
-    public String stringifyRow(Row row){
-        Iterator<Cell> cellIterator = row.cellIterator();
-        String cellString = "";
+        AnswerRow answerRow = new AnswerRow(row);
+        log.info(answerRow.toString());
+        log.info(answerRow.toString(row));
 
-        while (cellIterator.hasNext()){
-            cellString += " | " + cellIterator.next().toString();
+        if(answerRow.isExists()){
+
+            processExcelFileResult.addTotalRow();
+
+            //answerRow.validateType();//2 metodos privados invocados x isValid
+            //answerRow.validateData();
+
+            if(answerRow.isValid()){
+                processExcelFileResult.addValidRows();
+
+                //TODO: LLAMAR AL FORM Y AGREGAR LA FILA
+                //TODO: DEBERIA HABER metodo que agregue una fila 1 a 1.
+                //surveyForm.addValidRow(answerRow);
+            }
+            else{
+                processExcelFileResult.addRowError("todo: enviar error cacheado");
+            }
         }
 
-        return cellString;
+        //return processExcelFileResult;
+
+
     }
+
+
 }

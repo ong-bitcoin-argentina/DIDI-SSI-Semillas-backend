@@ -57,7 +57,7 @@ public abstract class ExcelParseService {
     }
 
 
-    public abstract void processRow(Row fila, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
+    public abstract void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
 
     private File getFileByPath(String path) throws FileNotFoundException {
         Optional<File> optionalFile;

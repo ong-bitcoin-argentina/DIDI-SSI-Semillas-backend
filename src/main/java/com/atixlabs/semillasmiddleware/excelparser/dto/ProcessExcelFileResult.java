@@ -115,4 +115,19 @@ public class ProcessExcelFileResult {
     public int getValidRows() {
         return validRows;
     }
+
+    @Override
+    public String toString() {
+        return "ProcessExcelFileResult{" +
+                "totalRows=" + totalRows +
+                ", validRows=" + validRows +
+                ", totalInsertedRows=" + totalInsertedRows +
+                ", totalErrorsRows=" + totalErrorsRows +
+                ", totalDeletedRows=" + totalDeletedRows +
+                ", errorRows=" + errorRows +
+                ", fileName='" + fileName + '\'' +
+                ", isFileValid=" + isFileValid +
+                ", fileError='" + fileError + '\'' +
+                '}';
+    }
 }

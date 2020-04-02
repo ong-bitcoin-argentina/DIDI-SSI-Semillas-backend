@@ -11,7 +11,6 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 import static org.mockito.Mockito.verify;
@@ -30,7 +29,7 @@ public class CredentialServiceTest {
         List<CredentialDto> credentials = new ArrayList<>();
 
 
-        CredentialDto credential1 = new CredentialDto(1L,2L,new Date(),new Date(),"Jorge Rodrigues",29302594L,"Estado");
+        CredentialDto credential1 = new CredentialDto(1L,2L, LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Jorge Rodrigues",29302594L,"Estado");
         credentials.add(credential1);
 
         return credentials;

@@ -6,7 +6,6 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.time.LocalDateTime;
-import java.util.Date;
 
 @Getter
 @Setter
@@ -16,9 +15,9 @@ public class CredentialDto {
 
     private Long idDidiCredential;
 
-    private Date dateOfIssue;
+    private LocalDateTime dateOfIssue;
 
-    private Date dateOfExpiry;
+    private LocalDateTime dateOfExpiry;
 
     private String name;
 
@@ -28,10 +27,10 @@ public class CredentialDto {
 
     //tipo de credencial ?
 
-    public CredentialDto(Long id, Long idDidiCredential, Date dateOfIssue, Date dateOfExpiry, String name, Long dniBeneficiary, String creditState) {
+    public CredentialDto(Long id, Long idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState) {
         this.id = id;
         this.idDidiCredential = idDidiCredential;
-        this.dateOfIssue = dateOfIssue;
+            this.dateOfIssue = dateOfIssue;
         this.dateOfExpiry = dateOfExpiry;
         this.name = name;
         this.dniBeneficiary = dniBeneficiary;

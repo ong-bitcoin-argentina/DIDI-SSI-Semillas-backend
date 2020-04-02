@@ -8,7 +8,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 @Service
@@ -24,7 +23,7 @@ public class CredentialService {
         credentialCredit.setIdDidiReceptor(234L);
         credentialCredit.setIdDidiCredential(456L);
         credentialCredit.setIdHistorical(77L);
-        credentialCredit.setDateOfExpiry(new Date());
+        credentialCredit.setDateOfExpiry(LocalDateTime.now());
         credentialCredit.setIdRelatedCredential(534L);
 
         credentialCredit.setIdCredit(222L);
@@ -44,16 +43,16 @@ public class CredentialService {
         List<CredentialDto> credentials = new ArrayList<>();
 
 
-        CredentialDto credential1 = new CredentialDto(1L,2L,new Date(),new Date(),"Jorge Rodrigues",29302594L,"Estado");
+        CredentialDto credential1 = new CredentialDto(1L,2L,LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Jorge Rodrigues",29302594L,"Estado");
         credentials.add(credential1);
 
-        CredentialDto credential2 = new CredentialDto(2L,3L,new Date(),new Date(),"Uriel Brama",29302594L,"Estado");
+        CredentialDto credential2 = new CredentialDto(2L,3L,LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Uriel Brama",29302594L,"Estado");
         credentials.add(credential2);
 
-        CredentialDto credential3 = new CredentialDto(3L,4L,new Date(),new Date(),"Pepe Grillo",293025464L,"Estado");
+        CredentialDto credential3 = new CredentialDto(3L,4L,LocalDateTime.now(),LocalDateTime.now().plusDays(2),"Pepe Grillo",293025464L,"Estado");
         credentials.add(credential3);
 
-        CredentialDto credential4 = new CredentialDto(4L,5L,new Date(),new Date(),"Armando Thompson",29302594L,"Estado");
+        CredentialDto credential4 = new CredentialDto(4L,5L,LocalDateTime.now(),LocalDateTime.now().plusDays(6),"Armando Thompson",29302594L,"Estado");
         credentials.add(credential4);
 
         return credentials;

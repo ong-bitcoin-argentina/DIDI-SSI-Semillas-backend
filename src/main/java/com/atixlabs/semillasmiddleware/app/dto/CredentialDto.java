@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.dto;
 
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -30,6 +31,7 @@ public class CredentialDto {
     private LocalDateTime lastUpdate;
 
     //tipo de credencial ?
+    //  tipo credencial -> enum tmb -> string
 
     public CredentialDto(Long id, Long idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState) {
         this.id = id;
@@ -41,7 +43,7 @@ public class CredentialDto {
         this.credentialState = creditState;
     }
 
-    public CredentialDto(CredentialCredit credential) {
+    public CredentialDto(Credential credential) {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiCredential();
         this.dateOfIssue = credential.getDateOfIssue();
@@ -52,6 +54,18 @@ public class CredentialDto {
         this.lastUpdate = credential.getUpdated();
     }
 
+    @Override
+    public String toString() {
+        return "CredentialDto{" +
+                "id=" + id +
+                ", idDidiCredential=" + idDidiCredential +
+                ", dateOfIssue=" + dateOfIssue +
+                ", dateOfExpiry=" + dateOfExpiry +
+                ", name='" + name + '\'' +
+                ", dniBeneficiary=" + dniBeneficiary +
+                ", credentialState='" + credentialState + '\'' +
+                ", lastUpdate=" + lastUpdate +
+                '}';
+    }
 
-//  tipo credencial -> enum tmb -> string
 }

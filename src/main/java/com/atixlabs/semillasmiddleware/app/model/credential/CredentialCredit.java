@@ -33,5 +33,18 @@ public class CredentialCredit extends Credential {
 
     private Long dniBeneficiary;
 
-
+    @Override
+    public String toString() {
+        return "CredentialCredit{" +
+                "idCredit=" + idCredit +
+                ", creditName='" + creditName + '\'' +
+                ", idGroup=" + idGroup +
+                ", groupName='" + groupName + '\'' +
+                ", rol='" + rol + '\'' +
+                ", currentCycle='" + currentCycle + '\'' +
+                ", creditState='" + creditState + '\'' +
+                ", amount=" + amount +
+                ", dniBeneficiary=" + dniBeneficiary +
+                '}' + super.toString();
+    }
 }

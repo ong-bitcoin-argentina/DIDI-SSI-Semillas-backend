@@ -40,4 +40,20 @@ public abstract class Credential extends AuditableEntity {
 
     private String credentialState;
 
+
+    @Override
+    public String toString() {
+        return "Credential{" +
+                "id=" + id +
+                ", idDidiIssueer=" + idDidiIssueer +
+                ", idDidiReceptor=" + idDidiReceptor +
+                ", idDidiCredential=" + idDidiCredential +
+                ", idHistorical=" + idHistorical +
+                ", dateOfIssue=" + dateOfIssue +
+                ", dateOfExpiry=" + dateOfExpiry +
+                ", idRelatedCredential=" + idRelatedCredential +
+                ", beneficiary=" + beneficiary +
+                ", credentialState='" + credentialState + '\'' +
+                '}';
+    }
 }

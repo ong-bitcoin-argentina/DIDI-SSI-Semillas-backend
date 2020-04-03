@@ -35,5 +35,15 @@ public class CredentialCredit extends Credential {
     private Long dniBeneficiary;
 
 
-
+    public CredentialCredit(CredentialCredit credential) {
+        this.idCredit = credential.idCredit;
+        this.creditName = credential.creditName;
+        this.idGroup = credential.idGroup;
+        this.groupName = credential.groupName;
+        this.rol = credential.rol;
+        this.currentCycle = credential.currentCycle;
+        this.creditState = credential.creditState;
+        this.amount = credential.amount;
+        this.dniBeneficiary = credential.dniBeneficiary;
+    }
 }

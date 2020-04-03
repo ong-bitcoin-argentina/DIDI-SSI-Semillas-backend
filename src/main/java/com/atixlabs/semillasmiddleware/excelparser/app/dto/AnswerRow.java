@@ -67,7 +67,6 @@ public class AnswerRow extends ExcelRow {
 
         category = category.toUpperCase().replaceAll("[0123456789]", "").trim();
 
-
         switch (category) {
             case "DATOS DEL BENEFICIARIO":
             case "DATOS DEL CONYUGE":
@@ -86,21 +85,6 @@ public class AnswerRow extends ExcelRow {
                 //log.info("CATEGORY UNKNOWN: "+category);
                 return "CATEGORY UNKNOWN: "+category;
         }
-        /*
-Datos del Beneficiario
-Datos del Conyuge
-Datos del Conyugue
-Datos Entrevista
-Datos Hijo
-Emprendimiento
-Finanzas Familiares
-Fotos adicionales
-Ingresos Solicitante
-Otro miembro de la familia 1
-Otros ingresos familiares
-Situación Patrimonial
-Vivienda
-         */
     }
 
 

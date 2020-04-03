@@ -103,4 +103,30 @@ public class AnswerRow extends ExcelRow {
                 ", cellIndexDescription='" + cellIndexDescription + '\'' +
                 '}';
     }
+
+    public String getAnswerAsString(){
+        return answer;
+    }
+    public Double getAnswerAsDouble(){
+        try {
+            return Double.valueOf(answer);
+        }
+        catch (NumberFormatException e){
+            log.info("String to Double conversion failed on: "+answer);
+        }
+        return null;
+    }
+    public Long getAnswerAsLong(){
+        return Long.valueOf(answer);
+    }
+    public Integer getAnswerAsInteger(){
+        return Integer.valueOf(answer);
+    }
+    public LocalDate getAnswerAsDate(String datePattern){
+        //"dd/MM/yy"
+        return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));
+    }
+
+
+
 }

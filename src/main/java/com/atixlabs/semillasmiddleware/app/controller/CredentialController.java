@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
@@ -12,6 +13,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -40,7 +42,10 @@ public class CredentialController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CredentialDto> findAllCredentials() {
-       List<Credential> credentials = credentialRepository.findAll();
+       List<Credential> credentials = credentialRepository.findAllByCredentialStateIs(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+       log.info("una crendencial padre " +credentials.get(0).toString());
+       Optional<CredentialCredit> a = credentialCreditRepository.findById(credentials.get(0).getId());
+       log.info("una credencial a partir del padre " + a.get().toString() );
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
        log.info("FIND CREDENTIALS -- " + credentialsDto.toString());
        return credentialsDto;

@@ -2,11 +2,11 @@ package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 
 public enum CredentialStatesCodes {
 
-    CREDENTIAL_PENDING("PENDIENTE"),
-    CREDENTIAL_ACTIVE("VIGENTE"),
-    CREDENTIAL_EXPIRED("VENCIDA"),
-    CREDENTIAL_OUT_OF_DATE("CADUCADA"),
-    CREDENTIAL_REVOKE("REVOCADA");
+    CREDENTIAL_PENDING("Pendiente"),
+    CREDENTIAL_ACTIVE("Vigente"),
+    CREDENTIAL_EXPIRED("Vencida"),
+    CREDENTIAL_OUT_OF_DATE("Caducada"),
+    CREDENTIAL_REVOKE("Revocada");
 
     private String code;
 

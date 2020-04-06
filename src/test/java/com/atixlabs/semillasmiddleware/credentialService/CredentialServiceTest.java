@@ -29,7 +29,7 @@ public class CredentialServiceTest {
         List<CredentialDto> credentials = new ArrayList<>();
 
 
-        CredentialDto credential1 = new CredentialDto(1L,2L, LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Jorge Rodrigues",29302594L,"Estado");
+        CredentialDto credential1 = new CredentialDto(1L,2L, LocalDateTime.now(),LocalDateTime.now().plusDays(1),"Jorge Rodrigues",29302594L,"Estado", "CredentialCredit");
         credentials.add(credential1);
 
         return credentials;

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.persistence.Transient;
 import java.time.LocalDateTime;
 
 @Getter
@@ -30,10 +31,10 @@ public class CredentialDto {
 
     private LocalDateTime lastUpdate;
 
-    //tipo de credencial ?
-    //  tipo credencial -> enum tmb -> string
+    private String credentialType;
 
-    public CredentialDto(Long id, Long idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState) {
+
+    public CredentialDto(Long id, Long idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState, String credentialType) {
         this.id = id;
         this.idDidiCredential = idDidiCredential;
         this.dateOfIssue = dateOfIssue;
@@ -41,7 +42,9 @@ public class CredentialDto {
         this.name = name;
         this.dniBeneficiary = dniBeneficiary;
         this.credentialState = creditState;
+        this.credentialType = credentialType;
     }
+
 
     public CredentialDto(Credential credential) {
         this.id = credential.getId();
@@ -52,6 +55,7 @@ public class CredentialDto {
         this.dniBeneficiary = credential.getBeneficiary().getDocumentNumber();
         this.credentialState = credential.getCredentialState();
         this.lastUpdate = credential.getUpdated();
+        this.credentialType = credential.getCredentialType();
     }
 
     @Override
@@ -65,6 +69,7 @@ public class CredentialDto {
                 ", dniBeneficiary=" + dniBeneficiary +
                 ", credentialState='" + credentialState + '\'' +
                 ", lastUpdate=" + lastUpdate +
+                ", credentialType='" + credentialType + '\'' +
                 '}';
     }
 

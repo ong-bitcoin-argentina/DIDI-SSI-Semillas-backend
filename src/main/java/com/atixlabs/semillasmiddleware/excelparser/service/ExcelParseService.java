@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.service;
 
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -19,9 +20,6 @@ import java.util.Optional;
 @Slf4j
 public abstract class ExcelParseService {
 
-    @Autowired
-    FileUtil fileUtil;
-
     /**
      *
      * Levanta el archivo y lee linea por linea
@@ -30,7 +28,7 @@ public abstract class ExcelParseService {
      * @return
      * @throws FileNotFoundException
      */
-    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws IOException, InvalidRowException {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception, InvalidCategoryException {
         log.info("Validation for file "+filePath+" begins");
 
         File xlsxFile = this.getFileByPath(filePath);
@@ -57,7 +55,7 @@ public abstract class ExcelParseService {
     }
 
 
-    public abstract ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
+    public abstract ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException;
 
     private File getFileByPath(String path) throws FileNotFoundException {
         Optional<File> optionalFile;

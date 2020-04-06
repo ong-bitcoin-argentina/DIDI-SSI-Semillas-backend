@@ -13,13 +13,14 @@ public class EntrepreneurshipCategory implements Category {
     String address;
     LocalDate activityEndingDate;
 
-    private void loadData(AnswerRow answerRow){
+
+    public void loadData(AnswerRow answerRow){
         switch (StringUtil.cleanString(answerRow.getQuestion())){
             case "TIPO DE EMPRENDIMIENTO":
                 this.type = answerRow.getAnswerAsString();
                 break;
             case "FECHA DE INICIO / REINICIO":
-                this.activityStartDate = answerRow.getAnswerAsDate();
+                this.activityStartDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
             case "ACTIVIDAD PRINCIPAL":
                 this.mainActivity = answerRow.getAnswerAsString();
@@ -32,7 +33,7 @@ public class EntrepreneurshipCategory implements Category {
                 break;
             //check final form
             case "FIN DE LA ACTIVIDAD":
-                this.activityEndingDate = answerRow.getAnswerAsDate();
+                this.activityEndingDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
         }
     };

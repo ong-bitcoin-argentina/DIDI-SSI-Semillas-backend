@@ -2,6 +2,10 @@ package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.row.ExcelRow;
+import com.atixlabs.semillasmiddleware.util.StringUtil;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -14,6 +18,9 @@ import java.time.format.DateTimeFormatter;
 import java.util.Date;
 
 @Slf4j
+@Getter
+@Setter
+@NoArgsConstructor
 public class AnswerRow extends ExcelRow {
 
     //key form:
@@ -28,6 +35,25 @@ public class AnswerRow extends ExcelRow {
     private String question;
     private String answer;
 
+    @Override
+    public String toString() {
+        return "AnswerRow{" +
+                "surveyDate=" + surveyDate +
+                ", surveyFormCode='" + surveyFormCode + '\'' +
+                ", pdv=" + pdv +
+                ", category='" + category + '\'' +
+                ", question='" + question + '\'' +
+                ", answer='" + answer + '\'' +
+                ", rowNum=" + rowNum +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", isValid=" + isValid +
+                ", exists=" + exists +
+                ", cellIndex=" + cellIndex +
+                ", cellIndexName='" + cellIndexName + '\'' +
+                ", cellIndexDescription='" + cellIndexDescription + '\'' +
+                '}';
+    }
+
     public AnswerRow(Row row) throws InvalidRowException {
         super(row);
     }
@@ -37,25 +63,28 @@ public class AnswerRow extends ExcelRow {
         //7 formulario
         //9 fecha relevamiento
         //10 PDV
-        this.surveyFormCode = getCellStringValue(row, 7, "formulario");
 
-        String dateString = getCellStringValue(row, 9, "fecha relevamiento");
-        dateString = dateString.replaceAll("'", "").trim();
-        this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
+        //log.info("parseRow->firstCellData: "+String.valueOf(row.getFirstCellNum()));
+        if(row.getFirstCellNum()>=0) {
 
-        this.pdv = getCellStringToLongValue(row, 10, "PDV");
+            this.surveyFormCode = getCellStringValue(row, 7, "formulario");
 
+            String dateString = getCellStringValue(row, 9, "fecha relevamiento");
+            //dateString = dateString.replaceAll("'", "").trim();
+            this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
+            this.pdv = getCellStringToLongValue(row, 10, "PDV");
 
-        //14 categoria
-        //15 pregunta
-        //16 respuesta
-        this.category = getCleanCategory(getCellStringValue(row, 14, "category"));
-        this.question = getCellStringValue(row, 15, "question");
-        this.answer = getCellStringValue(row, 16, "answer");
-
-        //this.cellIndex = 1;
-        //this.cellIndexName = "compl";
-        //this.cellIndexDescription = "completar";
+            //14 categoria
+            //15 pregunta
+            //16 respuesta
+            this.category = getCleanCategory(getCellStringValue(row, 14, "category"));
+            this.question = getCellStringValue(row, 15, "question");
+            this.answer = getCellStringValue(row, 16, "answer");
+        }
+        else {
+            //todo: ver como manejar row vacias que quedan en el excel.
+            this.isValid = false;
+        }
     }
 
 
@@ -65,7 +94,7 @@ public class AnswerRow extends ExcelRow {
         if (category == null)
             return "CATEGORY NULL";
 
-        category = category.toUpperCase().replaceAll("[0123456789]", "").trim();
+        category = StringUtil.cleanString(category);
 
         switch (category) {
             case "DATOS DEL BENEFICIARIO":
@@ -82,49 +111,34 @@ public class AnswerRow extends ExcelRow {
             case "VIVIENDA":
                 return category;
             default:
-                //log.info("CATEGORY UNKNOWN: "+category);
                 return "CATEGORY UNKNOWN: "+category;
         }
     }
 
 
-    @Override
-    public String toString() {
-        return "AnswerRow{" +
-                "category='" + category + '\'' +
-                ", question='" + question + '\'' +
-                ", answer='" + answer + '\'' +
-                ", rowNum=" + rowNum +
-                ", errorMessage='" + errorMessage + '\'' +
-                ", isValid=" + isValid +
-                ", exists=" + exists +
-                ", cellIndex=" + cellIndex +
-                ", cellIndexName='" + cellIndexName + '\'' +
-                ", cellIndexDescription='" + cellIndexDescription + '\'' +
-                '}';
-    }
-
     public String getAnswerAsString(){
         return answer;
     }
     public Double getAnswerAsDouble(){
-        try {
-            return Double.valueOf(answer);
-        }
-        catch (NumberFormatException e){
-            log.info("String to Double conversion failed on: "+answer);
-        }
+        try { return Double.valueOf(answer);}
+        catch (NumberFormatException e){log.info("String to Double conversion failed on: "+answer);}
         return null;
     }
     public Long getAnswerAsLong(){
-        return Long.valueOf(answer);
+        try {return Long.valueOf(answer);}
+        catch (NumberFormatException e){log.info("String to Long conversion failed on: "+answer);}
+        return null;
     }
     public Integer getAnswerAsInteger(){
-        return Integer.valueOf(answer);
+        try {return Integer.valueOf(answer);}
+        catch (NumberFormatException e){log.info("String to Integer conversion failed on: "+answer);}
+        return null;
     }
     public LocalDate getAnswerAsDate(String datePattern){
         //"dd/MM/yy"
-        return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));
+        try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
+        catch (NumberFormatException e){log.info("String to Date conversion failed on: "+answer);}
+        return null;
     }
 
 

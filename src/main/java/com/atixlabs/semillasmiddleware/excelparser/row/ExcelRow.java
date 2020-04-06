@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.excelparser.row;
 
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,6 +18,7 @@ import java.util.Iterator;
 @Getter
 @Setter
 @Slf4j
+@NoArgsConstructor
 public abstract class ExcelRow {
     protected int rowNum;
     protected String errorMessage;
@@ -28,6 +30,7 @@ public abstract class ExcelRow {
 
     public ExcelRow(Row row) throws InvalidRowException {
         try {
+            //log.info("ExcelRow:" +this.toString(row));
             this.rowNum = row.getRowNum();
             this.parseRow(row);
         } catch (Exception e) {

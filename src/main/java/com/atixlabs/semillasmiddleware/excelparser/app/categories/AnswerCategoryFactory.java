@@ -2,14 +2,19 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
-import org.apache.commons.lang3.StringUtils;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import org.springframework.stereotype.Component;
+//import org.apache.commons.lang3.StringUtils;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class AnswerCategoryFactory {
-    private static Map<String, Class<?>> CATEGORIES_TYPE = new HashMap<>() {{
+    private static Map<String, Class<?>> CATEGORIES_TYPE = new HashMap<String, Class<?>>() {{
         put("DATOS DEL BENEFICIARIO", BeneficiaryCategory.class);
         //put("DATOS DEL CONYUGE", null);
         //put("DATOS HIJO", null);
@@ -17,7 +22,7 @@ public class AnswerCategoryFactory {
         put("VIVIENDA", DwellingCategory.class);
     }};
 
-    private Map<String, Category> categories = new HashMap<>() {{
+    private Map<String, Category> categories = new HashMap<String, Category>() {{
         put("DATOS DEL BENEFICIARIO", null);
         put("DATOS DEL CONYUGE", null);
         put("DATOS HIJO", null);

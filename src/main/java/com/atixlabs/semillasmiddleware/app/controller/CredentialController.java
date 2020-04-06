@@ -41,7 +41,7 @@ public class CredentialController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CredentialDto> findAllCredentials() {
+    public List<CredentialDto> findAllActiveCredentials() {
        List<Credential> credentials = credentialRepository.findAllByCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
        log.info("FIND CREDENTIALS -- " + credentialsDto.toString());

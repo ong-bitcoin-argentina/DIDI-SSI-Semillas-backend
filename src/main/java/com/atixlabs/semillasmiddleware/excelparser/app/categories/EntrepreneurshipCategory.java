@@ -13,7 +13,8 @@ public class EntrepreneurshipCategory implements Category {
     String address;
     LocalDate activityEndingDate;
 
-    private void loadData(AnswerRow answerRow){
+
+    public void loadData(AnswerRow answerRow){
         switch (StringUtil.cleanString(answerRow.getQuestion())){
             case "TIPO DE EMPRENDIMIENTO":
                 this.type = answerRow.getAnswerAsString();

@@ -19,7 +19,7 @@ public class EntrepreneurshipCategory implements Category {
                 this.type = answerRow.getAnswerAsString();
                 break;
             case "FECHA DE INICIO / REINICIO":
-                this.activityStartDate = answerRow.getAnswerAsDate();
+                this.activityStartDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
             case "ACTIVIDAD PRINCIPAL":
                 this.mainActivity = answerRow.getAnswerAsString();
@@ -32,7 +32,7 @@ public class EntrepreneurshipCategory implements Category {
                 break;
             //check final form
             case "FIN DE LA ACTIVIDAD":
-                this.activityEndingDate = answerRow.getAnswerAsDate();
+                this.activityEndingDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
         }
     };

@@ -42,10 +42,7 @@ public class CredentialController {
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CredentialDto> findAllCredentials() {
-       List<Credential> credentials = credentialRepository.findAllByCredentialStateIs(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-       log.info("una crendencial padre " +credentials.get(0).toString());
-       Optional<CredentialCredit> a = credentialCreditRepository.findById(credentials.get(0).getId());
-       log.info("una credencial a partir del padre " + a.get().toString() );
+       List<Credential> credentials = credentialRepository.findAllByCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
        log.info("FIND CREDENTIALS -- " + credentialsDto.toString());
        return credentialsDto;

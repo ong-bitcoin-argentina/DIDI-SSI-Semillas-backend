@@ -2,10 +2,11 @@ package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 
 public enum CredentialTypesCodes {
 
-    CREDENTIAL_CREDIT("CredentialCredit"),
-    CREDENTIAL_DWELLING("CredentialDwelling"),
-    CREDENTIAL_IDENTITY("CredentialIdentity"),
-    CREDENTIAL_ENTREPRENEURSHIP("CredentialEntrepreneurship");
+    CREDENTIAL_CREDIT("Creditos Semillas"),
+    CREDENTIAL_DWELLING("Credito Viviendo"),
+    CREDENTIAL_IDENTITY("Identidad - Titular"),
+    CREDENTIAL_ENTREPRENEURSHIP("Credito Emprendedor"),
+    CREDENTIAL_ACADEMIC("Credito Escolar");
 
     private String code;
 

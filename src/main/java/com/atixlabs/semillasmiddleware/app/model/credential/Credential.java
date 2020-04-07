@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -40,7 +39,7 @@ public abstract class Credential extends AuditableEntity {
 
     private String credentialState;
 
-    private String credentialType;
+    private String credentialDescription;
 
 
     @Override
@@ -56,7 +55,7 @@ public abstract class Credential extends AuditableEntity {
                 ", idRelatedCredential=" + idRelatedCredential +
                 ", beneficiary=" + beneficiary +
                 ", credentialState='" + credentialState + '\'' +
-                ", credentialType='" + credentialType + '\'' +
+                ", credentialType='" + credentialDescription + '\'' +
                 '}';
     }
 }

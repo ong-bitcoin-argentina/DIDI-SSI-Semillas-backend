@@ -47,7 +47,7 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         Join<Credential, Person> children = credential.join("beneficiary", JoinType.LEFT);
 
         if (credentialType != null) {
-            predicates.add(cb.equal(credential.get("credentialType"), credentialType));
+            predicates.add(cb.equal(credential.get("credentialDescription"), credentialType));
         }
 
         if (name != null) {

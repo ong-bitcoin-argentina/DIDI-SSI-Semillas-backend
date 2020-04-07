@@ -1,18 +1,14 @@
 package com.atixlabs.semillasmiddleware.credentialService;
 
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialServiceCustom;
-import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
-import io.restassured.internal.assertion.Assertion;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -21,12 +17,11 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -58,7 +53,7 @@ public class CredentialServiceTest {
         CredentialCredit credential1 = new CredentialCredit();
         credential1.setId(1L);
         credential1.setIdDidiCredential(2L);
-        credential1.setCredentialType(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
+        credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfExpiry(LocalDateTime.now().plusDays(1));
         credential1.setDniBeneficiary(29302594L);
@@ -70,7 +65,7 @@ public class CredentialServiceTest {
         CredentialIdentity credentialIdentity = new CredentialIdentity();
         credentialIdentity.setId(2L);
         credentialIdentity.setDniCreditHolder(34534534L);
-        credential1.setCredentialType(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
+        credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
         credentialIdentity.setNameBeneficiary("Pepito");
         credentialIdentity.setDateOfExpiry(util.getLocalDateTimeNow());
         credentialIdentity.setDateOfIssue(util.getLocalDateTimeNow().minusDays(1));

@@ -1,12 +1,10 @@
 package com.atixlabs.semillasmiddleware.app.dto;
 
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Transient;
 import java.time.LocalDateTime;
 
 @Getter
@@ -56,7 +54,7 @@ public class CredentialDto {
         this.dniBeneficiary = credential.getBeneficiary().getDocumentNumber();
         this.credentialState = credential.getCredentialState();
         this.lastUpdate = credential.getUpdated();
-        this.credentialType = credential.getCredentialType();
+        this.credentialType = credential.getCredentialDescription();
     }
 
     @Override

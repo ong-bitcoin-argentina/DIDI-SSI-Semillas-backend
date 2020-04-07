@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -84,11 +85,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getActiveCredentials() {
-        when(credentialService.findCredentialsWithFilter(null,null,null, null, null, null,"Vigente")).thenReturn((List<Credential>) credentialsMock());
+        when(credentialService.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsMock());
 
-        List<Credential> credentials = credentialService.findCredentialsWithFilter(null,null,null, null, null, null,"Vigente");
+        List<Credential> credentials = credentialService.findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
 
-        verify(credentialService).findCredentialsWithFilter(null,null,null, null, null, null,"Vigente");
+        verify(credentialService).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
         log.info("credenciales " +credentials.toString());

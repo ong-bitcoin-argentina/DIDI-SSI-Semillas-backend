@@ -50,7 +50,7 @@ public class CredentialController {
                                                         @RequestParam(required = false) String idDidiCredential,
                                                         @RequestParam(required = false) String dateOfIssue,
                                                         @RequestParam(required = false) String dateOfExpiry,
-                                                        @RequestParam(required = false) String credentialState) {
+                                                        @RequestParam(required = false) List<String> credentialState) {
 
 
         List<Credential> credentials;

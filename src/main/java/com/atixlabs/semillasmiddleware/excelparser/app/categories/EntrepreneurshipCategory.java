@@ -1,10 +1,13 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestions;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
+import lombok.Setter;
 
 import java.time.LocalDate;
 
+@Setter
 public class EntrepreneurshipCategory implements Category {
     String type;
     LocalDate activityStartDate;
@@ -13,26 +16,26 @@ public class EntrepreneurshipCategory implements Category {
     String address;
     LocalDate activityEndingDate;
 
-
     public void loadData(AnswerRow answerRow){
-        switch (StringUtil.cleanString(answerRow.getQuestion())){
-            case "TIPO DE EMPRENDIMIENTO":
+        String question = StringUtil.cleanString(answerRow.getQuestion());
+        switch (EntrepreneurshipQuestions.valueOf(question)){
+            case TYPE:
                 this.type = answerRow.getAnswerAsString();
                 break;
-            case "FECHA DE INICIO / REINICIO":
+            case ACTIVITY_START_DATE:
                 this.activityStartDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
-            case "ACTIVIDAD PRINCIPAL":
+            case MAIN_ACTIVITY:
                 this.mainActivity = answerRow.getAnswerAsString();
                 break;
-            case "NOMBRE EMPRENDIMIENTO":
+            case NAME:
                 this.name = answerRow.getAnswerAsString();
                 break;
-            case "DIRECCION":
+            case ADDRESS:
                 this.address = answerRow.getAnswerAsString();
                 break;
             //check final form
-            case "FIN DE LA ACTIVIDAD":
+            case ACTIVITY_ENDING_DATE:
                 this.activityEndingDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
         }

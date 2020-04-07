@@ -63,7 +63,7 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         }
 
         if (dateOfExpiry != null) {
-            cb.like(credential.get("dateOfExpiry").as(String.class), dateOfExpiry+"%");
+            predicates.add(cb.like(credential.get("dateOfExpiry").as(String.class), dateOfExpiry+"%"));
         }
 
         if (dateOfIssue != null) {

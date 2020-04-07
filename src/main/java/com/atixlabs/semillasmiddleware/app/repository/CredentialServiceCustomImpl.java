@@ -1,19 +1,21 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
 
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.persistence.criteria.CriteriaQuery;
-import javax.persistence.criteria.Predicate;
-import javax.persistence.criteria.Root;
+import javax.persistence.criteria.*;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -31,12 +33,16 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
     @PersistenceContext
     protected EntityManager em;
 
-
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
     public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, String credentialState) {
-        //DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
 
+       // Date date1=new SimpleDateFormat("dd/MM/yyyy").parse(dateOfIssue);
+       // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
+        //Date dateTime = Date.parse(dateOfIssue, formatter).atStartOfDay();
+        //DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
+       // LocalDateTime dateTime2 = LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE);
         //LocalDateTime dateTime = LocalDateTime.parse(dateOfIssue, formatter);
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
@@ -45,13 +51,19 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         Root<Credential> credential = cq.from(Credential.class);
         List<Predicate> predicates = new ArrayList<>();
 
+        Join<Credential, Person> children = credential.join("beneficiary", JoinType.LEFT);
+
         if (credentialType != null) {
             predicates.add(cb.equal(credential.get("credentialType"), credentialType));
         }
 
-       /* if (name != null) {
-            predicates.add(cb.equal(credential.get("name"), name));
-        }*/
+        if (name != null) {
+            predicates.add(cb.like(children.get("name"), name+"%"));
+        }
+
+        if (dniBeneficiary != null) {
+            predicates.add(cb.like(children.get("documentNumber"), dniBeneficiary+"%"));
+        }
         //TODO JOIN con person dniBeneficiary y name
 
 
@@ -60,11 +72,11 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         }
 
         if (dateOfExpiry != null) {
-            predicates.add(cb.equal(credential.get("dateOfExpiry"), dateOfExpiry));
+            cb.like(credential.get("dateOfExpiry").as(String.class), dateOfExpiry+"%");
         }
 
-        if (dateOfIssue != null) { //TODO: busqueda por fecha sin horario dentro del timestamp (formato iso)
-            predicates.add(cb.equal(credential.get("dateOfIssue"), dateOfIssue));
+        if (dateOfIssue != null) {
+            predicates.add(cb.like(credential.get("dateOfIssue").as(String.class), dateOfIssue+"%"));
         }
 
         if (credentialState != null) {

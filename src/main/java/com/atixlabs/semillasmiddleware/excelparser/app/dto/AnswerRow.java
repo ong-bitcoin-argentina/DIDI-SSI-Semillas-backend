@@ -35,6 +35,10 @@ public class AnswerRow extends ExcelRow {
     private String question;
     private String answer;
 
+    public AnswerRow(Row row) throws InvalidRowException {
+        super(row);
+    }
+
     @Override
     public String toString() {
         return "AnswerRow{" +
@@ -54,21 +58,14 @@ public class AnswerRow extends ExcelRow {
                 '}';
     }
 
-    public AnswerRow(Row row) throws InvalidRowException {
-        super(row);
-    }
-
     @Override
     protected void parseRow(Row row) {
+            if(!isInputRowEmpty(row))
+                return;
 
-
-        //log.info("parseRow->firstCellData: "+String.valueOf(row.getFirstCellNum()));
-        if(row.getFirstCellNum()>=0) {
             //7 formulario //9 fecha relevamiento //10 PDV
             this.surveyFormCode = getCellStringValue(row, 7, "formulario");
-
-            String dateString = getCellStringValue(row, 9, "fecha relevamiento");
-            //dateString = dateString.replaceAll("'", "").trim();
+            String dateString = getCellStringValue(row, 9, "fecha relevamiento").replaceAll("'", "").trim();
             this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
             this.pdv = getCellStringToLongValue(row, 10, "PDV");
 
@@ -76,16 +73,20 @@ public class AnswerRow extends ExcelRow {
             this.category = getCleanCategory(getCellStringValue(row, 14, "category"));
             this.question = getCellStringValue(row, 15, "question");
             this.answer = getCellStringValue(row, 16, "answer");
-        }
-        else {
-            //todo: ver como manejar row vacias que quedan en el excel.
-            this.isValid = false;
-            this.errorMessage ="Row is empty";
-        }
     }
 
+    private boolean isInputRowEmpty(Row row){
+        //log.info("parseRow->firstCellData: "+String.valueOf(row.getFirstCellNum()));
+        if(row.getFirstCellNum()<0) {
+            this.isValid = false;
+            this.errorMessage ="Row is empty";
+            return false;
+        }
+        //todo: review other possible validations
+        return true;
+    }
 
-    public String getCleanCategory(String category) {
+    private String getCleanCategory(String category) {
         //Removes numbers in category name to reduce the number of alternatives (i.e: DATOS HIJO 1, DATOS HIJO 2, etc)
 
         if (category == null)
@@ -118,23 +119,33 @@ public class AnswerRow extends ExcelRow {
     }
     public Double getAnswerAsDouble(){
         try { return Double.valueOf(answer);}
-        catch (NumberFormatException e){log.info("String to Double conversion failed on: "+answer);}
+        catch (NumberFormatException e){
+            log.info("String to Double conversion failed on: "+answer);
+            this.errorMessage = "String to Double conversion failed on: "+answer;
+        }
         return null;
     }
     public Long getAnswerAsLong(){
         try {return Long.valueOf(answer);}
-        catch (NumberFormatException e){log.info("String to Long conversion failed on: "+answer);}
+        catch (NumberFormatException e){
+            log.info("String to Long conversion failed on: "+answer);
+            this.errorMessage = "String to Long conversion failed on: "+answer;
+        }
         return null;
     }
     public Integer getAnswerAsInteger(){
         try {return Integer.valueOf(answer);}
-        catch (NumberFormatException e){log.info("String to Integer conversion failed on: "+answer);}
+        catch (NumberFormatException e){
+            log.info("String to Integer conversion failed on: "+answer);
+            this.errorMessage = "String to Integer conversion failed on: "+answer;}
         return null;
     }
     public LocalDate getAnswerAsDate(String datePattern){
         //"dd/MM/yy"
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
-        catch (NumberFormatException e){log.info("String to Date conversion failed on: "+answer);}
+        catch (NumberFormatException e){
+            log.info("String to Date conversion failed on: "+answer);
+            this.errorMessage = "String to Date conversion failed on: "+answer;}
         return null;
     }
 

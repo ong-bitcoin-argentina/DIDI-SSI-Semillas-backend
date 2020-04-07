@@ -52,8 +52,8 @@ public class SurveyForm {
         this.pdv = 12345L;
     }
 
-    public boolean isInitialized(){
-        return this.pdv != null && this.surveyDate != null && this.surveyFormCode != null;
+    public boolean isEmpty(){
+        return this.pdv == null || this.surveyDate == null || this.surveyFormCode == null;
     }
 
     public void initialize(AnswerRow answerRow){

@@ -118,17 +118,13 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
         log.info("Path: "+uploadFile.getPath());
         log.info("Canonical Path: "+uploadFile.getCanonicalPath());
 
-        assertEquals(true, uploadFile.exists());
+        assertTrue(uploadFile.exists());
 
-        if(uploadFile.exists()){
-            log.info("file uploaded successfully");
+        log.info("file uploaded successfully");
+        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(tmpFilePath);
 
-            //SurveyExcelParseService surveyExcelParseService = new SurveyExcelParseService();
-            ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(tmpFilePath);
-
-            log.info(processExcelFileResult.toString());
-            log.info(surveyForm.toString());
-        }
+        log.info(processExcelFileResult.toString());
+        assertEquals(32, processExcelFileResult.getTotalInsertedRows());
     }
 
     @Test

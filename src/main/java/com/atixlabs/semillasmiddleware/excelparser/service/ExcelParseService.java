@@ -48,14 +48,14 @@ public abstract class ExcelParseService {
             rowsIterator.next();
 
         while (rowsIterator.hasNext()) {
-            processExcelFileResult = processRow(rowsIterator.next(), processExcelFileResult);
+            processExcelFileResult = processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
         }
 
         return processExcelFileResult;
     }
 
 
-    public abstract ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException;
+    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException;
 
     private File getFileByPath(String path) throws FileNotFoundException {
         Optional<File> optionalFile;

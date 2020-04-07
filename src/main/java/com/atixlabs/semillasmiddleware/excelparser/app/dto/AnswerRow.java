@@ -60,13 +60,11 @@ public class AnswerRow extends ExcelRow {
 
     @Override
     protected void parseRow(Row row) {
-        //7 formulario
-        //9 fecha relevamiento
-        //10 PDV
+
 
         //log.info("parseRow->firstCellData: "+String.valueOf(row.getFirstCellNum()));
         if(row.getFirstCellNum()>=0) {
-
+            //7 formulario //9 fecha relevamiento //10 PDV
             this.surveyFormCode = getCellStringValue(row, 7, "formulario");
 
             String dateString = getCellStringValue(row, 9, "fecha relevamiento");
@@ -74,9 +72,7 @@ public class AnswerRow extends ExcelRow {
             this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
             this.pdv = getCellStringToLongValue(row, 10, "PDV");
 
-            //14 categoria
-            //15 pregunta
-            //16 respuesta
+            //14 categoria //15 pregunta //16 respuesta
             this.category = getCleanCategory(getCellStringValue(row, 14, "category"));
             this.question = getCellStringValue(row, 15, "question");
             this.answer = getCellStringValue(row, 16, "answer");
@@ -84,6 +80,7 @@ public class AnswerRow extends ExcelRow {
         else {
             //todo: ver como manejar row vacias que quedan en el excel.
             this.isValid = false;
+            this.errorMessage ="Row is empty";
         }
     }
 

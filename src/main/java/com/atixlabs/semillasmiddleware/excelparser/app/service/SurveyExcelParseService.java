@@ -46,39 +46,39 @@ public class SurveyExcelParseService extends ExcelParseService {
 
 
     @Override
-    public ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException {
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException {
 
-        //todo: comprobar que la clave indica que es el mismo formulario.
-        //todo: si es el mismo continuar, sino inciar nuevo surveryForm.
-
-        //visualizo cada linea procesada en formato simil tabla.
-
-        AnswerRow answerRow = new AnswerRow(row);
-        //log.info(answerRow.toString()); //por ahora no logueo las celdas nulas
-
+        AnswerRow answerRow = new AnswerRow(currentRow);
         processExcelFileResult.addTotalRow();
 
-        if (answerRow.isValid()) {
-            //todo: answerRow.isValid deberia verificar si pudo parsear los datos ok. verificación minima viable.
+        if (!answerRow.isValid()) {
+            log.info("Invalid row: "+answerRow.toString());
+            processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): "+ answerRow.getErrorMessage());
+        }
+        else {
             log.info(answerRow.toString());
             processExcelFileResult.addValidRows();
             processExcelFileResult.addInsertedRows();
 
-            //todo: inicializar formulario antes de crear categoria pasandole datos clave y verificar que sea el mismo o iniciar nuevo hilo.
+            //Inicializa formulario con datos clave
             if (!surveyForm.isInitialized())
                 surveyForm.initialize(answerRow);
 
-            if (!surveyForm.isRowFromSameForm(answerRow))
-                surveyForm.clearForm();//todo: agregar persistir datos o llamar a crear credenciales, etc.
+            Category category = answerCategoryFactory.get(answerRow.getCategory());
+            category.loadData(answerRow);
 
-                Category category = answerCategoryFactory.get(answerRow.getCategory());
-                category.loadData(answerRow);
+            surveyForm.addCategory(category);
 
-                surveyForm.addCategory(category);
-                //log.info(surveyForm.toString());
-
-        } else {
-            processExcelFileResult.addRowError("todo: enviar error cacheado");
+            //Verifica que row sea del mismo form
+            if (!surveyForm.isRowFromSameForm(answerRow)) {
+                log.info("End of form");
+                surveyForm.buildCredentials();
+                surveyForm.clearForm();
+            }
+        }
+        if(!hasNext){
+            log.info("End of file");
+            surveyForm.buildCredentials();
         }
         return processExcelFileResult;
     }

@@ -12,7 +12,7 @@ public class DwellingCategory implements Category {
     @Override
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.cleanString(answerRow.getQuestion());
-        switch (DwellingQuestion.valueOf(question)){
+        switch (DwellingQuestion.get(question)){
             case DWELLING_TYPE:
                 this.dwellingType = answerRow.getAnswerAsString();
                 break;

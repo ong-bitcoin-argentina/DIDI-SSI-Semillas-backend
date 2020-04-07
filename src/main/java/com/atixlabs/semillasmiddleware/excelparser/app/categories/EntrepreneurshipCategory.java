@@ -17,7 +17,7 @@ public class EntrepreneurshipCategory implements Category {
 
     public void loadData(AnswerRow answerRow){
         String question = StringUtil.cleanString(answerRow.getQuestion());
-        switch (EntrepreneurshipQuestion.valueOf(question)){
+        switch (EntrepreneurshipQuestion.get(question)){
             case TYPE:
                 this.type = answerRow.getAnswerAsString();
                 break;

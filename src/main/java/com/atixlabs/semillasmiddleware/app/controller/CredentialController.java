@@ -14,6 +14,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -55,7 +56,14 @@ public class CredentialController {
                                                         @RequestParam(required = false) String credentialState) {
 
 
-       List<Credential> credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+        List<Credential> credentials = Collections.emptyList();
+        try {
+            credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+        }
+        catch (Exception e){
+            log.info("There has been an error searching for credentials " + e);
+            return Collections.emptyList();
+        }
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
        log.info("FIND CREDENTIALS -- " + credentialsDto.toString());
        return credentialsDto;

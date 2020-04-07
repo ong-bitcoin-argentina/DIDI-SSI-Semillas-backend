@@ -38,13 +38,6 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
     @Override
     public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, String credentialState) {
 
-       // Date date1=new SimpleDateFormat("dd/MM/yyyy").parse(dateOfIssue);
-       // DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd");
-        //Date dateTime = Date.parse(dateOfIssue, formatter).atStartOfDay();
-        //DateTimeFormatter formatter = DateTimeFormatter.ISO_DATE_TIME;
-       // LocalDateTime dateTime2 = LocalDateTime.parse(dateTime, DateTimeFormatter.ISO_LOCAL_DATE);
-        //LocalDateTime dateTime = LocalDateTime.parse(dateOfIssue, formatter);
-
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
 
@@ -58,14 +51,12 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         }
 
         if (name != null) {
-            predicates.add(cb.like(children.get("name"), name+"%"));
+            predicates.add(cb.like(cb.lower(children.get("name")), name.toLowerCase()+"%"));
         }
 
         if (dniBeneficiary != null) {
-            predicates.add(cb.like(children.get("documentNumber"), dniBeneficiary+"%"));
+            predicates.add(cb.like(children.get("documentNumber").as(String.class), dniBeneficiary+"%"));
         }
-        //TODO JOIN con person dniBeneficiary y name
-
 
         if (idDidiCredential != null) {
             predicates.add(cb.equal(credential.get("idDidiCredential"), idDidiCredential));

@@ -16,7 +16,7 @@ import java.util.Map;
 public class AnswerCategoryFactory {
     private static Map<String, Class<?>> CATEGORIES_TYPE = new HashMap<String, Class<?>>() {{
         put("DATOS DEL BENEFICIARIO", BeneficiaryCategory.class);
-        //put("DATOS DEL CONYUGE", null);
+        //put("DATOS DEL CONYUGE", );
         //put("DATOS HIJO", null);
         put("EMPRENDIMIENTO", EntrepreneurshipCategory.class);
         put("VIVIENDA", DwellingCategory.class);

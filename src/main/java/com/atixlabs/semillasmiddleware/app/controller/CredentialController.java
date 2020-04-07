@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
@@ -10,13 +9,10 @@ import com.atixlabs.semillasmiddleware.app.repository.CredentialServiceCustom;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.jpa.repository.Query;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -56,7 +52,7 @@ public class CredentialController {
                                                         @RequestParam(required = false) String credentialState) {
 
 
-        List<Credential> credentials = Collections.emptyList();
+        List<Credential> credentials;
         try {
             credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
         }
@@ -69,4 +65,9 @@ public class CredentialController {
        return credentialsDto;
     }
 
+    @GetMapping("/credentialStates")
+    @ResponseStatus(HttpStatus.OK)
+    public List<String> findCredentialStates() {
+        return Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
+    }
 }

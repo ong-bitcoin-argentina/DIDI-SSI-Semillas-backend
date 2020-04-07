@@ -51,7 +51,7 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         }
 
         if (name != null) {
-            predicates.add(cb.like(cb.lower(children.get("name")), name.toLowerCase()+"%"));
+            predicates.add(cb.like(cb.lower(children.get("name")), "%"+name.toLowerCase()+"%"));
         }
 
         if (dniBeneficiary != null) {

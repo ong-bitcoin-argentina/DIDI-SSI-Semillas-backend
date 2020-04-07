@@ -1,10 +1,9 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestions;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Setter;
-
 import java.time.LocalDate;
 
 @Setter
@@ -18,7 +17,7 @@ public class EntrepreneurshipCategory implements Category {
 
     public void loadData(AnswerRow answerRow){
         String question = StringUtil.cleanString(answerRow.getQuestion());
-        switch (EntrepreneurshipQuestions.valueOf(question)){
+        switch (EntrepreneurshipQuestion.valueOf(question)){
             case TYPE:
                 this.type = answerRow.getAnswerAsString();
                 break;

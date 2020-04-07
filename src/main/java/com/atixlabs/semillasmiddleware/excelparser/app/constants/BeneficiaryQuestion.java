@@ -1,12 +1,16 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
-public enum BeneficiaryQuestions {
+public enum BeneficiaryQuestion implements CategoryQuestion{
 
     NAME_AND_SURNAME("NOMBRE Y APELLIDO"),
     ID_NUMBER("NUMERO DE DOCUMENTO");
 
     private String pregunta;
-    BeneficiaryQuestions(String pregunta) {
+    BeneficiaryQuestion(String pregunta) {
         this.pregunta = pregunta;
+    }
+
+    public boolean isRequired(){
+        return true;
     }
 }

@@ -1,6 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.BeneficiaryQuestions;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.BeneficiaryQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 
@@ -11,7 +11,7 @@ public class BeneficiaryCategory implements Category {
     @Override
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.cleanString(answerRow.getQuestion());
-        switch (BeneficiaryQuestions.valueOf(question)){
+        switch (BeneficiaryQuestion.valueOf(question)){
             case ID_NUMBER:
                 this.idNumber = answerRow.getAnswerAsLong();
                 break;

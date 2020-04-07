@@ -68,6 +68,23 @@ public class CredentialController {
     @GetMapping("/credentialStates")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialStates() {
+        log.info("find credential states ----> " + Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList()));
         return Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
     }
+
+    @GetMapping("/credentialTypes")
+    @ResponseStatus(HttpStatus.OK)
+    public List<String> findCredentialTypes() {
+       // log.info("find credential types ----> " + Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList()));
+        //return Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
+        //TODO: desmockear creando un enum con los tipos de credenciales como lso estados para utilizar en el searchbox
+        List<String> crdentialTypes= new ArrayList<>();
+        crdentialTypes.add("CredentialCredit");
+        crdentialTypes.add("CredentialDwelling");
+        crdentialTypes.add("CredentialIdentity");
+        crdentialTypes.add("CredentialEntrepreneurship");
+        return crdentialTypes;
+    }
+
+
 }

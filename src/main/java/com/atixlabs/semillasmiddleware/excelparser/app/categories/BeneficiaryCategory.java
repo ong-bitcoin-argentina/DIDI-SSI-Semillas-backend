@@ -2,10 +2,14 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.swing.plaf.basic.BasicIconFactory;
 import java.time.LocalDate;
 
+@Getter
+@Setter
 public class BeneficiaryCategory implements Category {
 
     String apellido;
@@ -37,7 +41,7 @@ public class BeneficiaryCategory implements Category {
     Boolean terciario;
     String tiempoResidencia;
     String tipoDocumento;
-    Integer ultimoAñoEstudio;
+    Integer ultimoAnoEstudio;
     Boolean universitario;
 
 
@@ -49,6 +53,11 @@ public class BeneficiaryCategory implements Category {
                 break;
         }
 
+    }
+
+    @Override
+    public BeneficiaryCategory getData() {
+        return  this;
     }
 
     @Override
@@ -83,7 +92,7 @@ public class BeneficiaryCategory implements Category {
                 ", terciario=" + terciario +
                 ", tiempoResidencia='" + tiempoResidencia + '\'' +
                 ", tipoDocumento='" + tipoDocumento + '\'' +
-                ", ultimoAñoEstudio=" + ultimoAñoEstudio +
+                ", ultimoAñoEstudio=" + ultimoAnoEstudio +
                 ", universitario=" + universitario +
                 '}';
     }

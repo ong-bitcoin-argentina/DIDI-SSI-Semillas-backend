@@ -18,7 +18,7 @@ public abstract class Credential {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idDidiIssueer;
+    private Long idDidiIssuer;
 
     private Long idDidiReceptor;
 
@@ -39,4 +39,18 @@ public abstract class Credential {
     @ManyToOne
     private Person beneficiary;
 
+    @Override
+    public String toString() {
+        return "Credential{" +
+                "id=" + id +
+                ", idDidiIssuer=" + idDidiIssuer +
+                ", idDidiReceptor=" + idDidiReceptor +
+                ", idDidiCredential=" + idDidiCredential +
+                ", idHistorical=" + idHistorical +
+                ", dateOfIssue=" + dateOfIssue +
+                ", dateOfExpiry=" + dateOfExpiry +
+                ", idRelatedCredential=" + idRelatedCredential +
+                ", beneficiary=" + beneficiary +
+                '}';
+    }
 }

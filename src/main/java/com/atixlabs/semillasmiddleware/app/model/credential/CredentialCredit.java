@@ -11,7 +11,7 @@ import java.util.List;
 
 @Getter
 @Setter
-@NoArgsConstructor
+//@NoArgsConstructor
 @Entity
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
@@ -34,6 +34,22 @@ public class CredentialCredit extends Credential {
 
     private Long dniBeneficiary;
 
+    public CredentialCredit(){
+        super();
+    }
 
-
+    @Override
+    public String toString() {
+        return "CredentialCredit{" +
+                "idCredit=" + idCredit +
+                ", creditName='" + creditName + '\'' +
+                ", idGroup=" + idGroup +
+                ", groupName='" + groupName + '\'' +
+                ", rol='" + rol + '\'' +
+                ", currentCycle='" + currentCycle + '\'' +
+                ", creditState='" + creditState + '\'' +
+                ", amount=" + amount +
+                ", dniBeneficiary=" + dniBeneficiary +
+                "} " + super.toString();
+    }
 }

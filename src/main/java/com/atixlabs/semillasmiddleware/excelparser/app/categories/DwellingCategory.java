@@ -8,4 +8,9 @@ public class DwellingCategory implements Category {
     public void loadData(AnswerRow answerRow) {
 
     }
+
+    @Override
+    public Category getData() {
+        return this;
+    }
 }

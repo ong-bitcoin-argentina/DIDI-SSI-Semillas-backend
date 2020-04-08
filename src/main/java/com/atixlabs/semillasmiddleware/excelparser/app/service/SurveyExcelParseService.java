@@ -71,6 +71,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     private void addCategoryDataIntoForm(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
+
         try {
             Category category = answerCategoryFactory.get(answerRow.getCategory());
             category.loadData(answerRow);

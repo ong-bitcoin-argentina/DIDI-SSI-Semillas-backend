@@ -36,5 +36,10 @@ public class EntrepreneurshipCategory implements Category {
                 this.activityEndingDate = answerRow.getAnswerAsDate("dd/MM/yy");
                 break;
         }
-    };
+    }
+
+    @Override
+    public Category getData() {
+        return this;
+    }
 }

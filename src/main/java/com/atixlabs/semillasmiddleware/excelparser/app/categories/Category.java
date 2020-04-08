@@ -6,6 +6,6 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 public interface Category {
      void loadData(AnswerRow answerRow);
 
-    //public String get
+     Category getData();
 
 }

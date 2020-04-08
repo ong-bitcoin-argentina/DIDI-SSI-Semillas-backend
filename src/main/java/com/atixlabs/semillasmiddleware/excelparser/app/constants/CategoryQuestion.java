@@ -5,5 +5,6 @@ public interface CategoryQuestion {
     public static CategoryQuestion get(String questionName){
         return null;
     };
-    //public Enum getValidValues();
+    public String name();
+
 }

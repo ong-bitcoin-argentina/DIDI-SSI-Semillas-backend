@@ -70,7 +70,7 @@ public class AnswerRow extends ExcelRow {
             this.pdv = getCellStringToLongValue(row, 10, "PDV");
 
             //14 categoria //15 pregunta //16 respuesta
-            this.category = getCleanCategory(getCellStringValue(row, 14, "category"));
+            this.category = getCellStringValue(row, 14, "category");
             this.question = getCellStringValue(row, 15, "question");
             this.answer = getCellStringValue(row, 16, "answer");
     }
@@ -85,34 +85,6 @@ public class AnswerRow extends ExcelRow {
         //todo: review other possible validations
         return true;
     }
-
-    private String getCleanCategory(String category) {
-        //Removes numbers in category name to reduce the number of alternatives (i.e: DATOS HIJO 1, DATOS HIJO 2, etc)
-
-        if (category == null)
-            return "CATEGORY NULL";
-
-        category = StringUtil.cleanString(category);
-
-        switch (category) {
-            case "DATOS DEL BENEFICIARIO":
-            case "DATOS DEL CONYUGE":
-            case "DATOS ENTREVISTA":
-            case "DATOS HIJO":
-            case "EMPRENDIMIENTO":
-            case "FINANZAS FAMILIARES":
-            case "FOTOS ADICIONALES":
-            case "INGRESOS SOLICITANTE":
-            case "OTRO MIEMBRO DE LA FAMILIA":
-            case "OTROS INGRESOS FAMILIARES":
-            case "SITUACION PATRIMONIAL":
-            case "VIVIENDA":
-                return category;
-            default:
-                return "CATEGORY UNKNOWN: "+category;
-        }
-    }
-
 
     public String getAnswerAsString(){
         return answer;

@@ -53,7 +53,7 @@ public class SurveyExcelParseService extends ExcelParseService {
                 surveyForm.initialize(answerRow);
 
             if (!surveyForm.isRowFromSameForm(answerRow)) {
-                endOfFormHandler();
+                endOfFormHandler(processExcelFileResult);
                 surveyForm.clearForm();
                 surveyForm.initialize(answerRow);
             }
@@ -65,7 +65,7 @@ public class SurveyExcelParseService extends ExcelParseService {
             processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): "+ answerRow.getErrorMessage());
 
         if(!hasNext)
-            endOfFileHandler();
+            endOfFileHandler(processExcelFileResult);
 
         return processExcelFileResult;
     }
@@ -74,6 +74,9 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             Category category = answerCategoryFactory.get(answerRow.getCategory());
             category.loadData(answerRow);
+            if (answerRow.getErrorMessage() != null){
+                processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): " + answerRow.getErrorMessage());
+            }
             surveyForm.addCategory(category);
         }
         catch (Exception | InvalidCategoryException e) {
@@ -81,14 +84,23 @@ public class SurveyExcelParseService extends ExcelParseService {
         }
     }
 
-    private void endOfFormHandler(){
+    private void endOfFormHandler(ProcessExcelFileResult proccessExcelFileResult){
         log.info("endOfFormHandler");
         //log.info(surveyForm.toString());
-        surveyForm.buildCredentials();
+        if (surveyForm.isValid(proccessExcelFileResult)){
+            surveyForm.buildCredentials();
+        }
+        else{
+            log.info("no se pudieron crear las credenciales - formulario invalido");
+        }
     }
-    private void endOfFileHandler(){
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
         log.info("endOfFileHandler");
-        //log.info(surveyForm.toString());
-        surveyForm.buildCredentials();
+        if (surveyForm.isValid(processExcelFileResult)){
+            surveyForm.buildCredentials();
+        }
+        else{
+            log.info("no se pudieron crear las credenciales - formulario invalido");
+        }
     }
 }

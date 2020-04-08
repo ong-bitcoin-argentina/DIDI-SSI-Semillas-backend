@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -28,12 +29,12 @@ public class SurveyForm {
     private String surveyFormCode = null;
     private Long pdv = null;
 
-    Set<Category> categorySet = new HashSet<>();
+    List<Category> categoryList = new LinkedList<>();
 
 
     public void addCategory(Category category) {
         //verificar si repite categorias o el set ya lo maneja.
-        categorySet.add(category);
+        categoryList.add(category);
     }
 
     @Override
@@ -42,7 +43,7 @@ public class SurveyForm {
                 "surveyDate=" + surveyDate +
                 ", surveyFormCode='" + surveyFormCode + '\'' +
                 ", pdv=" + pdv +
-                ", categoryList=" + categorySet.toString() +
+                ", categoryList=" + categoryList.toString() +
                 '}';
     }
 
@@ -78,11 +79,14 @@ public class SurveyForm {
         this.surveyFormCode = null;
         this.surveyDate = null;
         this.pdv = null;
-        categorySet.clear();
+        categoryList.clear();
     }
 
     public void buildCredentials(){
         log.info("buildCredentials: "+this.toString());
     }
 
+    public boolean isValid(ProcessExcelFileResult proccessExcelFileResult) {
+        return categoryList.stream().allMatch(category -> category.isValid(proccessExcelFileResult));
+    }
 }

@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 
@@ -18,7 +19,7 @@ public class PersonCategory implements Category {
     PersonType personType;
 
     public PersonCategory(String personType){
-        personType = StringUtil.cleanString(personType.replaceAll("DATOS|DEL",""));
+        personType = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(personType.replaceAll("DATOS|DEL","")));
         try{
             this.personType = PersonType.get(personType);
         } catch (IllegalArgumentException e) {
@@ -27,7 +28,7 @@ public class PersonCategory implements Category {
     }
 
     public void loadData(AnswerRow answerRow) {
-        String question = StringUtil.cleanString(answerRow.getQuestion());
+        String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
         switch (PersonQuestion.get(question)) {
             case ID_NUMBER:
                 this.idNumber = answerRow.getAnswerAsLong();
@@ -45,6 +46,16 @@ public class PersonCategory implements Category {
                 this.relation = answerRow.getAnswerAsString();
                 break;
         }
+    }
 
+    @Override
+    public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
+        return(
+                isFilledIfRequired(nameAndSurname, PersonQuestion.NAME_AND_SURNAME,processExcelFileResult) &&
+                isFilledIfRequired(idNumber, PersonQuestion.ID_NUMBER, processExcelFileResult) &&
+                isFilledIfRequired(gender, PersonQuestion.GENDER, processExcelFileResult) &&
+                isFilledIfRequired(birthdate, PersonQuestion.BIRTHDATE, processExcelFileResult) &&
+                isFilledIfRequired(relation, PersonQuestion.RELATION, processExcelFileResult)
+        );
     }
 }

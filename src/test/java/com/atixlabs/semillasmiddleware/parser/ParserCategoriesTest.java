@@ -25,7 +25,7 @@ public class ParserCategoriesTest {
     }
 
     @Test
-    public void categoryFactoryAssignsChildItsCorrespondingEnum() throws Exception, InvalidCategoryException {
+    public void categoryFactoryAssignsChildAndSpouseTheCorrespondingEnum() throws Exception, InvalidCategoryException {
         AnswerCategoryFactory categoryFactory = new AnswerCategoryFactory();
         PersonCategory child = (PersonCategory) categoryFactory.get("DATOS HIJO 1");
         Assert.assertEquals(child.getPersonType(), PersonType.CHILD);

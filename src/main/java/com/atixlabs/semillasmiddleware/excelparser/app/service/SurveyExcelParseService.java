@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
@@ -9,11 +8,9 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
-import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Configurable;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
@@ -30,58 +27,68 @@ public class SurveyExcelParseService extends ExcelParseService {
      * @throws FileNotFoundException
      */
 
-    //AnswerCategoryFactory answerCategoryFactory = new AnswerCategoryFactory();
-    //SurveyForm surveyForm = new SurveyForm();
-
     @Autowired
     private AnswerCategoryFactory answerCategoryFactory;
 
     @Autowired
     private SurveyForm surveyForm;
 
-    public SurveyExcelParseService(){
-        surveyForm = new SurveyForm();
-    }
-
-
-
     @Override
-    public ProcessExcelFileResult processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException {
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult){
 
-        //todo: comprobar que la clave indica que es el mismo formulario.
-        //todo: si es el mismo continuar, sino inciar nuevo surveryForm.
-
-        //visualizo cada linea procesada en formato simil tabla.
-
-        AnswerRow answerRow = new AnswerRow(row);
-        //log.info(answerRow.toString()); //por ahora no logueo las celdas nulas
+        AnswerRow answerRow = null;
+        try {
+            answerRow = new AnswerRow(currentRow);
+        } catch (InvalidRowException e) {
+            processExcelFileResult.addRowError("("+currentRow.getRowNum()+"): "+ e.toString());
+        }
 
         processExcelFileResult.addTotalRow();
 
-        if (answerRow.isValid()) {
-            //todo: answerRow.isValid deberia verificar si pudo parsear los datos ok. verificación minima viable.
-            log.info(answerRow.toString());
+        if (answerRow.isValid()){
             processExcelFileResult.addValidRows();
             processExcelFileResult.addInsertedRows();
 
-            //todo: inicializar formulario antes de crear categoria pasandole datos clave y verificar que sea el mismo o iniciar nuevo hilo.
-            if (!surveyForm.isInitialized())
+            if (surveyForm.isEmpty())
                 surveyForm.initialize(answerRow);
 
-            if (!surveyForm.isRowFromSameForm(answerRow))
-                surveyForm.clearForm();//todo: agregar persistir datos o llamar a crear credenciales, etc.
+            if (!surveyForm.isRowFromSameForm(answerRow)) {
+                endOfFormHandler();
+                surveyForm.clearForm();
+                surveyForm.initialize(answerRow);
+            }
 
-                Category category = answerCategoryFactory.get(answerRow.getCategory());
-                category.loadData(answerRow);
-
-                surveyForm.addCategory(category);
-                //log.info(surveyForm.toString());
-
-        } else {
-            processExcelFileResult.addRowError("todo: enviar error cacheado");
+            addCategoryDataIntoForm(answerRow, processExcelFileResult);
+            log.info(answerRow.toString());
         }
+        else
+            processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): "+ answerRow.getErrorMessage());
+
+        if(!hasNext)
+            endOfFileHandler();
+
         return processExcelFileResult;
     }
 
+    private void addCategoryDataIntoForm(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
+        try {
+            Category category = answerCategoryFactory.get(answerRow.getCategory());
+            category.loadData(answerRow);
+            surveyForm.addCategory(category);
+        }
+        catch (Exception | InvalidCategoryException e) {
+            processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): "+ e.toString());
+        }
+    }
 
+    private void endOfFormHandler(){
+        log.info("endOfFormHandler");
+        //log.info(surveyForm.toString());
+        surveyForm.buildCredentials();
+    }
+    private void endOfFileHandler(){
+        log.info("endOfFileHandler");
+        //log.info(surveyForm.toString());
+        surveyForm.buildCredentials();
+    }
 }

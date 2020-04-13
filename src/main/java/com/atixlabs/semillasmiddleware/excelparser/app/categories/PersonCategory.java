@@ -8,6 +8,8 @@ import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 
 import java.time.LocalDate;
+import java.util.LinkedList;
+import java.util.List;
 
 @Getter
 public class PersonCategory implements Category {
@@ -50,12 +52,12 @@ public class PersonCategory implements Category {
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        return(
-                isFilledIfRequired(nameAndSurname, PersonQuestion.NAME_AND_SURNAME,processExcelFileResult) &&
-                isFilledIfRequired(idNumber, PersonQuestion.ID_NUMBER, processExcelFileResult) &&
-                isFilledIfRequired(gender, PersonQuestion.GENDER, processExcelFileResult) &&
-                isFilledIfRequired(birthdate, PersonQuestion.BIRTHDATE, processExcelFileResult) &&
-                isFilledIfRequired(relation, PersonQuestion.RELATION, processExcelFileResult)
-        );
+        List<Boolean> validations = new LinkedList<>();
+        validations.add(isFilledIfRequired(nameAndSurname, PersonQuestion.NAME_AND_SURNAME,processExcelFileResult));
+        validations.add(isFilledIfRequired(idNumber, PersonQuestion.ID_NUMBER, processExcelFileResult));
+        validations.add(isFilledIfRequired(gender, PersonQuestion.GENDER, processExcelFileResult));
+        validations.add(isFilledIfRequired(birthdate, PersonQuestion.BIRTHDATE, processExcelFileResult));
+        validations.add(isFilledIfRequired(relation, PersonQuestion.RELATION, processExcelFileResult));
+        return validations.stream().allMatch(v->v);
     }
 }

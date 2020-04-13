@@ -29,7 +29,7 @@ public enum EntrepreneurshipQuestion implements CategoryQuestion {
         return questionsMap.get(questionName);
     }
 
-    private String getQuestionName(){
+    public String getQuestionName(){
         return this.questionName;
     }
 

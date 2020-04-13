@@ -6,6 +6,9 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 
+import java.util.LinkedList;
+import java.util.List;
+
 public class DwellingCategory implements Category {
     String dwellingType;
     String holdingType;
@@ -28,11 +31,11 @@ public class DwellingCategory implements Category {
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        return(
-                isFilledIfRequired(dwellingType, DwellingQuestion.DWELLING_TYPE,processExcelFileResult) &&
-                isFilledIfRequired(holdingType, DwellingQuestion.HOLDING_TYPE, processExcelFileResult) &&
-                isFilledIfRequired(district, DwellingQuestion.DISTRICT, processExcelFileResult)
-        );
+        List<Boolean> validations = new LinkedList<>();
+        validations.add(isFilledIfRequired(dwellingType, DwellingQuestion.DWELLING_TYPE,processExcelFileResult));
+        validations.add(isFilledIfRequired(holdingType, DwellingQuestion.HOLDING_TYPE, processExcelFileResult));
+        validations.add(isFilledIfRequired(district, DwellingQuestion.DISTRICT, processExcelFileResult));
+        return validations.stream().allMatch(v->v);
     }
 
 }

@@ -7,6 +7,8 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Setter;
 import java.time.LocalDate;
+import java.util.LinkedList;
+import java.util.List;
 
 @Setter
 public class EntrepreneurshipCategory implements Category {
@@ -44,13 +46,13 @@ public class EntrepreneurshipCategory implements Category {
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        return(
-                isFilledIfRequired(type, EntrepreneurshipQuestion.TYPE,processExcelFileResult) &&
-                isFilledIfRequired(activityStartDate, EntrepreneurshipQuestion.ACTIVITY_START_DATE, processExcelFileResult) &&
-                isFilledIfRequired(mainActivity, EntrepreneurshipQuestion.MAIN_ACTIVITY, processExcelFileResult) &&
-                isFilledIfRequired(name, EntrepreneurshipQuestion.NAME, processExcelFileResult) &&
-                isFilledIfRequired(address, EntrepreneurshipQuestion.ADDRESS, processExcelFileResult) &&
-                isFilledIfRequired(activityEndingDate, EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE, processExcelFileResult)
-        );
+        List<Boolean> validations= new LinkedList<>();
+        validations.add(isFilledIfRequired(type, EntrepreneurshipQuestion.TYPE,processExcelFileResult));
+        validations.add(isFilledIfRequired(activityStartDate, EntrepreneurshipQuestion.ACTIVITY_START_DATE, processExcelFileResult));
+        validations.add(isFilledIfRequired(mainActivity, EntrepreneurshipQuestion.MAIN_ACTIVITY, processExcelFileResult));
+        validations.add(isFilledIfRequired(name, EntrepreneurshipQuestion.NAME, processExcelFileResult));
+        validations.add(isFilledIfRequired(address, EntrepreneurshipQuestion.ADDRESS, processExcelFileResult));
+        validations.add(isFilledIfRequired(activityEndingDate, EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE, processExcelFileResult));
+        return validations.stream().allMatch(v -> v);
     }
 }

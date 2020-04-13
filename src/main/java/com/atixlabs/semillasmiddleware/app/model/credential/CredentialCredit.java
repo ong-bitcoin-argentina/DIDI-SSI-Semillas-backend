@@ -22,6 +22,7 @@ public class CredentialCredit extends Credential {
 
     private Long idGroup;
 
+    //presidente, secretario y tesorero, se obtiene a partir de la api de Bondarea
     private String groupName;
 
     private String rol;
@@ -30,7 +31,7 @@ public class CredentialCredit extends Credential {
 
     private String creditState;
 
-    private Double amount;
+    private Double amount; //TODO revisar el tipo para monto. Para dinero deberiamos usar BigDecimal
 
     private Long dniBeneficiary;
 

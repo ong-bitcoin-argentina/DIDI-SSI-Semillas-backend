@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.sun.xml.bind.v2.TODO;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,6 +18,8 @@ public class CredentialIdentity extends Credential {
 
     private Long dniBeneficiary;
 
+    private Long dniMainBeneficiary;
+
     private String nameBeneficiary;
 
     private Long dniCreditHolder;
@@ -25,5 +28,7 @@ public class CredentialIdentity extends Credential {
 
     @Transient
     private String credentialType = "CredentialIdentity";
+
+    //TODO: Hay que analizar como estructurar el "titual o familiar" para las credenciales
 
 }

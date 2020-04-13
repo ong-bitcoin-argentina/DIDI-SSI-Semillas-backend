@@ -31,6 +31,11 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
+    //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado
+
+    @OneToOne
+     private Kinship Kinship;
+
     /*
     kinsman (pariente), p1,p2, tiporelacion (kind of kinship)
 

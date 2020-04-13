@@ -36,6 +36,8 @@ public class ProcessExcelFileResult {
         this.addTotalRow();
     }
 
+    public void addDeletedRow(){this.totalDeletedRows++;}
+
     public void addTotalRow(){
         this.totalRows++;
     }

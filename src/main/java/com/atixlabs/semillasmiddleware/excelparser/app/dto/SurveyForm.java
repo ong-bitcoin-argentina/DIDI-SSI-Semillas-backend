@@ -25,10 +25,6 @@ import java.util.*;
 @Slf4j
 public class SurveyForm {
 
-    @Autowired
-    //CredentialCreditRepository credentialCreditRepository;
-    CredentialService credentialService;
-
     //key form:
     @DateTimeFormat(pattern = "dd/MM/yy")
     @Temporal(TemporalType.DATE)
@@ -36,7 +32,7 @@ public class SurveyForm {
     private String surveyFormCode = null;
     private Long pdv = null;
 
-    ArrayList<Category> categoryList = new ArrayList<>();
+    private ArrayList<Category> categoryList = new ArrayList<>();
 
 
     @Override
@@ -79,40 +75,18 @@ public class SurveyForm {
     }
 
     public Integer findCategoryInList(Class<?> classToFind) {
-        for(int i=0; i<categoryList.size(); i++){
-            if(categoryList.get(i).getClass() == classToFind)//BeneficiaryCategory
+        for(int i = 0; i<categoryList.size(); i++){
+            if(categoryList.get(i).getClass() == classToFind)
                 return i;
         }
         return -1;
     }
-    public boolean findCategoryInListDummy(){
-        for(Category categoryListElement : this.categoryList)
-            if(categoryListElement instanceof BeneficiaryCategory)
-                return true;
-        return false;
-    }
 
-
-
-
-    public void buildCredentials()
-    {
-        log.info("buildCredentials: "+this.toString());
-        CredentialCredit credentialCredit = new CredentialCredit();
-
+    public Category getCategoryData(Class<?> classToFind){
         Integer categoryIndex = this.findCategoryInList(BeneficiaryCategory.class);
-        if(categoryIndex >=0) {
-            log.info("containsCategory = true");
-            BeneficiaryCategory beneficiaryCategory = (BeneficiaryCategory) categoryList.get(categoryIndex).getData();
-            credentialCredit.setDniBeneficiary(beneficiaryCategory.getNumeroDocumento());
-
-            log.info("credencial: "+credentialCredit.toString());
-            //credentialService.addCredentialCreditFromExcel(credentialCredit);
-            credentialService.addCredentialCredit();
-        }
-        if(this.findCategoryInListDummy()){
-            log.info("findCategoryInListDummy = true");
-        }
+        if(categoryIndex >=0)
+            return this.getCategoryList().get(categoryIndex).getData();
+        return null;
     }
 
 }

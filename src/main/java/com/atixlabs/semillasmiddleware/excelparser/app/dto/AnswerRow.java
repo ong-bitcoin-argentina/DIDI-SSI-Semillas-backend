@@ -9,13 +9,11 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
 
 @Slf4j
 @Getter
@@ -41,17 +39,14 @@ public class AnswerRow extends ExcelRow {
 
     @Override
     public String toString() {
-        return "AnswerRow{" +
+        return "["+this.rowNum +"]{" +
                 "surveyDate=" + surveyDate +
                 ", surveyFormCode='" + surveyFormCode + '\'' +
                 ", pdv=" + pdv +
                 ", category='" + category + '\'' +
                 ", question='" + question + '\'' +
                 ", answer='" + answer + '\'' +
-                ", rowNum=" + rowNum +
                 ", errorMessage='" + errorMessage + '\'' +
-                ", isValid=" + isValid +
-                ", exists=" + exists +
                 ", cellIndex=" + cellIndex +
                 ", cellIndexName='" + cellIndexName + '\'' +
                 ", cellIndexDescription='" + cellIndexDescription + '\'' +
@@ -60,31 +55,38 @@ public class AnswerRow extends ExcelRow {
 
     @Override
     protected void parseRow(Row row) {
-            if(!isInputRowEmpty(row))
-                return;
+            if(isEmpty(row))
+                log.info("["+row.getRowNum()+"]-"+row.getFirstCellNum());
+
 
             //7 formulario //9 fecha relevamiento //10 PDV
-            this.surveyFormCode = getCellStringValue(row, 7, "formulario");
-            String dateString = getCellStringValue(row, 9, "fecha relevamiento").replaceAll("'", "").trim();
-            this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
-            this.pdv = getCellStringToLongValue(row, 10, "PDV");
+            this.surveyFormCode = getCellStringValue(row, 7, "Formulario");
+            this.surveyDate = getCellStringToDate(row, 9, "Fecha de relevamiento");
+            this.pdv = getCellLongValue(row, 10, "PDV");
 
             //14 categoria //15 pregunta //16 respuesta
-            this.category = getCleanCategory(getCellStringValue(row, 14, "category"));
-            this.question = getCellStringValue(row, 15, "question");
-            this.answer = getCellStringValue(row, 16, "answer");
+            this.category = getCellStringValue(row, 14, "Categoria");
+            this.question = getCellStringValue(row, 15, "Pregunta");
+            this.answer = getCellStringValue(row, 16, "Respuesta");
+
+            //if (isRowValid())
+            //    isValid = true;
     }
 
-    private boolean isInputRowEmpty(Row row){
-        //log.info("parseRow->firstCellData: "+String.valueOf(row.getFirstCellNum()));
-        if(row.getFirstCellNum()<0) {
-            this.isValid = false;
-            this.errorMessage ="Row is empty";
+    private boolean isEmpty(Row row){
+        return row.getFirstCellNum() < 0;
+    }
+
+    public boolean isValid(){
+        if (surveyFormCode == null || surveyFormCode.isEmpty() || surveyDate == null || pdv == null || category == null || question == null || answer == null){
+            this.errorMessage = "A required field is null or empty";
             return false;
         }
-        //todo: review other possible validations
         return true;
     }
+
+
+    /*
 
     private String getCleanCategory(String category) {
         //Removes numbers in category name to reduce the number of alternatives (i.e: DATOS HIJO 1, DATOS HIJO 2, etc)
@@ -112,7 +114,7 @@ public class AnswerRow extends ExcelRow {
                 return "CATEGORY UNKNOWN: "+category;
         }
     }
-
+*/
 
     public String getAnswerAsString(){
         return answer;
@@ -144,11 +146,23 @@ public class AnswerRow extends ExcelRow {
         //"dd/MM/yy"
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
         catch (NumberFormatException e){
-            log.info("String to Date conversion failed on: "+answer);
-            this.errorMessage = "String to Date conversion failed on: "+answer;}
+            log.info("["+this.rowNum+"]:String to Date conversion failed on: "+answer);
+            this.errorMessage = "["+this.rowNum+"]:String to Date conversion failed on: "+answer;}
         return null;
     }
 
+    public LocalDate getCellStringToDate(Row row, int cellindex, String descripcion){
+        String dateString = null;
+        try {
+            dateString = getCellStringValue(row, 9, "fecha relevamiento").replaceAll("'", "").trim();
+            return this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
+        }
+        catch (Exception e){
+            log.info("["+cellIndex+"]:String to Date conversion failed on: "+dateString);
+            this.errorMessage = "["+cellIndex+"]:String to Date conversion failed on: "+dateString;
+        }
+        return null;
+        }
 
 
 }

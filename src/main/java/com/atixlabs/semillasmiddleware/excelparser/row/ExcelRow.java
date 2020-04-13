@@ -22,7 +22,7 @@ import java.util.Iterator;
 public abstract class ExcelRow {
     protected int rowNum;
     protected String errorMessage;
-    protected boolean isValid = true;
+    //protected boolean isValid = false;
     protected boolean exists = false;
     protected int cellIndex = 0;
     protected String cellIndexName = "None";
@@ -50,7 +50,7 @@ public abstract class ExcelRow {
         return row.getCell(cellindex).getStringCellValue();
     }
 
-    Long getCellLongValue(Row row, int cellindex, String descripcion) {
+    protected Long getCellLongValue(Row row, int cellindex, String descripcion) {
         this.saveCellData(cellindex, descripcion);
         if (row == null || row.getCell(cellindex) == null)
             return null;
@@ -99,8 +99,8 @@ public abstract class ExcelRow {
         this.cellIndexDescription = cellIndexDescription;
     }
 
-    protected String getStringError() {
-        return "Cell " + cellIndexName + ", Error: " + cellIndexDescription + " ";
+    public String getStringError() {
+        return "[" + cellIndexName + "]:"+cellIndexDescription + ": "+errorMessage;
     }
 
 

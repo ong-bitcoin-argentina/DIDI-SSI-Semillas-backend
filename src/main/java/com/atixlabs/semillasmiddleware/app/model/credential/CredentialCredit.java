@@ -4,20 +4,21 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.*;
 import java.util.List;
 
 
 @Getter
 @Setter
-//@NoArgsConstructor
+@Table(name = "credential_credit")
 @Entity
-@PrimaryKeyJoinColumn(referencedColumnName="id")
+@PrimaryKeyJoinColumn(name = "id")
+//@PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
 
-    private Long idCredit;
 
+
+    //    private Long idCredit;
     private String creditName;
 
     private Long idGroup;
@@ -34,14 +35,11 @@ public class CredentialCredit extends Credential {
 
     private Long dniBeneficiary;
 
-    public CredentialCredit(){
-        super();
-    }
 
     @Override
     public String toString() {
         return "CredentialCredit{" +
-                "idCredit=" + idCredit +
+  //              "idCredit=" + idCredit +
                 ", creditName='" + creditName + '\'' +
                 ", idGroup=" + idGroup +
                 ", groupName='" + groupName + '\'' +

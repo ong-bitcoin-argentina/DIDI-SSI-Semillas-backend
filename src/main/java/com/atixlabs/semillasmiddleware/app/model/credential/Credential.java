@@ -5,17 +5,18 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Table(name = "credential")
 @Entity
-@Table
 @Inheritance( strategy = InheritanceType.JOINED )
-public abstract class Credential {
+public class Credential {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long idDidiIssuer;
@@ -34,7 +35,7 @@ public abstract class Credential {
     /**
      *
      */
-    private Long idRelatedCredential;
+    //private Long idRelatedCredential;
 
     @ManyToOne
     private Person beneficiary;
@@ -49,7 +50,7 @@ public abstract class Credential {
                 ", idHistorical=" + idHistorical +
                 ", dateOfIssue=" + dateOfIssue +
                 ", dateOfExpiry=" + dateOfExpiry +
-                ", idRelatedCredential=" + idRelatedCredential +
+                //", idRelatedCredential=" + idRelatedCredential +
                 ", beneficiary=" + beneficiary +
                 '}';
     }

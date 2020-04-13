@@ -44,18 +44,18 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         Root<Credential> credential = cq.from(Credential.class);
         List<Predicate> predicates = new ArrayList<>();
 
-        Join<Credential, Person> children = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, Person> beneficiary = credential.join("beneficiary", JoinType.LEFT);
 
         if (credentialType != null) {
             predicates.add(cb.equal(credential.get("credentialDescription"), credentialType));
         }
 
         if (name != null) {
-            predicates.add(cb.like(cb.lower(children.get("name")), "%"+name.toLowerCase()+"%"));
+            predicates.add(cb.like(cb.lower(beneficiary.get("name")), "%"+name.toLowerCase()+"%"));
         }
 
         if (dniBeneficiary != null) {
-            predicates.add(cb.like(children.get("documentNumber").as(String.class), dniBeneficiary+"%"));
+            predicates.add(cb.like(beneficiary.get("documentNumber").as(String.class), dniBeneficiary+"%"));
         }
 
         if (idDidiCredential != null) {

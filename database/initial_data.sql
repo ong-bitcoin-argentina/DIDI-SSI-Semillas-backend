@@ -6,6 +6,13 @@ id, active, email, last_name, name, password, phone, username, id_role) VALUES (
 1, true, 'admin@semillas.com', 'semillas', 'administrador', '$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6', null, 'admin', 1);
 
 
+INSERT INTO public.credential_state(id, state_name) VALUES (
+'1'::bigint, 'Vigente'::character varying(255));
+
+INSERT INTO public.credential_state(id, state_name) VALUES (
+'2'::bigint, 'Revocada'::character varying(255));
+
+
 INSERT INTO public.person (
 id, birth_date, document_number, document_type, name) VALUES (
 '1'::bigint, '1999-04-21'::date, '454645687'::bigint, 'jjty'::character varying(255), 'Jorge Perez'::character varying(255));
@@ -17,6 +24,8 @@ id, birth_date, document_number, document_type, name) VALUES (
 INSERT INTO public.person (
 id, birth_date, document_number, document_type, name) VALUES (
 '3'::bigint, '1999-05-25'::date, '547547547'::bigint, 'type'::character varying(255), 'Rodolfo Rodriguez'::character varying(255));
+
+
 
 INSERT INTO public.credential (
 id, date_of_expiry, date_of_issue, id_didi_credential, id_didi_issueer, id_didi_receptor, beneficiary_id, id_credential, credential_state, credential_description) VALUES (
@@ -31,8 +40,10 @@ id, credential_state, date_of_expiry, date_of_issue, id_didi_credential, id_didi
 '3'::bigint, 'Vigente'::character varying(255), '2020-04-15'::timestamp without time zone, '2020-04-10'::timestamp without time zone, '3'::bigint, '3'::bigint, '3'::bigint, '2'::bigint, '3'::bigint, 'Credito Emprendedor'::character varying(255));
 
 INSERT INTO public.credential (
-id, credential_description, credential_state, date_of_expiry, date_of_issue, id_didi_credential, updated, id_didi_issueer, id_didi_receptor, beneficiary_id) VALUES (
-'4'::bigint, 'Identidad - Titular'::character varying(255), 'Vigente'::character varying(255), '2020-04-24 00:00:00'::timestamp without time zone, '2020-04-09 00:00:00'::timestamp without time zone, '4'::bigint, '2020-04-08 00:00:00'::timestamp without time zone, '4'::bigint, '4'::bigint, '2'::bigint);
+id, credential_description, credential_state, date_of_expiry, date_of_issue, id_didi_credential, updated, id_didi_issueer, id_didi_receptor, beneficiary_id, id_credential) VALUES (
+'4'::bigint, 'Identidad - Titular'::character varying(255), 'Vigente'::character varying(255), '2020-04-24 00:00:00'::timestamp without time zone, '2020-04-09 00:00:00'::timestamp without time zone, '4'::bigint, '2020-04-08 00:00:00'::timestamp without time zone, '4'::bigint, '4'::bigint, '2'::bigint, '4'::bigint);
+
+
 
 INSERT INTO public.credential_credit (
 amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id) VALUES (

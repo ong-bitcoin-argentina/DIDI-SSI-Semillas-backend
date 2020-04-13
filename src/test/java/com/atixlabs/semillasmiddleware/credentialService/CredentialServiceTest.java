@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialServiceCustom;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
@@ -59,7 +60,7 @@ public class CredentialServiceTest {
         credential1.setDniBeneficiary(29302594L);
         credential1.setCreditState("Estado");
         credential1.setBeneficiary(beneficiary);
-        credential1.setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        credential1.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
         credentials.add(credential1);
 
         CredentialIdentity credentialIdentity = new CredentialIdentity();
@@ -70,7 +71,7 @@ public class CredentialServiceTest {
         credentialIdentity.setDateOfExpiry(util.getLocalDateTimeNow());
         credentialIdentity.setDateOfIssue(util.getLocalDateTimeNow().minusDays(1));
         credentialIdentity.setBeneficiary(beneficiary);
-        credentialIdentity.setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        credentialIdentity.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
         credentials.add(credentialIdentity);
 
 

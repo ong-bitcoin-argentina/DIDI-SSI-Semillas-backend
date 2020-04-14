@@ -15,39 +15,34 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
+import org.junit.Before;
 import org.junit.Test;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 
 public class ParserCategoriesTest {
-    @Test
-    public void answerCategoryFactoryReturnsSameCategoryObject() throws InvalidCategoryException, Exception {
-        AnswerCategoryFactory answerCategoryFactory = new AnswerCategoryFactory();
-        Assert.assertEquals(answerCategoryFactory.get("Emprendimiento"), answerCategoryFactory.get("EMPRENDIMIENTO"));
-    }
+    AnswerCategoryFactory answerCategoryFactory;
+    AnswerRow answerRowActivityStartDate;
+    AnswerRow answerRowMainActivity;
+    AnswerRow answerRowAddress;
+    AnswerRow answerRowActivityEndingDate;
+    AnswerRow answerRowName;
+    AnswerRow answerRowType;
+    Workbook wb;
+    Sheet sheet;
+    Row row3;
+    Row row4;
+    Row row5;
+    Cell answerCell3;
+    Cell answerCell4;
+    Cell answerCell5;
 
-    @Test(expected = InvalidCategoryException.class)
-    public void invalidCategoryThrowsInvalidCategoryException() throws InvalidCategoryException, Exception {
-        AnswerCategoryFactory answerCategoryFactory = new AnswerCategoryFactory();
-        answerCategoryFactory.get("non-existent category");
-    }
+    @Before
+    public void init() throws InvalidRowException {
+        answerCategoryFactory = new AnswerCategoryFactory();
 
-    @Test
-    public void categoryFactoryAssignsChildAndSpouseTheCorrespondingEnum() throws Exception, InvalidCategoryException {
-        AnswerCategoryFactory categoryFactory = new AnswerCategoryFactory();
-        PersonCategory child = (PersonCategory) categoryFactory.get("datos hijo 1");
-        Assert.assertEquals(child.getPersonType(), PersonType.CHILD);
-
-        PersonCategory spouse = (PersonCategory) categoryFactory.get("DATOS DEL CÓNYUGE");
-        Assert.assertEquals(spouse.getPersonType(), PersonType.SPOUSE);
-    }
-
-    @Test
-    public void entrepreneurshipCategoryIsNotValidIfNameAndTypeAreMissing() throws Exception, InvalidCategoryException {
-        ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
-        //EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory();
-        Workbook wb = new HSSFWorkbook();
-        Sheet sheet = wb.createSheet();
+        wb = new HSSFWorkbook();
+        sheet = wb.createSheet();
         Row row = sheet.createRow(8);
         System.out.println(row.getRowNum());
         row.setRowNum(8);
@@ -95,9 +90,7 @@ public class ParserCategoriesTest {
         Cell answerCell2 = row2.createCell(16);
         answerCell2.setCellValue("ADDRESS 123");
 
-
-
-        Row row3 =  sheet.createRow(11);
+        row3 =sheet.createRow(11);
         row3.setRowNum(11);
         Cell surveyCell3 = row3.createCell(7);
         surveyCell3.setCellValue("SURVEY-1");
@@ -109,11 +102,10 @@ public class ParserCategoriesTest {
         categoryCell3.setCellValue("EMPRENDIMIENTO");
         Cell questionCell3 = row3.createCell(15);
         questionCell3.setCellValue("FIN DE LA ACTIVIDAD");
-        Cell answerCell3 = row3.createCell(16);
+        answerCell3 = row3.createCell(16);
         answerCell3.setCellValue("12/12/13");
 
-
-        Row row4= sheet.createRow(12);
+        row4= sheet.createRow(12);
         row4.setRowNum(12);
         Cell surveyCell4 = row4.createCell(7);
         surveyCell4.setCellValue("SURVEY-1");
@@ -125,11 +117,11 @@ public class ParserCategoriesTest {
         categoryCell4.setCellValue("EMPRENDIMIENTO");
         Cell questionCell4 = row4.createCell(15);
         questionCell4.setCellValue("NOMBRE EMPRENDIMIENTO");
-        Cell answerCell4 = row4.createCell(16);
+        answerCell4 = row4.createCell(16);
         answerCell4.setCellValue("");
 
 
-        Row row5= sheet.createRow(13);
+        row5 = sheet.createRow(13);
         row5.setRowNum(13);
         Cell surveyCell5 = row5.createCell(7);
         surveyCell5.setCellValue("SURVEY-1");
@@ -141,20 +133,42 @@ public class ParserCategoriesTest {
         categoryCell5.setCellValue("EMPRENDIMIENTO");
         Cell questionCell5 = row5.createCell(15);
         questionCell5.setCellValue("TIPO DE EMPRENDIMIENTO");
-        Cell answerCell5 = row5.createCell(16);
-        answerCell5.setCellValue("  ");
+        answerCell5 = row5.createCell(16);
+        answerCell5.setCellValue("");
 
-        AnswerRow answerRowActivityStartDate = new AnswerRow(row);
-        AnswerRow answerRowMainActivity = new AnswerRow(row1);
-        AnswerRow answerRowAddress = new AnswerRow(row2);
-        AnswerRow answerRowActivityEndingDate = new AnswerRow(row3);
-        AnswerRow answerRowName = new AnswerRow(row4);
-        AnswerRow answerRowType = new AnswerRow(row5);
+        answerRowActivityStartDate = new AnswerRow(row);
+        answerRowMainActivity = new AnswerRow(row1);
+        answerRowAddress = new AnswerRow(row2);
+        answerRowActivityEndingDate = new AnswerRow(row3);
+        answerRowName = new AnswerRow(row4);
+        answerRowType = new AnswerRow(row5);
 
-        AnswerCategoryFactory answerCategoryFactory = new AnswerCategoryFactory();
-        //Category entrepreneurshipCategory = answerCategoryFactory.get("EMPRENDIMIENTO");
+    }
+
+    @Test
+    public void answerCategoryFactoryReturnsSameCategoryObject() throws InvalidCategoryException, Exception {
+        Assert.assertEquals(answerCategoryFactory.get("Emprendimiento"), answerCategoryFactory.get("EMPRENDIMIENTO"));
+    }
+
+    @Test(expected = InvalidCategoryException.class)
+    public void invalidCategoryThrowsInvalidCategoryException() throws InvalidCategoryException, Exception {
+        answerCategoryFactory.get("non-existent category");
+    }
+
+    @Test
+    public void categoryFactoryAssignsChildAndSpouseTheCorrespondingEnum() throws Exception, InvalidCategoryException {
+        PersonCategory child = (PersonCategory) answerCategoryFactory.get("datos hijo 1");
+        Assert.assertEquals(child.getPersonType(), PersonType.CHILD);
+
+        PersonCategory spouse = (PersonCategory) answerCategoryFactory.get("DATOS DEL CÓNYUGE");
+        Assert.assertEquals(spouse.getPersonType(), PersonType.SPOUSE);
+    }
+
+    @Test
+    public void entrepreneurshipCategoryIsNotValidIfNameAndTypeAreMissing() throws Exception, InvalidCategoryException {
+        ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
         EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory();
-        System.out.println(answerRowActivityStartDate);
+
         entrepreneurshipCategory.loadData(answerRowActivityStartDate);
         entrepreneurshipCategory.loadData(answerRowMainActivity);
         entrepreneurshipCategory.loadData(answerRowAddress);
@@ -162,35 +176,33 @@ public class ParserCategoriesTest {
         entrepreneurshipCategory.loadData(answerRowName);
         entrepreneurshipCategory.loadData(answerRowType);
 
-
-
-        //entrepreneurshipCategory.getActivityStartDate().setAnswer(answerRowActivityStartDate);
-        /*entrepreneurshipCategory.getMainActivity().setAnswer(answerRowMainActivity);
-        entrepreneurshipCategory.getAddress().setAnswer(answerRowAddress);
-        entrepreneurshipCategory.getActivityEndingDate().setAnswer(answerRowActivityEndingDate);
-        entrepreneurshipCategory.getName().setAnswer(answerRowName);
-        entrepreneurshipCategory.getType().setAnswer(answerRowType);*/
-
-        Assert.assertFalse(entrepreneurshipCategory.getType().isValid(excelFileResult));
-        Assert.assertTrue(entrepreneurshipCategory.getAddress().isValid(excelFileResult));
-
-        //Assert.assertFalse(entrepreneurshipCategory.isValid(excelFileResult));
-        System.out.println(excelFileResult.toString());
-        //Assert.assertEquals(2,excelFileResult.getTotalErrorsRows());
+        Assert.assertFalse(entrepreneurshipCategory.isValid(excelFileResult));
+        Assert.assertEquals(2,excelFileResult.getTotalErrorsRows());
     }
 
-    /*@Test
-    public void entrepreneurshipCategoryIsValidIfOptionalEndingDateIsMissing() {
+    @Test
+    public void entrepreneurshipCategoryIsValidIfOptionalEndingDateIsMissing() throws InvalidRowException {
         ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
         EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory();
-        entrepreneurshipCategory.setType("COMERCIO");
-        entrepreneurshipCategory.setActivityStartDate(LocalDate.parse("2020-01-01"));
-        entrepreneurshipCategory.setMainActivity("COMERCIO");
-        entrepreneurshipCategory.setAddress("ADDRESS");
-        entrepreneurshipCategory.setName("NAME");
+
+        answerCell3.setCellValue("");
+        answerRowActivityEndingDate = new AnswerRow(row3);
+
+        answerCell4.setCellValue("ENTREPRENEURSHIP NAME");
+        answerRowName = new AnswerRow(row4);
+
+        answerCell5.setCellValue("TYPE");
+        answerRowType = new AnswerRow(row5);
+
+        entrepreneurshipCategory.loadData(answerRowActivityStartDate);
+        entrepreneurshipCategory.loadData(answerRowMainActivity);
+        entrepreneurshipCategory.loadData(answerRowAddress);
+        entrepreneurshipCategory.loadData(answerRowActivityEndingDate);
+        entrepreneurshipCategory.loadData(answerRowName);
+        entrepreneurshipCategory.loadData(answerRowType);
 
         Assert.assertTrue(entrepreneurshipCategory.isValid(excelFileResult));
-    }*/
+    }
 
     @Test
     public void child2AndChild11ReturnDifferentObjects() throws InvalidCategoryException, Exception {

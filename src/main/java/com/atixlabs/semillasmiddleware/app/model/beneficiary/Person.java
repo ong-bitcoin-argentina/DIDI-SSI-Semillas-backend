@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -13,6 +14,7 @@ import java.util.List;
 @Setter
 @Entity
 @Table
+@ToString
 public class Person {
 
     @Id
@@ -46,4 +48,6 @@ public class Person {
             hijo
     conyugue
             familiar*/
+
+
 }

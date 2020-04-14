@@ -26,8 +26,6 @@ public class CredentialIdentity extends Credential {
 
     private String nameCreditHolder;
 
-    @Transient
-    private String credentialType = "CredentialIdentity";
 
     //TODO: Hay que analizar como estructurar el "titual o familiar" para las credenciales
 

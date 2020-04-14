@@ -35,8 +35,7 @@ public class CredentialCredit extends Credential {
 
     private Long dniBeneficiary;
 
-    @Transient
-    private String credentialType = "CredentialCredit";
+
 
 
     @Override
@@ -51,7 +50,6 @@ public class CredentialCredit extends Credential {
                 ", creditState='" + creditState + '\'' +
                 ", amount=" + amount +
                 ", dniBeneficiary=" + dniBeneficiary +
-                ", credentialType=" + credentialType +
                 '}' + super.toString();
     }
 }

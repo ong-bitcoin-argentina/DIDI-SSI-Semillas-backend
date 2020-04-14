@@ -35,6 +35,4 @@ public class CredentialEntrepreneurship extends Credential {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime endActivity;
 
-    @Transient
-    private String credentialType = "CredentialEntrepreneurship";
 }

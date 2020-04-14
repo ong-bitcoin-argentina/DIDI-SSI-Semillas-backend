@@ -20,8 +20,6 @@ public class CredentialDwelling extends Credential {
     private String possessionType;
     //TODO campo que faltaba respuesta: "Distrito de Residencia" String
 
-    @Transient
-    private String credentialType = "CredentialDwelling";
 
 
 }

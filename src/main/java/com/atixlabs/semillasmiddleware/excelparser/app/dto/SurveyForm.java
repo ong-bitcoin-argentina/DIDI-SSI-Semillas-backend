@@ -1,24 +1,17 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.service.CredentialService;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.BeneficiaryCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
-import javassist.expr.Instanceof;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
 
 @Component
 @Getter
@@ -84,13 +77,14 @@ public class    SurveyForm {
     }
 
     public Category getCategoryData(Class<?> classToFind){
-        Integer categoryIndex = this.findCategoryInList(BeneficiaryCategory.class);
+        Integer categoryIndex = this.findCategoryInList(classToFind);
         if(categoryIndex >=0)
             return this.getCategoryList().get(categoryIndex).getData();
         return null;
     }
 
-    public boolean isValid(ProcessExcelFileResult proccessExcelFileResult) {
-        return categoryList.stream().allMatch(category -> category.isValid(proccessExcelFileResult));
+    public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
+        log.info("SurveyForm -> isValid");
+        return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
     }
 }

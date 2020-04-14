@@ -6,12 +6,14 @@ import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class AnswerCategoryFactory {
     private static final Integer AMOUNT_CHILDREN = 11;
@@ -55,14 +57,21 @@ public class AnswerCategoryFactory {
     }
 
     public Category get(String category) throws InvalidCategoryException, Exception {
+
+        log.info("Category.get: "+category);
+
         if (category == null)
             return null;
 
-        category =  StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+        category = StringUtil.removeNumbers(category);
+        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+
+        log.info("category: "+category);
 
         if (!categories.containsKey(category)){
             throw new InvalidCategoryException(category);
         }
+
 
         if (categories.get(category) == null){
             Category newCategory = null;

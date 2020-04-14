@@ -1,16 +1,19 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 
+@Slf4j
 @Getter
 public class PersonCategory implements Category {
     String nameAndSurname;
@@ -29,9 +32,16 @@ public class PersonCategory implements Category {
         }
     }
 
+    @Override
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        switch (PersonQuestion.get(question)) {
+
+        PersonQuestion questionMatch = PersonQuestion.get(question);
+
+        if(questionMatch == null)
+            return;
+
+        switch (questionMatch) {
             case ID_NUMBER:
                 this.idNumber = answerRow.getAnswerAsLong();
                 break;
@@ -42,12 +52,17 @@ public class PersonCategory implements Category {
                 this.gender = answerRow.getAnswerAsString();
                 break;
             case BIRTHDATE:
-                this.birthdate = answerRow.getAnswerAsDate("dd/MM/yy");
+                this.birthdate = answerRow.getAnswerAsDate("dd/MM/yyyy");
                 break;
             case RELATION:
                 this.relation = answerRow.getAnswerAsString();
                 break;
         }
+    }
+
+    @Override
+    public Category getData() {
+        return this;
     }
 
     @Override
@@ -59,5 +74,10 @@ public class PersonCategory implements Category {
         validations.add(isFilledIfRequired(birthdate, PersonQuestion.BIRTHDATE, processExcelFileResult));
         validations.add(isFilledIfRequired(relation, PersonQuestion.RELATION, processExcelFileResult));
         return validations.stream().allMatch(v->v);
+    }
+
+    @Override
+    public boolean isFilledIfRequired(Object attribute, CategoryQuestion questionType, ProcessExcelFileResult processExcelFileResult) {
+        return false;
     }
 }

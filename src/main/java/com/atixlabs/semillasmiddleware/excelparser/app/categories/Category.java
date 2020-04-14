@@ -7,11 +7,9 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 
 public interface Category {
      void loadData(AnswerRow answerRow);
-<<<<<<< HEAD
 
      Category getData();
 
-=======
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
      //TODO: No le estoy pasando la fila con error al processExcelFileResult
      default boolean isFilledIfRequired(Object attribute, CategoryQuestion questionType, ProcessExcelFileResult processExcelFileResult){
@@ -21,5 +19,4 @@ public interface Category {
           }
           return true;
      }
->>>>>>> SEMI-43-Parser-Categories
 }

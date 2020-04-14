@@ -53,10 +53,7 @@ public class AnswerRow extends ExcelRow {
     }
 
     public boolean isValid(){
-        if (surveyFormCode == null || surveyFormCode.isEmpty() || surveyDate == null || pdv == null || category == null || question == null){
-            return false;
-        }
-        return true;
+        return surveyFormCode != null && !surveyFormCode.isEmpty() && surveyDate != null && pdv != null && category != null && question != null;
     }
 
     public String getAnswerAsString(){

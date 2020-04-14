@@ -4,7 +4,7 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.BeneficiaryCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,13 +38,13 @@ public class CredentialService {
     private void buildPerson(SurveyForm surveyForm){
         log.info("  buildPerson");
 
-        BeneficiaryCategory beneficiaryCategory = (BeneficiaryCategory) surveyForm.getCategoryData(BeneficiaryCategory.class);
-        if(beneficiaryCategory != null) {
+        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
+        if(personCategory != null) {
             Person person = new Person();
-            person.setName(beneficiaryCategory.getNombre()+" "+beneficiaryCategory.getApellido());
-            person.setDocumentType(beneficiaryCategory.getTipoDocumento());
-            person.setDocumentNumber(beneficiaryCategory.getNumeroDocumento());
-            person.setBirthDate(beneficiaryCategory.getFechaNacimiento());
+            person.setName(personCategory.getNameAndSurname());
+            person.setDocumentType("DNI HARDCODE");
+            person.setDocumentNumber(personCategory.getIdNumber());
+            person.setBirthDate(personCategory.getBirthdate());
             log.info(person.toString());
 
             Optional<Person> personOptional = personRepository.findByDocumentTypeAndDocumentNumber(person.getDocumentType(),person.getDocumentNumber());
@@ -57,12 +57,12 @@ public class CredentialService {
 
     private void buildCreditCredential(SurveyForm surveyForm){
         log.info("  buildCreditCredential");
-        BeneficiaryCategory beneficiaryCategory = (BeneficiaryCategory) surveyForm.getCategoryData(BeneficiaryCategory.class);
+        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
 
-        if(beneficiaryCategory != null) {
+        if(personCategory != null) {
             CredentialCredit credentialCredit = new CredentialCredit();
-            credentialCredit.setBeneficiaryDocumentType(beneficiaryCategory.getTipoDocumento());
-            credentialCredit.setBeneficiaryDocumentNumber(beneficiaryCategory.getNumeroDocumento());
+            credentialCredit.setBeneficiaryDocumentType("DNI HARDCODE");
+            credentialCredit.setBeneficiaryDocumentNumber(personCategory.getIdNumber());
             credentialCredit.setDateOfExpiry(LocalDateTime.now());
             credentialCredit.setDateOfIssue(LocalDateTime.now());
             credentialCredit.setCurrentCycle("imported-from-excel");

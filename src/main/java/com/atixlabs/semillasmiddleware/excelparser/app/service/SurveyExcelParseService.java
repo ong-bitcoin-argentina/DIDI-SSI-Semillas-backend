@@ -53,33 +53,32 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             answerRow = new AnswerRow(currentRow);
         } catch (InvalidRowException e) {
-            processExcelFileResult.addRowError("***********("+currentRow.getRowNum()+"): "+ e.toString());
+            processExcelFileResult.addRowError("("+currentRow.getRowNum()+"): "+ e.toString());
         }
 
         processExcelFileResult.addTotalRow();
 
-        if (answerRow.isValid()){
-            processExcelFileResult.addValidRows();
-            processExcelFileResult.addInsertedRows();
+        if (answerRow != null) {
+            if (answerRow.isValid()) {
+                processExcelFileResult.addValidRows();
+                processExcelFileResult.addInsertedRows();
 
-            if (currentForm.isEmpty())
-                currentForm.initialize(answerRow);
+                if (currentForm.isEmpty())
+                    currentForm.initialize(answerRow);
 
-            if (!currentForm.isRowFromSameForm(answerRow)) {
-                endOfFormHandler(processExcelFileResult);
-                currentForm.clearForm();
-                currentForm.initialize(answerRow);
+                if (!currentForm.isRowFromSameForm(answerRow)) {
+                    endOfFormHandler(processExcelFileResult);
+                    currentForm.clearForm();
+                    currentForm.initialize(answerRow);
+                }
+
+                addCategoryDataIntoForm(answerRow, processExcelFileResult);
+                log.info("OK:" + answerRow.toString());
+            } else {
+                processExcelFileResult.addRowError(answerRow.getStringError());
+                log.error("ERROR:" + answerRow.toString());
             }
-
-            addCategoryDataIntoForm(answerRow, processExcelFileResult);
-            log.info("OK:"+answerRow.toString());
         }
-        else{
-            //processExcelFileResult.addRowError("["+answerRow.getRowNum()+"]"+ answerRow.getErrorMessage());
-            processExcelFileResult.addRowError(answerRow.getStringError());
-            log.error("ERROR:"+answerRow.toString());
-        }
-
         if(!hasNext)
             endOfFileHandler(processExcelFileResult);
 
@@ -91,7 +90,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             Category category = answerCategoryFactory.get(answerRow.getCategory());
             category.loadData(answerRow);
-            if (answerRow.getErrorMessage() != null){
+            if (!answerRow.getErrorMessage().isEmpty()){
                 processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): " + answerRow.getErrorMessage());
             }
             currentForm.addCategory(category);
@@ -112,10 +111,12 @@ public class SurveyExcelParseService extends ExcelParseService {
         //CHECK IF ALL FORMS AR OK:
         for (SurveyForm surveyForm : surveyFormList) {
             log.info(surveyForm.toString());
-            if(surveyForm.isValid(proccessExcelFileResult)
+            if(surveyForm.isValid(processExcelFileResult))
                 credentialService.buildAllCredentialsFromForm(surveyForm);
-            else
-                log.info("no se pudieron crear las credenciales - formulario invalido");
+            else {
+                log.info("No se crearán las credenciales - formulario invalido");
+                log.info(surveyForm.toString());
+            }
         }
     }
 }

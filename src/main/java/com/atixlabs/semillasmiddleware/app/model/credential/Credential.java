@@ -5,14 +5,12 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
-@ToString
 @Entity
 @Table
 @Inheritance( strategy = InheritanceType.JOINED )
@@ -54,4 +52,20 @@ public abstract class Credential extends AuditableEntity {
 
 
 
+    @Override
+    public String toString() {
+        return "Credential{" +
+                "id=" + id +
+                ", idDidiIssueer=" + idDidiIssueer +
+                ", idDidiReceptor=" + idDidiReceptor +
+                ", idDidiCredential=" + idDidiCredential +
+                ", idHistorical=" + idHistorical +
+                ", dateOfIssue=" + dateOfIssue +
+                ", dateOfExpiry=" + dateOfExpiry +
+               // ", idRelatedCredential=" + idRelatedCredential +
+                ", beneficiary=" + beneficiary +
+                ", credentialState='" + credentialState + '\'' +
+                ", credentialType='" + credentialDescription + '\'' +
+                '}';
+    }
 }

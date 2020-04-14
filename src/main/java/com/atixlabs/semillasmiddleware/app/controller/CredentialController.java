@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
@@ -50,12 +51,13 @@ public class CredentialController {
                                                         @RequestParam(required = false) String idDidiCredential,
                                                         @RequestParam(required = false) String dateOfIssue,
                                                         @RequestParam(required = false) String dateOfExpiry,
-                                                        @RequestParam(required = false) List<String> credentialState) {
+                                                        @RequestParam(required = false) List<String> credentialState,
+                                                        @RequestParam(required = false) String credentialStatus) {
 
 
         List<Credential> credentials;
         try {
-            credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+            credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);
         }
         catch (Exception e){
             log.info("There has been an error searching for credentials " + e);
@@ -80,6 +82,19 @@ public class CredentialController {
         List<String> credentialTypes =  Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
         log.info("find credential types ----> " + credentialTypes);
         return credentialTypes;
+    }
+
+    @GetMapping("/credentialStatus")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, String> findCredentialStatus() {
+        Map<String, String> credentialStatus = new HashMap<>();
+        for (CredentialStatusCodes status: CredentialStatusCodes.values()) {
+            credentialStatus.put(status.name(), status.getCode());
+        }
+
+       // Map<CredentialStatesCodes, String> credentialStatus = (Map<CredentialStatesCodes, String >) Arrays.stream(CredentialStatusCodes.values()).map(state ->Map.of(state,state.getCode())).collect(Collectors.toMap(e -> e, CredentialStatusCodes::getCode));
+        log.info("find credential status ----> " + credentialStatus);
+        return credentialStatus;
     }
 
 

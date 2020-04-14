@@ -6,8 +6,6 @@ public enum CredentialStatusCodes {
     CREDENTIAL_PENDING_DIDI("Pendiente-didi");
 
 
-
-
     private String code;
 
     CredentialStatusCodes(String code) {

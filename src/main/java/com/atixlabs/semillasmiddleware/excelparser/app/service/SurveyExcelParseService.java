@@ -66,7 +66,7 @@ public class SurveyExcelParseService extends ExcelParseService {
                 currentForm.initialize(answerRow);
 
             if (!currentForm.isRowFromSameForm(answerRow)) {
-                endOfFormHandler();
+                endOfFormHandler(processExcelFileResult);
                 currentForm.clearForm();
                 currentForm.initialize(answerRow);
             }
@@ -81,7 +81,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         }
 
         if(!hasNext)
-            endOfFileHandler();
+            endOfFileHandler(processExcelFileResult);
 
         return processExcelFileResult;
     }
@@ -98,12 +98,13 @@ public class SurveyExcelParseService extends ExcelParseService {
         }
     }
 
-    private void endOfFormHandler(){
+    private void endOfFormHandler(ProcessExcelFileResult processExcelFileResult){
         log.info("endOfFormHandler -> add form to surveyFormList");
+        processExcelFileResult.addProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(){
-        this.endOfFormHandler();
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
+        this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> check errors and build credentials");
         //CHECK IF ALL FORMS AR OK:
         for (SurveyForm surveyForm : surveyFormList) {

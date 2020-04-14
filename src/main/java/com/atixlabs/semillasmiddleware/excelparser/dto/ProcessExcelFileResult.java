@@ -19,6 +19,7 @@ public class ProcessExcelFileResult {
     private int totalInsertedRows = 0;
     private int totalErrorsRows = 0;
     private int totalDeletedRows = 0;
+    private int totalProcessedForms = 0;
     private List<String> errorRows = new ArrayList<String>();
     private String fileName = null;
     private boolean isFileValid = true;
@@ -45,6 +46,8 @@ public class ProcessExcelFileResult {
     public void addInsertedRows(){
         totalInsertedRows++;
     }
+
+    public void addProcessedForms(){totalProcessedForms++;}
 
     public void addValidRows(){
         validRows++;

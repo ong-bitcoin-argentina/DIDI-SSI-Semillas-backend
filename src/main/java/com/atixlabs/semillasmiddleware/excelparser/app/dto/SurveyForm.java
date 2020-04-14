@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.BeneficiaryCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import javassist.expr.Instanceof;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -89,4 +90,7 @@ public class    SurveyForm {
         return null;
     }
 
+    public boolean isValid(ProcessExcelFileResult proccessExcelFileResult) {
+        return categoryList.stream().allMatch(category -> category.isValid(proccessExcelFileResult));
+    }
 }

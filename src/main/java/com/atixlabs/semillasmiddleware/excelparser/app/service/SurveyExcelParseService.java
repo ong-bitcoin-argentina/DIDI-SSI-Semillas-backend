@@ -91,6 +91,9 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             Category category = answerCategoryFactory.get(answerRow.getCategory());
             category.loadData(answerRow);
+            if (answerRow.getErrorMessage() != null){
+                processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): " + answerRow.getErrorMessage());
+            }
             currentForm.addCategory(category);
         }
         catch (Exception | InvalidCategoryException e) {
@@ -109,7 +112,10 @@ public class SurveyExcelParseService extends ExcelParseService {
         //CHECK IF ALL FORMS AR OK:
         for (SurveyForm surveyForm : surveyFormList) {
             log.info(surveyForm.toString());
-            credentialService.buildAllCredentialsFromForm(surveyForm);
+            if(surveyForm.isValid(proccessExcelFileResult)
+                credentialService.buildAllCredentialsFromForm(surveyForm);
+            else
+                log.info("no se pudieron crear las credenciales - formulario invalido");
         }
     }
 }

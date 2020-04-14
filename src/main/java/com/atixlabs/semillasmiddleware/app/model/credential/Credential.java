@@ -47,6 +47,8 @@ public abstract class Credential extends AuditableEntity {
 
     private String credentialDescription;
 
+    private String credentialCategory;
+
 
 
 

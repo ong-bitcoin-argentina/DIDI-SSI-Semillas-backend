@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
@@ -36,7 +37,7 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -45,6 +46,7 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         List<Predicate> predicates = new ArrayList<>();
 
         Join<Credential, Person> beneficiary = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, CredentialState> credentialStateEntity = credential.join("credentialState", JoinType.LEFT);
 
         if (credentialType != null) {
             predicates.add(cb.equal(credential.get("credentialDescription"), credentialType));
@@ -70,8 +72,8 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
             predicates.add(cb.like(credential.get("dateOfIssue").as(String.class), dateOfIssue+"%"));
         }
 
-        if (credentialState != null) {
-            predicates.add(cb.in(credential.get("credentialState")).value(credentialState));
+        if (credentialStates != null) {
+            predicates.add(cb.in(credentialStateEntity.get("stateName")).value(credentialStates));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));

@@ -77,7 +77,6 @@ public class CredentialController {
     @GetMapping("/credentialTypes")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialTypes() {
-        //TODO: desmockear creando un enum con los tipos de credenciales como lso estados para utilizar en el searchbox
         List<String> credentialTypes =  Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
         log.info("find credential types ----> " + credentialTypes);
         return credentialTypes;

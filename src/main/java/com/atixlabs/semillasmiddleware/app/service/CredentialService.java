@@ -24,7 +24,7 @@ public class CredentialService {
         credentialCredit.setIdDidiCredential(456L);
         credentialCredit.setIdHistorical(77L);
         credentialCredit.setDateOfExpiry(LocalDateTime.now());
-        credentialCredit.setIdRelatedCredential(534L);
+        //credentialCredit.setIdRelatedCredential(534L);
 
         credentialCredit.setIdCredit(222L);
         credentialCredit.setCreditName("credit name");

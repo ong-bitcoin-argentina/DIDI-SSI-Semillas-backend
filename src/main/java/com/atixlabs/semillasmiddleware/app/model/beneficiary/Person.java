@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
+import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import lombok.Getter;
 import lombok.Setter;
@@ -31,10 +32,12 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
-    //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado
-
+    //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado.
     @OneToOne
      private Kinship Kinship;
+
+    @OneToMany
+    private List<Application> applications;
 
     /*
     kinsman (pariente), p1,p2, tiporelacion (kind of kinship)

@@ -33,7 +33,7 @@ public abstract class Credential extends AuditableEntity {
 
     private LocalDateTime dateOfExpiry;
 
-    private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
+    //private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
                                       // ya que es la credencial principal. Las credcenciales familiares se pueden encontrar filtrando a las personas que
                                       // asociado el dni del titular
 
@@ -41,10 +41,9 @@ public abstract class Credential extends AuditableEntity {
     private Person beneficiary;
 
     @ManyToOne
-    private CredentialState credentialState; //TODO: deberia ser una table de states asocidado al id
+    private CredentialState credentialState;
 
-    //Cuando pasa a credencial vigente este campo quedaria en null
-    private String credentialStatus; //pending -> bondarea/didi
+    private String credentialStatus; //pending -> bondarea/didi || Active -> null
 
     private String credentialDescription;
 
@@ -61,7 +60,7 @@ public abstract class Credential extends AuditableEntity {
                 ", idHistorical=" + idHistorical +
                 ", dateOfIssue=" + dateOfIssue +
                 ", dateOfExpiry=" + dateOfExpiry +
-                ", idRelatedCredential=" + idRelatedCredential +
+               // ", idRelatedCredential=" + idRelatedCredential +
                 ", beneficiary=" + beneficiary +
                 ", credentialState='" + credentialState + '\'' +
                 ", credentialType='" + credentialDescription + '\'' +

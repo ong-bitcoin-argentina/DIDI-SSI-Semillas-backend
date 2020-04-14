@@ -3,14 +3,12 @@ package com.atixlabs.semillasmiddleware.app.model.credentialState;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import javax.persistence.*;
 
 @Entity
 @Getter
 @Setter
+@Table
 public class CredentialState {
 
     //LA DECISION DE QUE SEA UNA TABLA ES PORQUE SI EL DIA DE MAÑANA CAMBIA LA FORMA DE DECIRLE "VIGENTE" A UN ESTADO, NO PODRIAS MODIFICARLO EN CADA CREDENCIAL
@@ -24,4 +22,6 @@ public class CredentialState {
     public CredentialState(String state){
         this.stateName = state;
     }
+
+    public  CredentialState(){};
 }

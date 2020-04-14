@@ -16,6 +16,8 @@ import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Getter
@@ -86,10 +88,10 @@ public class AnswerRow extends ExcelRow {
         return true;
     }
 
-    public String getAnswerAsString(){
+    private String getAnswerAsString(){
         return answer;
     }
-    public Double getAnswerAsDouble(){
+    private Double getAnswerAsDouble(){
         try { return Double.valueOf(answer);}
         catch (NumberFormatException e){
             log.info("String to Double conversion failed on: "+answer);
@@ -97,7 +99,7 @@ public class AnswerRow extends ExcelRow {
         }
         return null;
     }
-    public Long getAnswerAsLong(){
+    private Long getAnswerAsLong(){
         try {return Long.valueOf(answer);}
         catch (NumberFormatException e){
             log.info("String to Long conversion failed on: "+answer);
@@ -105,19 +107,44 @@ public class AnswerRow extends ExcelRow {
         }
         return null;
     }
-    public Integer getAnswerAsInteger(){
+    private Integer getAnswerAsInteger(){
         try {return Integer.valueOf(answer);}
         catch (NumberFormatException e){
             log.info("String to Integer conversion failed on: "+answer);
             this.errorMessage = "String to Integer conversion failed on: "+answer;}
         return null;
     }
-    public LocalDate getAnswerAsDate(String datePattern){
+    private LocalDate getAnswerAsDate(String datePattern){
         //"dd/MM/yy"
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
         catch (NumberFormatException e){
             log.info("String to Date conversion failed on: "+answer);
             this.errorMessage = "String to Date conversion failed on: "+answer;}
+        return null;
+    }
+
+    /*private final Map<Class<?>,Object> castMethods = new HashMap<>()
+    {{
+        put(String.class,getAnswerAsString());
+        put(Long.class,getAnswerAsLong());
+        put(Double.class,getAnswerAsDouble());
+        put(LocalDate.class,getAnswerAsDate("dd/MM/yy"));
+    }};*/
+
+    public Object getAnswerAs(Class<?> dataType) {
+        switch (dataType.getName()){
+            case "java.lang.String":
+                return getAnswerAsString();
+            case "java.lang.Double":
+                return getAnswerAsDouble();
+            case "java.time.LocalDate":
+                return getAnswerAsDate("dd/MM/yy");
+            case "java.lang.Long":
+                return getAnswerAsLong();
+        }
+        //System.out.println("DATA TYPE en getAnswerAs: " + dataType.toString());
+        //System.out.println("CAST METHOD GET : "+castMethods.get(dataType).toString());
+        //return castMethods.get(dataType);
         return null;
     }
 

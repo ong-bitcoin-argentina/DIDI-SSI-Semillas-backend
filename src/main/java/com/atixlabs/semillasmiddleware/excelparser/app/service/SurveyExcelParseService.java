@@ -53,7 +53,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             answerRow = new AnswerRow(currentRow);
         } catch (InvalidRowException e) {
-            processExcelFileResult.addRowError("("+currentRow.getRowNum()+"): "+ e.toString());
+            processExcelFileResult.addRowError("***********("+currentRow.getRowNum()+"): "+ e.toString());
         }
 
         processExcelFileResult.addTotalRow();
@@ -80,8 +80,6 @@ public class SurveyExcelParseService extends ExcelParseService {
             log.error("ERROR:"+answerRow.toString());
         }
 
-
-
         if(!hasNext)
             endOfFileHandler();
 
@@ -101,11 +99,12 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     private void endOfFormHandler(){
-        log.info("endOfFormHandler -> adding form to surveyFormList");
+        log.info("endOfFormHandler -> add form to surveyFormList");
         surveyFormList.add(currentForm);
     }
     private void endOfFileHandler(){
-        log.info("endOfFileHandler -> checking errors and building credentials");
+        this.endOfFormHandler();
+        log.info("endOfFileHandler -> check errors and build credentials");
         //CHECK IF ALL FORMS AR OK:
         for (SurveyForm surveyForm : surveyFormList) {
             log.info(surveyForm.toString());

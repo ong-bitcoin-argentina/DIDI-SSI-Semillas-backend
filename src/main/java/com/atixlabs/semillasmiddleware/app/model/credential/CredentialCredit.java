@@ -1,11 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
-import java.util.List;
 
 
 @Getter
@@ -33,7 +31,9 @@ public class CredentialCredit extends Credential {
 
     private Double amount;
 
-    private Long dniBeneficiary;
+    private String beneficiaryDocumentType;
+
+    private Long beneficiaryDocumentNumber;
 
 
     @Override
@@ -47,7 +47,7 @@ public class CredentialCredit extends Credential {
                 ", currentCycle='" + currentCycle + '\'' +
                 ", creditState='" + creditState + '\'' +
                 ", amount=" + amount +
-                ", dniBeneficiary=" + dniBeneficiary +
+                ", dniBeneficiary=" + beneficiaryDocumentNumber +
                 "} " + super.toString();
     }
 }

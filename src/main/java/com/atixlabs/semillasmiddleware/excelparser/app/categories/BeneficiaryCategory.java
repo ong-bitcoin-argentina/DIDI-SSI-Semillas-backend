@@ -51,6 +51,18 @@ public class BeneficiaryCategory implements Category {
             case "NUMERO DE DOCUMENTO":
                 this.numeroDocumento = answerRow.getAnswerAsLong();
                 break;
+            case "FECHA DE NACIMIENTO":
+                this.fechaNacimiento = answerRow.getAnswerAsDate("dd/MM/yyyy");
+                break;
+            case "TIPO DOCUMENTO":
+                this.tipoDocumento = answerRow.getAnswerAsString();
+                break;
+            case "NOMBRE":
+                this.nombre = answerRow.getAnswerAsString();
+                break;
+            case "APELLIDO":
+                this.apellido = answerRow.getAnswerAsString();
+                break;
         }
 
     }

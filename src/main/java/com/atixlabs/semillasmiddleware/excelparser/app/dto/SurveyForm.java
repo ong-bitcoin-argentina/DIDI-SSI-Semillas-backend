@@ -23,7 +23,7 @@ import java.util.*;
 @Getter
 @Setter
 @Slf4j
-public class SurveyForm {
+public class    SurveyForm {
 
     //key form:
     @DateTimeFormat(pattern = "dd/MM/yy")

@@ -3,14 +3,15 @@ package com.atixlabs.semillasmiddleware.app.service;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.BeneficiaryCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import javax.xml.catalog.CatalogException;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -18,6 +19,9 @@ public class CredentialService {
 
     @Autowired
     private CredentialCreditRepository credentialCreditRepository;
+
+    @Autowired
+    private PersonRepository personRepository;
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm)
     {
@@ -32,31 +36,50 @@ public class CredentialService {
      * @param surveyForm
      */
     private void buildPerson(SurveyForm surveyForm){
-        log.info("buildPerson");
-        Person person = new Person();
-        person.setName("pablo");
-        person.setDocumentType("DNI");
-        //person.setDocumentNumber();
+        log.info("  buildPerson");
+
+        BeneficiaryCategory beneficiaryCategory = (BeneficiaryCategory) surveyForm.getCategoryData(BeneficiaryCategory.class);
+        if(beneficiaryCategory != null) {
+            Person person = new Person();
+            person.setName(beneficiaryCategory.getNombre()+" "+beneficiaryCategory.getApellido());
+            person.setDocumentType(beneficiaryCategory.getTipoDocumento());
+            person.setDocumentNumber(beneficiaryCategory.getNumeroDocumento());
+            person.setBirthDate(beneficiaryCategory.getFechaNacimiento());
+            log.info(person.toString());
+
+            Optional<Person> personOptional = personRepository.findByDocumentTypeAndDocumentNumber(person.getDocumentType(),person.getDocumentNumber());
+            if(personOptional.isEmpty())
+                personRepository.save(person);
+            else
+                log.info("Ya existe una persona con "+personOptional.get().getDocumentType()+" "+personOptional.get().getDocumentNumber());
+        }
     }
 
     private void buildCreditCredential(SurveyForm surveyForm){
-        log.info("buildCreditCredential");
+        log.info("  buildCreditCredential");
         BeneficiaryCategory beneficiaryCategory = (BeneficiaryCategory) surveyForm.getCategoryData(BeneficiaryCategory.class);
 
         if(beneficiaryCategory != null) {
             CredentialCredit credentialCredit = new CredentialCredit();
-            credentialCredit.setDniBeneficiary(beneficiaryCategory.getNumeroDocumento());
-            this.saveCredentialCredit(credentialCredit);
-        }
-    }
+            credentialCredit.setBeneficiaryDocumentType(beneficiaryCategory.getTipoDocumento());
+            credentialCredit.setBeneficiaryDocumentNumber(beneficiaryCategory.getNumeroDocumento());
+            credentialCredit.setDateOfExpiry(LocalDateTime.now());
+            credentialCredit.setDateOfIssue(LocalDateTime.now());
+            credentialCredit.setCurrentCycle("imported-from-excel");
+            credentialCredit.setCreditState("pre-credential");
+            log.info(credentialCredit.toString());
 
-    private void saveCredentialCredit(CredentialCredit credentialCredit){
-        credentialCredit.setDateOfExpiry(LocalDateTime.now());
-        credentialCredit.setDateOfIssue(LocalDateTime.now());
-        credentialCredit.setCurrentCycle("imported-from-excel");
-        credentialCredit.setCreditState("pre-credential");
-        log.info(credentialCredit.toString());
-        credentialCreditRepository.save(credentialCredit);
+            Optional<CredentialCredit> credentialCreditOptional = credentialCreditRepository.findByBeneficiaryDocumentTypeAndBeneficiaryDocumentNumber(
+                    credentialCredit.getBeneficiaryDocumentType(), credentialCredit.getBeneficiaryDocumentNumber()
+            );
+
+            if(credentialCreditOptional.isEmpty())
+                credentialCreditRepository.save(credentialCredit);
+            else
+                log.info("Ya existe una credencial para el "+
+                        credentialCredit.getBeneficiaryDocumentType()+" " +
+                        credentialCredit.getBeneficiaryDocumentNumber());
+        }
     }
 
     public void saveCredentialCreditMock(){
@@ -78,7 +101,7 @@ public class CredentialService {
         credentialCredit.setAmount(1d);
         credentialCredit.setCurrentCycle("Cycle");
         credentialCredit.setCreditState("state");
-        credentialCredit.setDniBeneficiary(29302594L);
+        credentialCredit.setBeneficiaryDocumentNumber(29302594L);
         credentialCreditRepository.save(credentialCredit);
     }
 

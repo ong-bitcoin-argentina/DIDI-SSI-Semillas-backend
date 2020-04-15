@@ -88,10 +88,10 @@ public class AnswerRow extends ExcelRow {
         return true;
     }
 
-    private String getAnswerAsString(){
+    public String getAnswerAsString(){
         return answer;
     }
-    private Double getAnswerAsDouble(){
+    public Double getAnswerAsDouble(){
         try { return Double.valueOf(answer);}
         catch (NumberFormatException e){
             log.info("String to Double conversion failed on: "+answer);
@@ -99,7 +99,7 @@ public class AnswerRow extends ExcelRow {
         }
         return null;
     }
-    private Long getAnswerAsLong(){
+    public Long getAnswerAsLong(){
         try {return Long.valueOf(answer);}
         catch (NumberFormatException e){
             log.info("String to Long conversion failed on: "+answer);
@@ -107,14 +107,14 @@ public class AnswerRow extends ExcelRow {
         }
         return null;
     }
-    private Integer getAnswerAsInteger(){
+    public Integer getAnswerAsInteger(){
         try {return Integer.valueOf(answer);}
         catch (NumberFormatException e){
             log.info("String to Integer conversion failed on: "+answer);
             this.errorMessage = "String to Integer conversion failed on: "+answer;}
         return null;
     }
-    private LocalDate getAnswerAsDate(String datePattern){
+    public LocalDate getAnswerAsDate(String datePattern){
         //"dd/MM/yy"
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
         catch (NumberFormatException e){

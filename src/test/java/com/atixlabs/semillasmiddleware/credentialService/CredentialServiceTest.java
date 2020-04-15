@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepositoryCustom;
+import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +34,7 @@ import static org.mockito.Mockito.when;
 public class CredentialServiceTest {
 
     @Mock
-    private CredentialRepositoryCustom credentialService;
+    private CredentialService credentialService;
 
     @Autowired
     DateUtil util;
@@ -80,11 +81,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getActiveCredentials() {
-        when(credentialService.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsMock());
+        when(credentialService.findCredentials(null,null,null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsMock());
 
-        List<Credential> credentials = credentialService.findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
+        List<Credential> credentials = credentialService.findCredentials(null,null,null, null, null, null,Arrays.asList("Vigente"));
 
-        verify(credentialService).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
+        verify(credentialService).findCredentials(null,null,null, null, null, null,Arrays.asList("Vigente"));
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
         log.info("credenciales " +credentials.toString());

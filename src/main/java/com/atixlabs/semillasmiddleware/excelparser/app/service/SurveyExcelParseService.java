@@ -68,8 +68,10 @@ public class SurveyExcelParseService extends ExcelParseService {
 
                 if (!currentForm.isRowFromSameForm(answerRow)) {
                     endOfFormHandler(processExcelFileResult);
-                    currentForm.clearForm();
+                    currentForm.reset();
                     currentForm.initialize(answerRow);
+                    //Also reset Factory:
+                    answerCategoryFactory.reset();
                 }
 
                 addCategoryDataIntoForm(answerRow, processExcelFileResult);
@@ -107,16 +109,24 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
     private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
         this.endOfFormHandler(processExcelFileResult);
-        log.info("endOfFileHandler -> check errors and build credentials");
-        //CHECK IF ALL FORMS AR OK:
+        log.info("endOfFileHandler -> checking errors and building credentials");
+
+        boolean allFormValid = true;
+
         for (SurveyForm surveyForm : surveyFormList) {
-            log.info(surveyForm.toString());
-            if(surveyForm.isValid(processExcelFileResult))
-                credentialService.buildAllCredentialsFromForm(surveyForm);
-            else {
-                log.info("No se crearán las credenciales - formulario invalido");
-                log.info(surveyForm.toString());
+            if (!surveyForm.isValid(processExcelFileResult))
+                allFormValid = false;
+        }
+
+        if(allFormValid) {
+            log.info("endOfFileHandler -> all forms are ok: building credentials");
+            for (SurveyForm surveyForm : surveyFormList) {
+                if (surveyForm.isValid(processExcelFileResult))
+                    credentialService.buildAllCredentialsFromForm(surveyForm);
             }
         }
+        else
+            log.info("endOfFileHandler -> there are forms with errors: stopping import");
+
     }
 }

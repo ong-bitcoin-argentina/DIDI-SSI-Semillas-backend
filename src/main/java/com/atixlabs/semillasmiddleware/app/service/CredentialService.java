@@ -25,7 +25,7 @@ public class CredentialService {
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm)
     {
-        log.info("buildCredentials: "+this.toString());
+        log.info("buildAllCredentialsFromForm: "+this.toString());
         buildPerson(surveyForm);
         buildCreditCredential(surveyForm);
     }
@@ -41,8 +41,8 @@ public class CredentialService {
         PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
         if(personCategory != null) {
             Person person = new Person();
-            person.setName(personCategory.getNameAndSurname());
-            person.setDocumentType("DNI HARDCODE");
+            person.setName(personCategory.getName()+" "+ personCategory.getSurname());
+            person.setDocumentType(personCategory.getIdType());
             person.setDocumentNumber(personCategory.getIdNumber());
             person.setBirthDate(personCategory.getBirthdate());
             log.info(person.toString());
@@ -61,7 +61,7 @@ public class CredentialService {
 
         if(personCategory != null) {
             CredentialCredit credentialCredit = new CredentialCredit();
-            credentialCredit.setBeneficiaryDocumentType("DNI HARDCODE");
+            credentialCredit.setBeneficiaryDocumentType(personCategory.getIdType());
             credentialCredit.setBeneficiaryDocumentNumber(personCategory.getIdNumber());
             credentialCredit.setDateOfExpiry(LocalDateTime.now());
             credentialCredit.setDateOfIssue(LocalDateTime.now());

@@ -17,7 +17,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @Slf4j
-public class    SurveyForm {
+public class SurveyForm {
 
     //key form:
     @DateTimeFormat(pattern = "dd/MM/yy")
@@ -56,7 +56,7 @@ public class    SurveyForm {
                 && this.surveyFormCode.equals(answerRow.getSurveyFormCode());
     }
 
-    public void clearForm(){
+    public void reset(){
         this.surveyFormCode = null;
         this.surveyDate = null;
         this.pdv = null;
@@ -84,7 +84,6 @@ public class    SurveyForm {
     }
 
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        log.info("SurveyForm -> isValid");
         return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
     }
 }

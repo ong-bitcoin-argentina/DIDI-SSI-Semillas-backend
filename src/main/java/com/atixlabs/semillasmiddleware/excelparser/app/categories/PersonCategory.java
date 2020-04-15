@@ -16,7 +16,9 @@ import java.util.List;
 @Slf4j
 @Getter
 public class PersonCategory implements Category {
-    String nameAndSurname;
+    String name;
+    String surname;
+    String idType;
     Long idNumber;
     String gender;
     LocalDate birthdate;
@@ -42,11 +44,17 @@ public class PersonCategory implements Category {
             return;
 
         switch (questionMatch) {
+            case ID_TYPE:
+                this.idType = answerRow.getAnswerAsString();
+                break;
             case ID_NUMBER:
                 this.idNumber = answerRow.getAnswerAsLong();
                 break;
-            case NAME_AND_SURNAME:
-                this.nameAndSurname = answerRow.getAnswerAsString();
+            case NAME:
+                this.name = answerRow.getAnswerAsString();
+                break;
+            case SURNAME:
+                this.surname = answerRow.getAnswerAsString();
                 break;
             case GENDER:
                 this.gender = answerRow.getAnswerAsString();
@@ -68,16 +76,14 @@ public class PersonCategory implements Category {
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
         List<Boolean> validations = new LinkedList<>();
-        validations.add(isFilledIfRequired(nameAndSurname, PersonQuestion.NAME_AND_SURNAME,processExcelFileResult));
+        validations.add(isFilledIfRequired(name, PersonQuestion.NAME, processExcelFileResult));
+        validations.add(isFilledIfRequired(surname, PersonQuestion.SURNAME, processExcelFileResult));
         validations.add(isFilledIfRequired(idNumber, PersonQuestion.ID_NUMBER, processExcelFileResult));
         validations.add(isFilledIfRequired(gender, PersonQuestion.GENDER, processExcelFileResult));
         validations.add(isFilledIfRequired(birthdate, PersonQuestion.BIRTHDATE, processExcelFileResult));
         validations.add(isFilledIfRequired(relation, PersonQuestion.RELATION, processExcelFileResult));
+        //log.info("isValid: "+validations.stream().allMatch(v->v));
         return validations.stream().allMatch(v->v);
     }
 
-    @Override
-    public boolean isFilledIfRequired(Object attribute, CategoryQuestion questionType, ProcessExcelFileResult processExcelFileResult) {
-        return false;
-    }
 }

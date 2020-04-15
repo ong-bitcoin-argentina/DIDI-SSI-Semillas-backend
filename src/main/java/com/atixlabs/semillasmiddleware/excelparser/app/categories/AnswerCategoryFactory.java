@@ -58,20 +58,15 @@ public class AnswerCategoryFactory {
 
     public Category get(String category) throws InvalidCategoryException, Exception {
 
-        log.info("Category.get: "+category);
-
         if (category == null)
             return null;
 
         category = StringUtil.removeNumbers(category);
         category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
 
-        log.info("category: "+category);
-
         if (!categories.containsKey(category)){
             throw new InvalidCategoryException(category);
         }
-
 
         if (categories.get(category) == null){
             Category newCategory = null;
@@ -98,6 +93,10 @@ public class AnswerCategoryFactory {
         else{
             return (Category) categoryType.getConstructor().newInstance();
         }
+    }
+
+    public void reset(){
+        generateCategoriesDinamically();
     }
 
 }

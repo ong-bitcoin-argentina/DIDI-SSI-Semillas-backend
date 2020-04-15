@@ -6,7 +6,9 @@ import java.util.stream.Collectors;
 
 public enum PersonQuestion implements CategoryQuestion {
 
-    NAME_AND_SURNAME("NOMBRE Y APELLIDO"),
+    NAME("NOMBRE"),
+    SURNAME("APELLIDO"),
+    ID_TYPE("TIPO DOCUMENTO"),
     ID_NUMBER("NUMERO DE DOCUMENTO"),
     GENDER("GENERO"),
     BIRTHDATE("FECHA DE NACIMIENTO"),

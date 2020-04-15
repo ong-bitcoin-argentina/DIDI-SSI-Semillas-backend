@@ -26,7 +26,8 @@ public class BondareaController {
     @ResponseStatus(HttpStatus.OK)
     public List<BondareaLoan> getLoans() {
         log.info("BONDAREA - GET LOANS");
-        List<BondareaLoan> loans = bondareaService.getLoans(null, "55");
+        // idAccount not null!!
+        List<BondareaLoan> loans = bondareaService.getLoans("12345", "55");
         return loans;
     }
 

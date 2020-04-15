@@ -5,6 +5,9 @@ import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
+import okhttp3.Interceptor;
+import okhttp3.OkHttpClient;
+import okhttp3.Request;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
@@ -12,11 +15,14 @@ import retrofit2.GsonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+import java.io.IOException;
+import java.util.Collections;
 import java.util.List;
 
 @Service
 @Slf4j
 public class BondareaService {
+
 
     @Value("${bondarea.base_url}")
     private String serviceURL;
@@ -58,39 +64,58 @@ public class BondareaService {
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
                 .create();
 
+
+
         retrofit = new Retrofit.Builder()
                 .baseUrl(serviceURL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
+               // .client(httpClient.build())
                 .build();
 
         bondareaEndpoint = retrofit.create(BondareaEndpoint.class);
 
+
         log.info("initialize bondarea api:");
+        //url example working
+        //https://www.bondarea.com/?c=comunidad&v=wspre&url=prerepprestamos&access_key=bocsws@bitcoinargentina.org&access_token=1640908800-1166701A0229E2BEDE8680CE74B6FB19&idm=B26F59EC&id=BS6N5F1R&cols=sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m&estados=55
     }
 
     public List<BondareaLoan> getLoans(String idAccount, String loanState){
 
+        initializeBondareaApi();
         log.info("getLoans:");
 
         //Fill url params
         loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m";
 
 
-        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans(access_key, access_token, idm, idAccount, loanColumns, loanState);
+        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, /*idAccount,*/ loanColumns, loanState);
+        log.info("url request " + callSync.request().url());
 
+        BondareaLoanResponse bondareaLoanResponse = null;
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
-            BondareaLoanResponse bondareaLoanResponse = response.body();
-            log.info("RESPONSE:");
-            log.info("  "+bondareaLoanResponse.toString());
+            log.info("el response envio ... " + response.raw().toString());
+            log.info("Response getLoans status : " + response.code() + " " + response.message());
 
-            return bondareaLoanResponse.getLoans();
-        } catch (Exception ex) {
-            log.error(" Bondarea error", ex);
-            //TODO which error ? and when ?
-        }
+            if (response.code() == 200) {
+                bondareaLoanResponse = response.body();
+                log.info("RESPONSE:");
+                log.info("Response body " + response.body());
+                log.info("  " + bondareaLoanResponse.toString());
 
-        return null;
+            }
+            else
+            {
+                return Collections.emptyList();
+            }
+        }catch(Exception ex){
+                log.error(" Bondarea error", ex);
+                //TODO which error ? and when ?
+            }
+
+        return bondareaLoanResponse.getLoans();
+
     }
 
 

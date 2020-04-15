@@ -4,16 +4,20 @@ import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
 import retrofit2.http.Path;
+import retrofit2.http.Query;
 
 public interface BondareaEndpoint {
 
-    @GET("{access_key}{access_token}{idm}{idCuenta}{cols}{estados}")
-    Call<BondareaLoanResponse> getLoans(@Path("access_key") String access_key,
-                                        @Path("access_token") String access_token,
-                                        @Path("idm") String idm,
-                                        @Path("idCuenta") String idCuenta,
-                                        @Path("cols") String columns,
-                                        @Path("estados") String states);
+    @GET("/")
+    Call<BondareaLoanResponse> getLoans( @Query(value = "c", encoded = true) String c,
+                                         @Query(value = "v" , encoded = true ) String v,
+                                        @Query(value = "url" , encoded = true) String url,
+                                        @Query(value = "access_key", encoded = true) String access_key,
+                                        @Query(value = "access_token", encoded = true) String access_token,
+                                        @Query(value = "idm", encoded = true) String idm,
+                                      //  @Query("idCuenta") String idCuenta,
+                                        @Query(value = "cols", encoded = true) String columns,
+                                        @Query(value = "estados", encoded = true) String states);
 
 
 

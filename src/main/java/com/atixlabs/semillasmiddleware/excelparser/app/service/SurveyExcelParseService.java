@@ -59,7 +59,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalRow();
 
         if (answerRow != null) {
-            if (answerRow.isValid()) {
+            if (answerRow.hasFormKeyValues()) {
                 processExcelFileResult.addValidRows();
                 processExcelFileResult.addInsertedRows();
 
@@ -77,8 +77,7 @@ public class SurveyExcelParseService extends ExcelParseService {
                 addCategoryDataIntoForm(answerRow, processExcelFileResult);
                 log.info("OK:" + answerRow.toString());
             } else {
-                processExcelFileResult.addRowError(answerRow.getStringError());
-                log.error("ERROR:" + answerRow.toString());
+                processExcelFileResult.addRowError("["+answerRow.getRowNum()+"]:Empty Row");// ("+answerRow.getStringError()+")");
             }
         }
         if(!hasNext)

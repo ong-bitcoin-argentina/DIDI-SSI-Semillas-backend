@@ -21,12 +21,18 @@ public class EntrepreneurshipCategory implements Category {
 
     public void loadData(AnswerRow answerRow){
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        switch (EntrepreneurshipQuestion.get(question)){
+
+        EntrepreneurshipQuestion questionMatch = EntrepreneurshipQuestion.get(question);
+
+        if (questionMatch==null)
+            return;
+
+        switch (questionMatch){
             case TYPE:
                 this.type = answerRow.getAnswerAsString();
                 break;
             case ACTIVITY_START_DATE:
-                this.activityStartDate = answerRow.getAnswerAsDate("dd/MM/yy");
+                this.activityStartDate = answerRow.getAnswerAsDate("dd/MM/yyyy");
                 break;
             case MAIN_ACTIVITY:
                 this.mainActivity = answerRow.getAnswerAsString();

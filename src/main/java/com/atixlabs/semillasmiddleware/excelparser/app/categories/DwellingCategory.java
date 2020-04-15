@@ -17,7 +17,13 @@ public class DwellingCategory implements Category {
     @Override
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        switch (DwellingQuestion.get(question)){
+
+        DwellingQuestion questionMatch = DwellingQuestion.get(question);
+
+        if(questionMatch==null)
+            return;
+
+        switch (questionMatch){
             case DWELLING_TYPE:
                 this.dwellingType = answerRow.getAnswerAsString();
                 break;

@@ -40,6 +40,7 @@ public class AnswerCategoryFactory {
         this.categories = new HashMap<String,Category>(){{
             put("DATOS DEL BENEFICIARIO", null);
             put("DATOS DEL CONYUGE", null);
+            //put("DATOS HIJO", null);
             put("OTRO MIEMBRO DE LA FAMILIA", null);
             put("EMPRENDIMIENTO", null);
             put("VIVIENDA", null);
@@ -61,7 +62,7 @@ public class AnswerCategoryFactory {
         if (category == null)
             return null;
 
-        category = StringUtil.removeNumbers(category);
+        //category = StringUtil.removeNumbers(category);
         category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
 
         if (!categories.containsKey(category)){

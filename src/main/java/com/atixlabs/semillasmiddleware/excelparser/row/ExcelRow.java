@@ -33,7 +33,7 @@ public abstract class ExcelRow {
 
     public ExcelRow(Row row) throws InvalidRowException {
         try {
-            this.rowNum = row.getRowNum();
+            this.rowNum = row.getRowNum()+1;//must +1 due to headers
             this.parseRow(row);
         } catch (Exception e) {
             log.error("ExcelRow: "+getStringError(), e);

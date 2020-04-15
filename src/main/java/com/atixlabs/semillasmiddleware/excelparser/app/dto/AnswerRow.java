@@ -52,7 +52,7 @@ public class AnswerRow extends ExcelRow {
         return row.getFirstCellNum() < 0;
     }
 
-    public boolean isValid(){
+    public boolean hasFormKeyValues(){
         return surveyFormCode != null && !surveyFormCode.isEmpty() && surveyDate != null && pdv != null && category != null && question != null;
     }
 
@@ -60,33 +60,31 @@ public class AnswerRow extends ExcelRow {
         return answer;
     }
     public Double getAnswerAsDouble(){
+        if (answer == null)
+            return null;
         try { return Double.valueOf(answer);}
-        catch (NumberFormatException e){
-            this.errorMessage = "String to Double conversion failed on: "+answer;
-        }
+        catch (NumberFormatException e){this.errorMessage = "String to Double conversion failed on: "+answer;}
         return null;
     }
     public Long getAnswerAsLong(){
+        if (answer == null)
+            return null;
         try {return Long.valueOf(answer);}
-        catch (NumberFormatException e){
-            this.errorMessage = "String to Long conversion failed on: "+answer;
-        }
+        catch (NumberFormatException e){this.errorMessage = "String to Long conversion failed on: "+answer;}
         return null;
     }
     public Integer getAnswerAsInteger(){
+        if (answer == null)
+            return null;
         try {return Integer.valueOf(answer);}
-        catch (NumberFormatException e){
-            this.errorMessage = "String to Integer conversion failed on: "+answer;}
+        catch (NumberFormatException e){this.errorMessage = "String to Integer conversion failed on: "+answer;}
         return null;
     }
     public LocalDate getAnswerAsDate(String datePattern){
-        //"dd/MM/yy"
-        try {
-            return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));
-        }
-        catch (NumberFormatException e){
-            this.errorMessage = "String to Date conversion failed from "+answer+" to "+datePattern;
-        }
+        if (answer == null)
+            return null;
+        try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
+        catch (NumberFormatException e){this.errorMessage = "String to Date conversion failed from "+answer+" to "+datePattern;}
         return null;
     }
 

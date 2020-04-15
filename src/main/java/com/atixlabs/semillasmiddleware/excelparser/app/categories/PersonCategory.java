@@ -26,7 +26,16 @@ public class PersonCategory implements Category {
     PersonType personType;
 
     public PersonCategory(String personType){
-        personType = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(personType.replaceAll("DATOS|DEL","")));
+
+        personType = StringUtil.toUpperCaseTrimAndRemoveAccents(personType);
+        personType = StringUtil.removeNumbers(personType);
+        personType = personType.replaceAll("DATOS", "");
+        personType = personType.replaceAll("DEL", "");
+
+        //personType = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(personType)).replaceAll("DATOS|DEL","");
+
+        log.info("*********************PersonCategory: "+personType);
+
         try{
             this.personType = PersonType.get(personType);
         } catch (IllegalArgumentException e) {

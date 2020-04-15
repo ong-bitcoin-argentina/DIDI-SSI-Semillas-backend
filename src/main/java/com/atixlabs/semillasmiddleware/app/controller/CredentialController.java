@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CredentialController {
 
-    public static final String URL_MAPPING_CREDENTIAL = "/credential";
+    public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
     @Autowired
     private CredentialService credentialService;
@@ -36,7 +36,7 @@ public class CredentialController {
     @Autowired
     private CredentialRepository credentialRepository;
 
-    @RequestMapping(value = "/createCredit", method = RequestMethod.GET)
+    @RequestMapping(value = "/createCredit", method = RequestMethod.POST)
     public void createCredit() {
         log.info(" createCredit ");
         credentialService.addCredentialCredit();
@@ -62,24 +62,20 @@ public class CredentialController {
             return Collections.emptyList();
         }
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
-       log.info("FIND CREDENTIALS -- " + credentialsDto.toString());
        return credentialsDto;
     }
 
-    @GetMapping("/credentialStates")
+    @GetMapping("/states")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialStates() {
         List<String> credentialStates =  Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
-        log.info("find credential states ----> " + credentialStates);
         return credentialStates;
     }
 
-    @GetMapping("/credentialTypes")
+    @GetMapping("/types")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialTypes() {
-        //TODO: desmockear creando un enum con los tipos de credenciales como lso estados para utilizar en el searchbox
         List<String> credentialTypes =  Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
-        log.info("find credential types ----> " + credentialTypes);
         return credentialTypes;
     }
 

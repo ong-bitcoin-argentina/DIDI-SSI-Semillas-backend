@@ -6,7 +6,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialServiceCustom;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialRepositoryCustom;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,14 +27,6 @@ public class CredentialController {
     @Autowired
     private CredentialService credentialService;
 
-    @Autowired
-    private CredentialCreditRepository credentialCreditRepository;
-
-    @Autowired
-    CredentialServiceCustom credentialServiceCustom;
-
-    @Autowired
-    private CredentialRepository credentialRepository;
 
     @RequestMapping(value = "/createCredit", method = RequestMethod.POST)
     public void createCredit() {
@@ -53,14 +45,8 @@ public class CredentialController {
                                                         @RequestParam(required = false) List<String> credentialState) {
 
 
-        List<Credential> credentials;
-        try {
-            credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
-        }
-        catch (Exception e){
-            log.info("There has been an error searching for credentials " + e);
-            return Collections.emptyList();
-        }
+        List<Credential> credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+        
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
        return credentialsDto;
     }

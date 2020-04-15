@@ -6,7 +6,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialServiceCustom;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialRepositoryCustom;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -33,7 +33,7 @@ import static org.mockito.Mockito.when;
 public class CredentialServiceTest {
 
     @Mock
-    CredentialServiceCustom credentialService;
+    private CredentialRepositoryCustom credentialService;
 
     @Autowired
     DateUtil util;

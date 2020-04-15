@@ -1,20 +1,41 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 @Service
+@Slf4j
 public class CredentialService {
 
     @Autowired
     private CredentialCreditRepository credentialCreditRepository;
+
+    @Autowired
+    private CredentialRepository credentialRepository;
+
+
+    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+        List<Credential> credentials;
+        try {
+         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+        }
+        catch (Exception e){
+                log.info("There has been an error searching for credentials " + e);
+                return Collections.emptyList();
+            }
+         return  credentials;
+    }
 
     public void addCredentialCredit(){
         CredentialCredit credentialCredit = new CredentialCredit();
@@ -58,4 +79,5 @@ public class CredentialService {
         return credentials;
 
     }
+
 }

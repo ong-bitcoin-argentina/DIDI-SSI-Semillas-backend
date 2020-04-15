@@ -70,8 +70,11 @@ public class CredentialController {
 
     @GetMapping("/credentialStates")
     @ResponseStatus(HttpStatus.OK)
-    public List<String> findCredentialStates() {
-        List<String> credentialStates =  Arrays.stream(CredentialStatesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
+    public Map<String, String> findCredentialStates() {
+        Map<String, String> credentialStates = new HashMap<>();
+        for (CredentialStatesCodes states: CredentialStatesCodes.values()) {
+            credentialStates.put(states.name(), states.getCode());
+        }
         log.info("find credential states ----> " + credentialStates);
         return credentialStates;
     }

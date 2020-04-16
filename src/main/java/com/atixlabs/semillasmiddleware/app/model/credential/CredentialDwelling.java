@@ -6,6 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
 @Getter
 @Setter
@@ -17,4 +18,9 @@ public class CredentialDwelling extends Credential {
     private String dwellingType;
     private String dwellingAddress;
     private String possessionType;
+
+    @Transient
+    private String credentialType = "CredentialDwelling";
+
+
 }

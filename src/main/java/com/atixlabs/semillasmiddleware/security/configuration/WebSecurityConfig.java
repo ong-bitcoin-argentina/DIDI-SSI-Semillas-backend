@@ -47,26 +47,54 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     }
 
 
-    @Override
+    private static final String[] AUTH_WHITELIST = {
+            // -- swagger ui
+            "/v2/api-docs",
+            "/swagger-resources",
+            "/swagger-resources/**",
+            "/configuration/ui",
+            "/configuration/security",
+            "spring-security-rest/**",
+            "/swagger-ui.html**",
+            "/webjars/**",
+            "/",
+            "/favicon.ico",
+            "/**/*.png",
+            "/**/*.gif",
+            "/**/*.svg",
+            "/**/*.jpg",
+            "/**/*.html",
+            "/**/*.css",
+            "/**/*.js"
+            // other public endpoints of your API may be appended to this array
+    };
+
+
+
+
+    /*@Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity.cors()
                 .and().csrf().disable()
                 .authorizeRequests().antMatchers("*").permitAll()
              ;
-    }
+    }*/
 //TODO habilitarrrrrr
-    /*@Override
+    @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
+
         httpSecurity.cors()
                     .and().csrf().disable()
-                    .authorizeRequests().antMatchers("/auth/login").permitAll()
+                    .authorizeRequests()
+                    .antMatchers(AUTH_WHITELIST).permitAll().
+                    antMatchers("/auth/login").permitAll()
                     .antMatchers("/api/file/upload").permitAll()
                     .anyRequest().authenticated().and().
                         exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
                     .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
 
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
-    }*/
+    }
 
 
     //TODO only for initial dev, delete it

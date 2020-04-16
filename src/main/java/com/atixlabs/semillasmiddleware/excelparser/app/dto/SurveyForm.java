@@ -3,7 +3,6 @@ package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -11,10 +10,8 @@ import org.springframework.stereotype.Component;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
-import java.awt.event.WindowFocusListener;
 import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
-import java.util.*;
+import java.util.ArrayList;
 
 @Component
 @Getter
@@ -29,13 +26,8 @@ public class SurveyForm {
     private String surveyFormCode = null;
     private Long pdv = null;
 
-    List<Category> categoryList = new LinkedList<>();
+    private ArrayList<Category> categoryList = new ArrayList<>();
 
-
-    public void addCategory(Category category) {
-        //verificar si repite categorias o el set ya lo maneja.
-        categoryList.add(category);
-    }
 
     @Override
     public String toString() {
@@ -45,12 +37,6 @@ public class SurveyForm {
                 ", pdv=" + pdv +
                 ", categoryList=" + categoryList.toString() +
                 '}';
-    }
-
-    public void firstLoadForm(Category category){
-        this.surveyFormCode = "category.formCode";
-        this.surveyDate = LocalDate.parse("06/04/20", DateTimeFormatter.ofPattern("dd/MM/yy"));
-        this.pdv = 12345L;
     }
 
     public boolean isEmpty(){
@@ -65,28 +51,39 @@ public class SurveyForm {
     }
 
     public boolean isRowFromSameForm(AnswerRow answerRow){
-        boolean comparison = this.pdv.equals(answerRow.getPdv())
+        return this.pdv.equals(answerRow.getPdv())
                 && this.surveyDate.isEqual(answerRow.getSurveyDate())
                 && this.surveyFormCode.equals(answerRow.getSurveyFormCode());
-
-        //log.info("isRowFromSameForm: "+comparison);
-        return comparison;
     }
 
-
-
-    public void clearForm(){
+    public void reset(){
         this.surveyFormCode = null;
         this.surveyDate = null;
         this.pdv = null;
         categoryList.clear();
     }
 
-    public void buildCredentials(){
-        log.info("buildCredentials: "+this.toString());
+    public void addCategory(Category category) {
+        if(!categoryList.contains(category))
+            categoryList.add(category);
     }
 
-    public boolean isValid(ProcessExcelFileResult proccessExcelFileResult) {
-        return categoryList.stream().allMatch(category -> category.isValid(proccessExcelFileResult));
+    public Integer findCategoryInList(Class<?> classToFind) {
+        for(int i = 0; i<categoryList.size(); i++){
+            if(categoryList.get(i).getClass() == classToFind)
+                return i;
+        }
+        return -1;
+    }
+
+    public Category getCategoryData(Class<?> classToFind){
+        Integer categoryIndex = this.findCategoryInList(classToFind);
+        if(categoryIndex >=0)
+            return this.getCategoryList().get(categoryIndex).getData();
+        return null;
+    }
+
+    public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
+        return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
     }
 }

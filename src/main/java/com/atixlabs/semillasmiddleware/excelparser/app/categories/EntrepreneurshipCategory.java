@@ -35,7 +35,13 @@ public class EntrepreneurshipCategory implements Category {
 
     public void loadData(AnswerRow answerRow){
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        switch (EntrepreneurshipQuestion.get(question)){
+
+        EntrepreneurshipQuestion questionMatch = EntrepreneurshipQuestion.get(question);
+
+        if (questionMatch==null)
+            return;
+
+        switch (questionMatch){
             case TYPE:
                 this.type.setAnswer(answerRow);
                 break;
@@ -56,7 +62,14 @@ public class EntrepreneurshipCategory implements Category {
                 this.activityEndingDate.setAnswer(answerRow);
                 break;
         }
-    };
+    }
+
+    @Override
+    public Category getData() {
+        return this;
+    }
+
+    ;
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
@@ -87,7 +100,7 @@ public class EntrepreneurshipCategory implements Category {
     public String getAddress(){
         return (String) this.address.getAnswer();
     }
-    public LocalDate activityEndingDate(){
+    public LocalDate getActivityEndingDate(){
         return (LocalDate) this.activityEndingDate.getAnswer();
     }
 }

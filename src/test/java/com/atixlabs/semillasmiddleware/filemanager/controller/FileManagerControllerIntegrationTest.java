@@ -44,9 +44,6 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
     @Autowired
     private SurveyExcelParseService surveyExcelParseService;
 
-    @Autowired
-    private SurveyForm surveyForm;
-
     @Test
     public void fileEmptyException() throws IOException {
 

@@ -9,7 +9,6 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.util.StringUtils;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
@@ -25,11 +24,9 @@ import java.util.Map;
 @NoArgsConstructor
 public class AnswerRow extends ExcelRow {
 
-    //key form:
     @DateTimeFormat(pattern = "dd/MM/yy")
     @Temporal(TemporalType.DATE)
     private LocalDate surveyDate;
-
     private String surveyFormCode;
     private Long pdv;
 
@@ -42,84 +39,68 @@ public class AnswerRow extends ExcelRow {
     }
 
     @Override
-    public String toString() {
-        return "AnswerRow{" +
-                "surveyDate=" + surveyDate +
-                ", surveyFormCode='" + surveyFormCode + '\'' +
-                ", pdv=" + pdv +
-                ", category='" + category + '\'' +
-                ", question='" + question + '\'' +
-                ", answer='" + answer + '\'' +
-                ", rowNum=" + rowNum +
-                ", errorMessage='" + errorMessage + '\'' +
-                ", isValid=" + isValid +
-                ", exists=" + exists +
-                ", cellIndex=" + cellIndex +
-                ", cellIndexName='" + cellIndexName + '\'' +
-                ", cellIndexDescription='" + cellIndexDescription + '\'' +
-                '}';
-    }
-
-    @Override
     protected void parseRow(Row row) {
-            if(!isInputRowEmpty(row))
-                return;
-
             //7 formulario //9 fecha relevamiento //10 PDV
-            this.surveyFormCode = getCellStringValue(row, 7, "formulario");
-            String dateString = getCellStringValue(row, 9, "fecha relevamiento").replaceAll("'", "").trim();
-            this.surveyDate = LocalDate.parse(dateString, DateTimeFormatter.ofPattern("dd/MM/yy"));
-            this.pdv = getCellStringToLongValue(row, 10, "PDV");
+            this.surveyFormCode = getCellStringValue(row, 7, "Formulario");
+            this.surveyDate = getCellStringToDate(row, 9, "Fecha de relevamiento");
+            this.pdv = getCellLongValue(row, 10, "PDV");
 
             //14 categoria //15 pregunta //16 respuesta
-            this.category = getCellStringValue(row, 14, "category");
-            this.question = getCellStringValue(row, 15, "question");
-            this.answer = getCellStringValue(row, 16, "answer");
+            this.category = getCellStringValue(row, 14, "Categoria");
+            this.question = getCellStringValue(row, 15, "Pregunta");
+            this.answer = getCellStringValue(row, 16, "Respuesta");
     }
 
-    private boolean isInputRowEmpty(Row row){
-        //log.info("parseRow->firstCellData: "+String.valueOf(row.getFirstCellNum()));
-        if(row.getFirstCellNum()<0) {
-            this.isValid = false;
-            this.errorMessage ="Row is empty";
-            return false;
-        }
-        //todo: review other possible validations
-        return true;
+    private boolean isEmpty(Row row){
+        return row.getFirstCellNum() < 0;
+    }
+
+    public boolean hasFormKeyValues(){
+        return surveyFormCode != null && !surveyFormCode.isEmpty() && surveyDate != null && pdv != null && category != null && question != null;
     }
 
     public String getAnswerAsString(){
         return answer;
     }
     public Double getAnswerAsDouble(){
+        if (answer == null)
+            return null;
         try { return Double.valueOf(answer);}
-        catch (NumberFormatException e){
-            log.info("String to Double conversion failed on: "+answer);
-            this.errorMessage = "String to Double conversion failed on: "+answer;
-        }
+        catch (NumberFormatException e){this.errorMessage = "String to Double conversion failed on: "+answer;}
         return null;
     }
     public Long getAnswerAsLong(){
+        if (answer == null)
+            return null;
         try {return Long.valueOf(answer);}
-        catch (NumberFormatException e){
-            log.info("String to Long conversion failed on: "+answer);
-            this.errorMessage = "String to Long conversion failed on: "+answer;
-        }
+        catch (NumberFormatException e){this.errorMessage = "String to Long conversion failed on: "+answer;}
         return null;
     }
     public Integer getAnswerAsInteger(){
+        if (answer == null)
+            return null;
         try {return Integer.valueOf(answer);}
-        catch (NumberFormatException e){
-            log.info("String to Integer conversion failed on: "+answer);
-            this.errorMessage = "String to Integer conversion failed on: "+answer;}
+        catch (NumberFormatException e){this.errorMessage = "String to Integer conversion failed on: "+answer;}
         return null;
     }
     public LocalDate getAnswerAsDate(String datePattern){
-        //"dd/MM/yy"
+        if (answer == null)
+            return null;
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
-        catch (NumberFormatException e){
-            log.info("String to Date conversion failed on: "+answer);
-            this.errorMessage = "String to Date conversion failed on: "+answer;}
+        catch (NumberFormatException e){this.errorMessage = "String to Date conversion failed from "+answer+" to "+datePattern;}
+        return null;
+    }
+
+    public LocalDate getCellStringToDate(Row row, int cellIndex, String description){
+        String dateString = null;
+        String datePattern = "dd/MM/yy";
+        try {
+            dateString = getCellStringValue(row, cellIndex, description).replaceAll("'", "").trim();
+            return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(datePattern));
+        }
+        catch (Exception e){
+            this.errorMessage = "String to Date conversion failed from "+dateString+" to "+datePattern;
+        }
         return null;
     }
 
@@ -149,5 +130,19 @@ public class AnswerRow extends ExcelRow {
     }
 
 
-
+    @Override
+    public String toString() {
+        return "["+this.rowNum +"]{" +
+                "surveyDate=" + surveyDate +
+                ", surveyFormCode='" + surveyFormCode + '\'' +
+                ", pdv=" + pdv +
+                ", category='" + category + '\'' +
+                ", question='" + question + '\'' +
+                ", answer='" + answer + '\'' +
+                ", errorMessage='" + errorMessage + '\'' +
+                ", cellIndex=" + cellIndex +
+                ", cellIndexName='" + cellIndexName + '\'' +
+                ", cellIndexDescription='" + cellIndexDescription + '\'' +
+                '}';
+    }
 }

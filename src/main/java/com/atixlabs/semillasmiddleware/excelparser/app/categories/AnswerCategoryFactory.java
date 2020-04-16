@@ -6,12 +6,14 @@ import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Component;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.HashMap;
 import java.util.Map;
 
+@Slf4j
 @Component
 public class AnswerCategoryFactory {
     private static final Integer AMOUNT_CHILDREN = 11;
@@ -38,6 +40,7 @@ public class AnswerCategoryFactory {
         this.categories = new HashMap<String,Category>(){{
             put("DATOS DEL BENEFICIARIO", null);
             put("DATOS DEL CONYUGE", null);
+            //put("DATOS HIJO", null);
             put("OTRO MIEMBRO DE LA FAMILIA", null);
             put("EMPRENDIMIENTO", null);
             put("VIVIENDA", null);
@@ -55,10 +58,12 @@ public class AnswerCategoryFactory {
     }
 
     public Category get(String category) throws InvalidCategoryException, Exception {
+
         if (category == null)
             return null;
 
-        category =  StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+        //category = StringUtil.removeNumbers(category);
+        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
 
         if (!categories.containsKey(category)){
             throw new InvalidCategoryException(category);
@@ -89,6 +94,10 @@ public class AnswerCategoryFactory {
         else{
             return (Category) categoryType.getConstructor().newInstance();
         }
+    }
+
+    public void reset(){
+        generateCategoriesDinamically();
     }
 
 }

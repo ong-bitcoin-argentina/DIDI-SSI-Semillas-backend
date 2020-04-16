@@ -23,7 +23,13 @@ public class DwellingCategory implements Category {
 
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        switch (DwellingQuestion.get(question)){
+
+        DwellingQuestion questionMatch = DwellingQuestion.get(question);
+
+        if(questionMatch==null)
+            return;
+
+        switch (questionMatch){
             case DWELLING_TYPE:
                 this.dwellingType.setAnswer(answerRow);
                 break;
@@ -33,6 +39,11 @@ public class DwellingCategory implements Category {
             case DISTRICT:
                 this.district.setAnswer(answerRow);
         }
+    }
+
+    @Override
+    public Category getData() {
+        return this;
     }
 
     @Override

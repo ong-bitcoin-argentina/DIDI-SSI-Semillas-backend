@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
 
+import java.util.ArrayList;
 import java.util.Iterator;
 
 
@@ -21,8 +22,10 @@ import java.util.Iterator;
 @NoArgsConstructor
 public abstract class ExcelRow {
     protected int rowNum;
-    protected String errorMessage;
-    protected boolean isValid = true;
+
+    protected String errorMessage = "";
+    //protected ArrayList<String> errorMessageList = new ArrayList<>();
+    //protected boolean isValid = false;
     protected boolean exists = false;
     protected int cellIndex = 0;
     protected String cellIndexName = "None";
@@ -30,27 +33,26 @@ public abstract class ExcelRow {
 
     public ExcelRow(Row row) throws InvalidRowException {
         try {
-            //log.info("ExcelRow:" +this.toString(row));
-            this.rowNum = row.getRowNum();
+            this.rowNum = row.getRowNum()+1;//must +1 due to headers
             this.parseRow(row);
         } catch (Exception e) {
-            log.error(getStringError(), e);
+            log.error("ExcelRow: "+getStringError(), e);
             throw new InvalidRowException(getStringError() + e.getMessage());
         }
     }
 
-    protected String getCellStringValue(Row row, int cellindex, String descripcion) {
-        this.saveCellData(cellindex, descripcion);
-        if (row == null || row.getCell(cellindex) == null)
+    protected String getCellStringValue(Row row, int cellIndex, String description) {
+        this.saveCellData(cellIndex, description);
+        if (row == null || row.getCell(cellIndex) == null)
             return null;
-        this.cellIndexName = row.getCell(cellindex).getAddress().formatAsString();
-        if (row.getCell(cellindex).getCellType() == CellType.BLANK)
+        this.cellIndexName = row.getCell(cellIndex).getAddress().formatAsString();
+        if (row.getCell(cellIndex).getCellType() == CellType.BLANK)
             return null;
-        row.getCell(cellindex).setCellType(CellType.STRING);
-        return row.getCell(cellindex).getStringCellValue();
+        row.getCell(cellIndex).setCellType(CellType.STRING);
+        return row.getCell(cellIndex).getStringCellValue();
     }
 
-    Long getCellLongValue(Row row, int cellindex, String descripcion) {
+    protected Long getCellLongValue(Row row, int cellindex, String descripcion) {
         this.saveCellData(cellindex, descripcion);
         if (row == null || row.getCell(cellindex) == null)
             return null;
@@ -90,6 +92,8 @@ public abstract class ExcelRow {
         return row.getCell(cellindex).getBooleanCellValue();
     }
 
+
+
     protected Long getCellStringToLongValue(Row row, int cellindex, String descripcion) {
         return Long.parseLong(getCellStringValue(row, cellindex, descripcion));
     }
@@ -99,8 +103,12 @@ public abstract class ExcelRow {
         this.cellIndexDescription = cellIndexDescription;
     }
 
-    protected String getStringError() {
-        return "Cell " + cellIndexName + ", Error: " + cellIndexDescription + " ";
+    public String getStringError() {
+        return "[" + cellIndexName + "]:"+cellIndexDescription + ": "+errorMessage;
+    }
+
+    public void setErrorDetailedMessage(String errorMessage){
+        this.errorMessage += "[" + cellIndexName + "]:"+cellIndexDescription + ": "+errorMessage;
     }
 
 

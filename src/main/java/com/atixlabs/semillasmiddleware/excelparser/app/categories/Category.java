@@ -7,5 +7,8 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 
 public interface Category {
      void loadData(AnswerRow answerRow);
+
+     Category getData();
+
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
 }

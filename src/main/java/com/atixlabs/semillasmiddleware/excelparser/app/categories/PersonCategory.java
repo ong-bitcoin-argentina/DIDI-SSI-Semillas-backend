@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
@@ -7,11 +8,14 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
+import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Slf4j
 @Getter
 public class PersonCategory implements Category {
     AnswerDto name;
@@ -40,9 +44,15 @@ public class PersonCategory implements Category {
         }
     }
 
+    @Override
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        switch (PersonQuestion.get(question)) {
+        PersonQuestion questionMatch = PersonQuestion.get(question);
+
+        if (questionMatch == null)
+            return;
+
+        switch (questionMatch) {
             case ID_TYPE:
                 this.idType.setAnswer(answerRow);
                 break;
@@ -67,6 +77,12 @@ public class PersonCategory implements Category {
         }
     }
 
+
+    @Override
+    public Category getData() {
+        return this;
+    }
+
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
         List<AnswerDto> answers = new LinkedList<>();
@@ -80,4 +96,36 @@ public class PersonCategory implements Category {
         List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
+
+
+    public String getName() {
+        return (String) name.getAnswer();
+    }
+
+    public String getSurname() {
+        return (String) surname.getAnswer();
+    }
+
+    public String getIdType() {
+        return (String) idType.getAnswer();
+    }
+
+    public Long getIdNumber() {
+        return (Long) idNumber.getAnswer();
+    }
+
+    public String getGender() {
+        return (String) gender.getAnswer();
+    }
+
+    public LocalDate getBirthdate() {
+        return (LocalDate) birthdate.getAnswer();
+    }
+
+    public String getRelation() {
+        return (String) relation.getAnswer();
+    }
+
+
+
 }

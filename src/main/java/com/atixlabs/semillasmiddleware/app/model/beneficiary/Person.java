@@ -30,6 +30,18 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
+    @Override
+    public String toString() {
+        return "Person{" +
+                "id=" + id +
+                ", documentType='" + documentType + '\'' +
+                ", documentNumber=" + documentNumber +
+                ", name='" + name + '\'' +
+                ", birthDate=" + birthDate +
+                ", credentials=" + credentials +
+                '}';
+    }
+
     /*
     kinsman (pariente), p1,p2, tiporelacion (kind of kinship)
 

@@ -1,23 +1,22 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Entity;
-import javax.persistence.PrimaryKeyJoinColumn;
-import java.util.List;
+import javax.persistence.*;
 
 
 @Getter
 @Setter
-@NoArgsConstructor
+@Table(name = "credential_credit")
 @Entity
-@PrimaryKeyJoinColumn(referencedColumnName="id")
+@PrimaryKeyJoinColumn(name = "id")
+//@PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
 
-    private Long idCredit;
 
+
+    //    private Long idCredit;
     private String creditName;
 
     private Long idGroup;
@@ -32,8 +31,23 @@ public class CredentialCredit extends Credential {
 
     private Double amount;
 
-    private Long dniBeneficiary;
+    private String beneficiaryDocumentType;
+
+    private Long beneficiaryDocumentNumber;
 
 
-
+    @Override
+    public String toString() {
+        return "CredentialCredit{" +
+  //              "idCredit=" + idCredit +
+                ", creditName='" + creditName + '\'' +
+                ", idGroup=" + idGroup +
+                ", groupName='" + groupName + '\'' +
+                ", rol='" + rol + '\'' +
+                ", currentCycle='" + currentCycle + '\'' +
+                ", creditState='" + creditState + '\'' +
+                ", amount=" + amount +
+                ", dniBeneficiary=" + beneficiaryDocumentNumber +
+                "} " + super.toString();
+    }
 }

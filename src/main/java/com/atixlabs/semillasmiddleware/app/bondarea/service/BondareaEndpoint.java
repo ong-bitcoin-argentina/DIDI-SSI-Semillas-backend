@@ -20,5 +20,8 @@ public interface BondareaEndpoint {
                                         @Query(value = "estados", encoded = true) String states);
 
 
+    // second endpoint to validate one persona and their loan status
+
+
 
 }

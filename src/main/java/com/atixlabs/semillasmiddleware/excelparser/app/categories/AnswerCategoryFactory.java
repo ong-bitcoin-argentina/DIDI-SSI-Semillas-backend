@@ -40,8 +40,6 @@ public class AnswerCategoryFactory {
         this.categories = new HashMap<String,Category>(){{
             put("DATOS DEL BENEFICIARIO", null);
             put("DATOS DEL CONYUGE", null);
-            //put("DATOS HIJO", null);
-            put("OTRO MIEMBRO DE LA FAMILIA", null);
             put("EMPRENDIMIENTO", null);
             put("VIVIENDA", null);
         }};

@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
@@ -12,30 +13,30 @@ import lombok.extern.slf4j.Slf4j;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Getter
 public class PersonCategory implements Category {
-    String name;
-    String surname;
-    String idType;
-    Long idNumber;
-    String gender;
-    LocalDate birthdate;
-    String relation;
+    AnswerDto name;
+    AnswerDto surname;
+    AnswerDto idType;
+    AnswerDto idNumber;
+    AnswerDto gender;
+    AnswerDto birthdate;
+    AnswerDto relation;
     PersonType personType;
 
     public PersonCategory(String personType){
+        this.name = new AnswerDto(PersonQuestion.NAME);
+        this.surname = new AnswerDto(PersonQuestion.SURNAME);
+        this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
+        this.idNumber = new AnswerDto(PersonQuestion.ID_NUMBER);
+        this.gender = new AnswerDto(PersonQuestion.GENDER);
+        this.birthdate = new AnswerDto(PersonQuestion.BIRTHDATE);
+        this.relation = new AnswerDto(PersonQuestion.RELATION);
 
-        personType = StringUtil.toUpperCaseTrimAndRemoveAccents(personType);
-        personType = StringUtil.removeNumbers(personType);
-        personType = personType.replaceAll("DATOS", "");
-        personType = personType.replaceAll("DEL", "");
-
-        //personType = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(personType)).replaceAll("DATOS|DEL","");
-
-        log.info("*********************PersonCategory: "+personType);
-
+        personType = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(personType.replaceAll("DATOS|DEL","")));
         try{
             this.personType = PersonType.get(personType);
         } catch (IllegalArgumentException e) {
@@ -46,36 +47,36 @@ public class PersonCategory implements Category {
     @Override
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-
         PersonQuestion questionMatch = PersonQuestion.get(question);
 
-        if(questionMatch == null)
+        if (questionMatch == null)
             return;
 
         switch (questionMatch) {
             case ID_TYPE:
-                this.idType = answerRow.getAnswerAsString();
+                this.idType.setAnswer(answerRow);
                 break;
             case ID_NUMBER:
-                this.idNumber = answerRow.getAnswerAsLong();
+                this.idNumber.setAnswer(answerRow);
                 break;
             case NAME:
-                this.name = answerRow.getAnswerAsString();
+                this.name.setAnswer(answerRow);
                 break;
             case SURNAME:
-                this.surname = answerRow.getAnswerAsString();
+                this.surname.setAnswer(answerRow);
                 break;
             case GENDER:
-                this.gender = answerRow.getAnswerAsString();
+                this.gender.setAnswer(answerRow);
                 break;
             case BIRTHDATE:
-                this.birthdate = answerRow.getAnswerAsDate("dd/MM/yyyy");
+                this.birthdate.setAnswer(answerRow);
                 break;
             case RELATION:
-                this.relation = answerRow.getAnswerAsString();
+                this.relation.setAnswer(answerRow);
                 break;
         }
     }
+
 
     @Override
     public Category getData() {
@@ -84,15 +85,47 @@ public class PersonCategory implements Category {
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        List<Boolean> validations = new LinkedList<>();
-        validations.add(isFilledIfRequired(name, PersonQuestion.NAME, processExcelFileResult));
-        validations.add(isFilledIfRequired(surname, PersonQuestion.SURNAME, processExcelFileResult));
-        validations.add(isFilledIfRequired(idNumber, PersonQuestion.ID_NUMBER, processExcelFileResult));
-        validations.add(isFilledIfRequired(gender, PersonQuestion.GENDER, processExcelFileResult));
-        validations.add(isFilledIfRequired(birthdate, PersonQuestion.BIRTHDATE, processExcelFileResult));
-        validations.add(isFilledIfRequired(relation, PersonQuestion.RELATION, processExcelFileResult));
-        //log.info("isValid: "+validations.stream().allMatch(v->v));
+        List<AnswerDto> answers = new LinkedList<>();
+        answers.add(this.name);
+        answers.add(this.surname);
+        answers.add(this.idNumber);
+        answers.add(this.gender);
+        answers.add(this.birthdate);
+        answers.add(this.relation);
+
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
+
+
+    public String getName() {
+        return (String) name.getAnswer();
+    }
+
+    public String getSurname() {
+        return (String) surname.getAnswer();
+    }
+
+    public String getIdType() {
+        return (String) idType.getAnswer();
+    }
+
+    public Long getIdNumber() {
+        return (Long) idNumber.getAnswer();
+    }
+
+    public String getGender() {
+        return (String) gender.getAnswer();
+    }
+
+    public LocalDate getBirthdate() {
+        return (LocalDate) birthdate.getAnswer();
+    }
+
+    public String getRelation() {
+        return (String) relation.getAnswer();
+    }
+
+
 
 }

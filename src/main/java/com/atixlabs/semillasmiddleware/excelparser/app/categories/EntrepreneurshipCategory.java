@@ -2,22 +2,36 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.DwellingQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestion;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
+import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Setter
+@Getter
 public class EntrepreneurshipCategory implements Category {
-    String type;
-    LocalDate activityStartDate;
-    String mainActivity;
-    String name;
-    String address;
-    LocalDate activityEndingDate;
+    AnswerDto type;
+    AnswerDto activityStartDate;
+    AnswerDto mainActivity;
+    AnswerDto name;
+    AnswerDto address;
+    AnswerDto activityEndingDate;
+
+    public EntrepreneurshipCategory() {
+        this.type = new AnswerDto(EntrepreneurshipQuestion.TYPE);
+        this.activityStartDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_START_DATE);
+        this.mainActivity = new AnswerDto(EntrepreneurshipQuestion.MAIN_ACTIVITY);
+        this.name = new AnswerDto(EntrepreneurshipQuestion.NAME);
+        this.address = new AnswerDto(EntrepreneurshipQuestion.ADDRESS);
+        this.activityEndingDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE);
+    }
 
     public void loadData(AnswerRow answerRow){
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
@@ -29,23 +43,23 @@ public class EntrepreneurshipCategory implements Category {
 
         switch (questionMatch){
             case TYPE:
-                this.type = answerRow.getAnswerAsString();
+                this.type.setAnswer(answerRow);
                 break;
             case ACTIVITY_START_DATE:
-                this.activityStartDate = answerRow.getAnswerAsDate("dd/MM/yyyy");
+                this.activityStartDate.setAnswer(answerRow);
                 break;
             case MAIN_ACTIVITY:
-                this.mainActivity = answerRow.getAnswerAsString();
+                this.mainActivity.setAnswer(answerRow);
                 break;
             case NAME:
-                this.name = answerRow.getAnswerAsString();
+                this.name.setAnswer(answerRow);
                 break;
             case ADDRESS:
-                this.address = answerRow.getAnswerAsString();
+                this.address.setAnswer(answerRow);
                 break;
             //check final form
             case ACTIVITY_ENDING_DATE:
-                this.activityEndingDate = answerRow.getAnswerAsDate("dd/MM/yy");
+                this.activityEndingDate.setAnswer(answerRow);
                 break;
         }
     }
@@ -53,17 +67,40 @@ public class EntrepreneurshipCategory implements Category {
     @Override
     public Category getData() {
         return this;
-    };
+    }
+
+    ;
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        List<Boolean> validations= new LinkedList<>();
-        validations.add(isFilledIfRequired(type, EntrepreneurshipQuestion.TYPE,processExcelFileResult));
-        validations.add(isFilledIfRequired(activityStartDate, EntrepreneurshipQuestion.ACTIVITY_START_DATE, processExcelFileResult));
-        validations.add(isFilledIfRequired(mainActivity, EntrepreneurshipQuestion.MAIN_ACTIVITY, processExcelFileResult));
-        validations.add(isFilledIfRequired(name, EntrepreneurshipQuestion.NAME, processExcelFileResult));
-        validations.add(isFilledIfRequired(address, EntrepreneurshipQuestion.ADDRESS, processExcelFileResult));
-        validations.add(isFilledIfRequired(activityEndingDate, EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE, processExcelFileResult));
-        return validations.stream().allMatch(v -> v);
+        List<AnswerDto> answers = new LinkedList<>();
+        answers.add(this.type);
+        answers.add(this.activityStartDate);
+        answers.add(this.mainActivity);
+        answers.add(this.name);
+        answers.add(this.address);
+        answers.add(this.activityEndingDate);
+
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
+        return validations.stream().allMatch(v->v);
+    }
+
+    public String getType(){
+        return (String) this.type.getAnswer();
+    }
+    public LocalDate getActivityStartDate(){
+        return (LocalDate) this.activityStartDate.getAnswer();
+    }
+    public String getMainActivity(){
+        return (String) this.mainActivity.getAnswer();
+    }
+    public String getName(){
+        return (String) this.name.getAnswer();
+    }
+    public String getAddress(){
+        return (String) this.address.getAnswer();
+    }
+    public LocalDate getActivityEndingDate(){
+        return (LocalDate) this.activityEndingDate.getAnswer();
     }
 }

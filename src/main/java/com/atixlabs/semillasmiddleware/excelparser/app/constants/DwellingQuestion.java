@@ -28,4 +28,7 @@ public enum DwellingQuestion implements CategoryQuestion {
         return true;
     }
 
+    public Class<?> getDataType() { return String.class; }
+
+
 }

@@ -11,12 +11,4 @@ public interface Category {
      Category getData();
 
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
-     //TODO: No le estoy pasando la fila con error al processExcelFileResult
-     default boolean isFilledIfRequired(Object attribute, CategoryQuestion questionType, ProcessExcelFileResult processExcelFileResult){
-          if (questionType.isRequired()  && attribute==null){
-               processExcelFileResult.addRowError("El campo " + questionType.getQuestionName() + " es obligatorio.");
-               return false;
-          }
-          return true;
-     }
 }

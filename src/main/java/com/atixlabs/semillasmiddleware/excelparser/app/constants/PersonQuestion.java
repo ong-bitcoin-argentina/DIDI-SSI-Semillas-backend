@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
+import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -9,9 +10,19 @@ public enum PersonQuestion implements CategoryQuestion {
     NAME("NOMBRE"),
     SURNAME("APELLIDO"),
     ID_TYPE("TIPO DOCUMENTO"),
-    ID_NUMBER("NUMERO DE DOCUMENTO"),
+    ID_NUMBER("NUMERO DE DOCUMENTO"){
+        @Override
+        public Class<?> getDataType() {
+            return Long.class;
+        }
+    },
     GENDER("GENERO"),
-    BIRTHDATE("FECHA DE NACIMIENTO"),
+    BIRTHDATE("FECHA DE NACIMIENTO"){
+        @Override
+        public Class<?> getDataType() {
+            return LocalDate.class;
+        }
+    },
     RELATION("PARENTESCO"){
         @Override
         public boolean isRequired() {
@@ -37,4 +48,6 @@ public enum PersonQuestion implements CategoryQuestion {
     public boolean isRequired(){
         return true;
     }
+
+    public Class<?> getDataType() { return String.class; }
 }

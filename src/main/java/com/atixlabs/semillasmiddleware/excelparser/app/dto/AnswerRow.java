@@ -14,6 +14,9 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.Map;
 
 @Slf4j
 @Getter
@@ -98,6 +101,31 @@ public class AnswerRow extends ExcelRow {
         catch (Exception e){
             this.errorMessage = "String to Date conversion failed from "+dateString+" to "+datePattern;
         }
+        return null;
+    }
+
+    /*private final Map<Class<?>,Object> castMethods = new HashMap<>()
+    {{
+        put(String.class,getAnswerAsString());
+        put(Long.class,getAnswerAsLong());
+        put(Double.class,getAnswerAsDouble());
+        put(LocalDate.class,getAnswerAsDate("dd/MM/yy"));
+    }};*/
+
+    public Object getAnswerAs(Class<?> dataType) {
+        switch (dataType.getName()){
+            case "java.lang.String":
+                return getAnswerAsString();
+            case "java.lang.Double":
+                return getAnswerAsDouble();
+            case "java.time.LocalDate":
+                return getAnswerAsDate("dd/MM/yy");
+            case "java.lang.Long":
+                return getAnswerAsLong();
+        }
+        //System.out.println("DATA TYPE en getAnswerAs: " + dataType.toString());
+        //System.out.println("CAST METHOD GET : "+castMethods.get(dataType).toString());
+        //return castMethods.get(dataType);
         return null;
     }
 

@@ -76,8 +76,6 @@ public class SurveyExcelParseService extends ExcelParseService {
 
                 addCategoryDataIntoForm(answerRow, processExcelFileResult);
                 log.info("OK:" + answerRow.toString());
-            } else {
-                processExcelFileResult.addRowError("["+answerRow.getRowNum()+"]:Empty Row");// ("+answerRow.getStringError()+")");
             }
         }
         if(!hasNext)
@@ -96,7 +94,10 @@ public class SurveyExcelParseService extends ExcelParseService {
             }
             currentForm.addCategory(category);
         }
-        catch (Exception | InvalidCategoryException e) {
+        catch ( InvalidCategoryException e){
+            return;
+        }
+        catch (Exception e) {
             processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): "+ e.toString());
         }
     }

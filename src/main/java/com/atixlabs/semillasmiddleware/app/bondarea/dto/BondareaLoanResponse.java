@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.dto;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -17,5 +18,6 @@ public class BondareaLoanResponse {
     private String error; // Descripción del tipo de error
     private String errorcode; // Código de error
 
+    @SerializedName("prestamos")
     private List<BondareaLoan> loans;
 }

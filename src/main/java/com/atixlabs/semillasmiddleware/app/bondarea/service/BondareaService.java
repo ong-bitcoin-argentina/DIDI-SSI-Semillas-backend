@@ -2,12 +2,13 @@ package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoan;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
+import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.Interceptor;
 import okhttp3.OkHttpClient;
-import okhttp3.Request;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
@@ -15,15 +16,22 @@ import retrofit2.GsonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
-import java.io.IOException;
+import java.net.SocketTimeoutException;
 import java.util.Collections;
 import java.util.List;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @Slf4j
 public class BondareaService {
 
 
+    private LoanRepository loanRepository;
+
+    @Autowired
+    public BondareaService (LoanRepository loanRepository){
+        this.loanRepository = loanRepository;
+    }
     @Value("${bondarea.base_url}")
     private String serviceURL;
 
@@ -64,23 +72,27 @@ public class BondareaService {
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
                 .create();
 
+        OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
+                .connectTimeout(60, TimeUnit.SECONDS)
+                .readTimeout(60, TimeUnit.SECONDS)
+                .writeTimeout(60, TimeUnit.SECONDS)
+                .build();
 
 
         retrofit = new Retrofit.Builder()
                 .baseUrl(serviceURL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
-               // .client(httpClient.build())
+                .client(okHttpClient)
                 .build();
 
         bondareaEndpoint = retrofit.create(BondareaEndpoint.class);
 
 
         log.info("initialize bondarea api:");
-        //url example working
-        //https://www.bondarea.com/?c=comunidad&v=wspre&url=prerepprestamos&access_key=bocsws@bitcoinargentina.org&access_token=1640908800-1166701A0229E2BEDE8680CE74B6FB19&idm=B26F59EC&id=BS6N5F1R&cols=sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m&estados=55
+
     }
 
-    public List<BondareaLoan> getLoans(String idAccount, String loanState){
+    public List<BondareaLoan> getLoans(String idAccount, String loanState) throws Exception {
 
         initializeBondareaApi();
         log.info("getLoans:");
@@ -109,10 +121,19 @@ public class BondareaService {
             {
                 return Collections.emptyList();
             }
-        }catch(Exception ex){
-                log.error(" Bondarea error", ex);
-                //TODO which error ? and when ?
+        }catch(JsonSyntaxException  ex){
+            log.error(" Bondarea retrieved object does not match with model ", ex);
+            throw new Exception("retrived object does not match with model ");
+        }
+        catch (SocketTimeoutException ex){
+                log.error(" Bondarea timeout ", ex);
+             throw new Exception("Tiemout, please try again");
             }
+
+        catch(Exception ex){
+            log.error("Bondarea error ", ex);
+            throw new Exception("Error, please try again");
+        }
 
         return bondareaLoanResponse.getLoans();
 

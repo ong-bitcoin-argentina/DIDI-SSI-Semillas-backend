@@ -5,9 +5,10 @@ import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestio
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-
+@Slf4j
 @Setter
 @Getter
 public class AnswerDto {
@@ -26,9 +27,8 @@ public class AnswerDto {
         }
         catch (Exception e){
             //excelfileresult add error row
+            log.info(e.getMessage());
         }
-        //this.answer = answerRow.getAnswer();
-        //VER COMO PASARLE EL EXCELFILERESULT AL GET ANSWERAS ???
     }
 
     public boolean isValid(ProcessExcelFileResult processExcelFileResult){
@@ -41,6 +41,6 @@ public class AnswerDto {
 
 
     private boolean answerIsEmpty(){
-        return answer.toString().trim().replace(" ","").equals("") || answer == null;
+        return answer == null || answer.toString().trim().replace(" ","").equals("");
     }
 }

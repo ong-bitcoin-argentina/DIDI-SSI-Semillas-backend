@@ -112,15 +112,16 @@ public class SurveyExcelParseService extends ExcelParseService {
 
         boolean allFormValid = true;
 
+        /*Temporarily disable validations to test repository save
         for (SurveyForm surveyForm : surveyFormList) {
             if (!surveyForm.isValid(processExcelFileResult))
                 allFormValid = false;
         }
+         */
 
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
-                if (surveyForm.isValid(processExcelFileResult))
                     credentialService.buildAllCredentialsFromForm(surveyForm);
             }
         }

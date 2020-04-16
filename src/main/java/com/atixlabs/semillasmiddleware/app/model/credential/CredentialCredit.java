@@ -1,11 +1,15 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.time.LocalDateTime;
 
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "credential_credit")
@@ -36,6 +40,22 @@ public class CredentialCredit extends Credential {
     private Long beneficiaryDocumentNumber;
 
 
+    public CredentialCredit(PersonCategory personCategory){
+        /*credentialCredit.setDateOfIssue(LocalDateTime.now());
+        credentialCredit.setDateOfExpiry(LocalDateTime.now().plusDays(14L));
+        credentialCredit.setCurrentCycle("imported-from-excel");
+        credentialCredit.setCreditState("pre-credential");
+        credentialCredit.setBeneficiaryDocumentType(personCategory.getIdType());
+        credentialCredit.setBeneficiaryDocumentNumber(personCategory.getIdNumber());*/
+        this.setDateOfIssue(LocalDateTime.now());
+        this.setDateOfExpiry(LocalDateTime.now().plusDays(14L));
+        this.setCurrentCycle("imported-from-excel");
+        this.setCreditState("pre-credential");
+        this.setBeneficiaryDocumentType(personCategory.getIdType());
+        this.setBeneficiaryDocumentNumber(personCategory.getIdNumber());
+
+    }
+
     @Override
     public String toString() {
         return "CredentialCredit{" +
@@ -50,4 +70,7 @@ public class CredentialCredit extends Credential {
                 ", dniBeneficiary=" + beneficiaryDocumentNumber +
                 "} " + super.toString();
     }
+
+
+
 }

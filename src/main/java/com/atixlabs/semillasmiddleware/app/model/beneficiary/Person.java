@@ -1,13 +1,16 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.List;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Entity
@@ -29,6 +32,14 @@ public class Person {
 
     @OneToMany
     private List<Credential> credentials;
+
+    public Person(PersonCategory personCategory){
+        this.setName(personCategory.getName()+" "+ personCategory.getSurname());
+        this.setDocumentType(personCategory.getIdType());
+        this.setDocumentNumber(personCategory.getIdNumber());
+        this.setBirthDate(personCategory.getBirthdate());
+    }
+
 
     @Override
     public String toString() {

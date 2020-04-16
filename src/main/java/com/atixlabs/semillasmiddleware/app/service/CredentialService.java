@@ -28,6 +28,17 @@ public class CredentialService {
         log.info("buildAllCredentialsFromForm: "+this.toString());
         buildPerson(surveyForm);
         buildCreditCredential(surveyForm);
+        buildIdentityOwnerCredential(surveyForm);
+        buildIdentityRelativeCredential(surveyForm);
+        buildEntrepreneurshipCredential(surveyForm);
+        buildHomeCredential(surveyForm);
+        buildHealthOwnerCredential(surveyForm);
+        buildHeathRelativeCredential(surveyForm);
+        buildKnowledgeOwnerCredential(surveyForm);
+        buildKnowledgeRelativeCredential(surveyForm);
+        buildScholarLoanCredential(surveyForm);
+        buildCoursesOwnerCredential(surveyForm);
+        buildCoursesRelativeCredential(surveyForm);
     }
 
     /**
@@ -35,17 +46,48 @@ public class CredentialService {
      * to make public methods easier to read.
      * @param surveyForm
      */
+
+    private void buildIdentityOwnerCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildIdentityRelativeCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildEntrepreneurshipCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildHomeCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildHealthOwnerCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildHeathRelativeCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildKnowledgeOwnerCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildKnowledgeRelativeCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildScholarLoanCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildCoursesOwnerCredential(SurveyForm surveyForm) {
+    }
+
+    private void buildCoursesRelativeCredential(SurveyForm surveyForm) {
+    }
+
+
+
     private void buildPerson(SurveyForm surveyForm){
         log.info("  buildPerson");
 
         PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
         if(personCategory != null) {
-            Person person = new Person();
-            person.setName(personCategory.getName()+" "+ personCategory.getSurname());
-            person.setDocumentType(personCategory.getIdType());
-            person.setDocumentNumber(personCategory.getIdNumber());
-            person.setBirthDate(personCategory.getBirthdate());
-            log.info(person.toString());
+            Person person = new Person(personCategory);
 
             Optional<Person> personOptional = personRepository.findByDocumentTypeAndDocumentNumber(person.getDocumentType(),person.getDocumentNumber());
             if(personOptional.isEmpty())
@@ -57,17 +99,10 @@ public class CredentialService {
 
     private void buildCreditCredential(SurveyForm surveyForm){
         log.info("  buildCreditCredential");
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
 
+        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
         if(personCategory != null) {
-            CredentialCredit credentialCredit = new CredentialCredit();
-            credentialCredit.setBeneficiaryDocumentType(personCategory.getIdType());
-            credentialCredit.setBeneficiaryDocumentNumber(personCategory.getIdNumber());
-            credentialCredit.setDateOfExpiry(LocalDateTime.now());
-            credentialCredit.setDateOfIssue(LocalDateTime.now());
-            credentialCredit.setCurrentCycle("imported-from-excel");
-            credentialCredit.setCreditState("pre-credential");
-            log.info(credentialCredit.toString());
+            CredentialCredit credentialCredit = new CredentialCredit(personCategory);
 
             Optional<CredentialCredit> credentialCreditOptional = credentialCreditRepository.findByBeneficiaryDocumentTypeAndBeneficiaryDocumentNumber(
                     credentialCredit.getBeneficiaryDocumentType(), credentialCredit.getBeneficiaryDocumentNumber()

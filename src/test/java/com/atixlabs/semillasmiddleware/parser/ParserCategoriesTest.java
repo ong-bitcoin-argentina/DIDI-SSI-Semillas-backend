@@ -51,7 +51,7 @@ public class ParserCategoriesTest {
         Cell dateCell = row.createCell(9);
         dateCell.setCellValue("12/12/19");
         Cell pdvCell = row.createCell(10);
-        pdvCell.setCellValue("10");
+        pdvCell.setCellValue(5456580);
         Cell categoryCell = row.createCell(14);
         categoryCell.setCellValue("EMPRENDIMIENTO");
         Cell questionCell = row.createCell(15);
@@ -66,7 +66,7 @@ public class ParserCategoriesTest {
         Cell dateCell1 = row1.createCell(9);
         dateCell1.setCellValue("12/12/19");
         Cell pdvCell1 = row1.createCell(10);
-        pdvCell1.setCellValue("10");
+        pdvCell1.setCellValue(5456580);
         Cell categoryCell1 = row1.createCell(14);
         categoryCell1.setCellValue("EMPRENDIMIENTO");
         Cell questionCell1 = row1.createCell(15);
@@ -82,7 +82,7 @@ public class ParserCategoriesTest {
         Cell dateCell2 = row2.createCell(9);
         dateCell2.setCellValue("12/12/19");
         Cell pdvCell2 = row2.createCell(10);
-        pdvCell2.setCellValue("10");
+        pdvCell2.setCellValue(5456580);
         Cell categoryCell2 = row2.createCell(14);
         categoryCell2.setCellValue("EMPRENDIMIENTO");
         Cell questionCell2 = row2.createCell(15);
@@ -97,7 +97,7 @@ public class ParserCategoriesTest {
         Cell dateCell3 = row3.createCell(9);
         dateCell3.setCellValue("12/12/19");
         Cell pdvCell3 = row3.createCell(10);
-        pdvCell3.setCellValue("10");
+        pdvCell3.setCellValue(5456580);
         Cell categoryCell3 = row3.createCell(14);
         categoryCell3.setCellValue("EMPRENDIMIENTO");
         Cell questionCell3 = row3.createCell(15);
@@ -112,7 +112,7 @@ public class ParserCategoriesTest {
         Cell dateCell4 = row4.createCell(9);
         dateCell4.setCellValue("12/12/19");
         Cell pdvCell4 = row4.createCell(10);
-        pdvCell4.setCellValue("10");
+        pdvCell4.setCellValue(5456580);
         Cell categoryCell4 = row4.createCell(14);
         categoryCell4.setCellValue("EMPRENDIMIENTO");
         Cell questionCell4 = row4.createCell(15);
@@ -128,7 +128,7 @@ public class ParserCategoriesTest {
         Cell dateCell5 = row5.createCell(9);
         dateCell5.setCellValue("12/12/19");
         Cell pdvCell5 = row5.createCell(10);
-        pdvCell5.setCellValue("10");
+        pdvCell5.setCellValue(5456580);
         Cell categoryCell5 = row5.createCell(14);
         categoryCell5.setCellValue("EMPRENDIMIENTO");
         Cell questionCell5 = row5.createCell(15);

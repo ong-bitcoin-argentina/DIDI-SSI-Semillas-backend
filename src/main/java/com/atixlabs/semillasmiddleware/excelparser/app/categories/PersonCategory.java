@@ -8,14 +8,15 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 
-import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 @Getter
 public class PersonCategory implements Category {
-    AnswerDto nameAndSurname;
+    AnswerDto name;
+    AnswerDto surname;
+    AnswerDto idType;
     AnswerDto idNumber;
     AnswerDto gender;
     AnswerDto birthdate;
@@ -23,7 +24,9 @@ public class PersonCategory implements Category {
     PersonType personType;
 
     public PersonCategory(String personType){
-        this.nameAndSurname = new AnswerDto(PersonQuestion.NAME_AND_SURNAME);
+        this.name = new AnswerDto(PersonQuestion.NAME);
+        this.surname = new AnswerDto(PersonQuestion.SURNAME);
+        this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
         this.idNumber = new AnswerDto(PersonQuestion.ID_NUMBER);
         this.gender = new AnswerDto(PersonQuestion.GENDER);
         this.birthdate = new AnswerDto(PersonQuestion.BIRTHDATE);
@@ -40,11 +43,17 @@ public class PersonCategory implements Category {
     public void loadData(AnswerRow answerRow) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
         switch (PersonQuestion.get(question)) {
+            case ID_TYPE:
+                this.idType.setAnswer(answerRow);
+                break;
             case ID_NUMBER:
                 this.idNumber.setAnswer(answerRow);
                 break;
-            case NAME_AND_SURNAME:
-                this.nameAndSurname.setAnswer(answerRow);
+            case NAME:
+                this.name.setAnswer(answerRow);
+                break;
+            case SURNAME:
+                this.surname.setAnswer(answerRow);
                 break;
             case GENDER:
                 this.gender.setAnswer(answerRow);
@@ -61,7 +70,8 @@ public class PersonCategory implements Category {
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
         List<AnswerDto> answers = new LinkedList<>();
-        answers.add(this.nameAndSurname);
+        answers.add(this.name);
+        answers.add(this.surname);
         answers.add(this.idNumber);
         answers.add(this.gender);
         answers.add(this.birthdate);

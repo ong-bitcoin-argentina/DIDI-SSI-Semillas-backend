@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -69,5 +70,24 @@ public class EntrepreneurshipCategory implements Category {
 
         List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
+    }
+
+    public String getType(){
+        return (String) this.type.getAnswer();
+    }
+    public LocalDate getActivityStartDate(){
+        return (LocalDate) this.activityStartDate.getAnswer();
+    }
+    public String getMainActivity(){
+        return (String) this.mainActivity.getAnswer();
+    }
+    public String getName(){
+        return (String) this.name.getAnswer();
+    }
+    public String getAddress(){
+        return (String) this.address.getAnswer();
+    }
+    public LocalDate activityEndingDate(){
+        return (LocalDate) this.activityEndingDate.getAnswer();
     }
 }

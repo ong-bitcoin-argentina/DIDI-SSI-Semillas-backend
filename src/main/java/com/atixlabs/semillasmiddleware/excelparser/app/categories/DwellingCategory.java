@@ -46,4 +46,16 @@ public class DwellingCategory implements Category {
         return validations.stream().allMatch(v->v);
     }
 
+    public String getDwellingType(){
+        return (String) this.dwellingType.getAnswer();
+    }
+
+    public String getHoldingType(){
+        return (String) this.holdingType.getAnswer();
+    }
+
+    public String getDistrict(){
+        return (String) this.district.getAnswer();
+    }
+
 }

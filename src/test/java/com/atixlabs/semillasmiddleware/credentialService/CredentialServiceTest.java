@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepositoryCustom;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -24,8 +26,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 
 @RunWith(SpringRunner.class)
@@ -34,10 +35,13 @@ import static org.mockito.Mockito.when;
 public class CredentialServiceTest {
 
     @Mock
+    private CredentialRepository credentialRepository;
+
+    @InjectMocks
     private CredentialService credentialService;
 
     @Autowired
-    DateUtil util;
+    private DateUtil util;
 
     private Person getBeneficiaryMock(){
         Person person = new Person();
@@ -81,11 +85,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getActiveCredentials() {
-        when(credentialService.findCredentials(null,null,null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsMock());
+        when(credentialRepository.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsMock());
 
-        List<Credential> credentials = credentialService.findCredentials(null,null,null, null, null, null,Arrays.asList("Vigente"));
+        List<Credential> credentials = credentialRepository.findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
 
-        verify(credentialService).findCredentials(null,null,null, null, null, null,Arrays.asList("Vigente"));
+        verify(credentialRepository,times(1)).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
         log.info("credenciales " +credentials.toString());

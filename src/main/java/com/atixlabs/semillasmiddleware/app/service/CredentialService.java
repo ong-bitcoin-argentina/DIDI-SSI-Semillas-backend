@@ -18,11 +18,15 @@ import java.util.List;
 @Slf4j
 public class CredentialService {
 
-    @Autowired
     private CredentialCreditRepository credentialCreditRepository;
 
-    @Autowired
     private CredentialRepository credentialRepository;
+
+    @Autowired
+    public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
+        this.credentialCreditRepository = credentialCreditRepository;
+        this.credentialRepository = credentialRepository;
+    }
 
 
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {

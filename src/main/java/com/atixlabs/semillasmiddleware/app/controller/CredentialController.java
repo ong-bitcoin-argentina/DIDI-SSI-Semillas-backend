@@ -4,9 +4,6 @@ import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepositoryCustom;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,8 +21,12 @@ public class CredentialController {
 
     public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
-    @Autowired
     private CredentialService credentialService;
+
+    @Autowired
+    public CredentialController(CredentialService credentialService) {
+        this.credentialService = credentialService;
+    }
 
 
     @RequestMapping(value = "/createCredit", method = RequestMethod.POST)

@@ -23,4 +23,42 @@ public class ProcessExcelFileResult {
     private boolean isFileValid = true;
     private String fileError = null;
 
+    public void addRowError(List<String> errors){
+        this.getErrorRows().addAll(errors);
+        this.totalErrorsRows++;
+        this.addTotalRow();
+    }
+
+    public void addRowError(String error){
+        this.getErrorRows().add(error);
+        this.totalErrorsRows++;
+        this.addTotalRow();
+    }
+
+    public void addTotalRow(){
+        this.totalRows++;
+    }
+
+    public void addInsertedRows(){
+        totalInsertedRows++;
+    }
+
+    public void addValidRows(){
+        validRows++;
+    }
+
+    @Override
+    public String toString() {
+        return "ProcessExcelFileResult{" +
+                "totalRows=" + totalRows +
+                ", validRows=" + validRows +
+                ", totalInsertedRows=" + totalInsertedRows +
+                ", totalErrorsRows=" + totalErrorsRows +
+                ", totalDeletedRows=" + totalDeletedRows +
+                ", errorRows=" + errorRows +
+                ", fileName='" + fileName + '\'' +
+                ", isFileValid=" + isFileValid +
+                ", fileError='" + fileError + '\'' +
+                '}';
+    }
 }

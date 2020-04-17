@@ -1,11 +1,13 @@
 package com.atixlabs.semillasmiddleware.filemanager.util;
 
+import lombok.NoArgsConstructor;
 import org.springframework.stereotype.Component;
 
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.util.Optional;
 
+@NoArgsConstructor
 @Component
 public class FileUtil {
 

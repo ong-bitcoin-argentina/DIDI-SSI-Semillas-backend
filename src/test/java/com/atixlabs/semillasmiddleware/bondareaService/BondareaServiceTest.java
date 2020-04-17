@@ -18,8 +18,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.*;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest
@@ -33,7 +32,7 @@ public class BondareaServiceTest {
     private BondareaService bondareaService;
 
     @Captor
-    private ArgumentCaptor<List<Loan>> captor;
+    private ArgumentCaptor<Loan> captor;
 
     @Before
     public void setupMocks(){
@@ -159,9 +158,9 @@ public class BondareaServiceTest {
         List<Loan> loans = firstLoansData();
         bondareaService.updateExistingLoans(loans);
 
-        verify(loanRepository).saveAll(captor.capture());
+        verify(loanRepository,times(4)).save(captor.capture());
 
-        List<Loan> loansSaves = captor.getValue();
+        List<Loan> loansSaves = captor.getAllValues();
         Loan firstLoan = loansSaves.get(0);
 
         Assertions.assertEquals(firstLoansData().get(0).getIdBondareaLoan(), firstLoan.getIdBondareaLoan());
@@ -182,9 +181,9 @@ public class BondareaServiceTest {
         List<Loan> loans = secondLoansData();
         bondareaService.updateExistingLoans(loans);
 
-        verify(loanRepository).saveAll(captor.capture());
+        verify(loanRepository,times(5)).save(captor.capture());
 
-        List<Loan> loansSaves = captor.getValue();
+        List<Loan> loansSaves = captor.getAllValues();
 
         Assertions.assertTrue(loansSaves.size() > firstLoansData().size());
         Assertions.assertEquals(true,loansSaves.get(0).getPending());
@@ -206,9 +205,9 @@ public class BondareaServiceTest {
         List<Loan> loans = secondLoansDataAllNew();
         bondareaService.updateExistingLoans(loans);
 
-        verify(loanRepository).saveAll(captor.capture());
+        verify(loanRepository,times(7)).save(captor.capture());
 
-        List<Loan> loansSaves = captor.getValue();
+        List<Loan> loansSaves = captor.getAllValues();
 
         Assertions.assertTrue(loansSaves.size() > firstLoansData().size());
 
@@ -229,9 +228,9 @@ public class BondareaServiceTest {
         List<Loan> loans = secondLoansDataAllExpired();
         bondareaService.updateExistingLoans(loans);
 
-        verify(loanRepository).saveAll(captor.capture());
+        verify(loanRepository,times(4)).save(captor.capture());
 
-        List<Loan> loansSaves = captor.getValue();
+        List<Loan> loansSaves = captor.getAllValues();
 
 
         //the active loans will be any.

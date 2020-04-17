@@ -5,12 +5,14 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
 
 public class DwellingCategory implements Category {
+
     AnswerDto dwellingType;
     AnswerDto holdingType;
     AnswerDto district;
@@ -21,7 +23,7 @@ public class DwellingCategory implements Category {
         this.district = new AnswerDto(DwellingQuestion.DISTRICT);
     }
 
-    public void loadData(AnswerRow answerRow) {
+    public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
 
         DwellingQuestion questionMatch = DwellingQuestion.get(question);
@@ -31,13 +33,13 @@ public class DwellingCategory implements Category {
 
         switch (questionMatch){
             case DWELLING_TYPE:
-                this.dwellingType.setAnswer(answerRow);
+                this.dwellingType.setAnswer(answerRow, processExcelFileResult);
                 break;
             case HOLDING_TYPE:
-                this.holdingType.setAnswer(answerRow);
+                this.holdingType.setAnswer(answerRow, processExcelFileResult);
                 break;
             case DISTRICT:
-                this.district.setAnswer(answerRow);
+                this.district.setAnswer(answerRow, processExcelFileResult);
         }
     }
 

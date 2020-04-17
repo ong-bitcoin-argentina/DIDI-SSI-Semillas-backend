@@ -9,6 +9,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @Getter
 public class PersonCategory implements Category {
+
     AnswerDto name;
     AnswerDto surname;
     AnswerDto idType;
@@ -45,7 +47,7 @@ public class PersonCategory implements Category {
     }
 
     @Override
-    public void loadData(AnswerRow answerRow) {
+    public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
         PersonQuestion questionMatch = PersonQuestion.get(question);
 
@@ -54,25 +56,25 @@ public class PersonCategory implements Category {
 
         switch (questionMatch) {
             case ID_TYPE:
-                this.idType.setAnswer(answerRow);
+                this.idType.setAnswer(answerRow, processExcelFileResult);
                 break;
             case ID_NUMBER:
-                this.idNumber.setAnswer(answerRow);
+                this.idNumber.setAnswer(answerRow, processExcelFileResult);
                 break;
             case NAME:
-                this.name.setAnswer(answerRow);
+                this.name.setAnswer(answerRow, processExcelFileResult);
                 break;
             case SURNAME:
-                this.surname.setAnswer(answerRow);
+                this.surname.setAnswer(answerRow, processExcelFileResult);
                 break;
             case GENDER:
-                this.gender.setAnswer(answerRow);
+                this.gender.setAnswer(answerRow, processExcelFileResult);
                 break;
             case BIRTHDATE:
-                this.birthdate.setAnswer(answerRow);
+                this.birthdate.setAnswer(answerRow, processExcelFileResult);
                 break;
             case RELATION:
-                this.relation.setAnswer(answerRow);
+                this.relation.setAnswer(answerRow, processExcelFileResult);
                 break;
         }
     }

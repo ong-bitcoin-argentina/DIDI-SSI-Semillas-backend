@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.row.ExcelRow;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
@@ -8,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Temporal;
@@ -66,28 +68,40 @@ public class AnswerRow extends ExcelRow {
         if (answer == null)
             return null;
         try { return Double.valueOf(answer);}
-        catch (NumberFormatException e){this.errorMessage = "String to Double conversion failed on: "+answer;}
+        catch (NumberFormatException e){
+            //this.errorMessage = "String to Double conversion failed on: "+answer;
+            //processExcelFileResult.addRowError(this.getRowNum(), "String to Double conversion failed on: "+answer);
+        }
         return null;
     }
     public Long getAnswerAsLong(){
         if (answer == null)
             return null;
         try {return Long.valueOf(answer);}
-        catch (NumberFormatException e){this.errorMessage = "String to Long conversion failed on: "+answer;}
+        catch (NumberFormatException e){
+            //this.errorMessage = "String to Long conversion failed on: "+answer;
+            //processExcelFileResult.addRowError(this.getRowNum(), "String to Long conversion failed on: "+answer);
+        }
         return null;
     }
     public Integer getAnswerAsInteger(){
         if (answer == null)
             return null;
         try {return Integer.valueOf(answer);}
-        catch (NumberFormatException e){this.errorMessage = "String to Integer conversion failed on: "+answer;}
+        catch (NumberFormatException e){
+            //this.errorMessage = "String to Integer conversion failed on: "+answer;
+            //processExcelFileResult.addRowError(this.getRowNum(), "String to Integer conversion failed on: "+answer);
+        }
         return null;
     }
     public LocalDate getAnswerAsDate(String datePattern){
         if (answer == null)
             return null;
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
-        catch (NumberFormatException e){this.errorMessage = "String to Date conversion failed from "+answer+" to "+datePattern;}
+        catch (NumberFormatException e){
+            //this.errorMessage = "String to Date conversion failed from "+answer+" to "+datePattern;
+            //processExcelFileResult.addRowError(this.getRowNum(), "String to Date conversion failed on: "+answer);
+        }
         return null;
     }
 
@@ -99,7 +113,8 @@ public class AnswerRow extends ExcelRow {
             return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(datePattern));
         }
         catch (Exception e){
-            this.errorMessage = "String to Date conversion failed from "+dateString+" to "+datePattern;
+            //this.errorMessage = "String to Date conversion failed from "+dateString+" to "+datePattern;
+            //processExcelFileResult.addRowError(this.getRowNum(), "String to Date conversion failed from "+dateString+" to "+datePattern);
         }
         return null;
     }
@@ -139,7 +154,7 @@ public class AnswerRow extends ExcelRow {
                 ", category='" + category + '\'' +
                 ", question='" + question + '\'' +
                 ", answer='" + answer + '\'' +
-                ", errorMessage='" + errorMessage + '\'' +
+//                ", errorMessage='" + errorMessage + '\'' +
                 ", cellIndex=" + cellIndex +
                 ", cellIndexName='" + cellIndexName + '\'' +
                 ", cellIndexDescription='" + cellIndexDescription + '\'' +

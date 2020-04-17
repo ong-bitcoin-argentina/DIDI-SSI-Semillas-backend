@@ -9,6 +9,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.apache.tomcat.jni.Proc;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -48,7 +49,7 @@ public abstract class ExcelParseService {
             rowsIterator.next();
 
         while (rowsIterator.hasNext()) {
-            processExcelFileResult = processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
+            processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
         }
 
         return processExcelFileResult;

@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.time.LocalDate;
 import java.util.LinkedList;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 public class EntrepreneurshipCategory implements Category {
+
     AnswerDto type;
     AnswerDto activityStartDate;
     AnswerDto mainActivity;
@@ -33,7 +35,7 @@ public class EntrepreneurshipCategory implements Category {
         this.activityEndingDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE);
     }
 
-    public void loadData(AnswerRow answerRow){
+    public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
 
         EntrepreneurshipQuestion questionMatch = EntrepreneurshipQuestion.get(question);
@@ -43,23 +45,23 @@ public class EntrepreneurshipCategory implements Category {
 
         switch (questionMatch){
             case TYPE:
-                this.type.setAnswer(answerRow);
+                this.type.setAnswer(answerRow, processExcelFileResult);
                 break;
             case ACTIVITY_START_DATE:
-                this.activityStartDate.setAnswer(answerRow);
+                this.activityStartDate.setAnswer(answerRow, processExcelFileResult);
                 break;
             case MAIN_ACTIVITY:
-                this.mainActivity.setAnswer(answerRow);
+                this.mainActivity.setAnswer(answerRow, processExcelFileResult);
                 break;
             case NAME:
-                this.name.setAnswer(answerRow);
+                this.name.setAnswer(answerRow, processExcelFileResult);
                 break;
             case ADDRESS:
-                this.address.setAnswer(answerRow);
+                this.address.setAnswer(answerRow, processExcelFileResult);
                 break;
             //check final form
             case ACTIVITY_ENDING_DATE:
-                this.activityEndingDate.setAnswer(answerRow);
+                this.activityEndingDate.setAnswer(answerRow, processExcelFileResult);
                 break;
         }
     }

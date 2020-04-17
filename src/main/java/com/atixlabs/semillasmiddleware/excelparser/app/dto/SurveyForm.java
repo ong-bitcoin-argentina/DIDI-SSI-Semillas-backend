@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
@@ -18,6 +19,9 @@ import java.util.ArrayList;
 @Setter
 @Slf4j
 public class SurveyForm {
+
+    //@Autowired
+    //private ProcessExcelFileResult processExcelFileResult;
 
     //key form:
     @DateTimeFormat(pattern = "dd/MM/yy")

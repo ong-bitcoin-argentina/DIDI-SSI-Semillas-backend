@@ -169,12 +169,12 @@ public class ParserCategoriesTest {
         ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
         EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory();
 
-        entrepreneurshipCategory.loadData(answerRowActivityStartDate);
-        entrepreneurshipCategory.loadData(answerRowMainActivity);
-        entrepreneurshipCategory.loadData(answerRowAddress);
-        entrepreneurshipCategory.loadData(answerRowActivityEndingDate);
-        entrepreneurshipCategory.loadData(answerRowName);
-        entrepreneurshipCategory.loadData(answerRowType);
+        entrepreneurshipCategory.loadData(answerRowActivityStartDate, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowMainActivity, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowAddress, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowActivityEndingDate, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowName, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowType, excelFileResult);
 
         Assert.assertFalse(entrepreneurshipCategory.isValid(excelFileResult));
         Assert.assertEquals(2,excelFileResult.getTotalErrorsRows());
@@ -194,12 +194,12 @@ public class ParserCategoriesTest {
         answerCell5.setCellValue("TYPE");
         answerRowType = new AnswerRow(row5);
 
-        entrepreneurshipCategory.loadData(answerRowActivityStartDate);
-        entrepreneurshipCategory.loadData(answerRowMainActivity);
-        entrepreneurshipCategory.loadData(answerRowAddress);
-        entrepreneurshipCategory.loadData(answerRowActivityEndingDate);
-        entrepreneurshipCategory.loadData(answerRowName);
-        entrepreneurshipCategory.loadData(answerRowType);
+        entrepreneurshipCategory.loadData(answerRowActivityStartDate, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowMainActivity, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowAddress, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowActivityEndingDate, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowName, excelFileResult);
+        entrepreneurshipCategory.loadData(answerRowType, excelFileResult);
 
         Assert.assertTrue(entrepreneurshipCategory.isValid(excelFileResult));
     }

@@ -38,8 +38,6 @@ public class FileManagerController {
         File receivedFile = fileManagerService.uploadFile(file);
 
         ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath());
-        //log.info(processExcelFileResult.toString());
-
 
         return ResponseEntity.ok(processExcelFileResult);
         //return(ResponseEntity.ok().build());

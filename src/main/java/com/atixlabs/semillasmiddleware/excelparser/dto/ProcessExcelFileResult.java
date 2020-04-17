@@ -1,8 +1,10 @@
 package com.atixlabs.semillasmiddleware.excelparser.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import org.springframework.stereotype.Component;
+import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -10,8 +12,10 @@ import java.util.List;
 /**
  * This class represents the final result of the processing of a file
  */
+@NoArgsConstructor
 @Getter
 @Setter
+@Component
 public class ProcessExcelFileResult {
 
     private int totalRows = 0;
@@ -20,106 +24,57 @@ public class ProcessExcelFileResult {
     private int totalErrorsRows = 0;
     private int totalDeletedRows = 0;
     private int totalProcessedForms = 0;
-    private List<String> errorRows = new ArrayList<String>();
+    //private List<String> errorRows = new ArrayList<String>();
+    private List<ExcelErrorDetail> errorRows = new ArrayList<>();
+
     private String fileName = null;
     private boolean isFileValid = true;
     private String fileError = null;
+/*
+    public ProcessExcelFileResult(){
+        totalRows = 0;
+        validRows = 0;
+        totalInsertedRows = 0;
+        totalErrorsRows = 0;
+        totalDeletedRows = 0;
+        totalProcessedForms = 0;
+        List<ExcelErrorDetail> errorRows = new ArrayList<>();
 
-    public void addRowError(List<String> errors){
-        this.getErrorRows().addAll(errors);
+        String fileName = null;
+        boolean isFileValid = true;
+        String fileError = null;
+    }
+*/
+
+    /*public void addRowError(String errorBody){
+        ExcelErrorDetail  excelErrorDetail = new ExcelErrorDetail(errorBody);
+        this.getErrorRows().add(excelErrorDetail);
+        this.totalErrorsRows++;
+        this.addTotalRow();
+    }*/
+
+    public void addRowError(Integer errorHeader, String errorBody){
+        this.errorRows.add(new ExcelErrorDetail(String.valueOf(errorHeader), errorBody));
         this.totalErrorsRows++;
         this.addTotalRow();
     }
 
-    public void addRowError(String error){
-        this.getErrorRows().add(error);
+    public void addRowError(String errorHeader, String errorBody){
+        this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody));
         this.totalErrorsRows++;
         this.addTotalRow();
     }
 
     public void addDeletedRow(){this.totalDeletedRows++;}
-
     public void addTotalRow(){
         this.totalRows++;
     }
-
     public void addInsertedRows(){
-        totalInsertedRows++;
+        this.totalInsertedRows++;
     }
-
-    public void addProcessedForms(){totalProcessedForms++;}
-
+    public void addProcessedForms(){ this.totalProcessedForms++;}
     public void addValidRows(){
-        validRows++;
-    }
-
-    public int getTotalRows() {
-        return totalRows;
-    }
-
-    public void setTotalRows(int totalRows) {
-        this.totalRows = totalRows;
-    }
-
-    public int getTotalInsertedRows() {
-        return totalInsertedRows;
-    }
-
-    public void setTotalInsertedRows(int totalInsertedRows) {
-        this.totalInsertedRows = totalInsertedRows;
-    }
-
-    public int getTotalErrorsRows() {
-        return totalErrorsRows;
-    }
-
-    public void setTotalErrorsRows(int totalErrorsRows) {
-        this.totalErrorsRows = totalErrorsRows;
-    }
-
-    public int getTotalDeletedRows() {
-        return totalDeletedRows;
-    }
-
-    public void setTotalDeletedRows(int totalDeletedRows) {
-        this.totalDeletedRows = totalDeletedRows;
-    }
-
-    public List<String> getErrorRows() {
-        return errorRows;
-    }
-
-    public void setErrorRows(List<String> errorRows) {
-        this.errorRows = errorRows;
-    }
-
-    public String getFileName() {
-        return fileName;
-    }
-
-    public ProcessExcelFileResult agregarFileName(String fileName) {
-        this.fileName = fileName;
-        return this;
-    }
-
-    public boolean isFileValid() {
-        return isFileValid;
-    }
-
-    public void setFileValid(boolean fileValid) {
-        isFileValid = fileValid;
-    }
-
-    public String getFileError() {
-        return fileError;
-    }
-
-    public void setFileError(String fileError) {
-        this.fileError = fileError;
-    }
-
-    public int getValidRows() {
-        return validRows;
+        this.validRows++;
     }
 
     @Override

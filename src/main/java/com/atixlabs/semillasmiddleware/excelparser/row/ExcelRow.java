@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.row;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -8,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.ArrayList;
 import java.util.Iterator;
@@ -21,9 +23,9 @@ import java.util.Iterator;
 @Slf4j
 @NoArgsConstructor
 public abstract class ExcelRow {
-    protected int rowNum;
 
-    protected String errorMessage = "";
+    protected int rowNum;
+    //protected String errorMessage = "";
     //protected ArrayList<String> errorMessageList = new ArrayList<>();
     //protected boolean isValid = false;
     protected boolean exists = false;
@@ -31,13 +33,15 @@ public abstract class ExcelRow {
     protected String cellIndexName = "None";
     protected String cellIndexDescription = "";
 
+
     public ExcelRow(Row row) throws InvalidRowException {
         try {
             this.rowNum = row.getRowNum()+1;//must +1 due to headers
             this.parseRow(row);
         } catch (Exception e) {
-            log.error("ExcelRow: "+getStringError(), e);
-            throw new InvalidRowException(getStringError() + e.getMessage());
+            log.error("ExcelRow: ", e);
+            //processExcelFileResult.addRowError("", e.toString());
+            throw new InvalidRowException(e.getMessage());
         }
     }
 
@@ -102,7 +106,7 @@ public abstract class ExcelRow {
         this.cellIndex = cellindex;
         this.cellIndexDescription = cellIndexDescription;
     }
-
+/*
     public String getStringError() {
         return "[" + cellIndexName + "]:"+cellIndexDescription + ": "+errorMessage;
     }
@@ -110,7 +114,7 @@ public abstract class ExcelRow {
     public void setErrorDetailedMessage(String errorMessage){
         this.errorMessage += "[" + cellIndexName + "]:"+cellIndexDescription + ": "+errorMessage;
     }
-
+*/
 
     protected abstract void parseRow(Row row);
 

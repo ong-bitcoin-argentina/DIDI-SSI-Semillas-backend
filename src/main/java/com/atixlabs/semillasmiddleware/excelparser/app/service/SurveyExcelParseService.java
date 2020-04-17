@@ -34,7 +34,8 @@ public class SurveyExcelParseService extends ExcelParseService {
     private AnswerCategoryFactory answerCategoryFactory;
 
     @Autowired
-    CredentialService credentialService;
+    private CredentialService credentialService;
+
 
     /**
      * currentForm is shared between the whole Excel file.
@@ -53,7 +54,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             answerRow = new AnswerRow(currentRow);
         } catch (InvalidRowException e) {
-            processExcelFileResult.addRowError("("+currentRow.getRowNum()+"): "+ e.toString());
+            processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
         }
 
         processExcelFileResult.addTotalRow();
@@ -88,17 +89,17 @@ public class SurveyExcelParseService extends ExcelParseService {
 
         try {
             Category category = answerCategoryFactory.get(answerRow.getCategory());
-            category.loadData(answerRow);
-            if (!answerRow.getErrorMessage().isEmpty()){
-                processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): " + answerRow.getErrorMessage());
-            }
+            category.loadData(answerRow, processExcelFileResult);
+            //if (!answerRow.getErrorMessage().isEmpty()){
+            //    processExcelFileResult.addRowError(answerRow.getRowNum(), "ENTENDER ERROR CUAL ES");
+            //}
             currentForm.addCategory(category);
         }
         catch ( InvalidCategoryException e){
             return;
         }
         catch (Exception e) {
-            processExcelFileResult.addRowError("("+answerRow.getRowNum()+"): "+ e.toString());
+            processExcelFileResult.addRowError(answerRow.getRowNum(), e.toString());
         }
     }
 
@@ -113,12 +114,10 @@ public class SurveyExcelParseService extends ExcelParseService {
 
         boolean allFormValid = true;
 
-        /*Temporarily disable validations to test repository save
         for (SurveyForm surveyForm : surveyFormList) {
             if (!surveyForm.isValid(processExcelFileResult))
                 allFormValid = false;
         }
-         */
 
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");

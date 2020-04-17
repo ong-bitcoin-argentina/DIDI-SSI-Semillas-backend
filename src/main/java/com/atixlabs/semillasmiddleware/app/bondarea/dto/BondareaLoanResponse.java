@@ -19,5 +19,5 @@ public class BondareaLoanResponse {
     private String errorcode; // Código de error
 
     @SerializedName("prestamos")
-    private List<BondareaLoan> loans;
+    private List<BondareaLoanDto> loans;
 }

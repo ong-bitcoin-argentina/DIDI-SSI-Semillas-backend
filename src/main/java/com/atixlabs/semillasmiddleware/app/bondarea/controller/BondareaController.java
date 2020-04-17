@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoan;
+import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +11,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @RestController
 @Slf4j
@@ -29,18 +31,27 @@ public class BondareaController {
 
     @GetMapping("/getLoans")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoan>> getLoans()  {
+    public ResponseEntity<List<BondareaLoanDto>> getLoans()  {
         log.info("BONDAREA - GET LOANS");
-        List<BondareaLoan> loans;
+        List<BondareaLoanDto> loansDto;
         // idAccount not null!!
         try {
-            loans = bondareaService.getLoans("12345", "55");
+            //loans = bondareaService.getLoans("12345", "55"); //loanState 60 -> se consulta con segunda api
+            loansDto = bondareaService.secondLoansDataAllNew();
+            List<Loan> loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
+            bondareaService.updateExistingLoans(loans);
+
         }
         catch (Exception ex){
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
-        return new ResponseEntity<>(loans, HttpStatus.OK);
+
+        //El proceso deberia tomar todos los prestamos y actualizar la tabla intermedia para manejar la data
+
+        return new ResponseEntity<>(loansDto, HttpStatus.OK);
     }
+
+
 
 
     }

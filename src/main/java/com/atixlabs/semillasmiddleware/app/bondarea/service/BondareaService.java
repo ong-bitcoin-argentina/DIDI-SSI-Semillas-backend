@@ -1,7 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoan;
+import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -17,9 +18,13 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.net.SocketTimeoutException;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collector;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -92,7 +97,71 @@ public class BondareaService {
 
     }
 
-    public List<BondareaLoan> getLoans(String idAccount, String loanState) throws Exception {
+    private BondareaLoanDto getMockBondareaLoan(){
+        BondareaLoanDto loan = new BondareaLoanDto();
+        loan.setIdBondareaLoan("1L");
+        loan.setDni(123456L);
+        loan.setStatusName("Activo");
+        loan.setAmount((float) 1000);
+        loan.setExpiredAmount((float) 0);
+        loan.setStatus(55);
+
+        return loan;
+    }
+
+
+    public List<BondareaLoanDto> getMockLoans(String idAccount, String loanState){
+        List<BondareaLoanDto> loans = new ArrayList<>();
+
+        BondareaLoanDto loan = getMockBondareaLoan();
+        loans.add(loan);
+
+        BondareaLoanDto loan2 = getMockBondareaLoan();
+        loan2.setIdBondareaLoan("2L");
+        loans.add(loan2);
+
+        BondareaLoanDto loan3 = getMockBondareaLoan();
+        loan3.setIdBondareaLoan("3L");
+        loans.add(loan3);
+
+        BondareaLoanDto loan4 = getMockBondareaLoan();
+        loan4.setIdBondareaLoan("4L");
+        loans.add(loan4);
+
+        return loans;
+    }
+
+    public List<BondareaLoanDto> secondLoansDataAllNew(){
+        List<BondareaLoanDto> loans = new ArrayList<>();
+
+        //id 1 is deleted
+
+        //loan 2 is the same
+        BondareaLoanDto loan2 = getMockBondareaLoan();
+        loan2.setIdBondareaLoan("2L");
+        loans.add(loan2);
+
+        //loan 3 modified tag
+        BondareaLoanDto loan3 = getMockBondareaLoan();
+        loan3.setIdBondareaLoan("3L");
+        loan3.setTagBondareaLoan("nuevo tag");
+        loans.add(loan3);
+
+        //loan 4 is in default
+        BondareaLoanDto loan4 = getMockBondareaLoan();
+        loan4.setIdBondareaLoan("4L");
+        loan4.setExpiredAmount((float) 100);
+        loans.add(loan4);
+
+        //new loan
+        BondareaLoanDto loan5 = getMockBondareaLoan();
+        loan5.setIdBondareaLoan("5L");
+        loans.add(loan5);
+
+        return loans;
+    }
+
+    public List<BondareaLoanDto> getLoans(String idAccount, String loanState) throws Exception {
 
         initializeBondareaApi();
         log.info("getLoans:");
@@ -104,7 +173,7 @@ public class BondareaService {
         Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, /*idAccount,*/ loanColumns, loanState);
         log.info("url request " + callSync.request().url());
 
-        BondareaLoanResponse bondareaLoanResponse = null;
+        BondareaLoanResponse bondareaLoanResponse;
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
             log.info("el response envio ... " + response.raw().toString());
@@ -139,7 +208,57 @@ public class BondareaService {
 
     }
 
-    //Second endpoint
+    //Second endpoint -> request for one id and get the status
+
+
+    public void updateExistingLoans(List<Loan> newLoans) {
+       // List<Loan> finalLoans = new ArrayList<>();
+
+        List<Loan> existingLoans = loanRepository.findAll();
+
+
+        List<String> idsExistingLoans = existingLoans.stream().map(Loan::getIdBondareaLoan).collect(Collectors.toList());
+        List<String> idsNewLoans = newLoans.stream().map(Loan::getIdBondareaLoan).collect(Collectors.toList());
+
+        //idsExistingLoans now have the ids that no loger exist in the new loan list
+        idsExistingLoans.removeAll(idsNewLoans);
+
+        for (Loan existingLoan : existingLoans) {
+            //Search for the loan that has been deleated in the new list
+            if (idsExistingLoans.contains(existingLoan.getIdBondareaLoan())) {
+                //this loan has been deleted on the new list, so this loan needs to be checked (is eliminated or is terminated)
+                existingLoan.setPending(true);
+                loanRepository.save(existingLoan);
+            }
+        }
+
+        //update the existing loans
+
+        for (Loan loanToSave : newLoans) {
+            //if the newLoan existed previously -> update. Else create.
+            Optional<Loan> opLoanToUpdate = existingLoans.stream().filter(previousLoan -> previousLoan.getIdBondareaLoan().equals(loanToSave.getIdBondareaLoan())).findFirst();
+            if (opLoanToUpdate.isPresent()) {
+                // if(newLoan.getStatus() == 60) { //60 -> finalizado (esto va en la segunda api)
+                if (loanToSave.getExpiredAmount() > 0.0) {
+                    loanToSave.setIsActive(false);
+                }
+
+                    Loan loanToUpdate = opLoanToUpdate.get();
+                    loanToUpdate.merge(loanToSave);
+                    loanRepository.save(loanToUpdate);
+
+            }
+            else {
+                loanRepository.save(loanToSave);
+            }
+
+        }
+        //loanRepository.saveAll(finalLoans);
+        // status de alguno es finalizado. En ese caso se pondra como inactivo. Puedo tomar directamente el nuevo loan, cambiarlo ahi y guardar. (Hay que verificar si updatearia el que ya existe en la base en este caso)
+        // se hace en api 2 tomando los status pendiente
+    }
+
+
 
 
 }

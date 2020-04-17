@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 @Slf4j
-@Component
 public class AnswerCategoryFactory {
     private static final Integer AMOUNT_CHILDREN = 11;
     private static final Integer AMOUNT_KINSMAN = 3;

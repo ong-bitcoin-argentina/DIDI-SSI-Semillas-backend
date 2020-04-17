@@ -31,53 +31,60 @@ public class SurveyExcelParseService extends ExcelParseService {
      */
 
     @Autowired
-    private AnswerCategoryFactory answerCategoryFactory;
-
-    @Autowired
     private CredentialService credentialService;
 
-
-    /**
-     * currentForm is shared between the whole Excel file.
-     * it must be @Autowired to keep state of previous row key data,
-     * in order to allow currentForm.isRowFromSameForm() to work properly.
-     */
-    @Autowired
+    private AnswerRow answerRow;
+    private AnswerCategoryFactory answerCategoryFactory;
     private SurveyForm currentForm;
+    private List<SurveyForm> surveyFormList;
 
-    private List<SurveyForm> surveyFormList = new ArrayList<>();
+
+    public SurveyExcelParseService(){
+        initializeObjects();
+    }
+
+    public void initializeObjects(){
+        if (answerCategoryFactory == null)
+            answerCategoryFactory = new AnswerCategoryFactory();
+        if (currentForm == null)
+            currentForm = new SurveyForm();
+        if (surveyFormList == null)
+            surveyFormList = new ArrayList<>();
+        answerRow = null;
+    }
+
+    public void clearObjects(){
+        currentForm = null;
+        answerCategoryFactory = null;
+        surveyFormList.clear();
+        surveyFormList = null;
+    }
 
     @Override
     public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult){
 
-        AnswerRow answerRow = null;
+        initializeObjects();
+
         try {
             answerRow = new AnswerRow(currentRow);
         } catch (InvalidRowException e) {
             processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
         }
 
-        processExcelFileResult.addTotalRow();
+        processExcelFileResult.addTotalReadRow();
 
         if (answerRow != null) {
             if (answerRow.hasFormKeyValues()) {
-                processExcelFileResult.addValidRows();
-                processExcelFileResult.addInsertedRows();
+                processExcelFileResult.addTotalValidRows();
 
-                if (currentForm.isEmpty())
-                    currentForm.initialize(answerRow);
-
-                if (!currentForm.isRowFromSameForm(answerRow)) {
+                if (!currentForm.isRowFromSameForm(answerRow))
                     endOfFormHandler(processExcelFileResult);
-                    currentForm.reset();
-                    currentForm.initialize(answerRow);
-                    //Also reset Factory:
-                    answerCategoryFactory.reset();
-                }
 
                 addCategoryDataIntoForm(answerRow, processExcelFileResult);
                 log.info("OK:" + answerRow.toString());
             }
+            else
+                processExcelFileResult.addEmptyRow();
         }
         if(!hasNext)
             endOfFileHandler(processExcelFileResult);
@@ -90,9 +97,6 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             Category category = answerCategoryFactory.get(answerRow.getCategory());
             category.loadData(answerRow, processExcelFileResult);
-            //if (!answerRow.getErrorMessage().isEmpty()){
-            //    processExcelFileResult.addRowError(answerRow.getRowNum(), "ENTENDER ERROR CUAL ES");
-            //}
             currentForm.addCategory(category);
         }
         catch ( InvalidCategoryException e){
@@ -105,8 +109,10 @@ public class SurveyExcelParseService extends ExcelParseService {
 
     private void endOfFormHandler(ProcessExcelFileResult processExcelFileResult){
         log.info("endOfFormHandler -> add form to surveyFormList");
-        processExcelFileResult.addProcessedForms();
+        processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
+        currentForm = new SurveyForm(answerRow);
+        answerCategoryFactory = new AnswerCategoryFactory();
     }
     private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
         this.endOfFormHandler(processExcelFileResult);
@@ -128,5 +134,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");
 
+
+        clearObjects();
     }
 }

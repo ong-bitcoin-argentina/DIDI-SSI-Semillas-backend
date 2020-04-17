@@ -121,7 +121,7 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
         ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(tmpFilePath);
 
         log.info(processExcelFileResult.toString());
-        assertEquals(32, processExcelFileResult.getTotalInsertedRows());
+        assertEquals(32, processExcelFileResult.getTotalValidRows());
     }
 
     @Test

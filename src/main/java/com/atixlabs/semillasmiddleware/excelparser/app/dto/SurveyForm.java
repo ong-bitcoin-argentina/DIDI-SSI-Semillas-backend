@@ -14,16 +14,10 @@ import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.util.ArrayList;
 
-@Component
 @Getter
 @Setter
 @Slf4j
 public class SurveyForm {
-
-    //@Autowired
-    //private ProcessExcelFileResult processExcelFileResult;
-
-    //key form:
     @DateTimeFormat(pattern = "dd/MM/yy")
     @Temporal(TemporalType.DATE)
     private LocalDate surveyDate = null;
@@ -43,8 +37,10 @@ public class SurveyForm {
                 '}';
     }
 
-    public boolean isEmpty(){
-        return this.pdv == null || this.surveyDate == null || this.surveyFormCode == null;
+    public SurveyForm(){}
+
+    public SurveyForm(AnswerRow answerRow){
+        initialize(answerRow);
     }
 
     public void initialize(AnswerRow answerRow){
@@ -54,17 +50,20 @@ public class SurveyForm {
         this.pdv = answerRow.getPdv();
     }
 
+    public boolean isEmpty(){
+        return this.pdv == null || this.surveyDate == null || this.surveyFormCode == null;
+    }
+
     public boolean isRowFromSameForm(AnswerRow answerRow){
+
+        if(this.isEmpty()) {
+            this.initialize(answerRow);
+            return true;
+        }
+
         return this.pdv.equals(answerRow.getPdv())
                 && this.surveyDate.isEqual(answerRow.getSurveyDate())
                 && this.surveyFormCode.equals(answerRow.getSurveyFormCode());
-    }
-
-    public void reset(){
-        this.surveyFormCode = null;
-        this.surveyDate = null;
-        this.pdv = null;
-        categoryList.clear();
     }
 
     public void addCategory(Category category) {

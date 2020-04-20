@@ -2,12 +2,14 @@ package com.atixlabs.semillasmiddleware.app.bondarea.model;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
 @Getter
@@ -17,6 +19,17 @@ import java.time.format.DateTimeFormatter;
 @ToString
 public class Loan extends AuditableEntity {
 
+    @PrePersist
+    private void preSetValues(){
+        if(this.isActive == null)
+            this.isActive = true;
+        if(this.isDeleted == null)
+            this.isDeleted = false;
+        if(this.pending == null)
+            this.pending = false;
+    }
+
+
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
@@ -24,7 +37,7 @@ public class Loan extends AuditableEntity {
     private Long dniPerson;
 
     @Column(columnDefinition = "boolean default true") //TODO check this functionality
-    private Boolean isActive; //Active or Inactive ? or another thing -> por mora inactivo
+    private Boolean isActive;
 
     @Column(columnDefinition = "boolean default false")
     private Boolean isDeleted;
@@ -60,15 +73,10 @@ public class Loan extends AuditableEntity {
 
     private Float expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
-    @PrePersist
-    private void preSetValues(){
-        if(this.isActive == null)
-            this.isActive = true;
-        if(this.isDeleted == null)
-            this.isDeleted = false;
-        if(this.pending == null)
-            this.pending = false;
-    }
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime modifiedTime;
+
+
 
     public Loan(BondareaLoanDto loanDto) {
         this.dniPerson = loanDto.getDni();

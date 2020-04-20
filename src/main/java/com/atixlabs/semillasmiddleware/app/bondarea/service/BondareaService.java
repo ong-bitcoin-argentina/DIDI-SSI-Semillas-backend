@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -18,10 +19,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.net.SocketTimeoutException;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -60,8 +61,6 @@ public class BondareaService {
 
 
 
-
-
     //contains json converter and date format configuration
     private Gson gson = null;
 
@@ -97,6 +96,10 @@ public class BondareaService {
 
     }
 
+    /**
+     * MOCK PURPOSE
+     * @return BpndareaLoanDto
+     */
     private BondareaLoanDto getMockBondareaLoan(){
         BondareaLoanDto loan = new BondareaLoanDto();
         loan.setIdBondareaLoan("1L");
@@ -110,6 +113,12 @@ public class BondareaService {
     }
 
 
+    /**
+     * MOCK PURPOSE
+     * @param idAccount
+     * @param loanState
+     * @return
+     */
     public List<BondareaLoanDto> getMockLoans(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
@@ -131,6 +140,12 @@ public class BondareaService {
         return loans;
     }
 
+    /**
+     * MOCK PURPOSE
+     * @param idAccount
+     * @param loanState
+     * @return
+     */
     public List<BondareaLoanDto> secondLoansDataAllNew(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
@@ -164,32 +179,27 @@ public class BondareaService {
     public List<BondareaLoanDto> getLoans(String idAccount, String loanState) throws Exception {
 
         initializeBondareaApi();
-        log.info("getLoans:");
+        log.info("getBondareaLoans:");
 
         //Fill url params
         loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m";
 
 
         Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, /*idAccount,*/ loanColumns, loanState);
-        log.info("url request " + callSync.request().url());
 
         BondareaLoanResponse bondareaLoanResponse;
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
-            log.info("el response envio ... " + response.raw().toString());
-            log.info("Response getLoans status : " + response.code() + " " + response.message());
 
             if (response.code() == 200) {
                 bondareaLoanResponse = response.body();
-                log.info("RESPONSE:");
                 log.info("Response body " + response.body());
-                log.info("  " + bondareaLoanResponse.toString());
-
             }
             else
             {
                 return Collections.emptyList();
             }
+
         }catch(JsonSyntaxException  ex){
             log.error(" Bondarea retrieved object does not match with model ", ex);
             throw new Exception("retrived object does not match with model ");
@@ -208,52 +218,52 @@ public class BondareaService {
 
     }
 
-    //Second endpoint -> request for one id and get the status
+   
 
 
     public void updateExistingLoans(List<Loan> newLoans) {
-        List<Loan> existingLoans = loanRepository.findAll();
+        //List<Loan> existingLoans = loanRepository.findAll();
 
-
-        List<String> idsExistingLoans = existingLoans.stream().map(Loan::getIdBondareaLoan).collect(Collectors.toList());
-        List<String> idsNewLoans = newLoans.stream().map(Loan::getIdBondareaLoan).collect(Collectors.toList());
-
-        //idsExistingLoans now have the ids that no longer exist in the new loan list
-        idsExistingLoans.removeAll(idsNewLoans);
-
-        for (Loan existingLoan : existingLoans) {
-            //Search for the loan that has been deleated in the new list
-            if (idsExistingLoans.contains(existingLoan.getIdBondareaLoan())) {
-                //this loan has been deleted on the new list, so this loan needs to be checked (is eliminated or is terminated)
-                existingLoan.setPending(true);
-                loanRepository.save(existingLoan);
-            }
-        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
+        LocalDateTime updateTime = new DateUtil().getLocalDateTimeNowWithFormat(formatter);
 
         //update or create loans
-
         for (Loan loanToSave : newLoans) {
             //if the newLoan existed previously -> update. Else create.
-            Optional<Loan> opLoanToUpdate = existingLoans.stream().filter(previousLoan -> previousLoan.getIdBondareaLoan().equals(loanToSave.getIdBondareaLoan())).findFirst();
+            Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanToSave.getIdBondareaLoan());
             //There is a previous loan
             if (opLoanToUpdate.isPresent()) {
-                if (loanToSave.getExpiredAmount() > 0.0) {
-                    loanToSave.setIsActive(false);
-                }
-                    //update
-                    Loan loanToUpdate = opLoanToUpdate.get();
-                    loanToUpdate.merge(loanToSave);
-                    loanRepository.save(loanToUpdate);
-
-            }
-            else {
+                //update
+                Loan loanToUpdate = opLoanToUpdate.get();
+                loanToUpdate.setModifiedTime(updateTime);
+                loanToUpdate.merge(loanToSave);
+                loanRepository.save(loanToUpdate);
+            } else {
                 //create
                 loanRepository.save(loanToSave);
             }
+        }
+
+        List<Loan> loansToReview = loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(updateTime);
+        for (Loan existingLoan : loansToReview) {
+            //this loan has been deleted on the new list, so this loan needs to be checked (is eliminated or is terminated)
+            existingLoan.setPending(true);
+            loanRepository.save(existingLoan);
+        }
+
+    }
+
+    /**
+     * This method check if pending loans are deleted/canceled or finished, then update this status
+     */
+    //This method is incomplete
+    public void validatePendingLoans() throws Exception {
+        List<Loan> pendingLoans = loanRepository.findAllByPending(true);
+
+        for (Loan pendingLoan: pendingLoans) {
+                BondareaLoanDto loanDto = getLoanState(pendingLoan.getIdBondareaLoan());
 
         }
-        // status de alguno es finalizado. En ese caso se pondra como inactivo. Puedo tomar directamente el nuevo loan, cambiarlo ahi y guardar. (Hay que verificar si updatearia el que ya existe en la base en este caso)
-        // se hace en api 2 tomando los status pendiente
     }
 
 

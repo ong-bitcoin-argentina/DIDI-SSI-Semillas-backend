@@ -95,6 +95,9 @@ public class AnswerRow extends ExcelRow {
         return null;
     }
     public LocalDate getAnswerAsDate(String datePattern){
+
+
+
         if (answer == null)
             return null;
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
@@ -134,7 +137,7 @@ public class AnswerRow extends ExcelRow {
             case "java.lang.Double":
                 return getAnswerAsDouble();
             case "java.time.LocalDate":
-                return getAnswerAsDate("dd/MM/yy");
+                return getAnswerAsDate("dd/MM/yyyy");
             case "java.lang.Long":
                 return getAnswerAsLong();
         }

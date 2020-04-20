@@ -218,7 +218,36 @@ public class BondareaService {
 
     }
 
-   
+    //Second endpoint -> request for one id and get the status
+    public BondareaLoanDto getLoanState(String idBocs) throws Exception {
+        initializeBondareaApi();
+        log.info("getBondareaLoanState:");
+
+        Call<BondareaLoanDto> callSync = bondareaEndpoint.getLoanState("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, idBocs);
+
+        BondareaLoanDto loanDto = null;
+        try {
+            Response<BondareaLoanDto> response = callSync.execute();
+            if (response.code() == 200) {
+                loanDto = response.body();
+                log.info("Response body " + response.body());
+            }
+            else
+            {
+                return null;
+            }
+
+        }
+        catch (SocketTimeoutException ex){
+            log.error(" Bondarea timeout ", ex);
+        }
+
+        catch(Exception ex){
+            log.error("Bondarea error ", ex);
+        }
+
+        return loanDto;
+    }
 
 
     public void updateExistingLoans(List<Loan> newLoans) {
@@ -262,6 +291,7 @@ public class BondareaService {
 
         for (Loan pendingLoan: pendingLoans) {
                 BondareaLoanDto loanDto = getLoanState(pendingLoan.getIdBondareaLoan());
+                //a la espera de info sobre endpoint
 
         }
     }

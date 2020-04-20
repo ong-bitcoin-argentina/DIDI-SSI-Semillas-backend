@@ -40,6 +40,7 @@ public class BondareaController {
             loansDto = bondareaService.secondLoansDataAllNew("","");
             List<Loan> loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);
+            bondareaService.validatePendingLoans();
 
         }
         catch (Exception ex){

@@ -36,10 +36,10 @@ public class Loan extends AuditableEntity {
 
     private Long dniPerson;
 
-    @Column(columnDefinition = "boolean default true") //TODO check this functionality
+    //@Column(columnDefinition = "boolean default true") //TODO check this functionality. Is not working
     private Boolean isActive;
 
-    @Column(columnDefinition = "boolean default false")
+    //@Column(columnDefinition = "boolean default false")
     private Boolean isDeleted;
 
     private String idBondareaLoan;
@@ -52,7 +52,7 @@ public class Loan extends AuditableEntity {
 
     private String statusDescription; // Deccripcion de estado ?
 
-    @Column(columnDefinition = "boolean default false")
+    //@Column(columnDefinition = "boolean default false")
     private Boolean pending;
 
     private String idIndividual; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)

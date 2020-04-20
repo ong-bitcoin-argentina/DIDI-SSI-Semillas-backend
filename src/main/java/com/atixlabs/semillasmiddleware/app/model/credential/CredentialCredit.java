@@ -7,6 +7,9 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
+import javax.persistence.Entity;
+import javax.persistence.PrimaryKeyJoinColumn;
+import javax.persistence.Transient;
 
 
 @NoArgsConstructor
@@ -56,10 +59,14 @@ public class CredentialCredit extends Credential {
 
     }
 
+    @Transient
+    private String credentialType = "CredentialCredit";
+
+
     @Override
     public String toString() {
         return "CredentialCredit{" +
-  //              "idCredit=" + idCredit +
+                //"idCredit=" + idCredit +
                 ", creditName='" + creditName + '\'' +
                 ", idGroup=" + idGroup +
                 ", groupName='" + groupName + '\'' +
@@ -68,9 +75,7 @@ public class CredentialCredit extends Credential {
                 ", creditState='" + creditState + '\'' +
                 ", amount=" + amount +
                 ", dniBeneficiary=" + beneficiaryDocumentNumber +
-                "} " + super.toString();
+                ", credentialType=" + credentialType +
+                '}' + super.toString();
     }
-
-
-
 }

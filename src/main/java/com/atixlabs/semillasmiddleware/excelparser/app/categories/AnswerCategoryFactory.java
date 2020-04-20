@@ -17,14 +17,22 @@ import java.util.Map;
 public class AnswerCategoryFactory {
     private static final Integer AMOUNT_CHILDREN = 11;
     private static final Integer AMOUNT_KINSMAN = 3;
+    private static final String BENEFICIARY_CATEGORY_NAME="DATOS DEL BENEFICIARIO";
+    private static final String SPOUSE_CATEGORY_NAME="DATOS DEL CONYUGE";
+    private static final String CHILD_CATEGORY_NAME="DATOS HIJO";
+    private static final String KINSMAN_CATEGORY_NAME="OTRO MIEMBRO DE LA FAMILIA";
+    private static final String ENTREPRENEURSHIP_CATEGORY_NAME="EMPRENDIMIENTO";
+    private static final String DWELLING_CATEGORY_NAME="VIVIENDA";
+
+
 
     private static Map<String, Class<?>> CATEGORIES_TYPE = new HashMap<String, Class<?>>() {{
-        put("DATOS DEL BENEFICIARIO", PersonCategory.class);
-        put("DATOS DEL CONYUGE", PersonCategory.class);
-        put("DATOS HIJO", PersonCategory.class);
-        put("OTRO MIEMBRO DE LA FAMILIA", PersonCategory.class);
-        put("EMPRENDIMIENTO", EntrepreneurshipCategory.class);
-        put("VIVIENDA", DwellingCategory.class);
+        put(BENEFICIARY_CATEGORY_NAME, PersonCategory.class);
+        put(SPOUSE_CATEGORY_NAME, PersonCategory.class);
+        put(CHILD_CATEGORY_NAME, PersonCategory.class);
+        put(KINSMAN_CATEGORY_NAME, PersonCategory.class);
+        put(ENTREPRENEURSHIP_CATEGORY_NAME, EntrepreneurshipCategory.class);
+        put(DWELLING_CATEGORY_NAME, DwellingCategory.class);
     }};
 
 
@@ -37,20 +45,20 @@ public class AnswerCategoryFactory {
 
     private void generateCategoriesDinamically(){
         this.categories = new HashMap<String,Category>(){{
-            put("DATOS DEL BENEFICIARIO", null);
-            put("DATOS DEL CONYUGE", null);
-            put("EMPRENDIMIENTO", null);
-            put("VIVIENDA", null);
+            put(BENEFICIARY_CATEGORY_NAME, null);
+            put(SPOUSE_CATEGORY_NAME, null);
+            put(ENTREPRENEURSHIP_CATEGORY_NAME, null);
+            put(DWELLING_CATEGORY_NAME, null);
         }};
 
         //Generates children keys dinamically
         for (int i = 1; i < AMOUNT_CHILDREN+1; i++) {
-            categories.put("DATOS HIJO " + i, null);
+            categories.put(CHILD_CATEGORY_NAME +" "+ i, null);
         }
 
         //Generates family members' keys dinamically
         for (int i = 1; i < AMOUNT_KINSMAN+1; i++) {
-            categories.put("OTRO MIEMBRO DE LA FAMILIA " + i, null);
+            categories.put(KINSMAN_CATEGORY_NAME + " " + i, null);
         }
     }
 

@@ -1,14 +1,11 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
-//import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.time.LocalDate;
 @Slf4j
 @Setter
 @Getter
@@ -37,7 +34,14 @@ public class AnswerDto {
     public boolean isValid(ProcessExcelFileResult processExcelFileResult){
 
         if (question.isRequired() && answerIsEmpty()){
-            processExcelFileResult.addRowError(cellLocation, question.getQuestionName() + " es un campo requerido");
+            //If the question does not exist in the form:
+            if (cellLocation == null){
+                processExcelFileResult.addRowError(String.format("La pregunta %s no existe",question.getQuestionName()), String.format("%s es un campo requerido", question.getQuestionName()));
+            }
+            //If the question does exists in the form but its answer is empty:
+            else{
+                processExcelFileResult.addRowError(cellLocation, String.format("%s es un campo requerido", question.getQuestionName()));
+            }
             return false;
         }
         return true;

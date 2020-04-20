@@ -229,13 +229,13 @@ public class BondareaService {
 
         //update or create loans
         for (Loan loanToSave : newLoans) {
+            loanToSave.setModifiedTime(updateTime);
             //if the newLoan existed previously -> update. Else create.
             Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanToSave.getIdBondareaLoan());
             //There is a previous loan
             if (opLoanToUpdate.isPresent()) {
                 //update
                 Loan loanToUpdate = opLoanToUpdate.get();
-                loanToUpdate.setModifiedTime(updateTime);
                 loanToUpdate.merge(loanToSave);
                 loanRepository.save(loanToUpdate);
             } else {
@@ -253,18 +253,7 @@ public class BondareaService {
 
     }
 
-    /**
-     * This method check if pending loans are deleted/canceled or finished, then update this status
-     */
-    //This method is incomplete
-    public void validatePendingLoans() throws Exception {
-        List<Loan> pendingLoans = loanRepository.findAllByPending(true);
 
-        for (Loan pendingLoan: pendingLoans) {
-                BondareaLoanDto loanDto = getLoanState(pendingLoan.getIdBondareaLoan());
-
-        }
-    }
 
 
 

@@ -120,7 +120,7 @@ public class Loan extends AuditableEntity {
 
         this.dniPerson = loanToUpdate.getDniPerson();
 
-        this.isActive = loanToUpdate.getIsActive();
+        //this.isActive = loanToUpdate.getIsActive();
         //this.isDeleted = loanToUpdate.getIsDeleted();
         //this.pending = loanToUpdate.getPending();
 
@@ -151,6 +151,8 @@ public class Loan extends AuditableEntity {
         this.dateFirstInstalment = loanToUpdate.getDateFirstInstalment();
 
         this.expiredAmount = loanToUpdate.getExpiredAmount();
+
+        this.modifiedTime = loanToUpdate.getModifiedTime();
 
     }
 

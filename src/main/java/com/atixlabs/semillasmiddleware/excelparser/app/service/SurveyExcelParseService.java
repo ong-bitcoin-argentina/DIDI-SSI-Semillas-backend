@@ -77,8 +77,11 @@ public class SurveyExcelParseService extends ExcelParseService {
             if (answerRow.hasFormKeyValues()) {
                 processExcelFileResult.addTotalValidRows();
 
-                if (!currentForm.isRowFromSameForm(answerRow))
+                if (!currentForm.isRowFromSameForm(answerRow)) {
                     endOfFormHandler(processExcelFileResult);
+                    currentForm = new SurveyForm(answerRow);
+                    answerCategoryFactory = new AnswerCategoryFactory();
+                }
 
                 addCategoryDataIntoForm(answerRow, processExcelFileResult);
                 log.info("OK:" + answerRow.toString());
@@ -111,8 +114,6 @@ public class SurveyExcelParseService extends ExcelParseService {
         log.info("endOfFormHandler -> add form to surveyFormList");
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
-        currentForm = new SurveyForm(answerRow);
-        answerCategoryFactory = new AnswerCategoryFactory();
     }
     private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
         this.endOfFormHandler(processExcelFileResult);

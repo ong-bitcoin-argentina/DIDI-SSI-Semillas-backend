@@ -131,7 +131,7 @@ public class BondareaService {
         return loans;
     }
 
-    public List<BondareaLoanDto> secondLoansDataAllNew(){
+    public List<BondareaLoanDto> secondLoansDataAllNew(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         //id 1 is deleted
@@ -212,15 +212,13 @@ public class BondareaService {
 
 
     public void updateExistingLoans(List<Loan> newLoans) {
-       // List<Loan> finalLoans = new ArrayList<>();
-
         List<Loan> existingLoans = loanRepository.findAll();
 
 
         List<String> idsExistingLoans = existingLoans.stream().map(Loan::getIdBondareaLoan).collect(Collectors.toList());
         List<String> idsNewLoans = newLoans.stream().map(Loan::getIdBondareaLoan).collect(Collectors.toList());
 
-        //idsExistingLoans now have the ids that no loger exist in the new loan list
+        //idsExistingLoans now have the ids that no longer exist in the new loan list
         idsExistingLoans.removeAll(idsNewLoans);
 
         for (Loan existingLoan : existingLoans) {
@@ -232,28 +230,28 @@ public class BondareaService {
             }
         }
 
-        //update the existing loans
+        //update or create loans
 
         for (Loan loanToSave : newLoans) {
             //if the newLoan existed previously -> update. Else create.
             Optional<Loan> opLoanToUpdate = existingLoans.stream().filter(previousLoan -> previousLoan.getIdBondareaLoan().equals(loanToSave.getIdBondareaLoan())).findFirst();
+            //There is a previous loan
             if (opLoanToUpdate.isPresent()) {
-                // if(newLoan.getStatus() == 60) { //60 -> finalizado (esto va en la segunda api)
                 if (loanToSave.getExpiredAmount() > 0.0) {
                     loanToSave.setIsActive(false);
                 }
-
+                    //update
                     Loan loanToUpdate = opLoanToUpdate.get();
                     loanToUpdate.merge(loanToSave);
                     loanRepository.save(loanToUpdate);
 
             }
             else {
+                //create
                 loanRepository.save(loanToSave);
             }
 
         }
-        //loanRepository.saveAll(finalLoans);
         // status de alguno es finalizado. En ese caso se pondra como inactivo. Puedo tomar directamente el nuevo loan, cambiarlo ahi y guardar. (Hay que verificar si updatearia el que ya existe en la base en este caso)
         // se hace en api 2 tomando los status pendiente
     }

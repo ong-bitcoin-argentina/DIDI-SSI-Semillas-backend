@@ -60,6 +60,15 @@ public class Loan extends AuditableEntity {
 
     private Float expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
+    @PrePersist
+    private void preSetValues(){
+        if(this.isActive == null)
+            this.isActive = true;
+        if(this.isDeleted == null)
+            this.isDeleted = false;
+        if(this.pending == null)
+            this.pending = false;
+    }
 
     public Loan(BondareaLoanDto loanDto) {
         this.dniPerson = loanDto.getDni();
@@ -103,7 +112,9 @@ public class Loan extends AuditableEntity {
 
         this.dniPerson = loanToUpdate.getDniPerson();
 
-        this.isActive = loanToUpdate.getIsActive();
+        //this.isActive = loanToUpdate.getIsActive();
+        //this.isDeleted = loanToUpdate.getIsDeleted();
+        //this.pending = loanToUpdate.getPending();
 
         this.idBondareaLoan = loanToUpdate.getIdBondareaLoan();
 

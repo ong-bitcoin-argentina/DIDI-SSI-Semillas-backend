@@ -52,6 +52,8 @@ public abstract class ExcelParseService {
             processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
         }
 
+        fileInput.close();
+
         return processExcelFileResult;
     }
 

@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.filemanager.controller;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidAnswerCastException;
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
@@ -112,7 +113,7 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
     }
 
     @Test
-    public void answerConversion(){
+    public void answerConversion() throws InvalidAnswerCastException {
 
         AnswerRow answerRow = new AnswerRow();
         answerRow.setAnswer("1");

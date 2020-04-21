@@ -22,7 +22,7 @@ public class AnswerDto {
     public void setAnswer(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
         this.cellLocation = answerRow.getCellIndexName();
         try{
-            this.answer = answerRow.getAnswerAs(question.getDataType());
+            this.answer = answerRow.getAnswerAs(question.getDataType(),processExcelFileResult,cellLocation);
         }
         catch (Exception e){
             //excelfileresult add error row

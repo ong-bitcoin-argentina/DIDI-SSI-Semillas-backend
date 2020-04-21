@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidAnswerCastException;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.row.ExcelRow;
@@ -64,48 +65,44 @@ public class AnswerRow extends ExcelRow {
     public String getAnswerAsString(){
         return answer;
     }
-    public Double getAnswerAsDouble(){
+    public Double getAnswerAsDouble() throws InvalidAnswerCastException {
         if (answer == null)
             return null;
         try { return Double.valueOf(answer);}
         catch (NumberFormatException e){
+            throw new InvalidAnswerCastException(getAnswerAsString(), "valor numérico");
             //this.errorMessage = "String to Double conversion failed on: "+answer;
-            //processExcelFileResult.addRowError(this.getRowNum(), "String to Double conversion failed on: "+answer);
         }
-        return null;
     }
-    public Long getAnswerAsLong(){
+    public Long getAnswerAsLong() throws InvalidAnswerCastException {
         if (answer == null)
             return null;
         try {return Long.valueOf(answer);}
         catch (NumberFormatException e){
+            throw new InvalidAnswerCastException(getAnswerAsString(), "valor numérico");
             //this.errorMessage = "String to Long conversion failed on: "+answer;
-            //processExcelFileResult.addRowError(this.getRowNum(), "String to Long conversion failed on: "+answer);
         }
-        return null;
     }
-    public Integer getAnswerAsInteger(){
+    public Integer getAnswerAsInteger() throws InvalidAnswerCastException {
         if (answer == null)
             return null;
         try {return Integer.valueOf(answer);}
         catch (NumberFormatException e){
+            throw new InvalidAnswerCastException(getAnswerAsString(), "valor numérico");
             //this.errorMessage = "String to Integer conversion failed on: "+answer;
-            //processExcelFileResult.addRowError(this.getRowNum(), "String to Integer conversion failed on: "+answer);
         }
-        return null;
     }
-    public LocalDate getAnswerAsDate(String datePattern){
+    public LocalDate getAnswerAsDate(String datePattern) throws InvalidAnswerCastException {
         if (answer == null)
             return null;
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
-        catch (NumberFormatException e){
+        catch (Exception e){
+            throw new InvalidAnswerCastException(getAnswerAsString(), "fecha");
             //this.errorMessage = "String to Date conversion failed from "+answer+" to "+datePattern;
-            //processExcelFileResult.addRowError(this.getRowNum(), "String to Date conversion failed on: "+answer);
         }
-        return null;
     }
 
-    public LocalDate getCellStringToDate(Row row, int cellIndex, String description){
+    public LocalDate getCellStringToDate(Row row, int cellIndex, String description) {
         String dateString = null;
         String datePattern = "dd/MM/yy";
         try {
@@ -113,37 +110,30 @@ public class AnswerRow extends ExcelRow {
             return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(datePattern));
         }
         catch (Exception e){
+           // throw new InvalidAnswerCastException(getAnswerAsString(), "fecha");
             //this.errorMessage = "String to Date conversion failed from "+dateString+" to "+datePattern;
-            //processExcelFileResult.addRowError(this.getRowNum(), "String to Date conversion failed from "+dateString+" to "+datePattern);
         }
         return null;
     }
 
-    /*private final Map<Class<?>,Object> castMethods = new HashMap<>()
-    {{
-        put(String.class,getAnswerAsString());
-        put(Long.class,getAnswerAsLong());
-        put(Double.class,getAnswerAsDouble());
-        put(LocalDate.class,getAnswerAsDate("dd/MM/yy"));
-    }};*/
-
-    public Object getAnswerAs(Class<?> dataType) {
-        switch (dataType.getName()){
-            case "java.lang.String":
-                return getAnswerAsString();
-            case "java.lang.Double":
-                return getAnswerAsDouble();
-            case "java.time.LocalDate":
-                return getAnswerAsDate("dd/MM/yy");
-            case "java.lang.Long":
-                return getAnswerAsLong();
+    public Object getAnswerAs(Class<?> dataType, ProcessExcelFileResult processExcelFileResult, String cellLocation) {
+        try {
+            switch (dataType.getName()) {
+                case "java.lang.String":
+                    return getAnswerAsString();
+                case "java.lang.Double":
+                    return getAnswerAsDouble();
+                case "java.time.LocalDate":
+                    return getAnswerAsDate("dd/MM/yyyy");
+                case "java.lang.Long":
+                    return getAnswerAsLong();
+            }
         }
-        //System.out.println("DATA TYPE en getAnswerAs: " + dataType.toString());
-        //System.out.println("CAST METHOD GET : "+castMethods.get(dataType).toString());
-        //return castMethods.get(dataType);
-        return null;
+        catch (InvalidAnswerCastException e){
+            processExcelFileResult.addRowError(cellLocation,e.getMessage());
+        }
+    return null;
     }
-
 
     @Override
     public String toString() {

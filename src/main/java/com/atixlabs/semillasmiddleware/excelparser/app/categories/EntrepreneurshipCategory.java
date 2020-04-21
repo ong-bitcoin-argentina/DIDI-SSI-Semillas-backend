@@ -83,7 +83,7 @@ public class EntrepreneurshipCategory implements Category {
         answers.add(this.address);
         answers.add(this.activityEndingDate);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, "Emprendimiento")).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 

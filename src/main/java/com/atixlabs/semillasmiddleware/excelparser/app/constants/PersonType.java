@@ -17,7 +17,7 @@ public enum PersonType {
         this.type = type;
     }
 
-    private String getType(){
+    public String getType(){
         return this.type;
     }
 

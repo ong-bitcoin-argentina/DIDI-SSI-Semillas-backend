@@ -55,7 +55,7 @@ public class DwellingCategory implements Category {
         answers.add(this.holdingType);
         answers.add(this.district);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, "Vivienda")).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 

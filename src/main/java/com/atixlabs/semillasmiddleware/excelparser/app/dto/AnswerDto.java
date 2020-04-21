@@ -31,16 +31,16 @@ public class AnswerDto {
         }
     }
 
-    public boolean isValid(ProcessExcelFileResult processExcelFileResult){
+    public boolean isValid(ProcessExcelFileResult processExcelFileResult, String categoryBeingChecked){
 
         if (question.isRequired() && answerIsEmpty()){
             //If the question does not exist in the form:
             if (cellLocation == null){
-                processExcelFileResult.addRowError(String.format("La pregunta %s no existe",question.getQuestionName()), String.format("%s es un campo requerido", question.getQuestionName()));
+                processExcelFileResult.addRowError(String.format("Categoría %s",categoryBeingChecked), String.format("la pregunta %s no existe y es obligatoria", question.getQuestionName()));
             }
             //If the question does exists in the form but its answer is empty:
             else{
-                processExcelFileResult.addRowError(cellLocation, String.format("%s es un campo requerido", question.getQuestionName()));
+                processExcelFileResult.addRowError(cellLocation, String.format("la pregunta %s esta vacía y es obligatoria", question.getQuestionName()));
             }
             return false;
         }

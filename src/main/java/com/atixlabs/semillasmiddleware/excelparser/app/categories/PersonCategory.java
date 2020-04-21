@@ -95,7 +95,7 @@ public class PersonCategory implements Category {
         answers.add(this.birthdate);
         answers.add(this.relation);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, personType.getType())).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 

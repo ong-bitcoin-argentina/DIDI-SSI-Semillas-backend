@@ -2,9 +2,8 @@ package com.atixlabs.semillasmiddleware.filemanager.controller;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
-import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidCategoryException;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.filemanager.exception.EmptyFileException;
-import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;

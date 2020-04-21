@@ -1,16 +1,12 @@
 package com.atixlabs.semillasmiddleware.excelparser.service;
 
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
-import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidCategoryException;
-import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
-import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.apache.tomcat.jni.Proc;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.*;

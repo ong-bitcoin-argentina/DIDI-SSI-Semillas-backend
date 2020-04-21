@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.dto;
 
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.util.ArrayList;
@@ -9,56 +10,54 @@ import java.util.List;
 /**
  * This class represents the final result of the processing of a file
  */
+@NoArgsConstructor
 @Getter
 @Setter
 public class ProcessExcelFileResult {
 
-    private int totalRows = 0;
-    private int validRows = 0;
-    private int totalInsertedRows = 0;
+    private int totalReadRows = 0;
+    private int totalValidRows = 0;
     private int totalErrorsRows = 0;
-    private int totalDeletedRows = 0;
-    private List<String> errorRows = new ArrayList<String>();
+    private int totalEmptyRows = 0;
+    private int totalProcessedForms = 0;
     private String fileName = null;
-    private boolean isFileValid = true;
+    private boolean fileValid = true;
     private String fileError = null;
 
-    public void addRowError(List<String> errors){
-        this.getErrorRows().addAll(errors);
+    private List<ExcelErrorDetail> errorRows = new ArrayList<>();
+
+    public void addRowError(Integer errorHeader, String errorBody){
+        this.errorRows.add(new ExcelErrorDetail(String.valueOf(errorHeader), errorBody));
         this.totalErrorsRows++;
-        this.addTotalRow();
     }
 
-    public void addRowError(String error){
-        this.getErrorRows().add(error);
+    public void addRowError(String errorHeader, String errorBody){
+        this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody));
         this.totalErrorsRows++;
-        this.addTotalRow();
     }
 
-    public void addTotalRow(){
-        this.totalRows++;
+    public void addTotalReadRow(){
+        this.totalReadRows++;
     }
+    public void addTotalValidRows(){
+        this.totalValidRows++;
+    }
+    public void addEmptyRow(){this.totalEmptyRows++;}
+    public void addTotalProcessedForms(){ this.totalProcessedForms++;}
 
-    public void addInsertedRows(){
-        totalInsertedRows++;
-    }
-
-    public void addValidRows(){
-        validRows++;
-    }
 
     @Override
     public String toString() {
         return "ProcessExcelFileResult{" +
-                "totalRows=" + totalRows +
-                ", validRows=" + validRows +
-                ", totalInsertedRows=" + totalInsertedRows +
+                "totalReadRows=" + totalReadRows +
+                ", totalValidRows=" + totalValidRows +
                 ", totalErrorsRows=" + totalErrorsRows +
-                ", totalDeletedRows=" + totalDeletedRows +
-                ", errorRows=" + errorRows +
+                ", totalEmptyRows=" + totalEmptyRows +
+                ", totalProcessedForms=" + totalProcessedForms +
                 ", fileName='" + fileName + '\'' +
-                ", isFileValid=" + isFileValid +
+                ", isFileValid=" + fileValid +
                 ", fileError='" + fileError + '\'' +
+                ", errorRows=" + errorRows +
                 '}';
     }
 }

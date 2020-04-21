@@ -1,7 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.service;
 
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
-import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,9 +19,6 @@ import java.util.Optional;
 @Slf4j
 public abstract class ExcelParseService {
 
-    @Autowired
-    FileUtil fileUtil;
-
     /**
      *
      * Levanta el archivo y lee linea por linea
@@ -30,10 +27,15 @@ public abstract class ExcelParseService {
      * @return
      * @throws FileNotFoundException
      */
-    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws IOException, InvalidRowException {
+
+    @Autowired
+    FileUtil fileUtil;
+
+
+    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception, InvalidCategoryException {
         log.info("Validation for file "+filePath+" begins");
 
-        File xlsxFile = this.getFileByPath(filePath);
+        File xlsxFile = fileUtil.getFileByPath(filePath);
 
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         processExcelFileResult.setFileName(filePath);
@@ -46,26 +48,19 @@ public abstract class ExcelParseService {
         Iterator<Row> rowsIterator = sheet.rowIterator();
 
         //está eliminando la linea de cabeceras que por ahora quiero ver:
-        //if (rowsIterator.hasNext())
-        //    rowsIterator.next();
+        if (rowsIterator.hasNext())
+            rowsIterator.next();
 
         while (rowsIterator.hasNext()) {
-            processRow(rowsIterator.next(), processExcelFileResult);
+            processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
         }
+
+        fileInput.close();
 
         return processExcelFileResult;
     }
 
 
-    public abstract void processRow(Row row, ProcessExcelFileResult processExcelFileResult) throws InvalidRowException;
-
-    private File getFileByPath(String path) throws FileNotFoundException {
-        Optional<File> optionalFile;
-        File file = new File(path);
-        optionalFile = file.exists() ? Optional.of(file) : Optional.empty();
-        //TODO make File manager exeception
-        return optionalFile.orElseThrow(() -> new FileNotFoundException(String.format("File %s not exist.",path)));
-    }
-
+    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException;
 
 }

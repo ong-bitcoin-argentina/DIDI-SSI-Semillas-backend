@@ -32,7 +32,7 @@ public class CredentialController {
     @RequestMapping(value = "/createCredit", method = RequestMethod.POST)
     public void createCredit() {
         log.info(" createCredit ");
-        credentialService.addCredentialCredit();
+        credentialService.saveCredentialCreditMock();
     }
 
     @GetMapping

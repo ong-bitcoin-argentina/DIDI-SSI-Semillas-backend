@@ -7,7 +7,6 @@ import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepositoryCustom;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
@@ -29,8 +28,8 @@ import java.util.List;
 import static org.mockito.Mockito.*;
 
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 @Slf4j
 public class CredentialServiceTest {
 
@@ -61,7 +60,7 @@ public class CredentialServiceTest {
         credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfExpiry(LocalDateTime.now().plusDays(1));
-        credential1.setDniBeneficiary(29302594L);
+        credential1.setBeneficiaryDocumentNumber(29302594L);
         credential1.setCreditState("Estado");
         credential1.setBeneficiary(beneficiary);
         credential1.setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());

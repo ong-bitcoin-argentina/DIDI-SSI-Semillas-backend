@@ -1,4 +1,4 @@
-package com.atixlabs.semillasmiddleware.excelparser.exception;
+package com.atixlabs.semillasmiddleware.excelparser.app.exception;
 
 public class InvalidQuestionException extends Exception {
     public InvalidQuestionException(String invalidQuestion){

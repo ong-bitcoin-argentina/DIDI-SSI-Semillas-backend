@@ -6,20 +6,21 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Table(name = "credential")
 @Entity
-@Table
 @Inheritance( strategy = InheritanceType.JOINED )
 public abstract class Credential extends AuditableEntity {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idDidiIssueer;
+    private Long idDidiIssuer;
 
     private Long idDidiReceptor;
 
@@ -46,7 +47,8 @@ public abstract class Credential extends AuditableEntity {
     public String toString() {
         return "Credential{" +
                 "id=" + id +
-                ", idDidiIssueer=" + idDidiIssueer +
+                ", idDidiIssuer=" + idDidiIssuer +
+
                 ", idDidiReceptor=" + idDidiReceptor +
                 ", idDidiCredential=" + idDidiCredential +
                 ", idHistorical=" + idHistorical +

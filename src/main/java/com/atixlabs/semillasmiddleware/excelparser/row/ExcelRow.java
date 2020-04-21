@@ -4,8 +4,11 @@ import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellType;
 import org.apache.poi.ss.usermodel.Row;
+
+import java.util.Iterator;
 
 
 /**
@@ -23,7 +26,7 @@ public abstract class ExcelRow {
     protected String cellIndexName = "None";
     protected String cellIndexDescription = "";
 
-    ExcelRow(Row row) throws InvalidRowException {
+    public ExcelRow(Row row) throws InvalidRowException {
         try {
             this.rowNum = row.getRowNum();
             this.parseRow(row);
@@ -33,7 +36,7 @@ public abstract class ExcelRow {
         }
     }
 
-    String getCellStringValue(Row row, int cellindex, String descripcion) {
+    protected String getCellStringValue(Row row, int cellindex, String descripcion) {
         this.saveCellData(cellindex, descripcion);
         if (row == null || row.getCell(cellindex) == null)
             return null;
@@ -99,5 +102,19 @@ public abstract class ExcelRow {
 
 
     protected abstract void parseRow(Row row);
+
+
+    public String toString(Row row){
+        Iterator<Cell> cellIterator = row.cellIterator();
+        String cellString = "";
+
+        while (cellIterator.hasNext()){
+            cellString += " | " + cellIterator.next().toString();
+        }
+
+        return cellString;
+    }
+
+
 }
 

@@ -6,7 +6,7 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import java.util.List;
+import javax.persistence.Transient;
 
 
 @Getter
@@ -34,6 +34,23 @@ public class CredentialCredit extends Credential {
 
     private Long dniBeneficiary;
 
+    @Transient
+    private String credentialType = "CredentialCredit";
 
 
+    @Override
+    public String toString() {
+        return "CredentialCredit{" +
+                "idCredit=" + idCredit +
+                ", creditName='" + creditName + '\'' +
+                ", idGroup=" + idGroup +
+                ", groupName='" + groupName + '\'' +
+                ", rol='" + rol + '\'' +
+                ", currentCycle='" + currentCycle + '\'' +
+                ", creditState='" + creditState + '\'' +
+                ", amount=" + amount +
+                ", dniBeneficiary=" + dniBeneficiary +
+                ", credentialType=" + credentialType +
+                '}' + super.toString();
+    }
 }

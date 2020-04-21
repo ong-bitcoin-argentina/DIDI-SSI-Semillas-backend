@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -12,7 +13,7 @@ import java.time.LocalDateTime;
 @Entity
 @Table
 @Inheritance( strategy = InheritanceType.JOINED )
-public abstract class Credential {
+public abstract class Credential extends AuditableEntity {
 
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
@@ -31,12 +32,30 @@ public abstract class Credential {
 
     private LocalDateTime dateOfExpiry;
 
-    /**
-     *
-     */
     private Long idRelatedCredential;
 
     @ManyToOne
     private Person beneficiary;
 
+    private String credentialState;
+
+    private String credentialDescription;
+
+
+    @Override
+    public String toString() {
+        return "Credential{" +
+                "id=" + id +
+                ", idDidiIssueer=" + idDidiIssueer +
+                ", idDidiReceptor=" + idDidiReceptor +
+                ", idDidiCredential=" + idDidiCredential +
+                ", idHistorical=" + idHistorical +
+                ", dateOfIssue=" + dateOfIssue +
+                ", dateOfExpiry=" + dateOfExpiry +
+                ", idRelatedCredential=" + idRelatedCredential +
+                ", beneficiary=" + beneficiary +
+                ", credentialState='" + credentialState + '\'' +
+                ", credentialType='" + credentialDescription + '\'' +
+                '}';
+    }
 }

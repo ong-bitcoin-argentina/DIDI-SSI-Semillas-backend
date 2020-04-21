@@ -3,6 +3,8 @@ package com.atixlabs.semillasmiddleware.security.dto;
 import lombok.Getter;
 import java.io.Serializable;
 
+//TODO DELETE
+@Deprecated
 @Getter
 public class JwtResponse implements Serializable {
 

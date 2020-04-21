@@ -29,11 +29,8 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Slf4j
 public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
 
-    @Autowired
+   /* @Autowired
     private JwtTokenProvider jwtTokenProvider;
-
-
-
 
 
     protected boolean logout(String token) {
@@ -48,7 +45,7 @@ public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
     @Test
     public void loginSuccessful() {
 
-        Response response = login(JwtRequest.builder().username("admin").password("password").build());
+        Response response = login(JwtRequest.builder().username("admin@atixlabs.com").password("admin").build());
 
         response.then()
                 .assertThat()
@@ -90,5 +87,5 @@ public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
         Assert.assertFalse(response.getBody().equals(true));
 
 
-    }
+    } */
 }

@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestion;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidAnswerCastException;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
@@ -24,9 +25,8 @@ public class AnswerDto {
         try{
             this.answer = answerRow.getAnswerAs(question.getDataType());
         }
-        catch (Exception e){
-            //excelfileresult add error row
-            processExcelFileResult.addRowError(cellLocation, e.getMessage());
+        catch (InvalidAnswerCastException e){
+            processExcelFileResult.addRowError("Celda "+cellLocation, "Pregunta: "+question.getQuestionName() +" - "+ e.getMessage());
             log.info(e.getMessage());
         }
     }

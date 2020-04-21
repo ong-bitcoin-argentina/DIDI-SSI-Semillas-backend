@@ -1,13 +1,12 @@
 package com.atixlabs.semillasmiddleware.parser;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
-import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidCategoryException;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -17,8 +16,6 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 
 public class ParserCategoriesTest {
     AnswerCategoryFactory answerCategoryFactory;
@@ -49,7 +46,7 @@ public class ParserCategoriesTest {
         Cell surveyCell = row.createCell(7);
         surveyCell.setCellValue("SURVEY-1");
         Cell dateCell = row.createCell(9);
-        dateCell.setCellValue("12/12/19");
+        dateCell.setCellValue("12/12/2019");
         Cell pdvCell = row.createCell(10);
         pdvCell.setCellValue(5456580);
         Cell categoryCell = row.createCell(14);
@@ -57,14 +54,14 @@ public class ParserCategoriesTest {
         Cell questionCell = row.createCell(15);
         questionCell.setCellValue("FECHA DE INICIO / REINICIO");
         Cell answerCell = row.createCell(16);
-        answerCell.setCellValue("03/04/20");
+        answerCell.setCellValue("03/04/2020");
 
         Row row1 = sheet.createRow(9);
         row1.setRowNum(9);
         Cell surveyCell1 = row1.createCell(7);
         surveyCell1.setCellValue("SURVEY-1");
         Cell dateCell1 = row1.createCell(9);
-        dateCell1.setCellValue("12/12/19");
+        dateCell1.setCellValue("12/12/2019");
         Cell pdvCell1 = row1.createCell(10);
         pdvCell1.setCellValue(5456580);
         Cell categoryCell1 = row1.createCell(14);
@@ -80,7 +77,7 @@ public class ParserCategoriesTest {
         Cell surveyCell2 = row2.createCell(7);
         surveyCell2.setCellValue("SURVEY-1");
         Cell dateCell2 = row2.createCell(9);
-        dateCell2.setCellValue("12/12/19");
+        dateCell2.setCellValue("12/12/2019");
         Cell pdvCell2 = row2.createCell(10);
         pdvCell2.setCellValue(5456580);
         Cell categoryCell2 = row2.createCell(14);
@@ -95,7 +92,7 @@ public class ParserCategoriesTest {
         Cell surveyCell3 = row3.createCell(7);
         surveyCell3.setCellValue("SURVEY-1");
         Cell dateCell3 = row3.createCell(9);
-        dateCell3.setCellValue("12/12/19");
+        dateCell3.setCellValue("12/12/2019");
         Cell pdvCell3 = row3.createCell(10);
         pdvCell3.setCellValue(5456580);
         Cell categoryCell3 = row3.createCell(14);
@@ -103,14 +100,14 @@ public class ParserCategoriesTest {
         Cell questionCell3 = row3.createCell(15);
         questionCell3.setCellValue("FIN DE LA ACTIVIDAD");
         answerCell3 = row3.createCell(16);
-        answerCell3.setCellValue("12/12/13");
+        answerCell3.setCellValue("12/12/2013");
 
         row4= sheet.createRow(12);
         row4.setRowNum(12);
         Cell surveyCell4 = row4.createCell(7);
         surveyCell4.setCellValue("SURVEY-1");
         Cell dateCell4 = row4.createCell(9);
-        dateCell4.setCellValue("12/12/19");
+        dateCell4.setCellValue("12/12/2019");
         Cell pdvCell4 = row4.createCell(10);
         pdvCell4.setCellValue(5456580);
         Cell categoryCell4 = row4.createCell(14);
@@ -126,7 +123,7 @@ public class ParserCategoriesTest {
         Cell surveyCell5 = row5.createCell(7);
         surveyCell5.setCellValue("SURVEY-1");
         Cell dateCell5 = row5.createCell(9);
-        dateCell5.setCellValue("12/12/19");
+        dateCell5.setCellValue("12/12/2019");
         Cell pdvCell5 = row5.createCell(10);
         pdvCell5.setCellValue(5456580);
         Cell categoryCell5 = row5.createCell(14);

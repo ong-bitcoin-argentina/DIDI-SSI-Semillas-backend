@@ -40,10 +40,10 @@ public class SurveyExcelParseService extends ExcelParseService {
 
 
     public SurveyExcelParseService(){
-        initializeObjects();
+        resetFormRelatedVariables();
     }
 
-    public void initializeObjects(){
+    public void resetFormRelatedVariables(){
         if (answerCategoryFactory == null)
             answerCategoryFactory = new AnswerCategoryFactory();
         if (currentForm == null)
@@ -53,7 +53,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         answerRow = null;
     }
 
-    public void clearObjects(){
+    public void clearFormRelatedVariables(){
         currentForm = null;
         answerCategoryFactory = null;
         surveyFormList.clear();
@@ -63,7 +63,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     @Override
     public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult){
 
-        initializeObjects();
+        resetFormRelatedVariables();
 
         try {
             answerRow = new AnswerRow(currentRow);
@@ -71,23 +71,28 @@ public class SurveyExcelParseService extends ExcelParseService {
             processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
         }
 
-        processExcelFileResult.addTotalReadRow();
+
 
         if (answerRow != null) {
-            if (answerRow.hasFormKeyValues()) {
-                processExcelFileResult.addTotalValidRows();
+            if(!answerRow.isEmpty(currentRow)){
 
-                if (!currentForm.isRowFromSameForm(answerRow)) {
-                    endOfFormHandler(processExcelFileResult);
-                    currentForm = new SurveyForm(answerRow);
-                    answerCategoryFactory = new AnswerCategoryFactory();
+                processExcelFileResult.addTotalReadRow();
+                if (answerRow.hasFormKeyValues()) {
+                    //processExcelFileResult.addTotalValidRows();
+
+                    if (!currentForm.isRowFromSameForm(answerRow)) {
+                        endOfFormHandler(processExcelFileResult);
+                        currentForm = new SurveyForm(answerRow);
+                        answerCategoryFactory = new AnswerCategoryFactory();
+                    }
+
+                    addCategoryDataIntoForm(answerRow, processExcelFileResult);
+                    log.info("OK:" + answerRow.toString());
                 }
-
-                addCategoryDataIntoForm(answerRow, processExcelFileResult);
-                log.info("OK:" + answerRow.toString());
+                else
+                    processExcelFileResult.addEmptyRow();
             }
-            else
-                processExcelFileResult.addEmptyRow();
+
         }
         if(!hasNext)
             endOfFileHandler(processExcelFileResult);
@@ -128,14 +133,14 @@ public class SurveyExcelParseService extends ExcelParseService {
 
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
-            for (SurveyForm surveyForm : surveyFormList) {
-                    credentialService.buildAllCredentialsFromForm(surveyForm);
-            }
+            //for (SurveyForm surveyForm : surveyFormList) {
+            //        credentialService.buildAllCredentialsFromForm(surveyForm);
+            //}
         }
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");
 
-
-        clearObjects();
+        processExcelFileResult.setTotalValidRows(processExcelFileResult.getTotalReadRows() - processExcelFileResult.getTotalErrorsRows()-processExcelFileResult.getTotalEmptyRows());
+        clearFormRelatedVariables();
     }
 }

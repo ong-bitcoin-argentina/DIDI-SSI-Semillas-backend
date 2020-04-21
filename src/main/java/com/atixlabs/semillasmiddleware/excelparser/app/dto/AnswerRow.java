@@ -54,8 +54,9 @@ public class AnswerRow extends ExcelRow {
             this.answer = getCellStringValue(row, 16, "Respuesta");
     }
 
-    private boolean isEmpty(Row row){
+    public boolean isEmpty(Row row){
         return row.getFirstCellNum() < 0;
+        //return surveyFormCode == null || surveyDate == null || pdv == null;
     }
 
     public boolean hasFormKeyValues(){

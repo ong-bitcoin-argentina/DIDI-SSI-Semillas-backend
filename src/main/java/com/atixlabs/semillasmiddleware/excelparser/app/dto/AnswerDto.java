@@ -40,7 +40,7 @@ public class AnswerDto {
             }
             //If the question does exists in the form but its answer is empty:
             else{
-                processExcelFileResult.addRowError(cellLocation, String.format("la pregunta %s esta vacía y es obligatoria", question.getQuestionName()));
+                processExcelFileResult.addRowError("Celda "+cellLocation, String.format("la pregunta %s esta vacía y es obligatoria", question.getQuestionName()));
             }
             return false;
         }

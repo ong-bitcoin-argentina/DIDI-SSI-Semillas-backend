@@ -140,7 +140,8 @@ public class SurveyExcelParseService extends ExcelParseService {
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");
 
-        processExcelFileResult.setTotalValidRows(processExcelFileResult.getTotalReadRows() - processExcelFileResult.getTotalErrorsRows()-processExcelFileResult.getTotalEmptyRows());
+        //todo: rows with multiple errors must be considered in next sprint
+        processExcelFileResult.setTotalValidRows(processExcelFileResult.getTotalReadRows() - processExcelFileResult.getTotalErrorsRows());
         clearFormRelatedVariables();
     }
 }

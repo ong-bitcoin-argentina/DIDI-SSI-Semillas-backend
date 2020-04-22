@@ -51,4 +51,9 @@ public class AnswerDto {
     private boolean answerIsEmpty(){
         return answer == null || answer.toString().trim().replace(" ","").equals("");
     }
+
+    @Override
+    public String toString() {
+        return "" + answer +"";
+    }
 }

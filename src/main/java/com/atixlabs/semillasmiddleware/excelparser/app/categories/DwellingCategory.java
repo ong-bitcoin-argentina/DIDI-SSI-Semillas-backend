@@ -13,6 +13,8 @@ import java.util.stream.Collectors;
 
 public class DwellingCategory implements Category {
 
+    String categoryOriginalName;
+
     AnswerDto dwellingType;
     AnswerDto holdingType;
     AnswerDto district;
@@ -21,6 +23,8 @@ public class DwellingCategory implements Category {
         this.dwellingType = new AnswerDto(DwellingQuestion.DWELLING_TYPE);
         this.holdingType = new AnswerDto(DwellingQuestion.HOLDING_TYPE);
         this.district = new AnswerDto(DwellingQuestion.DISTRICT);
+
+        this.categoryOriginalName = "VIVIENDA";
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
@@ -49,13 +53,18 @@ public class DwellingCategory implements Category {
     }
 
     @Override
+    public  String getCategoryOriginalName(){
+        return categoryOriginalName;
+    }
+
+    @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
         List<AnswerDto> answers = new LinkedList<>();
         answers.add(this.dwellingType);
         answers.add(this.holdingType);
         answers.add(this.district);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, "Vivienda")).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 
@@ -71,4 +80,13 @@ public class DwellingCategory implements Category {
         return (String) this.district.getAnswer();
     }
 
+    @Override
+    public String toString() {
+        return "DwellingCategory{" +
+                "categoryOriginalName='" + categoryOriginalName + '\'' +
+                ", dwellingType=" + dwellingType +
+                ", holdingType=" + holdingType +
+                ", district=" + district +
+                '}';
+    }
 }

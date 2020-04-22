@@ -3,12 +3,16 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
+@Service
 public class AnswerCategoryFactory {
     private static final Integer AMOUNT_CHILDREN = 11;
     private static final Integer AMOUNT_KINSMAN = 3;
@@ -19,8 +23,6 @@ public class AnswerCategoryFactory {
     private static final String ENTREPRENEURSHIP_CATEGORY_NAME="EMPRENDIMIENTO";
     private static final String DWELLING_CATEGORY_NAME="VIVIENDA";
 
-
-
     private static Map<String, Class<?>> CATEGORIES_TYPE = new HashMap<String, Class<?>>() {{
         put(BENEFICIARY_CATEGORY_NAME, PersonCategory.class);
         put(SPOUSE_CATEGORY_NAME, PersonCategory.class);
@@ -29,8 +31,6 @@ public class AnswerCategoryFactory {
         put(ENTREPRENEURSHIP_CATEGORY_NAME, EntrepreneurshipCategory.class);
         put(DWELLING_CATEGORY_NAME, DwellingCategory.class);
     }};
-
-
 
     private Map<String, Category> categories;
 
@@ -55,6 +55,26 @@ public class AnswerCategoryFactory {
         for (int i = 1; i < AMOUNT_KINSMAN+1; i++) {
             categories.put(KINSMAN_CATEGORY_NAME + " " + i, null);
         }
+    }
+
+    public ArrayList<Category> getAllCategories() {
+
+        ArrayList<Category> categoryList = new ArrayList<>();
+
+        categoryList.add(new PersonCategory(BENEFICIARY_CATEGORY_NAME));
+        categoryList.add(new PersonCategory(SPOUSE_CATEGORY_NAME));
+
+        for (int i = 1; i < AMOUNT_CHILDREN+1; i++) {
+            categoryList.add(new PersonCategory(CHILD_CATEGORY_NAME+" "+ i));
+        }
+        for (int i = 1; i < AMOUNT_KINSMAN+1; i++) {
+            categoryList.add(new PersonCategory(KINSMAN_CATEGORY_NAME+ " " + i));
+        }
+
+        categoryList.add(new PersonCategory(ENTREPRENEURSHIP_CATEGORY_NAME));
+        categoryList.add(new PersonCategory(DWELLING_CATEGORY_NAME));
+
+        return categoryList;
     }
 
     public Category get(String category) throws InvalidCategoryException, Exception {
@@ -100,4 +120,9 @@ public class AnswerCategoryFactory {
         generateCategoriesDinamically();
     }
 
+
+    public boolean containsKey(String category){
+        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+        return categories.containsKey(category);
+    }
 }

@@ -13,4 +13,6 @@ public interface Category {
      Category getData();
 
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
+
+     String getCategoryOriginalName();
 }

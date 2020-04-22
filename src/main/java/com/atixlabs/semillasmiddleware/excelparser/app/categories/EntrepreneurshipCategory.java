@@ -10,6 +10,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Autowired;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +19,8 @@ import java.util.stream.Collectors;
 @Setter
 @Getter
 public class EntrepreneurshipCategory implements Category {
+
+    String categoryOriginalName;
 
     AnswerDto type;
     AnswerDto activityStartDate;
@@ -33,6 +36,8 @@ public class EntrepreneurshipCategory implements Category {
         this.name = new AnswerDto(EntrepreneurshipQuestion.NAME);
         this.address = new AnswerDto(EntrepreneurshipQuestion.ADDRESS);
         this.activityEndingDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE);
+
+        this.categoryOriginalName = "EMPRENDIMIENTO";
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
@@ -71,7 +76,10 @@ public class EntrepreneurshipCategory implements Category {
         return this;
     }
 
-    ;
+    @Override
+    public String getCategoryOriginalName(){
+        return categoryOriginalName;
+    }
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
@@ -83,7 +91,7 @@ public class EntrepreneurshipCategory implements Category {
         answers.add(this.address);
         answers.add(this.activityEndingDate);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, "Emprendimiento")).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 
@@ -104,5 +112,18 @@ public class EntrepreneurshipCategory implements Category {
     }
     public LocalDate getActivityEndingDate(){
         return (LocalDate) this.activityEndingDate.getAnswer();
+    }
+
+    @Override
+    public String toString() {
+        return "EntrepreneurshipCategory{" +
+                "categoryOriginalName='" + categoryOriginalName + '\'' +
+                ", type=" + type +
+                ", activityStartDate=" + activityStartDate +
+                ", mainActivity=" + mainActivity +
+                ", name=" + name +
+                ", address=" + address +
+                ", activityEndingDate=" + activityEndingDate +
+                '}';
     }
 }

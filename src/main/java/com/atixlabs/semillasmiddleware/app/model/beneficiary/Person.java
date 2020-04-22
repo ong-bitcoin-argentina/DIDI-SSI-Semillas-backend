@@ -38,7 +38,7 @@ public class Person {
         this.setName(personCategory.getName()+" "+ personCategory.getSurname());
         this.setDocumentType(personCategory.getIdType());
         this.setDocumentNumber(personCategory.getIdNumber());
-        this.setBirthDate(personCategory.getBirthdate());
+        this.setBirthDate(personCategory.getBirthDate());
     }
 
 

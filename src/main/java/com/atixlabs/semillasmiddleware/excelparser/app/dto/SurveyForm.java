@@ -1,7 +1,10 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
+import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
@@ -9,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Component;
 
+import javax.naming.ldap.PagedResultsControl;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
@@ -26,7 +30,6 @@ public class SurveyForm {
 
     private ArrayList<Category> categoryList = new ArrayList<>();
 
-
     @Override
     public String toString() {
         return "SurveyForm{" +
@@ -37,11 +40,14 @@ public class SurveyForm {
                 '}';
     }
 
-    public SurveyForm(){}
+    public SurveyForm(){
+        log.info("calling non-parameter constructor for surveyForm");
+    }
 
     public SurveyForm(AnswerRow answerRow){
         initialize(answerRow);
     }
+
 
     public void initialize(AnswerRow answerRow){
         log.info("Initializing a new form");
@@ -86,7 +92,39 @@ public class SurveyForm {
         return null;
     }
 
+    public void setCategoryData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
+
+        //busco el objeto en el form y devuelvo referencia.
+        Category category = this.getCategoryFromForm(answerRow.getCategory(), processExcelFileResult);
+        if (category != null)
+            category.loadData(answerRow, processExcelFileResult);
+    }
+
+    public Category getCategoryFromForm(String category, ProcessExcelFileResult processExcelFileResult) {
+
+        if (category == null)
+            return null;
+
+        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+
+        for (Category value : categoryList) {
+            if (value.getCategoryOriginalName().equals(category))
+                return value;
+        }
+        processExcelFileResult.addRowDebug("Categoría "+category, "DEBUG: La categoría no existe");
+        return null;
+    }
+
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
+        //return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
+
+        boolean allValid = true;
+
+        for (Category category : categoryList) {
+            log.info("SurveyForm -> isValid: " + category.getCategoryOriginalName());
+            if (!category.isValid(processExcelFileResult))
+                allValid = false;
+        }
+        return allValid;
     }
 }

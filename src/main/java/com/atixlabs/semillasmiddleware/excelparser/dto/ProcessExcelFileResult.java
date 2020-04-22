@@ -25,6 +25,7 @@ public class ProcessExcelFileResult {
     private String fileError = null;
 
     private List<ExcelErrorDetail> errorRows = new ArrayList<>();
+    private List<ExcelErrorDetail> debugRows = new ArrayList<>();
 
     public void addRowError(Integer errorHeader, String errorBody){
         this.errorRows.add(new ExcelErrorDetail(String.valueOf(errorHeader), errorBody));
@@ -45,6 +46,9 @@ public class ProcessExcelFileResult {
     public void addEmptyRow(){this.totalEmptyRows++;}
     public void addTotalProcessedForms(){ this.totalProcessedForms++;}
 
+    public void addRowDebug(String errorHeader, String errorBody){
+        this.debugRows.add(new ExcelErrorDetail(errorHeader, errorBody));
+    }
 
     @Override
     public String toString() {

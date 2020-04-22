@@ -5,9 +5,6 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialServiceCustom;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,22 +22,18 @@ public class CredentialController {
 
     public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
-    @Autowired
     private CredentialService credentialService;
 
     @Autowired
-    private CredentialCreditRepository credentialCreditRepository;
+    public CredentialController(CredentialService credentialService) {
+        this.credentialService = credentialService;
+    }
 
-    @Autowired
-    CredentialServiceCustom credentialServiceCustom;
 
-    @Autowired
-    private CredentialRepository credentialRepository;
-
-    @RequestMapping(value = "/createCredit", method = RequestMethod.GET)
+    @RequestMapping(value = "/createCredit", method = RequestMethod.POST)
     public void createCredit() {
         log.info(" createCredit ");
-        credentialService.addCredentialCredit();
+        credentialService.saveCredentialCreditMock();
     }
 
     @GetMapping
@@ -54,17 +47,16 @@ public class CredentialController {
                                                         @RequestParam(required = false) List<String> credentialState,
                                                         @RequestParam(required = false) String credentialStatus) {
 
-
         List<Credential> credentials;
         try {
-            credentials = credentialServiceCustom.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);
+            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);
         }
         catch (Exception e){
             log.info("There has been an error searching for credentials " + e);
             return Collections.emptyList();
         }
+
        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
-       log.info("FIND CREDENTIALS -- " + credentialsDto.toString());
        return credentialsDto;
     }
 
@@ -76,6 +68,7 @@ public class CredentialController {
             credentialStates.put(states.name(), states.getCode());
         }
         log.info("find credential states ----> " + credentialStates);
+
         return credentialStates;
     }
 
@@ -83,7 +76,6 @@ public class CredentialController {
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialTypes() {
         List<String> credentialTypes =  Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
-        log.info("find credential types ----> " + credentialTypes);
         return credentialTypes;
     }
 

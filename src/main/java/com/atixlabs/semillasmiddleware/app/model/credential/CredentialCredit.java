@@ -1,23 +1,25 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
+import java.time.LocalDateTime;
 
 
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
 
-    private Long idCredit;
 
+
+    //    private Long idCredit;
     private String creditName;
 
     private Long idGroup;
@@ -33,23 +35,40 @@ public class CredentialCredit extends Credential {
 
     private Double amount; //TODO revisar el tipo para monto. Para dinero deberiamos usar BigDecimal
 
+    private String beneficiaryDocumentType;
+
     private Long dniBeneficiary;
 
 
+    public CredentialCredit(PersonCategory personCategory){
+        /*credentialCredit.setDateOfIssue(LocalDateTime.now());
+        credentialCredit.setDateOfExpiry(LocalDateTime.now().plusDays(14L));
+        credentialCredit.setCurrentCycle("imported-from-excel");
+        credentialCredit.setCreditState("pre-credential");
+        credentialCredit.setBeneficiaryDocumentType(personCategory.getIdType());
+        credentialCredit.setBeneficiaryDocumentNumber(personCategory.getIdNumber());*/
+        this.setDateOfIssue(LocalDateTime.now());
+        this.setDateOfExpiry(LocalDateTime.now().plusDays(14L));
+        this.setCurrentCycle("imported-from-excel");
+        this.setCreditState("pre-credential");
+        this.setBeneficiaryDocumentType(personCategory.getIdType());
+        this.setDniBeneficiary(personCategory.getIdNumber());
+
+    }
 
 
     @Override
     public String toString() {
         return "CredentialCredit{" +
-                "idCredit=" + idCredit +
-                ", creditName='" + creditName + '\'' +
+                "creditName='" + creditName + '\'' +
                 ", idGroup=" + idGroup +
                 ", groupName='" + groupName + '\'' +
                 ", rol='" + rol + '\'' +
                 ", currentCycle='" + currentCycle + '\'' +
                 ", creditState='" + creditState + '\'' +
                 ", amount=" + amount +
-                ", dniBeneficiary=" + dniBeneficiary +
-                '}' + super.toString();
+                ", beneficiaryDocumentType='" + beneficiaryDocumentType + '\'' +
+                ", beneficiaryDocumentNumber=" + dniBeneficiary +
+                '}';
     }
 }

@@ -20,6 +20,7 @@ import org.mockito.Mock;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
+import retrofit2.http.HEAD;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
@@ -30,18 +31,19 @@ import java.util.stream.Collectors;
 import static org.mockito.Mockito.*;
 
 
-//@RunWith(SpringRunner.class)
-//@SpringBootTest
+@RunWith(SpringRunner.class)
+@SpringBootTest
 @Slf4j
 public class CredentialServiceTest {
-/*
-    private CredentialRepository credentialRepository;
+
 
     @InjectMocks
     private CredentialService credentialService;
 
-    @Autowired
-    private DateUtil util;
+    @Mock
+    private CredentialRepository credentialRepository;
+
+    private DateUtil util = new DateUtil();
 
     private Person getBeneficiaryMock(){
         Person person = new Person();
@@ -62,9 +64,7 @@ public class CredentialServiceTest {
         credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfExpiry(LocalDateTime.now().plusDays(14));
-        credential1.setBeneficiaryDocumentNumber(29302594L);
-        credential1.setDateOfExpiry(LocalDateTime.now().plusDays(1));
-        credential1.setBeneficiaryDocumentNumber(29302594L);
+        credential1.setDniBeneficiary(29302594L);
         credential1.setCreditState("Estado");
         credential1.setBeneficiary(beneficiary);
         credential1.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
@@ -107,19 +107,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getActiveCredentials() {
-<<<<<<< HEAD
-        when(credentialService.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
+        when(credentialRepository.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
 
-        List<Credential> credentials = credentialService.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"), null);
+        List<Credential> credentials = credentialService.findCredentials(null,null,null, null, null, null, Arrays.asList("Vigente"), null);
 
-        verify(credentialService).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"), null);
-=======
-        when(credentialRepository.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsMock());
-
-        List<Credential> credentials = credentialRepository.findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
-
-        verify(credentialRepository,times(1)).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"));
->>>>>>> develop
+        verify(credentialRepository).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Vigente"), null);
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
         log.info("credenciales " +credentials.toString());
@@ -138,11 +130,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getRevokedCredentials() {
-        when(credentialService.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
+        when(credentialRepository.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
 
-        List<Credential> credentials = credentialService.findCredentialsWithFilter(null,null,null, null, null, null, Arrays.asList("Revocada"), null);
+        List<Credential> credentials = credentialService.findCredentials(null,null,null, null, null, null, Arrays.asList("Revocada"), null);
 
-        verify(credentialService).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Revocada"), null);
+        verify(credentialRepository).findCredentialsWithFilter(null,null,null, null, null, null,Arrays.asList("Revocada"), null);
 
         log.info("credenciales " +credentials.toString());
 
@@ -156,5 +148,5 @@ public class CredentialServiceTest {
         Assertions.assertTrue(credentials.get(0).getDateOfIssue() != null);
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getBeneficiary().getName() ,credentials.get(0).getBeneficiary().getName());
     }
-*/
+
 }

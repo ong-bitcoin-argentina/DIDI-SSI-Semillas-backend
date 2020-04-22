@@ -19,7 +19,8 @@ public class CredentialCredit extends Credential {
 
 
 
-    //    private Long idCredit;
+    private Long idCredit;
+
     private String creditName;
 
     private Long idGroup;

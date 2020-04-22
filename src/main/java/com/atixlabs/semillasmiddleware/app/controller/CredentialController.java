@@ -67,7 +67,6 @@ public class CredentialController {
         for (CredentialStatesCodes states: CredentialStatesCodes.values()) {
             credentialStates.put(states.name(), states.getCode());
         }
-        log.info("find credential states ----> " + credentialStates);
 
         return credentialStates;
     }
@@ -88,7 +87,6 @@ public class CredentialController {
         }
 
        // Map<CredentialStatesCodes, String> credentialStatus = (Map<CredentialStatesCodes, String >) Arrays.stream(CredentialStatusCodes.values()).map(state ->Map.of(state,state.getCode())).collect(Collectors.toMap(e -> e, CredentialStatusCodes::getCode));
-        log.info("find credential status ----> " + credentialStatus);
         return credentialStatus;
     }
 

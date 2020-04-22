@@ -1,11 +1,3 @@
-INSERT INTO security.role (id, code, description) 
-VALUES (1, 'ADMIN', 'Admin role');
-
-INSERT INTO security.users (
-id, active, email, last_name, name, password, phone, username, id_role) VALUES (
-1, true, 'admin@semillas.com', 'semillas', 'administrador', '$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6', null, 'admin', 1);
-
-
 INSERT INTO public.credential_state(id, state_name) VALUES (
 '1'::bigint, 'Vigente'::character varying(255));
 
@@ -32,19 +24,19 @@ id, birth_date, document_number, document_type, name) VALUES (
 
 
 INSERT INTO public.credential (
-id, date_of_expiry, credential_category, date_of_issue, id_didi_credential, id_didi_issueer, id_didi_receptor, beneficiary_id, id_credential, credential_state_id, credential_status, credential_description) VALUES (
+id, date_of_expiry, credential_category, date_of_issue, id_didi_credential, id_didi_issuer, id_didi_receptor, beneficiary_id, id_credential, credential_state_id, credential_status, credential_description) VALUES (
 '1'::bigint, '2020-04-23'::timestamp without time zone, 'Finanzas'::character varying(255), '2020-04-08'::timestamp without time zone, '1'::bigint, '1'::bigint, '1'::bigint, '1'::bigint, '1'::bigint, '1'::bigint, ''::character varying(255), 'Creditos Semillas'::character varying(255));
 
 INSERT INTO public.credential (
-id, date_of_expiry, credential_category, date_of_issue, id_didi_credential, id_didi_issueer, id_didi_receptor, beneficiary_id, id_credential, credential_state_id,credential_status, credential_description) VALUES (
+id, date_of_expiry, credential_category, date_of_issue, id_didi_credential, id_didi_issuer, id_didi_receptor, beneficiary_id, id_credential, credential_state_id,credential_status, credential_description) VALUES (
 '2'::bigint, '2020-04-24'::timestamp without time zone, 'Finanzas'::character varying(255), '2020-04-09'::timestamp without time zone, '2'::bigint, '2'::bigint, '2'::bigint, '1'::bigint, '2'::bigint, '2'::bigint, ''::character varying(255), 'Creditos Semillas'::character varying(255));
 
 INSERT INTO public.credential (
-id, credential_state_id, credential_category, date_of_expiry, date_of_issue, id_didi_credential, id_didi_issueer, id_didi_receptor, beneficiary_id, id_credential, credential_status, credential_description) VALUES (
+id, credential_state_id, credential_category, date_of_expiry, date_of_issue, id_didi_credential, id_didi_issuer, id_didi_receptor, beneficiary_id, id_credential, credential_status, credential_description) VALUES (
 '3'::bigint, '1'::bigint, 'Laboral'::character varying(255), '2020-04-15'::timestamp without time zone, '2020-04-10'::timestamp without time zone, '3'::bigint, '3'::bigint, '3'::bigint, '2'::bigint, '3'::bigint, ''::character varying(255), 'Credito Emprendedor'::character varying(255));
 
 INSERT INTO public.credential (
-id, credential_description, credential_category, credential_state_id, date_of_expiry, date_of_issue, id_didi_credential, updated, id_didi_issueer, id_didi_receptor, beneficiary_id, credential_status, id_credential) VALUES (
+id, credential_description, credential_category, credential_state_id, date_of_expiry, date_of_issue, id_didi_credential, updated, id_didi_issuer, id_didi_receptor, beneficiary_id, credential_status, id_credential) VALUES (
 '4'::bigint, 'Identidad - Titular'::character varying(255), 'Identidad'::character varying(255), '1'::bigint, '2020-04-24 00:00:00'::timestamp without time zone, '2020-04-09 00:00:00'::timestamp without time zone, '4'::bigint, '2020-04-08 00:00:00'::timestamp without time zone, '4'::bigint, '4'::bigint, '1'::bigint,  ''::character varying(255),'4'::bigint);
 
 

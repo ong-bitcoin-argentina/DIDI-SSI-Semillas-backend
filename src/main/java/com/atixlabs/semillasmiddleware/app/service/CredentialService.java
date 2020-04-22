@@ -27,9 +27,15 @@ public class CredentialService {
     private CredentialCreditRepository credentialCreditRepository;
 
     @Autowired
+    public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
+        this.credentialCreditRepository = credentialCreditRepository;
+        this.credentialRepository = credentialRepository;
+    }
+
+    @Autowired
     private PersonRepository personRepository;
 
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm)
+    /*public void buildAllCredentialsFromForm(SurveyForm surveyForm)
     {
         log.info("buildAllCredentialsFromForm: "+this.toString());
         buildPerson(surveyForm);
@@ -46,6 +52,8 @@ public class CredentialService {
         buildCoursesOwnerCredential(surveyForm);
         buildCoursesRelativeCredential(surveyForm);
     }
+    */
+
 
     /**
      * The following are non-public methods, isolating functionality.
@@ -81,11 +89,7 @@ public class CredentialService {
     }
     
 
-    @Autowired
-    public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
-        this.credentialCreditRepository = credentialCreditRepository;
-        this.credentialRepository = credentialRepository;
-    }
+
 
 
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String credentialStatus) {
@@ -112,7 +116,7 @@ public class CredentialService {
 
 
 
-    private void buildPerson(SurveyForm surveyForm){
+    /*private void buildPerson(SurveyForm surveyForm){
         log.info("  buildPerson");
 
         PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
@@ -146,6 +150,8 @@ public class CredentialService {
                         credentialCredit.getDniBeneficiary());
         }
     }
+    */
+
 
     public void saveCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();

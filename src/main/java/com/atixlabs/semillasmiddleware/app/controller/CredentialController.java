@@ -23,7 +23,7 @@ import java.util.stream.Collectors;
 @Slf4j
 public class CredentialController {
 
-    public static final String URL_MAPPING_CREDENTIAL = "/credential";
+    public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
     @Autowired
     private CredentialService credentialService;
@@ -68,7 +68,7 @@ public class CredentialController {
        return credentialsDto;
     }
 
-    @GetMapping("/credentialStates")
+    @GetMapping("/states")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, String> findCredentialStates() {
         Map<String, String> credentialStates = new HashMap<>();
@@ -79,7 +79,7 @@ public class CredentialController {
         return credentialStates;
     }
 
-    @GetMapping("/credentialTypes")
+    @GetMapping("/types")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialTypes() {
         List<String> credentialTypes =  Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
@@ -87,7 +87,7 @@ public class CredentialController {
         return credentialTypes;
     }
 
-    @GetMapping("/credentialStatus")
+    @GetMapping("/status")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, String> findCredentialStatus() {
         Map<String, String> credentialStatus = new HashMap<>();

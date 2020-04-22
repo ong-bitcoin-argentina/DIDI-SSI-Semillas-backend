@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
@@ -55,39 +56,7 @@ public class CredentialService {
     */
 
 
-    /**
-     * The following are non-public methods, isolating functionality.
-     * to make public methods easier to read.
-     * @param surveyForm
-     */
 
-    private void buildIdentityOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildIdentityRelativeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildEntrepreneurshipCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildHomeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildHealthOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildHeathRelativeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildKnowledgeOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildKnowledgeRelativeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildScholarLoanCredential(SurveyForm surveyForm) {
-    }
-    
 
 
 
@@ -104,18 +73,9 @@ public class CredentialService {
          return  credentials;
     }
 
-    public void addCredentialCredit(){
-        CredentialCredit credentialCredit = new CredentialCredit();
-    }
-
-    private void buildCoursesOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildCoursesRelativeCredential(SurveyForm surveyForm) {
-    }
 
 
-
+        //This must be on personService, not here
     /*private void buildPerson(SurveyForm surveyForm){
         log.info("  buildPerson");
 
@@ -130,27 +90,15 @@ public class CredentialService {
                 log.info("Ya existe una persona con "+personOptional.get().getDocumentType()+" "+personOptional.get().getDocumentNumber());
         }
     }
+*/
 
-    private void buildCreditCredential(SurveyForm surveyForm){
-        log.info("  buildCreditCredential");
+    private void buildCreditCredential(Loan loan){
+        log.info("Creating credit credential");
 
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
-        if(personCategory != null) {
-            CredentialCredit credentialCredit = new CredentialCredit(personCategory);
+        CredentialCredit credentialCredit = new CredentialCredit();
 
-            Optional<CredentialCredit> credentialCreditOptional = credentialCreditRepository.findByBeneficiaryDocumentTypeAndBeneficiaryDocumentNumber(
-                    credentialCredit.getBeneficiaryDocumentType(), credentialCredit.getDniBeneficiary()
-            );
-
-            if(credentialCreditOptional.isEmpty())
-                credentialCreditRepository.save(credentialCredit);
-            else
-                log.info("Ya existe una credencial para el "+
-                        credentialCredit.getBeneficiaryDocumentType()+" " +
-                        credentialCredit.getDniBeneficiary());
-        }
     }
-    */
+
 
 
     public void saveCredentialCreditMock(){

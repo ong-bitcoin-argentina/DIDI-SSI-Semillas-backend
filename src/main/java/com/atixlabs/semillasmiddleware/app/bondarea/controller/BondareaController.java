@@ -29,15 +29,15 @@ public class BondareaController {
     }
 
 
-    @GetMapping("/getLoans")
+    @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> getLoans()  {
+    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoans()  {
         log.info("BONDAREA - GET LOANS");
         List<BondareaLoanDto> loansDto;
         // idAccount not null!!
         try {
             //loans = bondareaService.getLoans("12345", "55"); //loanState 60 -> se consulta con segunda api
-            loansDto = bondareaService.secondLoansDataAllNew("","");
+            loansDto = bondareaService.getMockLoans("","");
             List<Loan> loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);
 

@@ -17,8 +17,6 @@ import java.time.LocalDateTime;
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
 
-
-
     private Long idCredit;
 
     private String creditName;
@@ -34,7 +32,7 @@ public class CredentialCredit extends Credential {
 
     private String creditState;
 
-    private Double amount; //TODO revisar el tipo para monto. Para dinero deberiamos usar BigDecimal
+    private Float amount;
 
     private String beneficiaryDocumentType;
 

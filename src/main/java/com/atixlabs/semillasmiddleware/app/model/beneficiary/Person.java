@@ -24,7 +24,7 @@ public class Person {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String documentType; //TODO enum or class
+   // private String documentType; //TODO enum or class. Only documentNumber
 
     @Column(unique = true)
     private Long documentNumber;
@@ -37,6 +37,8 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
+    private Long idDidi;
+
 
     //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado.
     @OneToOne
@@ -47,7 +49,6 @@ public class Person {
 
     public Person(PersonCategory personCategory){
         this.setName(personCategory.getName()+" "+ personCategory.getSurname());
-        this.setDocumentType(personCategory.getIdType());
         this.setDocumentNumber(personCategory.getIdNumber());
         this.setBirthDate(personCategory.getBirthdate());
     }
@@ -57,7 +58,6 @@ public class Person {
     public String toString() {
         return "Person{" +
                 "id=" + id +
-                ", documentType='" + documentType + '\'' +
                 ", documentNumber=" + documentNumber +
                 ", name='" + name + '\'' +
                 ", birthDate=" + birthDate +

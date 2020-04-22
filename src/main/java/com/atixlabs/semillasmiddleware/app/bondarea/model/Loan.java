@@ -27,6 +27,8 @@ public class Loan extends AuditableEntity {
             this.isDeleted = false;
         if(this.pending == null)
             this.pending = false;
+        if(this.hasCredential == null)
+            this.hasCredential = false;
     }
 
 
@@ -75,6 +77,8 @@ public class Loan extends AuditableEntity {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime modifiedTime;
+
+    private Boolean hasCredential;
 
 
 
@@ -153,6 +157,8 @@ public class Loan extends AuditableEntity {
         this.expiredAmount = loanToUpdate.getExpiredAmount();
 
         this.modifiedTime = loanToUpdate.getModifiedTime();
+
+        this.hasCredential = loanToUpdate.getHasCredential();
 
     }
 

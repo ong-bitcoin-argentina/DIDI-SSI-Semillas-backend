@@ -1,5 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -24,9 +26,12 @@ public class CredentialController {
 
     private CredentialService credentialService;
 
+    private LoanService loanService;
+
     @Autowired
-    public CredentialController(CredentialService credentialService) {
+    public CredentialController(CredentialService credentialService, LoanService loanService) {
         this.credentialService = credentialService;
+        this.loanService = loanService;
     }
 
 
@@ -88,6 +93,19 @@ public class CredentialController {
 
        // Map<CredentialStatesCodes, String> credentialStatus = (Map<CredentialStatesCodes, String >) Arrays.stream(CredentialStatusCodes.values()).map(state ->Map.of(state,state.getCode())).collect(Collectors.toMap(e -> e, CredentialStatusCodes::getCode));
         return credentialStatus;
+    }
+
+    @PostMapping("/generate-credit")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void generateCredentialsCredit(){
+        List<Loan> newLoans = loanService.findLoansWithoutCredential();
+
+        for (Loan l:newLoans ) {
+            loanService.validateLoanBeneficiary(l);
+
+        }
+
+
     }
 
 

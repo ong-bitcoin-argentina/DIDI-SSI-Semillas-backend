@@ -164,7 +164,7 @@ public class ParserCategoriesTest {
     @Test
     public void entrepreneurshipCategoryIsNotValidIfNameAndTypeAreMissing() throws Exception, InvalidCategoryException {
         ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
-        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory();
+        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory("EMPRENDIMIENTO");
 
         entrepreneurshipCategory.loadData(answerRowActivityStartDate, excelFileResult);
         entrepreneurshipCategory.loadData(answerRowMainActivity, excelFileResult);
@@ -180,7 +180,7 @@ public class ParserCategoriesTest {
     @Test
     public void entrepreneurshipCategoryIsValidIfOptionalEndingDateIsMissing() throws InvalidRowException {
         ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
-        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory();
+        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory("EMPRENDIMIENTO");
 
         answerCell3.setCellValue("");
         answerRowActivityEndingDate = new AnswerRow(row3);

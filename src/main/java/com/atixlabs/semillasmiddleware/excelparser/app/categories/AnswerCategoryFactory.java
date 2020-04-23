@@ -71,8 +71,8 @@ public class AnswerCategoryFactory {
             categoryList.add(new PersonCategory(KINSMAN_CATEGORY_NAME+ " " + i));
         }
 
-        categoryList.add(new PersonCategory(ENTREPRENEURSHIP_CATEGORY_NAME));
-        categoryList.add(new PersonCategory(DWELLING_CATEGORY_NAME));
+        categoryList.add(new EntrepreneurshipCategory(ENTREPRENEURSHIP_CATEGORY_NAME));
+        categoryList.add(new DwellingCategory(DWELLING_CATEGORY_NAME));
 
         return categoryList;
     }

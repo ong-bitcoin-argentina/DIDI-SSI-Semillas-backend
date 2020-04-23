@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
+import ch.qos.logback.core.joran.action.IADataForComplexProperty;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
@@ -111,7 +112,7 @@ public class SurveyForm {
             if (value.getCategoryOriginalName().equals(category))
                 return value;
         }
-        processExcelFileResult.addRowDebug("Categoría "+category, "DEBUG: La categoría no existe");
+        processExcelFileResult.addRowDebug("Categoría "+category, "No fue definida en meta-data: será ignorada");
         return null;
     }
 
@@ -119,12 +120,28 @@ public class SurveyForm {
         //return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
 
         boolean allValid = true;
+        String msg;
 
         for (Category category : categoryList) {
-            log.info("SurveyForm -> isValid: " + category.getCategoryOriginalName());
-            if (!category.isValid(processExcelFileResult))
-                allValid = false;
+            if (category.isEmpty()) {
+                if (category.isRequired()) {
+                    allValid = false;
+                    msg = "Empty and Required";
+                }
+                else
+                    msg = "Empty but not Required";
+            }
+            else {
+                if (!category.isValid(processExcelFileResult)) {
+                    allValid = false;
+                    msg = "Completed with errors";
+                }
+                else
+                    msg = "Completed OK";
+            }
+            log.info("SurveyForm -> isValid: " + category.getCategoryOriginalName() + " "+msg);
         }
+
         return allValid;
     }
 }

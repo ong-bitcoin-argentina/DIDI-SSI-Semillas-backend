@@ -15,4 +15,7 @@ public interface Category {
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
 
      String getCategoryOriginalName();
+
+     boolean isEmpty();
+     boolean isRequired();
 }

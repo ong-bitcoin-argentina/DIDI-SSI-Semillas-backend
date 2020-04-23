@@ -48,7 +48,7 @@ public class AnswerDto {
     }
 
 
-    private boolean answerIsEmpty(){
+    public boolean answerIsEmpty(){
         return answer == null || answer.toString().trim().replace(" ","").equals("");
     }
 

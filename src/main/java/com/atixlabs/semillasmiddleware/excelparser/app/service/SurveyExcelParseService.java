@@ -42,7 +42,7 @@ public class SurveyExcelParseService extends ExcelParseService {
 
 
     public void resetFormRelatedVariables(){
-        log.info("resetFormRelatedVariables: ");
+        //log.info("resetFormRelatedVariables: ");
         //if (answerCategoryFactory == null)
             //answerCategoryFactory = new AnswerCategoryFactory();
         if (currentForm == null){

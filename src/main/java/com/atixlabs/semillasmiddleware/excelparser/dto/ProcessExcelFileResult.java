@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.dto;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -25,6 +26,7 @@ public class ProcessExcelFileResult {
     private String fileError = null;
 
     private List<ExcelErrorDetail> errorRows = new ArrayList<>();
+    @JsonIgnore
     private List<ExcelErrorDetail> debugRows = new ArrayList<>();
 
     public void addRowError(Integer errorHeader, String errorBody){

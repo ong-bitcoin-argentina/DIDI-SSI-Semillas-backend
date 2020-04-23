@@ -107,6 +107,23 @@ public class PersonCategory implements Category {
         return validations.stream().allMatch(v->v);
     }
 
+    @Override
+    public boolean isEmpty(){
+        return name.answerIsEmpty() && surname.answerIsEmpty() && idNumber.answerIsEmpty() && gender.answerIsEmpty() && birthDate.answerIsEmpty() && relation.answerIsEmpty();
+    }
+
+    @Override
+    public boolean isRequired(){
+        switch (personType){
+            case BENEFICIARY:
+                return true;
+            case CHILD:
+            case SPOUSE:
+            case OTHER_KINSMAN:
+                return false;
+        }
+        return true;
+    }
 
     public String getName() {
         return (String) name.getAnswer();

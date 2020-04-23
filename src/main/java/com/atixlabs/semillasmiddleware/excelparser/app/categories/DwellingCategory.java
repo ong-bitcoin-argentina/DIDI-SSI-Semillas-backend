@@ -19,12 +19,12 @@ public class DwellingCategory implements Category {
     AnswerDto holdingType;
     AnswerDto district;
 
-    public DwellingCategory(){
+    public DwellingCategory(String categoryOriginalName){
         this.dwellingType = new AnswerDto(DwellingQuestion.DWELLING_TYPE);
         this.holdingType = new AnswerDto(DwellingQuestion.HOLDING_TYPE);
         this.district = new AnswerDto(DwellingQuestion.DISTRICT);
 
-        this.categoryOriginalName = "VIVIENDA";
+        this.categoryOriginalName = categoryOriginalName;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
@@ -66,6 +66,16 @@ public class DwellingCategory implements Category {
 
         List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
+    }
+
+    @Override
+    public boolean isEmpty(){
+        return dwellingType.answerIsEmpty() && holdingType.answerIsEmpty() && district.answerIsEmpty();
+    }
+
+    @Override
+    public boolean isRequired() {
+        return true;
     }
 
     public String getDwellingType(){

@@ -29,7 +29,7 @@ public class EntrepreneurshipCategory implements Category {
     AnswerDto address;
     AnswerDto activityEndingDate;
 
-    public EntrepreneurshipCategory() {
+    public EntrepreneurshipCategory(String categoryOriginalName) {
         this.type = new AnswerDto(EntrepreneurshipQuestion.TYPE);
         this.activityStartDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_START_DATE);
         this.mainActivity = new AnswerDto(EntrepreneurshipQuestion.MAIN_ACTIVITY);
@@ -37,7 +37,7 @@ public class EntrepreneurshipCategory implements Category {
         this.address = new AnswerDto(EntrepreneurshipQuestion.ADDRESS);
         this.activityEndingDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE);
 
-        this.categoryOriginalName = "EMPRENDIMIENTO";
+        this.categoryOriginalName = categoryOriginalName;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
@@ -93,6 +93,16 @@ public class EntrepreneurshipCategory implements Category {
 
         List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
+    }
+
+    @Override
+    public boolean isEmpty() {
+        return type.answerIsEmpty() && activityStartDate.answerIsEmpty() && mainActivity.answerIsEmpty() && name.answerIsEmpty() && address.answerIsEmpty() && activityEndingDate.answerIsEmpty();
+    }
+
+    @Override
+    public boolean isRequired() {
+        return true;
     }
 
     public String getType(){

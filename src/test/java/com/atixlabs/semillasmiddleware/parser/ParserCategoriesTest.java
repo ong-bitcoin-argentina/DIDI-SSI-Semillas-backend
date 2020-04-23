@@ -1,10 +1,13 @@
 package com.atixlabs.semillasmiddleware.parser;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
@@ -16,6 +19,8 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.ArrayList;
 
 public class ParserCategoriesTest {
     AnswerCategoryFactory answerCategoryFactory;
@@ -144,20 +149,37 @@ public class ParserCategoriesTest {
 
     @Test
     public void answerCategoryFactoryReturnsSameCategoryObject() throws InvalidCategoryException, Exception {
-        Assert.assertEquals(answerCategoryFactory.get("Emprendimiento"), answerCategoryFactory.get("EMPRENDIMIENTO"));
+
+        SurveyForm surveyForm = new SurveyForm();
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        Assert.assertEquals(
+                surveyForm.getCategoryFromForm("Emprendimiento", null),
+                surveyForm.getCategoryFromForm("EMPRENDIMIENTO", null)
+        );
+
+        //Assert.assertEquals(answerCategoryFactory.get("Emprendimiento"), answerCategoryFactory.get("EMPRENDIMIENTO"));
+        //Assert.assertEquals(Categories.EMPRENDIMIENTO);
     }
 
-    @Test(expected = InvalidCategoryException.class)
-    public void invalidCategoryThrowsInvalidCategoryException() throws InvalidCategoryException, Exception {
-        answerCategoryFactory.get("non-existent category");
+    //@Test(expected = InvalidCategoryException.class)
+    public void invalidCategoryThrowsInvalidCategoryException(){
+        //answerCategoryFactory.get("non-existent category");
+        SurveyForm surveyForm = new SurveyForm();
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        Assert.assertNull(surveyForm.getCategoryFromForm("non-existent-category", null));
     }
 
     @Test
     public void categoryFactoryAssignsChildAndSpouseTheCorrespondingEnum() throws Exception, InvalidCategoryException {
-        PersonCategory child = (PersonCategory) answerCategoryFactory.get("datos hijo 1");
+        SurveyForm surveyForm = new SurveyForm();
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+
+
+
+        PersonCategory child = (PersonCategory) surveyForm.getCategoryFromForm("datos hijo 1", null);
         Assert.assertEquals(child.getPersonType(), PersonType.CHILD);
 
-        PersonCategory spouse = (PersonCategory) answerCategoryFactory.get("DATOS DEL CÓNYUGE");
+        PersonCategory spouse = (PersonCategory) surveyForm.getCategoryFromForm("DATOS DEL CÓNYUGE", null);
         Assert.assertEquals(spouse.getPersonType(), PersonType.SPOUSE);
     }
 
@@ -203,7 +225,15 @@ public class ParserCategoriesTest {
 
     @Test
     public void child2AndChild11ReturnDifferentObjects() throws InvalidCategoryException, Exception {
-        AnswerCategoryFactory answerCategoryFactory = new AnswerCategoryFactory();
-        Assert.assertNotEquals(answerCategoryFactory.get("DATOS HIJO 2"),answerCategoryFactory.get("DATOS HIJO 11"));
+        //AnswerCategoryFactory answerCategoryFactory = new AnswerCategoryFactory();
+        //Assert.assertNotEquals(answerCategoryFactory.get("DATOS HIJO 2"),answerCategoryFactory.get("DATOS HIJO 11"));
+
+        SurveyForm surveyForm = new SurveyForm();
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        Assert.assertNotEquals(
+                surveyForm.getCategoryFromForm("DATOS HIJO 2", null),
+                surveyForm.getCategoryFromForm("DATOS HIJO 11", null)
+        );
+
     }
 }

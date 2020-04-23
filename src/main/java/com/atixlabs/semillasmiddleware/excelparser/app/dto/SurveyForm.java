@@ -73,46 +73,25 @@ public class SurveyForm {
                 && this.surveyFormCode.equals(answerRow.getSurveyFormCode());
     }
 
-    public void addCategory(Category category) {
-        if(!categoryList.contains(category))
-            categoryList.add(category);
-    }
-
-    public Integer findCategoryInList(Class<?> classToFind) {
-        for(int i = 0; i<categoryList.size(); i++){
-            if(categoryList.get(i).getClass() == classToFind)
-                return i;
-        }
-        return -1;
-    }
-
-    public Category getCategoryData(Class<?> classToFind){
-        Integer categoryIndex = this.findCategoryInList(classToFind);
-        if(categoryIndex >=0)
-            return this.getCategoryList().get(categoryIndex).getData();
-        return null;
-    }
-
     public void setCategoryData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
-
-        //busco el objeto en el form y devuelvo referencia.
         Category category = this.getCategoryFromForm(answerRow.getCategory(), processExcelFileResult);
         if (category != null)
             category.loadData(answerRow, processExcelFileResult);
     }
 
-    public Category getCategoryFromForm(String category, ProcessExcelFileResult processExcelFileResult) {
+    public Category getCategoryFromForm(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
 
-        if (category == null)
+        if (categoryToFind == null)
             return null;
 
-        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+        categoryToFind = StringUtil.toUpperCaseTrimAndRemoveAccents(categoryToFind);
 
         for (Category value : categoryList) {
-            if (value.getCategoryOriginalName().equals(category))
+            if (value.getCategoryOriginalName().equals(categoryToFind))
                 return value;
         }
-        processExcelFileResult.addRowDebug("Categoría "+category, "No fue definida en meta-data: será ignorada");
+        if (processExcelFileResult!=null)
+            processExcelFileResult.addRowDebug("Categoría "+categoryToFind, "No fue definida en meta-data: será ignorada");
         return null;
     }
 

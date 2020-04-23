@@ -1,128 +1,100 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
-import com.atixlabs.semillasmiddleware.util.StringUtil;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
+import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
 public class AnswerCategoryFactory {
-    private static final Integer AMOUNT_CHILDREN = 11;
-    private static final Integer AMOUNT_KINSMAN = 3;
-    private static final String BENEFICIARY_CATEGORY_NAME="DATOS DEL BENEFICIARIO";
-    private static final String SPOUSE_CATEGORY_NAME="DATOS DEL CONYUGE";
-    private static final String CHILD_CATEGORY_NAME="DATOS HIJO";
-    private static final String KINSMAN_CATEGORY_NAME="OTRO MIEMBRO DE LA FAMILIA";
-    private static final String ENTREPRENEURSHIP_CATEGORY_NAME="EMPRENDIMIENTO";
-    private static final String DWELLING_CATEGORY_NAME="VIVIENDA";
+    /*
+    public static final Integer AMOUNT_CHILDREN = 11;
+    public static final Integer AMOUNT_KINSMAN = 3;
+    public static final String BENEFICIARY_CATEGORY_NAME="DATOS DEL BENEFICIARIO";
+    public static final String SPOUSE_CATEGORY_NAME="DATOS DEL CONYUGE";
+    public static final String CHILD_CATEGORY_NAME="DATOS HIJO";
+    public static final String KINSMAN_CATEGORY_NAME="OTRO MIEMBRO DE LA FAMILIA";
+    public static final String ENTREPRENEURSHIP_CATEGORY_NAME="EMPRENDIMIENTO";
+    public static final String DWELLING_CATEGORY_NAME="VIVIENDA";
+*/
+    private Map<String, Class<?>> categoryMap;
 
-    private static Map<String, Class<?>> CATEGORIES_TYPE = new HashMap<String, Class<?>>() {{
-        put(BENEFICIARY_CATEGORY_NAME, PersonCategory.class);
-        put(SPOUSE_CATEGORY_NAME, PersonCategory.class);
-        put(CHILD_CATEGORY_NAME, PersonCategory.class);
-        put(KINSMAN_CATEGORY_NAME, PersonCategory.class);
-        put(ENTREPRENEURSHIP_CATEGORY_NAME, EntrepreneurshipCategory.class);
-        put(DWELLING_CATEGORY_NAME, DwellingCategory.class);
-    }};
 
-    private Map<String, Category> categories;
+    public ArrayList<Category> getCategoryList(){
 
-    public AnswerCategoryFactory(){
-        generateCategoriesDinamically();
-    }
 
-    private void generateCategoriesDinamically(){
-        this.categories = new HashMap<String,Category>(){{
-            put(BENEFICIARY_CATEGORY_NAME, null);
-            put(SPOUSE_CATEGORY_NAME, null);
-            put(ENTREPRENEURSHIP_CATEGORY_NAME, null);
-            put(DWELLING_CATEGORY_NAME, null);
-        }};
-
-        //Generates children keys dinamically
-        for (int i = 1; i < AMOUNT_CHILDREN+1; i++) {
-            categories.put(CHILD_CATEGORY_NAME +" "+ i, null);
-        }
-
-        //Generates family members' keys dinamically
-        for (int i = 1; i < AMOUNT_KINSMAN+1; i++) {
-            categories.put(KINSMAN_CATEGORY_NAME + " " + i, null);
-        }
-    }
-
-    public ArrayList<Category> getAllCategories() {
-
+        //Keep all Category options.
+        ArrayList<Categories> categoryEnumList = new ArrayList<>(Categories.getCodeList());
+        //Keep actual objects to return
         ArrayList<Category> categoryList = new ArrayList<>();
 
-        categoryList.add(new PersonCategory(BENEFICIARY_CATEGORY_NAME));
-        categoryList.add(new PersonCategory(SPOUSE_CATEGORY_NAME));
-
-        for (int i = 1; i < AMOUNT_CHILDREN+1; i++) {
-            categoryList.add(new PersonCategory(CHILD_CATEGORY_NAME+" "+ i));
-        }
-        for (int i = 1; i < AMOUNT_KINSMAN+1; i++) {
-            categoryList.add(new PersonCategory(KINSMAN_CATEGORY_NAME+ " " + i));
+        //building CATEGORY_MAP
+        categoryMap = new HashMap<>();
+        for (Categories categoryEnum : categoryEnumList) {
+            categoryMap.put(categoryEnum.getCode(), categoryEnum.getLinkedClass());
         }
 
-        categoryList.add(new EntrepreneurshipCategory(ENTREPRENEURSHIP_CATEGORY_NAME));
-        categoryList.add(new DwellingCategory(DWELLING_CATEGORY_NAME));
-
+        //Filling category list with objects
+        for (Categories categoryEnum : categoryEnumList) {
+            addCategoryInstancesToList(categoryList, categoryEnum);
+        }
         return categoryList;
     }
 
-    public Category get(String category) throws InvalidCategoryException, Exception {
+    private void addCategoryInstancesToList(ArrayList<Category> categoryList, Categories categoryEnum) {
 
-        if (category == null)
-            return null;
+        Class<?> categoryClass = categoryMap.get(categoryEnum.getCode());
 
-        //category = StringUtil.removeNumbers(category);
-        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
+        if (categoryEnum.getAmount() <=0)
+            return;
 
-        if (!categories.containsKey(category)){
-            throw new InvalidCategoryException(category);
-        }
-
-        if (categories.get(category) == null){
-            Category newCategory = null;
-            try{
-                newCategory = createCategoryByCategoryName(category);
-                categories.put(category,newCategory);
-            } catch (IllegalAccessException | InvocationTargetException | NoSuchMethodException | InstantiationException e) {
-                throw new Exception(e.getMessage());
+        if (categoryEnum.getAmount() == 1){
+            try {
+                categoryList.add((Category) categoryClass.getConstructor(String.class).newInstance(categoryEnum.getCode()));
+            } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                e.printStackTrace();
             }
-            return newCategory;
         }
-        else{
-            return categories.get(category);
+        else {
+            for (int i = 1; i<categoryEnum.getAmount()+1; i++) {
+                try {
+                    categoryList.add((Category) categoryClass.getConstructor(String.class).newInstance(categoryEnum.getCode()+" "+i));
+                } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
+                    e.printStackTrace();
+                }
+            }
         }
-    }
-
-    //If it's a person (beneficiary, child or other kinsman): pass the type of person to the PersonCategory's constructor)
-    public Category createCategoryByCategoryName(String categoryName) throws NoSuchMethodException, IllegalAccessException, InvocationTargetException, InstantiationException {
-        categoryName = StringUtil.removeNumbers(categoryName);
-        Class<?> categoryType = CATEGORIES_TYPE.get(categoryName);
-        if (categoryType == PersonCategory.class){
-            return (Category) categoryType.getConstructor(String.class).newInstance(categoryName);
-        }
-        else{
-            return (Category) categoryType.getConstructor().newInstance();
-        }
-    }
-
-    public void reset(){
-        generateCategoriesDinamically();
-    }
-
-
-    public boolean containsKey(String category){
-        category = StringUtil.toUpperCaseTrimAndRemoveAccents(category);
-        return categories.containsKey(category);
     }
 }
+
+
+/*
+
+CATEGORY_MAP = new HashMap<>() {{
+             put(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), PersonCategory.class);
+             put(Categories.SPOUSE_CATEGORY_NAME.getCode(), PersonCategory.class);
+             put(Categories.CHILD_CATEGORY_NAME.getCode(), PersonCategory.class);
+             put(Categories.KINSMAN_CATEGORY_NAME.getCode(), PersonCategory.class);
+             put(Categories.ENTREPRENEURSHIP_CATEGORY_NAME.getCode(), EntrepreneurshipCategory.class);
+             put(Categories.DWELLING_CATEGORY_NAME.getCode(), DwellingCategory.class);
+         }};
+
+        categoryList.add(new PersonCategory(Categories.BENEFICIARY_CATEGORY_NAME.getCode()));
+        categoryList.add(new PersonCategory(Categories.SPOUSE_CATEGORY_NAME.getCode()));
+
+        for (int i = 1; i < Categories.CHILD_CATEGORY_NAME.getAmount()+1; i++) {
+            categoryList.add(new PersonCategory(Categories.CHILD_CATEGORY_NAME.getCode()+" "+ i));
+        }
+        for (int i = 1; i < Categories.KINSMAN_CATEGORY_NAME.getAmount()+1; i++) {
+            categoryList.add(new PersonCategory(Categories.KINSMAN_CATEGORY_NAME.getCode()+ " " + i));
+        }
+
+        categoryList.add(new EntrepreneurshipCategory(Categories.ENTREPRENEURSHIP_CATEGORY_NAME.getCode()));
+        categoryList.add(new DwellingCategory(Categories.DWELLING_CATEGORY_NAME.getCode()));
+        */

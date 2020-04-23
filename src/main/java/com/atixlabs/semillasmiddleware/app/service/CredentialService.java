@@ -4,7 +4,9 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
@@ -27,24 +29,19 @@ public class CredentialService {
     private CredentialCreditRepository credentialCreditRepository;
 
     @Autowired
+    AnswerCategoryFactory answerCategoryFactory;
+
+    @Autowired
     private PersonRepository personRepository;
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm)
     {
         log.info("buildAllCredentialsFromForm: "+this.toString());
         buildPerson(surveyForm);
-        buildCreditCredential(surveyForm);
         buildIdentityOwnerCredential(surveyForm);
         buildIdentityRelativeCredential(surveyForm);
         buildEntrepreneurshipCredential(surveyForm);
         buildHomeCredential(surveyForm);
-        buildHealthOwnerCredential(surveyForm);
-        buildHeathRelativeCredential(surveyForm);
-        buildKnowledgeOwnerCredential(surveyForm);
-        buildKnowledgeRelativeCredential(surveyForm);
-        buildScholarLoanCredential(surveyForm);
-        buildCoursesOwnerCredential(surveyForm);
-        buildCoursesRelativeCredential(surveyForm);
     }
 
     /**
@@ -65,28 +62,12 @@ public class CredentialService {
     private void buildHomeCredential(SurveyForm surveyForm) {
     }
 
-    private void buildHealthOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildHeathRelativeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildKnowledgeOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildKnowledgeRelativeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildScholarLoanCredential(SurveyForm surveyForm) {
-    }
-    
 
     @Autowired
     public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
     }
-
 
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
         List<Credential> credentials;
@@ -100,50 +81,19 @@ public class CredentialService {
          return  credentials;
     }
 
-    public void addCredentialCredit(){
-        CredentialCredit credentialCredit = new CredentialCredit();
-    }
-
-    private void buildCoursesOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildCoursesRelativeCredential(SurveyForm surveyForm) {
-    }
-
-
-
     private void buildPerson(SurveyForm surveyForm){
         log.info("  buildPerson");
 
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
-        if(personCategory != null) {
+        //PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
+        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryFromForm(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        if(!personCategory.isEmpty()) {
             Person person = new Person(personCategory);
 
-            Optional<Person> personOptional = personRepository.findByDocumentTypeAndDocumentNumber(person.getDocumentType(),person.getDocumentNumber());
+            Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
             if(personOptional.isEmpty())
                 personRepository.save(person);
             else
                 log.info("Ya existe una persona con "+personOptional.get().getDocumentType()+" "+personOptional.get().getDocumentNumber());
-        }
-    }
-
-    private void buildCreditCredential(SurveyForm surveyForm){
-        log.info("  buildCreditCredential");
-
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
-        if(personCategory != null) {
-            CredentialCredit credentialCredit = new CredentialCredit(personCategory);
-
-            Optional<CredentialCredit> credentialCreditOptional = credentialCreditRepository.findByBeneficiaryDocumentTypeAndBeneficiaryDocumentNumber(
-                    credentialCredit.getBeneficiaryDocumentType(), credentialCredit.getBeneficiaryDocumentNumber()
-            );
-
-            if(credentialCreditOptional.isEmpty())
-                credentialCreditRepository.save(credentialCredit);
-            else
-                log.info("Ya existe una credencial para el "+
-                        credentialCredit.getBeneficiaryDocumentType()+" " +
-                        credentialCredit.getBeneficiaryDocumentNumber());
         }
     }
 

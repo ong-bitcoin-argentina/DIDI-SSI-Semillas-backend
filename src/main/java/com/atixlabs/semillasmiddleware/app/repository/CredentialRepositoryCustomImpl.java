@@ -3,6 +3,8 @@ package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,7 +27,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates, String credentialStatus) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -33,18 +35,19 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
         Root<Credential> credential = cq.from(Credential.class);
         List<Predicate> predicates = new ArrayList<>();
 
-        Join<Credential, Person> children = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, Person> beneficiary = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, CredentialState> credentialStateEntity = credential.join("credentialState", JoinType.LEFT);
 
         if (credentialType != null) {
             predicates.add(cb.equal(credential.get("credentialDescription"), credentialType));
         }
 
         if (name != null) {
-            predicates.add(cb.like(cb.lower(children.get("name")), "%"+name.toLowerCase()+"%"));
+            predicates.add(cb.like(cb.lower(beneficiary.get("name")), "%"+name.toLowerCase()+"%"));
         }
 
         if (dniBeneficiary != null) {
-            predicates.add(cb.like(children.get("documentNumber").as(String.class), dniBeneficiary+"%"));
+            predicates.add(cb.like(beneficiary.get("documentNumber").as(String.class), dniBeneficiary+"%"));
         }
 
         if (idDidiCredential != null) {
@@ -59,8 +62,12 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
             predicates.add(cb.like(credential.get("dateOfIssue").as(String.class), dateOfIssue+"%"));
         }
 
-        if (credentialState != null) {
-            predicates.add(cb.in(credential.get("credentialState")).value(credentialState));
+        if (credentialStates != null) {
+            predicates.add(cb.in(credentialStateEntity.get("stateName")).value(credentialStates));
+        }
+
+        if (credentialStatus != null) {
+            predicates.add(cb.equal(credential.get("credentialStatus").as(String.class), credentialStatus));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));

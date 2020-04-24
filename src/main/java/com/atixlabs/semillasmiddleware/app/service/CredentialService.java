@@ -29,28 +29,26 @@ public class CredentialService {
     private CredentialCreditRepository credentialCreditRepository;
 
     @Autowired
-<<<<<<< HEAD
     AnswerCategoryFactory answerCategoryFactory;
-=======
+
+    @Autowired
     public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
     }
->>>>>>> develop
 
     @Autowired
     private PersonRepository personRepository;
 
-    /*public void buildAllCredentialsFromForm(SurveyForm surveyForm)
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm)
     {
         log.info("buildAllCredentialsFromForm: "+this.toString());
-        buildPerson(surveyForm);
         buildIdentityOwnerCredential(surveyForm);
         buildIdentityRelativeCredential(surveyForm);
         buildEntrepreneurshipCredential(surveyForm);
         buildHomeCredential(surveyForm);
     }
-    */
+
 
 
     /**
@@ -73,13 +71,7 @@ public class CredentialService {
 
 
 
-<<<<<<< HEAD
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
-=======
-
-
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String credentialStatus) {
->>>>>>> develop
         List<Credential> credentials;
         try {
          credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);

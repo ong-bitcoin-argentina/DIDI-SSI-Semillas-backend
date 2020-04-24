@@ -43,10 +43,9 @@ public class BondareaController {
 
         }
         catch (Exception ex){
+            log.error("Could not synchronized data from Bondarea !");
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
-
-        //El proceso deberia tomar todos los prestamos y actualizar la tabla intermedia para manejar la data
 
         return new ResponseEntity<>(loansDto, HttpStatus.OK);
     }

@@ -15,22 +15,22 @@ import java.time.LocalDate;
 public class BondareaLoanDto {
 
     @SerializedName("pp")
-    private String idBondareaLoan; // ID de producto de préstamo (Ej. B26F5FKZ)
+    private String idProductLoan; // ID de producto de préstamo (Ej. B26F5FKZ)
 
     @SerializedName("ppt")
     private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes)
 
     @SerializedName("sta")
-    private String statusName; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
+    private String statusDescription; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
 
     @SerializedName("staint")
     private int status; // Estado numérico del préstamo (Ej.0=Preparación, 55= Activo, 60=finalizado)
 
     @SerializedName("t")
-    private String statusDescription; // Deccripcion de estado ?
+    private String statusFullDescription; // Deccripcion de estado ?
 
     @SerializedName("id")
-    private String idIndividual; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
+    private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 
     @SerializedName("id_pg")
     private String idGroup; // ID del crédito grupal y su estado (Ej.55-B26F5FKZ)

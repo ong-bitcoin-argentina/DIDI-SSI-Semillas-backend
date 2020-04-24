@@ -44,24 +44,24 @@ public class Loan extends AuditableEntity {
     //@Column(columnDefinition = "boolean default false")
     private Boolean isDeleted;
 
-    private String idBondareaLoan;
+    private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 
     private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes)
 
-    private String statusName; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
+    private String statusDescription; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
 
     private int status; // Estado numérico del préstamo (Ej.0=Preparación, 55= Activo, 60=finalizado)
 
-    private String statusDescription; // Deccripcion de estado ?
+    private String statusFullDescription; // Deccripcion de estado ?
 
     //@Column(columnDefinition = "boolean default false")
     private Boolean pending;
 
-    private String idIndividual; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
+    private String idProductLoan;  //ID de producto de préstamo (Ej.  B26F5FKZ)
 
-    private String idGroup; // ID del crédito grupal y su estado (Ej.55-B26F5FKZ)
+    private String idGroup; // ID del   crédito grupal y su estado (Ej.55-B26F5FKZ)
 
-    private String loanName; // Nombre asignado al crédito (Ej. Ciclo 2)
+    private String cycleDescription; // Nombre asignado al crédito (Ej. Ciclo 2)
 
     private LocalDate creationDate; // Fecha de otorgamiento cuentas
 
@@ -89,17 +89,17 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        this.statusName =  loanDto.getStatusName();
+        this.statusFullDescription =  loanDto.getStatusFullDescription();
 
         this.status =   loanDto.getStatus();
 
-        this.statusDescription =  loanDto.getStatusDescription();
+        this.statusFullDescription =  loanDto.getStatusFullDescription();
 
-        this.idIndividual =   loanDto.getIdIndividual();
+        this.idProductLoan =   loanDto.getIdProductLoan();
 
         this.idGroup =   loanDto.getIdGroup();
 
-        this.loanName =   loanDto.getLoanName();
+        this.cycleDescription =   loanDto.getLoanName();
 
         this.personName =   loanDto.getPersonName();
 
@@ -132,17 +132,17 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanToUpdate.getTagBondareaLoan();
 
-        this.statusName = loanToUpdate.getStatusName();
+        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
 
         this.status = loanToUpdate.getStatus();
 
-        this.statusDescription = loanToUpdate.getStatusDescription();
+        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
 
-        this.idIndividual = loanToUpdate.getIdIndividual();
+        this.idProductLoan = loanToUpdate.getIdProductLoan();
 
         this.idGroup = loanToUpdate.getIdGroup();
 
-        this.loanName = loanToUpdate.getLoanName();
+        this.cycleDescription = loanToUpdate.getCycleDescription();
 
         this.creationDate = loanToUpdate.getCreationDate();
 

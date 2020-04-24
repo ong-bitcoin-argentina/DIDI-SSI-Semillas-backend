@@ -19,13 +19,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.net.SocketTimeoutException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -102,9 +99,9 @@ public class BondareaService {
      */
     private BondareaLoanDto getMockBondareaLoan(){
         BondareaLoanDto loan = new BondareaLoanDto();
-        loan.setIdBondareaLoan("1L");
+        loan.setIdProductLoan("1L");
         loan.setDni(123456L);
-        loan.setStatusName("Activo");
+        loan.setStatusFullDescription("Activo");
         loan.setAmount((float) 1000);
         loan.setExpiredAmount((float) 0);
         loan.setStatus(55);
@@ -126,15 +123,15 @@ public class BondareaService {
         loans.add(loan);
 
         BondareaLoanDto loan2 = getMockBondareaLoan();
-        loan2.setIdBondareaLoan("2L");
+        loan2.setIdProductLoan("2L");
         loans.add(loan2);
 
         BondareaLoanDto loan3 = getMockBondareaLoan();
-        loan3.setIdBondareaLoan("3L");
+        loan3.setIdProductLoan("3L");
         loans.add(loan3);
 
         BondareaLoanDto loan4 = getMockBondareaLoan();
-        loan4.setIdBondareaLoan("4L");
+        loan4.setIdProductLoan("4L");
         loans.add(loan4);
 
         return loans;
@@ -153,24 +150,24 @@ public class BondareaService {
 
         //loan 2 is the same
         BondareaLoanDto loan2 = getMockBondareaLoan();
-        loan2.setIdBondareaLoan("2L");
+        loan2.setIdProductLoan("2L");
         loans.add(loan2);
 
         //loan 3 modified tag
         BondareaLoanDto loan3 = getMockBondareaLoan();
-        loan3.setIdBondareaLoan("3L");
+        loan3.setIdProductLoan("3L");
         loan3.setTagBondareaLoan("nuevo tag");
         loans.add(loan3);
 
         //loan 4 is in default
         BondareaLoanDto loan4 = getMockBondareaLoan();
-        loan4.setIdBondareaLoan("4L");
+        loan4.setIdProductLoan("4L");
         loan4.setExpiredAmount((float) 100);
         loans.add(loan4);
 
         //new loan
         BondareaLoanDto loan5 = getMockBondareaLoan();
-        loan5.setIdBondareaLoan("5L");
+        loan5.setIdProductLoan("5L");
         loans.add(loan5);
 
         return loans;

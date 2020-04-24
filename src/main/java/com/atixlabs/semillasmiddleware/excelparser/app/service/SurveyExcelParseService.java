@@ -111,7 +111,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
-                    credentialService.buildAllCredentialsFromForm(surveyForm);
+                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
         }
         else

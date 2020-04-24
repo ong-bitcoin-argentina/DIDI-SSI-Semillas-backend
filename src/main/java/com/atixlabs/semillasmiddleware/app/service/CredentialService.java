@@ -1,8 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialIdentityRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
@@ -11,6 +12,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -25,11 +27,16 @@ import java.util.List;
 @Service
 public class CredentialService {
 
+    @Autowired
     private CredentialRepository credentialRepository;
+    @Autowired
     private CredentialCreditRepository credentialCreditRepository;
 
     @Autowired
-    AnswerCategoryFactory answerCategoryFactory;
+    private CredentialIdentityRepository credentialIdentityRepository;
+
+    @Autowired
+    private AnswerCategoryFactory answerCategoryFactory;
 
     @Autowired
     public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
@@ -37,13 +44,11 @@ public class CredentialService {
         this.credentialRepository = credentialRepository;
     }
 
-    @Autowired
-    private PersonRepository personRepository;
 
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm)
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult)
     {
         log.info("buildAllCredentialsFromForm: "+this.toString());
-        buildIdentityOwnerCredential(surveyForm);
+        buildIdentityOwnerCredential(surveyForm, processExcelFileResult);
         buildIdentityRelativeCredential(surveyForm);
         buildEntrepreneurshipCredential(surveyForm);
         buildHomeCredential(surveyForm);
@@ -56,9 +61,25 @@ public class CredentialService {
      * to make public methods easier to read.
      * @param surveyForm
      */
+    private void buildIdentityOwnerCredential(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult){
+        log.info("  buildIdentityOwnerCredential");
 
-    private void buildIdentityOwnerCredential(SurveyForm surveyForm) {
+        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryFromForm(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        if(personCategory != null) {
+
+            Optional<CredentialIdentity> CredentialIdentityOptional = credentialIdentityRepository.findByDniBeneficiary(personCategory.getIdNumber());
+
+            if(CredentialIdentityOptional.isEmpty()) {
+                CredentialIdentity credentialIdentity = new CredentialIdentity(personCategory);
+                credentialIdentityRepository.save(credentialIdentity);
+            }
+            else {
+                processExcelFileResult.addRowError("warning", "Ya existe una credencial para el DNI " + personCategory.getIdNumber());
+                //log.info("Ya existe una credencial para el DNI: " + personCategory.getIdNumber());
+            }
+        }
     }
+
 
     private void buildIdentityRelativeCredential(SurveyForm surveyForm) {
     }
@@ -82,18 +103,6 @@ public class CredentialService {
             }
          return  credentials;
     }
-
-
-    public void addCredentialCredit(){
-        CredentialCredit credentialCredit = new CredentialCredit();
-    }
-
-    private void buildCoursesOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildCoursesRelativeCredential(SurveyForm surveyForm) {
-    }
-
 
 
     public void saveCredentialCreditMock(){

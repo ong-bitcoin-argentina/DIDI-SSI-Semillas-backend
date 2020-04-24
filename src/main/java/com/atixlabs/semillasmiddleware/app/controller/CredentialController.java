@@ -100,9 +100,9 @@ public class CredentialController {
     public void generateCredentialsCredit(){
         List<Loan> newLoans = loanService.findLoansWithoutCredential();
 
-        for (Loan l:newLoans ) {
-            loanService.validateLoanBeneficiary(l);
-
+        for (Loan loan: newLoans) {
+            credentialService.createNewCreditCredentials(loan);
+            credentialService.createBenefitsCredential(loan.getDniPerson());
         }
 
 

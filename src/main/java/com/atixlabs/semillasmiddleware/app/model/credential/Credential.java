@@ -32,7 +32,7 @@ public abstract class Credential extends AuditableEntity {
 
     private LocalDateTime dateOfIssue;
 
-    private LocalDateTime dateOfExpiry;
+    //private LocalDateTime dateOfExpiry; is ok to delete it ?
 
     //private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
                                       // ya que es la credencial principal. Las credcenciales familiares se pueden encontrar filtrando a las personas que
@@ -48,9 +48,7 @@ public abstract class Credential extends AuditableEntity {
 
     private String credentialDescription;
 
-    private String credentialCategory;
-
-
+    private String credentialCategory; // TODO purpose ?
 
 
     @Override
@@ -58,16 +56,15 @@ public abstract class Credential extends AuditableEntity {
         return "Credential{" +
                 "id=" + id +
                 ", idDidiIssuer=" + idDidiIssuer +
-
                 ", idDidiReceptor=" + idDidiReceptor +
                 ", idDidiCredential=" + idDidiCredential +
                 ", idHistorical=" + idHistorical +
                 ", dateOfIssue=" + dateOfIssue +
-                ", dateOfExpiry=" + dateOfExpiry +
-               // ", idRelatedCredential=" + idRelatedCredential +
                 ", beneficiary=" + beneficiary +
-                ", credentialState='" + credentialState + '\'' +
-                ", credentialType='" + credentialDescription + '\'' +
+                ", credentialState=" + credentialState +
+                ", credentialStatus='" + credentialStatus + '\'' +
+                ", credentialDescription='" + credentialDescription + '\'' +
+                ", credentialCategory='" + credentialCategory + '\'' +
                 '}';
     }
 }

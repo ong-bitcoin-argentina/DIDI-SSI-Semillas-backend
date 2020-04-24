@@ -18,13 +18,9 @@ public class LoanService {
 
     private LoanRepository loanRepository;
 
-    private PersonRepository personRepository;
-
-
     @Autowired
     public LoanService(LoanRepository loanRepository, PersonRepository personRepository){
         this.loanRepository = loanRepository;
-        this.personRepository = personRepository;
     }
 
 
@@ -34,21 +30,5 @@ public class LoanService {
         return newLoans;
     }
 
-    public void validateLoanBeneficiary(Loan loan){
-        //TODO beneficiarieSSSS
-        Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
-        if(opBeneficiary.isPresent()){
-            if(opBeneficiary.get().getIdDidi() != null){
-                create credit
 
-            }
-            else{
-                create "pre credential" on state pending didi
-            }
-            loan.setHasCredential(true);
-
-        }else{
-            //throw error -> person should have been created before...
-        }
-    }
 }

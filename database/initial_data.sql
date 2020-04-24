@@ -42,12 +42,12 @@ id, credential_description, credential_category, credential_state_id, date_of_ex
 
 
 INSERT INTO public.credential_credit (
-amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id) VALUES (
-'10000'::double precision, 'credito'::character varying(255), 'Vigente'::character varying(255), '4353456345'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '1'::bigint);
+amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id, total_cycles) VALUES (
+'10000'::double precision, 'credito'::character varying(255), 'Vigente'::character varying(255), '4353456345'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '1'::bigint, '12'::bigint);
 
 INSERT INTO public.credential_credit (
-amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id) VALUES (
-'20000'::double precision, 'credito2'::character varying(255), 'Vigente'::character varying(255), '468767'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '2'::bigint);
+amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id, total_cycles) VALUES (
+'20000'::double precision, 'credito2'::character varying(255), 'Vigente'::character varying(255), '468767'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '2'::bigint, '12'::bigint);
 
 INSERT INTO public.credential_entrepreneurship (
 entrepreneurship_address,  end_activity, entrepreneurship_type, main_activity, entrepreneurship_name, start_activity, id) VALUES (

@@ -1,24 +1,25 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.Optional;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -26,15 +27,22 @@ public class CredentialService {
 
     private CredentialRepository credentialRepository;
     private CredentialCreditRepository credentialCreditRepository;
+    private PersonRepository personRepository;
+    private LoanRepository loanRepository;
+    private CredentialBenefitsRepository credentialBenefitsRepository;
+    private DIDHistoricRepository didHistoricRepository;
 
     @Autowired
-    public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
+    public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository, PersonRepository personRepository, LoanRepository loanRepository, CredentialBenefitsRepository credentialBenefitsRepository, DIDHistoricRepository didHistoricRepository) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
+        this.personRepository = personRepository;
+        this.loanRepository = loanRepository;
+        this.credentialBenefitsRepository = credentialBenefitsRepository;
+        this.didHistoricRepository = didHistoricRepository;
     }
 
-    @Autowired
-    private PersonRepository personRepository;
+
 
     /*public void buildAllCredentialsFromForm(SurveyForm surveyForm)
     {
@@ -54,11 +62,6 @@ public class CredentialService {
         buildCoursesRelativeCredential(surveyForm);
     }
     */
-
-
-
-
-
 
 
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String credentialStatus) {
@@ -92,18 +95,128 @@ public class CredentialService {
     }
 */
 
-    private void buildCreditCredential(Loan loan){
+    public void createNewCreditCredentials(Loan loan) {
+        //TODO beneficiarieSSSS -> the credit group will be created by separate
+        Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
+        if(!opCreditExistence.isPresent()) {
+            Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
+            if (opBeneficiary.isPresent()) {
+                //the documents must coincide
+                CredentialCredit credit = this.buildCreditCredential(loan, opBeneficiary.get());
+                loan.setHasCredential(true);
+
+                credentialCreditRepository.save(credit);
+                loanRepository.save(loan);
+
+                //after create credit, will create benefit credential
+                this.createBenefitsCredential(opBeneficiary.get());
+            } else {
+                //throw error -> person should have been created before...
+                //this eror is important, have to be showed in front
+            }
+        }
+        else{
+            loan.setHasCredential(true);
+            log.error("The credit with idBondarea " + loan.getIdBondareaLoan() + " has an existent credential ");
+            //credit exist
+        }
+    }
+
+
+    private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
         log.info("Creating credit credential");
 
         CredentialCredit credentialCredit = new CredentialCredit();
+        credentialCredit.setIdBondareaCredit(loan.getIdBondareaLoan());
+        credentialCredit.setDniBeneficiary(loan.getDniPerson());
+        // TODO we need the type from bondarea - credentialCredit.setCreditType();
+        credentialCredit.setIdGroup(loan.getIdGroup());
+        credentialCredit.setCurrentCycle(loan.getCycleDescription()); // si cambia, se tomara
+        //TODO data for checking - credentialCredit.totalCycles;
 
+        credentialCredit.setAmountExpiredCycles(0); //TODO a credit starts always in cero ?
+        credentialCredit.setCreditState(loan.getStatusDescription());
+        credentialCredit.setExpiredAmount(loan.getExpiredAmount());
+        credentialCredit.setCreationDate(loan.getCreationDate());
+
+        //Credential Parent fields
+        credentialCredit.setDateOfIssue(DateUtil.getLocalDateTimeNow()); //Todo check if correct to use loan creation time
+        credentialCredit.setBeneficiary(beneficiary);
+
+        //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
+        Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
+        if(opActiveDid.isPresent()) {
+            credentialCredit.setIdDidiReceptor(opActiveDid.get().getIdDidiReceptor());
+            credentialCredit.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
+            credentialCredit.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
+        }
+        else{
+            //Person do not have a DID yet -> set as pending didi
+            credentialCredit.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_DIDI.getCode());
+        }
+
+        //This depends of the type field from bondarea. And CredentialTypes
+        credentialCredit.setCredentialDescription("type");
+
+        return credentialCredit;
+
+    }
+
+    public void createBenefitsCredential(Person beneficiary){
+        //TODO validations ?
+        Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByDniBeneficiary(beneficiary.getDocumentNumber());
+        //create benefit if person does not have or is not titular
+            if (!opBenefits.isPresent() || !opBenefits.get().getBeneficiaryType().equals("Titular") ) {
+                CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary));
+                credentialBenefitsRepository.save(benefits);
+            } else {
+                //throw error -> person should have been created before...
+            }
+        }
+
+
+    }
+
+    /**
+     * Build for Titular persons, process into credential credit creation (could be parametrized eventually)
+     * @param beneficiary
+     * @return
+     */
+    public CredentialBenefits buildBenefitsCredential(Person beneficiary){
+        CredentialBenefits benefits = new CredentialBenefits();
+
+        benefits.setBeneficiaryType("Titular"); //TOdo this hardcode could be improved
+        benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
+
+        benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
+        benefits.setBeneficiary(beneficiary);
+
+        benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
+
+        //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
+
+        Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
+        if(opActiveDid.isPresent()) {
+            benefits.setIdDidiReceptor(opActiveDid.get().getIdDidiReceptor());
+            benefits.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
+            benefits.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
+        }
+        else{
+            //Person do not have a DID yet -> set as pending didi
+            benefits.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_DIDI.getCode());
+        }
+
+        return benefits;
     }
 
 
 
+
+    // ------------------------------------------------MOCKS -----------------------------------------
+
     public void saveCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();
-        credentialCredit.setDateOfExpiry(LocalDateTime.now());
+        //credentialCredit.setDateOfExpiry(LocalDateTime.now());
 
         credentialCredit.setDateOfIssue(LocalDateTime.now());
 
@@ -115,11 +228,8 @@ public class CredentialService {
         //credentialCredit.setIdRelatedCredential(534L);//tbd value
 
 
-        credentialCredit.setCreditName("credit name");
-        credentialCredit.setIdGroup(1111L);
-        credentialCredit.setGroupName("GroupName");
-        credentialCredit.setRol("rol");
-        credentialCredit.setAmount(1d);
+        credentialCredit.setIdGroup("1111L");
+        credentialCredit.setExpiredAmount((float) 1);
         credentialCredit.setCurrentCycle("Cycle");
         credentialCredit.setCreditState("state");
         credentialCredit.setDniBeneficiary(29302594L);

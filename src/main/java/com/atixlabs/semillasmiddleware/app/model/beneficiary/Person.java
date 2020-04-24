@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
+import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
@@ -24,8 +25,6 @@ public class Person {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-   // private String documentType; //TODO enum or class. Only documentNumber
-
     @Column(unique = true)
     private Long documentNumber;
 
@@ -37,7 +36,8 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
-    private Long idDidi;
+    @ManyToOne
+    private List<DIDHisotoric> DIDIsHisotoric;
 
 
     //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado.

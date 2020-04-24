@@ -18,8 +18,6 @@ public class CredentialIdentity extends Credential {
 
     private Long dniBeneficiary;
 
-    private Long dniMainBeneficiary;
-
     private String nameBeneficiary;
 
     private Long dniCreditHolder;
@@ -27,7 +25,6 @@ public class CredentialIdentity extends Credential {
     private String nameCreditHolder;
 
     //GENDER ? BirthDate ?
-
-    //TODO: Hay que analizar como estructurar el "titual o familiar" para las credenciales
+    
 
 }

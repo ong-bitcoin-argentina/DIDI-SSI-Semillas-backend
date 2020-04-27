@@ -1,19 +1,13 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
-import ch.qos.logback.core.joran.action.IADataForComplexProperty;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
-import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Component;
 
-import javax.naming.ldap.PagedResultsControl;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
@@ -123,4 +117,31 @@ public class SurveyForm {
 
         return allValid;
     }
+
+    public ArrayList<Category> getCompletedElementsOfCategoryFromForm(Class<?> classToFind) {
+        ArrayList<Category> classArrayList = new ArrayList<>();
+
+        for (Category category : categoryList) {
+            if (category.getClass() == classToFind && !category.isEmpty())
+                classArrayList.add(category);
+        }
+        return classArrayList;
+    }
+/*
+    public Integer findCategoryInList(Class<?> classToFind) {
+        for(int i = 0; i<categoryList.size(); i++){
+            if(categoryList.get(i).getClass() == classToFind)
+                return i;
+        }
+        return -1;
+    }
+
+    public Category getCategoryData(Class<?> classToFind){
+        Integer categoryIndex = this.findCategoryInList(classToFind);
+        if(categoryIndex >=0)
+            return this.getCategoryList().get(categoryIndex).getData();
+        return null;
+    }
+    */
+
 }

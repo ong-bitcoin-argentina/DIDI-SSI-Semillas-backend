@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.io.Serializable;
@@ -15,6 +16,7 @@ import java.time.LocalDateTime;
 @Table(name = "credential")
 @Entity
 @Inheritance( strategy = InheritanceType.JOINED )
+@ToString
 public abstract class Credential extends AuditableEntity {
 
     @Id
@@ -30,9 +32,9 @@ public abstract class Credential extends AuditableEntity {
 
     private Long idHistorical;
 
-    private LocalDateTime dateOfIssue;
+    //private LocalDateTime dateOfIssue;//NO VAN ACÁ SINO EN CADA CREDENCIAL HIJA QUE CORRESPONDA.
 
-    private LocalDateTime dateOfExpiry;
+    //private LocalDateTime dateOfExpiry;//NO VAN ACÁ SINO EN CADA CREDENCIAL HIJA QUE CORRESPONDA.
 
     //private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
                                       // ya que es la credencial principal. Las credcenciales familiares se pueden encontrar filtrando a las personas que
@@ -40,6 +42,8 @@ public abstract class Credential extends AuditableEntity {
 
     @ManyToOne
     private Person beneficiary;
+
+
 
     @ManyToOne
     private CredentialState credentialState;
@@ -49,25 +53,4 @@ public abstract class Credential extends AuditableEntity {
     private String credentialDescription;
 
     private String credentialCategory;
-
-
-
-
-    @Override
-    public String toString() {
-        return "Credential{" +
-                "id=" + id +
-                ", idDidiIssuer=" + idDidiIssuer +
-
-                ", idDidiReceptor=" + idDidiReceptor +
-                ", idDidiCredential=" + idDidiCredential +
-                ", idHistorical=" + idHistorical +
-                ", dateOfIssue=" + dateOfIssue +
-                ", dateOfExpiry=" + dateOfExpiry +
-               // ", idRelatedCredential=" + idRelatedCredential +
-                ", beneficiary=" + beneficiary +
-                ", credentialState='" + credentialState + '\'' +
-                ", credentialType='" + credentialDescription + '\'' +
-                '}';
-    }
 }

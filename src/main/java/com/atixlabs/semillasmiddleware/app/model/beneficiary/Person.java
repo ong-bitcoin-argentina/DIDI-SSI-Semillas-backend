@@ -24,46 +24,22 @@ public class Person {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String documentType; //TODO enum or class
-
     @Column(unique = true)
     private Long documentNumber;
 
-    private String name;
+    private String firstName;
+    private String lastName;
 
     private LocalDate birthDate;
-    
+    /*
     @JoinColumn(name = "ID_CREDENTIAL")
     @OneToMany
     private List<Credential> credentials;
 
 
-    //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado.
-    @OneToOne
-     private Kinship Kinship;
-
     @OneToMany
     private List<Application> applications;
-
-    public Person(PersonCategory personCategory){
-        this.setName(personCategory.getName()+" "+ personCategory.getSurname());
-        this.setDocumentType(personCategory.getIdType());
-        this.setDocumentNumber(personCategory.getIdNumber());
-        this.setBirthDate(personCategory.getBirthDate());
-    }
-
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", documentType='" + documentType + '\'' +
-                ", documentNumber=" + documentNumber +
-                ", name='" + name + '\'' +
-                ", birthDate=" + birthDate +
-                ", credentials=" + credentials +
-                '}';
-    }
+*/
 
 
     /*

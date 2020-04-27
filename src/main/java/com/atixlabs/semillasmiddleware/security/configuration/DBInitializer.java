@@ -1,5 +1,8 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
 import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.atixlabs.semillasmiddleware.security.repository.PermissionRepository;
@@ -32,6 +35,9 @@ public class DBInitializer implements CommandLineRunner {
 
     @Autowired
     private MenuRepository menuRepository;
+
+    @Autowired
+    CredentialStateRepository credentialStateRepository;
 
     @Override
     public void run(String... args) throws Exception {
@@ -161,5 +167,13 @@ public class DBInitializer implements CommandLineRunner {
         if (menu.isPresent()) {
             menuRepository.save(menu.get());
         }
+
+        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        if (credentialStateOptional.isEmpty()){
+            credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
+            credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
+        }
+
+
     }
 }

@@ -6,9 +6,7 @@ import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
@@ -96,7 +94,7 @@ public class CredentialService {
 */
 
     public void createNewCreditCredentials(Loan loan) {
-        //TODO beneficiarieSSSS -> the credit group will be created by separate
+        //beneficiarieSSSS -> the credit group will be created by separate (not together)
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
         if(!opCreditExistence.isPresent()) {
             Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
@@ -112,7 +110,7 @@ public class CredentialService {
                 this.createBenefitsCredential(opBeneficiary.get());
             } else {
                 //throw error -> person should have been created before...
-                //this eror is important, have to be showed in front
+                //this eror is important, have to be shown in front
             }
         }
         else{
@@ -131,16 +129,16 @@ public class CredentialService {
         credentialCredit.setDniBeneficiary(loan.getDniPerson());
         // TODO we need the type from bondarea - credentialCredit.setCreditType();
         credentialCredit.setIdGroup(loan.getIdGroup());
-        credentialCredit.setCurrentCycle(loan.getCycleDescription()); // si cambia, se tomara
+        credentialCredit.setCurrentCycle(loan.getCycleDescription()); // si cambia, se tomara como cambio de ciclo
         //TODO data for checking - credentialCredit.totalCycles;
 
-        credentialCredit.setAmountExpiredCycles(0); //TODO a credit starts always in cero ?
+        credentialCredit.setAmountExpiredCycles(0);
         credentialCredit.setCreditState(loan.getStatusDescription());
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
 
         //Credential Parent fields
-        credentialCredit.setDateOfIssue(DateUtil.getLocalDateTimeNow()); //Todo check if correct to use loan creation time
+        credentialCredit.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credentialCredit.setBeneficiary(beneficiary);
 
         //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
@@ -152,22 +150,22 @@ public class CredentialService {
         }
         else{
             //Person do not have a DID yet -> set as pending didi
-            credentialCredit.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_DIDI.getCode());
+            credentialCredit.setCredentialStatus(CredentialStatusCodes.PENDING_DIDI.getCode());
         }
 
-        //This depends of the type field from bondarea. And CredentialTypes
+        //This depends of the type of loan from bondarea
         credentialCredit.setCredentialDescription("type");
 
         return credentialCredit;
 
     }
 
+    //now is used only for holders, can be easily changed adding param
     public void createBenefitsCredential(Person beneficiary){
-        //TODO validations ?
         Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByDniBeneficiary(beneficiary.getDocumentNumber());
-        //create benefit if person does not have or is not titular
-            if (!opBenefits.isPresent() || !opBenefits.get().getBeneficiaryType().equals("Titular") ) {
-                CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary));
+        //create benefit if person does not have or is holder
+            if (!opBenefits.isPresent() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode()) ) {
+                CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, PersonTypesCodes.HOLDER);
                 credentialBenefitsRepository.save(benefits);
             } else {
                 //throw error -> person should have been created before...
@@ -175,23 +173,30 @@ public class CredentialService {
         }
 
 
-    }
-
     /**
-     * Build for Titular persons, process into credential credit creation (could be parametrized eventually)
+     *
      * @param beneficiary
-     * @return
+     * @param personType
+     * @return CredentialBenefits
      */
-    public CredentialBenefits buildBenefitsCredential(Person beneficiary){
+    public CredentialBenefits buildBenefitsCredential(Person beneficiary, PersonTypesCodes personType){
         CredentialBenefits benefits = new CredentialBenefits();
 
-        benefits.setBeneficiaryType("Titular"); //TOdo this hardcode could be improved
-        benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
+        //Person is holder or family
+        if(personType.getCode().equals(PersonTypesCodes.HOLDER)){
+            benefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
+            benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
+            benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
+        }
+        else{
+            benefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
+            benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
+            benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
+        }
 
+        benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
-
-        benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
 
         //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
 
@@ -203,7 +208,7 @@ public class CredentialService {
         }
         else{
             //Person do not have a DID yet -> set as pending didi
-            benefits.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_DIDI.getCode());
+            benefits.setCredentialStatus(CredentialStatusCodes.PENDING_DIDI.getCode());
         }
 
         return benefits;

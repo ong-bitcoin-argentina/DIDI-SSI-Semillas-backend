@@ -332,7 +332,6 @@ public class CredentialServiceTest {
 
         log.info("credit created " + creditSaved.toString());
 
-
         Assertions.assertEquals(true, savedLoan.getHasCredential());
         Assertions.assertEquals(loan.getIdBondareaLoan(), creditSaved.getIdBondareaCredit());
         Assertions.assertEquals(loan.getDniPerson(), creditSaved.getDniBeneficiary());

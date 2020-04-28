@@ -105,6 +105,8 @@ public class CredentialService {
         credentialCredit.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credentialCredit.setBeneficiary(beneficiary);
 
+        //TODO credentialCredit.setIdHistorical();
+
 
         //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
         Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
@@ -167,6 +169,7 @@ public class CredentialService {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
+        //TODO credentialCredit.setIdHistorical();
 
 
 

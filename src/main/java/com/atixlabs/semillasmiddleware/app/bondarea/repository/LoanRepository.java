@@ -21,4 +21,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     Optional<Loan> findByIdBondareaLoan(String idBocs);
 
     List<Loan> findAllByHasCredentialFalse();
+
+    List<Loan> findAllByHasCredentialTrue();
 }

@@ -44,26 +44,6 @@ public class CredentialService {
 
 
 
-    /*public void buildAllCredentialsFromForm(SurveyForm surveyForm)
-    {
-        log.info("buildAllCredentialsFromForm: "+this.toString());
-        buildPerson(surveyForm);
-        buildCreditCredential(surveyForm);
-        buildIdentityOwnerCredential(surveyForm);
-        buildIdentityRelativeCredential(surveyForm);
-        buildEntrepreneurshipCredential(surveyForm);
-        buildHomeCredential(surveyForm);
-        buildHealthOwnerCredential(surveyForm);
-        buildHeathRelativeCredential(surveyForm);
-        buildKnowledgeOwnerCredential(surveyForm);
-        buildKnowledgeRelativeCredential(surveyForm);
-        buildScholarLoanCredential(surveyForm);
-        buildCoursesOwnerCredential(surveyForm);
-        buildCoursesRelativeCredential(surveyForm);
-    }
-    */
-
-
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
         List<Credential> credentials;
         try {
@@ -78,24 +58,7 @@ public class CredentialService {
 
 
 
-        //This must be on personService, not here
-    /*private void buildPerson(SurveyForm surveyForm){
-        log.info("  buildPerson");
-
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
-        if(personCategory != null) {
-            Person person = new Person(personCategory);
-
-            Optional<Person> personOptional = personRepository.findByDocumentTypeAndDocumentNumber(person.getDocumentType(),person.getDocumentNumber());
-            if(personOptional.isEmpty())
-                personRepository.save(person);
-            else
-                log.info("Ya existe una persona con "+personOptional.get().getDocumentType()+" "+personOptional.get().getDocumentNumber());
-        }
-    }
-*/
-
-    public void createNewCreditCredentials(Loan loan) {
+    public void createNewCreditCredentials(Loan loan) throws Exception {
         //beneficiarieSSSS -> the credit group will be created by separate (not together)
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
         if(!opCreditExistence.isPresent()) {
@@ -111,19 +74,18 @@ public class CredentialService {
                 //after create credit, will create benefit credential
                 this.createBenefitsCredential(opBeneficiary.get());
             } else {
-                //throw error -> person should have been created before...
+                throw new Exception("Person should have been created before...");
                 //this eror is important, have to be shown in front
             }
         }
         else{
             loan.setHasCredential(true);
             log.error("The credit with idBondarea " + loan.getIdBondareaLoan() + " has an existent credential ");
-            //credit exist
         }
     }
 
 
-    private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
+    private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary) {
         log.info("Creating credit credential");
 
         CredentialCredit credentialCredit = new CredentialCredit();
@@ -137,44 +99,48 @@ public class CredentialService {
         credentialCredit.setCreditState(loan.getStatusDescription());
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
+        credentialCredit.setDniBeneficiary(beneficiary.getDocumentNumber());
 
         //Credential Parent fields
         credentialCredit.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credentialCredit.setBeneficiary(beneficiary);
 
 
-
         //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
         Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
-        if(opActiveDid.isPresent()) {
+        if (opActiveDid.isPresent()) {
             credentialCredit.setIdDidiReceptor(opActiveDid.get().getIdDidiReceptor());
-            CredentialState stateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-            credentialCredit.setCredentialState(stateActive);
-            credentialCredit.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
-        }
-        else{
+            Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+            if (opStateActive.isPresent()) {
+                credentialCredit.setCredentialState(opStateActive.get());
+                credentialCredit.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
+            }
+        } else {
             //Person do not have a DID yet -> set as pending didi
-            CredentialState stateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-            credentialCredit.setCredentialState(stateActive);
+            Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+            if (opStateActive.isPresent()) {
+                credentialCredit.setCredentialState(opStateActive.get());
+            }
         }
 
-        //This depends of the type of loan from bondarea
-        credentialCredit.setCredentialDescription("type"); // TODO this column will be no longer useful
-        credentialCredit.setCredentialCategory("type ");
+            //This depends of the type of loan from bondarea
+            credentialCredit.setCredentialDescription("type"); // TODO this column will be no longer useful
+            credentialCredit.setCredentialCategory("type ");
 
-        return credentialCredit;
+            return credentialCredit;
 
     }
 
     //now is used only for holders, can be easily changed adding param
     public void createBenefitsCredential(Person beneficiary){
-        Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDocumentNumber(beneficiary.getDocumentNumber());
+        Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByDniBeneficiary(beneficiary.getDocumentNumber());
+        //TODO if TITULAR has a benefit with state REVOCADA ? create new ? or not ?
         //create benefit if person does not have or is holder
             if (!opBenefits.isPresent() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode()) ) {
                 CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, PersonTypesCodes.HOLDER);
                 credentialBenefitsRepository.save(benefits);
             } else {
-                //throw error -> person should have been created before...
+                log.info("Person with dni" + beneficiary.getDocumentNumber() + "already has a credential benefits");
             }
         }
 
@@ -200,6 +166,7 @@ public class CredentialService {
 
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
+        benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
 
 
 
@@ -208,14 +175,17 @@ public class CredentialService {
         Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
         if(opActiveDid.isPresent()) {
             benefits.setIdDidiReceptor(opActiveDid.get().getIdDidiReceptor());
-            CredentialState stateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-            benefits.setCredentialState(stateActive);
-            benefits.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
+            Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+            if(opStateActive.isPresent()) {
+                benefits.setCredentialState(opStateActive.get());
+                benefits.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
+            }
         }
         else{
             //Person do not have a DID yet -> set as pending didi
-            CredentialState stateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-            benefits.setCredentialState(stateActive);
+            Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+            if(opStateActive.isPresent())
+                 benefits.setCredentialState(opStateActive.get());
         }
 
         return benefits;

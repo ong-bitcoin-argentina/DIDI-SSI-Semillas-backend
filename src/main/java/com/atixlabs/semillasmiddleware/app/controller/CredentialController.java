@@ -34,12 +34,6 @@ public class CredentialController {
     }
 
 
-    @RequestMapping(value = "/createCredit", method = RequestMethod.POST)
-    public void createCredit() {
-        log.info(" createCredit ");
-        credentialService.saveCredentialCreditMock();
-    }
-
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public List<CredentialDto> findCredentials(@RequestParam(required = false) String credentialType,
@@ -88,8 +82,12 @@ public class CredentialController {
         List<Loan> newLoans = loanService.findLoansWithoutCredential();
 
         for (Loan loan: newLoans) {
-            credentialService.createNewCreditCredentials(loan);
-            //credentialService.createBenefitsCredential(loan.getDniPerson());
+            try {
+                credentialService.createNewCreditCredentials(loan);
+            }
+            catch (Exception ex){
+
+            }
         }
 
 

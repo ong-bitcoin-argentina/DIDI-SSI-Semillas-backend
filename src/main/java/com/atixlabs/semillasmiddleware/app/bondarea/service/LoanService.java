@@ -30,5 +30,11 @@ public class LoanService {
         return newLoans;
     }
 
+    public List<Loan> findLoansWithCredential(){
+        List<Loan> newLoans = loanRepository.findAllByHasCredentialTrue();
+
+        return newLoans;
+    }
+
 
 }

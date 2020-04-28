@@ -10,7 +10,7 @@ import java.util.Optional;
 @Repository
 public interface DIDHistoricRepository extends JpaRepository<DIDHisotoric, Long> {
 
-    Optional<DIDHisotoric> findByIdPersonAndIsActive(Long idPersona, boolean active);
+    Optional<DIDHisotoric> findByIdPersonAndIsActive(Long idPerson, boolean active);
 
 
 }

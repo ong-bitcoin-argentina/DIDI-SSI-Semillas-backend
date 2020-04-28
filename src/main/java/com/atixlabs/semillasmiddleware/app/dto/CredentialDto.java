@@ -62,7 +62,6 @@ public class CredentialDto {
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();
         this.credentialType = credential.getCredentialDescription();
-        this.credentialStatus = credential.getCredentialStatus();
     }
 
 

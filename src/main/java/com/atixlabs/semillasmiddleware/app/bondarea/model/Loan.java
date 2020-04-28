@@ -99,7 +99,7 @@ public class Loan extends AuditableEntity {
 
         this.idGroup =   loanDto.getIdGroup();
 
-        this.cycleDescription =   loanDto.getLoanName();
+        this.cycleDescription =   loanDto.getCycle();
 
         this.personName =   loanDto.getPersonName();
 

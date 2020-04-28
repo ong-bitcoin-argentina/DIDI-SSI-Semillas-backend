@@ -44,8 +44,6 @@ public abstract class Credential extends AuditableEntity {
     @ManyToOne
     private CredentialState credentialState;
 
-    private String credentialStatus; //pending -> bondarea/didi || Active -> null
-
     private String credentialDescription;
 
     private String credentialCategory; // TODO purpose ?
@@ -62,7 +60,6 @@ public abstract class Credential extends AuditableEntity {
                 ", dateOfIssue=" + dateOfIssue +
                 ", beneficiary=" + beneficiary +
                 ", credentialState=" + credentialState +
-                ", credentialStatus='" + credentialStatus + '\'' +
                 ", credentialDescription='" + credentialDescription + '\'' +
                 ", credentialCategory='" + credentialCategory + '\'' +
                 '}';

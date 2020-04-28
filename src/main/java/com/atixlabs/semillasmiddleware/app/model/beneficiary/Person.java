@@ -36,7 +36,7 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
-    @ManyToOne
+    @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
 

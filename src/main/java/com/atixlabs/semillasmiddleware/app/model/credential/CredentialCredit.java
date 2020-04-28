@@ -38,8 +38,6 @@ public class CredentialCredit extends Credential {
 
     private Float expiredAmount; //TODO ? can have money in favour
 
-    private Long dniBeneficiary; // is in main activity -> beneficiary.dni
-
 
 
     /*public CredentialCredit(PersonCategory personCategory){

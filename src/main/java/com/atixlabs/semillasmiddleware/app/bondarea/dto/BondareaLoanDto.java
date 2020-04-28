@@ -36,7 +36,7 @@ public class BondareaLoanDto {
     private String idGroup; // ID del crédito grupal y su estado (Ej.55-B26F5FKZ)
 
     @SerializedName("pg")
-    private String loanName; // Nombre asignado al crédito (Ej. Ciclo 2)
+    private String cycle; // Nombre asignado al crédito (Ej. Ciclo 2)
 
     @SerializedName("fOt")
     private String creationDate; // Fecha de otorgamiento cuentas

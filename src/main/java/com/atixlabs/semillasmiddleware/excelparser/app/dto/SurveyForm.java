@@ -68,12 +68,12 @@ public class SurveyForm {
     }
 
     public void setCategoryData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
-        Category category = this.getCategoryFromForm(answerRow.getCategory(), processExcelFileResult);
+        Category category = this.getCategoryByName(answerRow.getCategory(), processExcelFileResult);
         if (category != null)
             category.loadData(answerRow, processExcelFileResult);
     }
 
-    public Category getCategoryFromForm(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
+    public Category getCategoryByName(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
 
         if (categoryToFind == null)
             return null;
@@ -118,7 +118,7 @@ public class SurveyForm {
         return allValid;
     }
 
-    public ArrayList<Category> getCompletedElementsOfCategoryFromForm(Class<?> classToFind) {
+    public ArrayList<Category> getCompletedCategoriesByClass(Class<?> classToFind) {
         ArrayList<Category> classArrayList = new ArrayList<>();
 
         for (Category category : categoryList) {

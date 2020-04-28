@@ -36,12 +36,4 @@ public class CredentialCredit extends Credential {
 
     private Double amount; //TODO revisar el tipo para monto. Para dinero deberiamos usar BigDecimal
 
-    //private String beneficiaryDocumentType;
-
-    //private Long dniBeneficiary;
-
-    private LocalDateTime dateOfIssue;//NO VAN ACÁ SINO EN CADA CREDENCIAL HIJA QUE CORRESPONDA.
-
-    private LocalDateTime dateOfExpiry;//NO VAN ACÁ SINO EN CADA CREDENCIAL HIJA QUE CORRESPONDA.
-
 }

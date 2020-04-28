@@ -4,21 +4,21 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialIdentityRepository;
-import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
+import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.hql.internal.ast.ParseErrorHandler;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -30,18 +30,16 @@ import java.util.*;
 public class CredentialService {
 
     @Autowired
+    private PersonRepository personRepository;
+    @Autowired
     private CredentialRepository credentialRepository;
     @Autowired
     private CredentialCreditRepository credentialCreditRepository;
     @Autowired
-    private PersonRepository personRepository;
-
-
-    @Autowired
     private CredentialIdentityRepository credentialIdentityRepository;
-
     @Autowired
-    private AnswerCategoryFactory answerCategoryFactory;
+    private CredentialStateRepository credentialStateRepository;
+
 
     @Autowired
     public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
@@ -52,9 +50,9 @@ public class CredentialService {
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("buildAllCredentialsFromForm: " + this.toString());
-        buildIdentityCredential(surveyForm, processExcelFileResult);
-        buildEntrepreneurshipCredential(surveyForm, processExcelFileResult);
-        buildHomeCredential(surveyForm, processExcelFileResult);
+        buildIdentityCredentialFromForm(surveyForm, processExcelFileResult);
+        buildEntrepreneurshipCredentialFromForm(surveyForm, processExcelFileResult);
+        buildHomeCredentialFromForm(surveyForm, processExcelFileResult);
     }
 
     /**
@@ -63,47 +61,115 @@ public class CredentialService {
      *
      * @param surveyForm
      */
-    private void buildIdentityCredential(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    private void buildIdentityCredentialFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("  buildIdentityCredential");
 
-        ArrayList<Category> personsArrayList = surveyForm.getCompletedElementsOfCategoryFromForm(PersonCategory.class);
+        //1-get all people data from form, creditHolder will be a beneficiary as well.
+        ArrayList<Category> personsArrayList = surveyForm.getCompletedCategoriesByClass(PersonCategory.class);
 
-        for (Category category : personsArrayList) {
-            PersonCategory personCategory = (PersonCategory) category;
+        //2-verify each person is new or not but his data has not changed.
+        boolean allValidationOk = true;
+        for (Category beneficiaryCategory : personsArrayList) {
+            PersonCategory beneficiaryPersonCategory = (PersonCategory) beneficiaryCategory;
+            Person beneficiary = getPersonFromPersonCategory(beneficiaryPersonCategory);
+            if (!isPersonNewOrUnchanged(beneficiary, processExcelFileResult))
+                allValidationOk = false;
+            if (!isCredentialNew(beneficiary.getDocumentNumber(), processExcelFileResult))
+                allValidationOk = false;
+        }
 
-            //ENCUENTRO LA PERSONA:
-            Optional<Person> beneficiaryOptional = personRepository.findByDocumentNumber(personCategory.getIdNumber());
-            if (beneficiaryOptional.isEmpty()){
-                personRepository.save(fillPersonData(personCategory));//Saving person if not exists
-                beneficiaryOptional = personRepository.findByDocumentNumber(personCategory.getIdNumber());//Returning new person id
+        if (allValidationOk) {
+            //3-Now that every person is new or unchanged: get creditHolder Data
+            PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+            Person creditHolder = getPersonFromPersonCategory(creditHolderPersonCategory);
+            creditHolder = savePersonIfNew(creditHolder);
+
+            //4-Now working with each beneficiary
+            for (Category beneficiaryCategory : personsArrayList) {
+                PersonCategory beneficiaryPersonCategory = (PersonCategory) beneficiaryCategory;
+                Person beneficiary = getPersonFromPersonCategory(beneficiaryPersonCategory);
+
+                //the person is new or unchanged
+                beneficiary = savePersonIfNew(beneficiary);
+
+                //the credential is new we already checked
+                credentialIdentityRepository.save(buildIdentityCredential(beneficiary, beneficiaryPersonCategory.getPersonType(), creditHolder));
             }
-
-            Optional<CredentialIdentity> CredentialIdentityOptional = credentialIdentityRepository.findByBeneficiary(beneficiaryOptional.get());
-
-            if (CredentialIdentityOptional.isEmpty())
-                credentialIdentityRepository.save(fillIdentityCredentialData(personCategory, beneficiaryOptional.get()));
-            else
-                processExcelFileResult.addRowError(
-                        "Warning "+personCategory.getCategoryOriginalName(),
-                        "Ya existe una credencial para el DNI " + personCategory.getIdNumber()
-                );
         }
     }
 
-    private Person fillPersonData(PersonCategory personCategory){
-        Person beneficiaryNew = new Person();
-        beneficiaryNew.setDocumentNumber(personCategory.getIdNumber());
-        beneficiaryNew.setFirstName(personCategory.getName());
-        beneficiaryNew.setLastName(personCategory.getSurname());
-        beneficiaryNew.setBirthDate(personCategory.getBirthDate());
-        return beneficiaryNew;
+    private Person getPersonFromPersonCategory(PersonCategory personCategory){
+        Person person = new Person();
+        person.setDocumentNumber(personCategory.getIdNumber());
+        person.setFirstName(personCategory.getName());
+        person.setLastName(personCategory.getSurname());
+        person.setBirthDate(personCategory.getBirthDate());
+        return person;
     }
 
-    private CredentialIdentity fillIdentityCredentialData(PersonCategory personCategory, Person beneficiary) {
-        CredentialIdentity credentialIdentity = new CredentialIdentity();
-        credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
+    private boolean isPersonNewOrUnchanged(Person person, ProcessExcelFileResult processExcelFileResult){
+        Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
+        if (personOptional.isEmpty())
+            return true;
+        else {
+            if (verifyPersonData(person, personOptional.get()))
+                return true;
+            else
+             processExcelFileResult.addRowError(
+                     "warning-negocio",
+                     person.getFirstName()+" "+person.getLastName() +" con DNI:"+ person.getDocumentNumber() +" tiene cambios y no será modificada"
+             );
+        }
+        return false;
+    }
 
-        switch (personCategory.getPersonType()){
+    private boolean verifyPersonData(Person person1, Person person2){
+        return person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&
+                person1.getFirstName().equals(person2.getFirstName()) &&
+                person1.getLastName().equals(person2.getLastName()) &&
+                person1.getBirthDate().isEqual(person2.getBirthDate());
+    }
+
+
+    private boolean isCredentialNew(Long beneficiaryDni, ProcessExcelFileResult processExcelFileResult){
+        CredentialState credentialStateActive = null;
+        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        if (credentialStateOptional.isPresent())
+            credentialStateActive = credentialStateOptional.get();
+
+        Optional<CredentialIdentity> CredentialIdentityOptional = credentialIdentityRepository.findByBeneficiaryDniAndCredentialState(beneficiaryDni, credentialStateActive);
+        if (CredentialIdentityOptional.isEmpty())
+            return true;
+        else
+            processExcelFileResult.addRowError(
+                    "Warning CREDENCIAL DUPLICADA",
+                    "Ya existe una credencial ACTIVA para el DNI " + beneficiaryDni+" debe revocarlas manualmente"
+            );
+        return false;
+    }
+
+    private Person savePersonIfNew(Person person){
+        Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
+        if (personOptional.isEmpty())
+            return personRepository.save(person);
+        else
+            return personOptional.get();
+    }
+
+    private CredentialIdentity buildIdentityCredential(Person beneficiary, PersonType beneficiaryPersonType, Person creditHolder) {
+        CredentialIdentity credentialIdentity = new CredentialIdentity();
+        credentialIdentity.setDateOfIssue(LocalDateTime.now());
+        credentialIdentity.setCreditHolder(creditHolder);
+        credentialIdentity.setCreditHolderDni(creditHolder.getDocumentNumber());
+        credentialIdentity.setCreditHolderName(creditHolder.getFirstName()+" "+creditHolder.getLastName());
+        credentialIdentity.setBeneficiary(beneficiary);
+        credentialIdentity.setBeneficiaryDni(beneficiary.getDocumentNumber());
+        credentialIdentity.setBeneficiaryName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+
+        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+
+        switch (beneficiaryPersonType){
             case BENEFICIARY:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
                 break;
@@ -113,21 +179,18 @@ public class CredentialService {
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILIAR.getCode());
                 break;
         }
-        credentialIdentity.setBeneficiary(beneficiary);
-        credentialIdentity.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_BONDAREA.getCode());
-        CredentialState credentialState = new CredentialState();
-        credentialState.setId(1L);//todo: revisar hacer un find x code para encontrar ID.
-        credentialIdentity.setCredentialState(credentialState);
+
+        credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
         return credentialIdentity;
     }
 
 
-    private void buildEntrepreneurshipCredential(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    private void buildEntrepreneurshipCredentialFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
 
 
     }
 
-    private void buildHomeCredential(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    private void buildHomeCredentialFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
     }
 
 

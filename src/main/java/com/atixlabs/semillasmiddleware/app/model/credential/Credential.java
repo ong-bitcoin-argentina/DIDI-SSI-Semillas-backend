@@ -32,18 +32,23 @@ public abstract class Credential extends AuditableEntity {
 
     private Long idHistorical;
 
-    //private LocalDateTime dateOfIssue;//NO VAN ACÁ SINO EN CADA CREDENCIAL HIJA QUE CORRESPONDA.
+    private LocalDateTime dateOfIssue;
 
-    //private LocalDateTime dateOfExpiry;//NO VAN ACÁ SINO EN CADA CREDENCIAL HIJA QUE CORRESPONDA.
+    private LocalDateTime dateOfRevocation;
 
     //private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
                                       // ya que es la credencial principal. Las credcenciales familiares se pueden encontrar filtrando a las personas que
                                       // asociado el dni del titular
 
     @ManyToOne
+    private Person creditHolder;
+    private Long creditHolderDni;
+    private String creditHolderName;
+
+    @ManyToOne
     private Person beneficiary;
-
-
+    private Long beneficiaryDni;
+    private String beneficiaryName;
 
     @ManyToOne
     private CredentialState credentialState;

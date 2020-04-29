@@ -149,8 +149,8 @@ public class ParserCategoriesTest {
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
         Assert.assertEquals(
-                surveyForm.getCategoryByName("Emprendimiento", null),
-                surveyForm.getCategoryByName("EMPRENDIMIENTO", null)
+                surveyForm.getCategoryByUniqueName("Emprendimiento", null),
+                surveyForm.getCategoryByUniqueName("EMPRENDIMIENTO", null)
         );
 
         //Assert.assertEquals(answerCategoryFactory.get("Emprendimiento"), answerCategoryFactory.get("EMPRENDIMIENTO"));
@@ -162,7 +162,7 @@ public class ParserCategoriesTest {
         //answerCategoryFactory.get("non-existent category");
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
-        Assert.assertNull(surveyForm.getCategoryByName("non-existent-category", null));
+        Assert.assertNull(surveyForm.getCategoryByUniqueName("non-existent-category", null));
     }
 
     @Test
@@ -172,10 +172,10 @@ public class ParserCategoriesTest {
 
 
 
-        PersonCategory child = (PersonCategory) surveyForm.getCategoryByName("datos hijo 1", null);
+        PersonCategory child = (PersonCategory) surveyForm.getCategoryByUniqueName("datos hijo 1", null);
         Assert.assertEquals(child.getPersonType(), PersonType.CHILD);
 
-        PersonCategory spouse = (PersonCategory) surveyForm.getCategoryByName("DATOS DEL CÓNYUGE", null);
+        PersonCategory spouse = (PersonCategory) surveyForm.getCategoryByUniqueName("DATOS DEL CÓNYUGE", null);
         Assert.assertEquals(spouse.getPersonType(), PersonType.SPOUSE);
     }
 
@@ -227,8 +227,8 @@ public class ParserCategoriesTest {
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
         Assert.assertNotEquals(
-                surveyForm.getCategoryByName("DATOS HIJO 2", null),
-                surveyForm.getCategoryByName("DATOS HIJO 11", null)
+                surveyForm.getCategoryByUniqueName("DATOS HIJO 2", null),
+                surveyForm.getCategoryByUniqueName("DATOS HIJO 11", null)
         );
 
     }

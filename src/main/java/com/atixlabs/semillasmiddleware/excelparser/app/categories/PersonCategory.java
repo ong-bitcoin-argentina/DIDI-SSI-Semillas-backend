@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
@@ -20,9 +19,8 @@ import java.util.stream.Collectors;
 @Getter
 public class PersonCategory implements Category {
 
-    String categoryOriginalName;
+    String categoryUniqueName;
     private Categories categoryName;
-    private Class<?> categoryClass;
 
     private AnswerDto name;
     private AnswerDto surname;
@@ -33,7 +31,7 @@ public class PersonCategory implements Category {
     private AnswerDto relation;
     private PersonType personType;
 
-    public PersonCategory(String categoryOriginalName){
+    public PersonCategory(String categoryUniqueName){
         this.name = new AnswerDto(PersonQuestion.NAME);
         this.surname = new AnswerDto(PersonQuestion.SURNAME);
         this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
@@ -42,12 +40,10 @@ public class PersonCategory implements Category {
         this.birthDate = new AnswerDto(PersonQuestion.BIRTHDATE);
         this.relation = new AnswerDto(PersonQuestion.RELATION);
 
-        this.categoryOriginalName = categoryOriginalName;
+        this.categoryUniqueName = categoryUniqueName;
         this.categoryName = Categories.BENEFICIARY_CATEGORY_NAME;//TODO:CREAR TIPO PERSONA O RESOLVER AGRUPACION
-        this.categoryClass = Person.class;
 
-
-        String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryOriginalName.replaceAll("DATOS|DEL","")));
+        String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryUniqueName.replaceAll("DATOS|DEL","")));
 
         try{
             this.personType = PersonType.get(personTypeString);
@@ -90,21 +86,13 @@ public class PersonCategory implements Category {
         }
     }
 
-
     @Override
-    public Category getData() {
-        return this;
-    }
-
-    @Override
-    public String getCategoryOriginalName(){
-        return categoryOriginalName;
+    public String getCategoryUniqueName(){
+        return categoryUniqueName;
     }
 
     @Override
     public Categories getCategoryName(){return categoryName;}
-    @Override
-    public Class<?> getCategoryClass(){return categoryClass;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
@@ -116,7 +104,7 @@ public class PersonCategory implements Category {
         answers.add(this.birthDate);
         answers.add(this.relation);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryUniqueName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 
@@ -127,9 +115,6 @@ public class PersonCategory implements Category {
 
     @Override
     public boolean isRequired(){
-
-        log.info("isRequired: "+personType);
-
         switch (personType){
             case BENEFICIARY:
                 return true;
@@ -173,7 +158,7 @@ public class PersonCategory implements Category {
     @Override
     public String toString() {
         return "PersonCategory{" +
-                "categoryOriginalName='" + categoryOriginalName + '\'' +
+                "categoryOriginalName='" + categoryUniqueName + '\'' +
                 ", name=" + name +
                 ", surname=" + surname +
                 ", idType=" + idType +

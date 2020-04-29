@@ -9,10 +9,8 @@ public interface Category {
 
      void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult);
 
-     Category getData();
-     String getCategoryOriginalName();
+     String getCategoryUniqueName();
      Categories getCategoryName();
-     Class<?> getCategoryClass();
 
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
      boolean isEmpty();

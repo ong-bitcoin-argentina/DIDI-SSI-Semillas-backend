@@ -68,12 +68,12 @@ public class SurveyForm {
     }
 
     public void setCategoryData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
-        Category category = this.getCategoryByName(answerRow.getCategory(), processExcelFileResult);
+        Category category = this.getCategoryByUniqueName(answerRow.getCategory(), processExcelFileResult);
         if (category != null)
             category.loadData(answerRow, processExcelFileResult);
     }
 
-    public Category getCategoryByName(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
+    public Category getCategoryByUniqueName(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
 
         if (categoryToFind == null)
             return null;
@@ -81,7 +81,7 @@ public class SurveyForm {
         categoryToFind = StringUtil.toUpperCaseTrimAndRemoveAccents(categoryToFind);
 
         for (Category value : categoryList) {
-            if (value.getCategoryOriginalName().equals(categoryToFind))
+            if (value.getCategoryUniqueName().equals(categoryToFind))
                 return value;
         }
         if (processExcelFileResult!=null)
@@ -112,20 +112,9 @@ public class SurveyForm {
                 else
                     msg = "Completed OK";
             }
-            log.info("SurveyForm -> isValid: " + category.getCategoryOriginalName() + " "+msg);
+            log.info("SurveyForm -> isValid: " + category.getCategoryUniqueName() + " "+msg);
         }
-
         return allValid;
-    }
-
-    public ArrayList<Category> getCompletedCategoriesByClass(Class<?> classToFind) {
-        ArrayList<Category> classArrayList = new ArrayList<>();
-
-        for (Category category : categoryList) {
-            if (category.getClass() == classToFind && !category.isEmpty())
-                classArrayList.add(category);
-        }
-        return classArrayList;
     }
 
     public ArrayList<Category> getAllCompletedCategories() {
@@ -137,23 +126,5 @@ public class SurveyForm {
         }
         return classArrayList;
     }
-
-
-/*
-    public Integer findCategoryInList(Class<?> classToFind) {
-        for(int i = 0; i<categoryList.size(); i++){
-            if(categoryList.get(i).getClass() == classToFind)
-                return i;
-        }
-        return -1;
-    }
-
-    public Category getCategoryData(Class<?> classToFind){
-        Integer categoryIndex = this.findCategoryInList(classToFind);
-        if(categoryIndex >=0)
-            return this.getCategoryList().get(categoryIndex).getData();
-        return null;
-    }
-    */
 
 }

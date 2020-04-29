@@ -15,7 +15,6 @@ public class DwellingCategory implements Category {
 
     String categoryOriginalName;
     private Categories categoryName = Categories.DWELLING_CATEGORY_NAME;
-    private Class<?> categoryClass = DwellingCategory.class;
 
     AnswerDto dwellingType;
     AnswerDto holdingType;
@@ -50,19 +49,12 @@ public class DwellingCategory implements Category {
     }
 
     @Override
-    public Category getData() {
-        return this;
-    }
-
-    @Override
-    public  String getCategoryOriginalName(){
+    public  String getCategoryUniqueName(){
         return categoryOriginalName;
     }
 
     @Override
     public Categories getCategoryName(){return categoryName;}
-    @Override
-    public Class<?> getCategoryClass(){return categoryClass;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {

@@ -69,7 +69,7 @@ public class CredentialService {
         ArrayList<Category> categoryArrayList = surveyForm.getAllCompletedCategories();
 
         //2-get creditHolder Data
-        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = getPersonFromPersonCategory(creditHolderPersonCategory);
 
         //2-verify each person is new, or his data has not changed.
@@ -82,15 +82,15 @@ public class CredentialService {
                 case KINSMAN_CATEGORY_NAME:
                     PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
                     Person beneficiary = getPersonFromPersonCategory(beneficiaryPersonCategory);
-                    if (!isCredentialNew(beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), processExcelFileResult))
+                    if (isCredentialAlreadyExistent(beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
                 case ENTREPRENEURSHIP_CATEGORY_NAME:
-                    if (!isCredentialNew(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode(), processExcelFileResult))
+                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode(), processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
                 case DWELLING_CATEGORY_NAME:
-                    if (!isCredentialNew(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.DWELLING.getCode(), processExcelFileResult))
+                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.DWELLING.getCode(), processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
             }
@@ -98,7 +98,7 @@ public class CredentialService {
         return allCredentialsNewOrInactive;
     }
 
-    private boolean isCredentialNew(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult){
+    private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult){
         CredentialState credentialStateActive = null;
         Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
         if (credentialStateOptional.isPresent())
@@ -110,7 +110,7 @@ public class CredentialService {
                 credentialStateActive
         );
         if (credentialOptional.isEmpty())
-            return true;
+            return false;
         else
             processExcelFileResult.addRowError(
                     "Warning CREDENCIAL DUPLICADA",
@@ -118,12 +118,12 @@ public class CredentialService {
                              " en estado ACTIVO"+
                              " para el DNI "+beneficiaryDni+" para continuar debe revocarlas manualmente"
             );
-        return false;
+        return true;
     }
 
     private void saveAllCredentialsFromForm(SurveyForm surveyForm){
         //1-get creditHolder Data
-        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = getPersonFromPersonCategory(creditHolderPersonCategory);
 
         //1-get all data from form

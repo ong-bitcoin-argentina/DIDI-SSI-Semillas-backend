@@ -11,5 +11,4 @@ import java.util.Optional;
 @Repository
 public interface CredentialIdentityRepository extends JpaRepository<CredentialIdentity, Long> {
 
-    Optional<CredentialIdentity> findByBeneficiaryDniAndAndCredentialCategoryAndCredentialState(Long beneficiaryDni, String code, CredentialState credentialStateActive);
 }

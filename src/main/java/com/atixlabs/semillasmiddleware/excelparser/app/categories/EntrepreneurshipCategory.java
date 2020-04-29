@@ -20,7 +20,6 @@ public class EntrepreneurshipCategory implements Category {
 
     private String categoryOriginalName;
     private Categories categoryName;
-    private Class<?> categoryClass;
 
     private AnswerDto type;
     private AnswerDto activityStartDate;
@@ -39,7 +38,6 @@ public class EntrepreneurshipCategory implements Category {
 
         this.categoryOriginalName = categoryOriginalName;
         this.categoryName = Categories.ENTREPRENEURSHIP_CATEGORY_NAME;
-        this.categoryClass = EntrepreneurshipCategory.class;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
@@ -74,19 +72,12 @@ public class EntrepreneurshipCategory implements Category {
     }
 
     @Override
-    public Category getData() {
-        return this;
-    }
-
-    @Override
-    public String getCategoryOriginalName(){
+    public String getCategoryUniqueName(){
         return categoryOriginalName;
     }
 
     @Override
     public Categories getCategoryName(){return categoryName;}
-    @Override
-    public Class<?> getCategoryClass(){return categoryClass;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {

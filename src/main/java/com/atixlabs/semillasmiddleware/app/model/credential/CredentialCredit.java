@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,26 +37,13 @@ public class CredentialCredit extends Credential {
 
     private String creditState;
 
-    private Float expiredAmount; //TODO ? can have money in favour
+    private Float expiredAmount; //TODO ? can have money in favor ?
 
     private Long dniBeneficiary;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
+    private LocalDateTime modifiedTime;
 
-
-    /*public CredentialCredit(PersonCategory personCategory){
-        /*credentialCredit.setDateOfIssue(LocalDateTime.now());
-        credentialCredit.setDateOfExpiry(LocalDateTime.now().plusDays(14L));
-        credentialCredit.setCurrentCycle("imported-from-excel");
-        credentialCredit.setCreditState("pre-credential");
-        credentialCredit.setBeneficiaryDocumentType(personCategory.getIdType());
-        credentialCredit.setBeneficiaryDocumentNumber(personCategory.getIdNumber());
-        this.setDateOfIssue(LocalDateTime.now());
-        this.setDateOfExpiry(LocalDateTime.now().plusDays(14L));
-        this.setCurrentCycle("imported-from-excel");
-        this.setCreditState("pre-credential");
-        this.setDniBeneficiary(personCategory.getIdNumber());
-
-    }*/
-
+    private LocalDate finalizedTime;
 
 }

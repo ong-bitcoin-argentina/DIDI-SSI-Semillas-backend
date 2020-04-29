@@ -25,7 +25,7 @@ stages:
 backend:
   image: openjdk:11-jdk-slim
   services:
-    - name: postgres:11.1
+    - name: postgres:11.7
       alias: db
   stage: test
   script:

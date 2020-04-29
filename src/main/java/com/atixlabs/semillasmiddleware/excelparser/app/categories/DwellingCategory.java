@@ -1,11 +1,11 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.DwellingQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 public class DwellingCategory implements Category {
 
     String categoryOriginalName;
+    private Categories categoryName = Categories.DWELLING_CATEGORY_NAME;
+    private Class<?> categoryClass = DwellingCategory.class;
 
     AnswerDto dwellingType;
     AnswerDto holdingType;
@@ -56,6 +58,11 @@ public class DwellingCategory implements Category {
     public  String getCategoryOriginalName(){
         return categoryOriginalName;
     }
+
+    @Override
+    public Categories getCategoryName(){return categoryName;}
+    @Override
+    public Class<?> getCategoryClass(){return categoryClass;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {

@@ -127,6 +127,18 @@ public class SurveyForm {
         }
         return classArrayList;
     }
+
+    public ArrayList<Category> getAllCompletedCategories() {
+        ArrayList<Category> classArrayList = new ArrayList<>();
+
+        for (Category category : categoryList) {
+            if (!category.isEmpty())
+                classArrayList.add(category);
+        }
+        return classArrayList;
+    }
+
+
 /*
     public Integer findCategoryInList(Class<?> classToFind) {
         for(int i = 0; i<categoryList.size(); i++){

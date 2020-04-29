@@ -1,6 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.DwellingQuestion;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
@@ -8,9 +8,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -20,14 +18,16 @@ import java.util.stream.Collectors;
 @Getter
 public class EntrepreneurshipCategory implements Category {
 
-    String categoryOriginalName;
+    private String categoryOriginalName;
+    private Categories categoryName;
+    private Class<?> categoryClass;
 
-    AnswerDto type;
-    AnswerDto activityStartDate;
-    AnswerDto mainActivity;
-    AnswerDto name;
-    AnswerDto address;
-    AnswerDto activityEndingDate;
+    private AnswerDto type;
+    private AnswerDto activityStartDate;
+    private AnswerDto mainActivity;
+    private AnswerDto name;
+    private AnswerDto address;
+    private AnswerDto activityEndingDate;
 
     public EntrepreneurshipCategory(String categoryOriginalName) {
         this.type = new AnswerDto(EntrepreneurshipQuestion.TYPE);
@@ -38,6 +38,8 @@ public class EntrepreneurshipCategory implements Category {
         this.activityEndingDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE);
 
         this.categoryOriginalName = categoryOriginalName;
+        this.categoryName = Categories.ENTREPRENEURSHIP_CATEGORY_NAME;
+        this.categoryClass = EntrepreneurshipCategory.class;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
@@ -80,6 +82,11 @@ public class EntrepreneurshipCategory implements Category {
     public String getCategoryOriginalName(){
         return categoryOriginalName;
     }
+
+    @Override
+    public Categories getCategoryName(){return categoryName;}
+    @Override
+    public Class<?> getCategoryClass(){return categoryClass;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {

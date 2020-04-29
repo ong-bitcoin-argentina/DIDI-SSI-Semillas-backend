@@ -66,7 +66,7 @@ public class CredentialServiceTest {
         //credential1.setDateOfExpiry(LocalDateTime.now().plusDays(14));
         //credential1.setDniBeneficiary(29302594L);
         credential1.setCreditState("Estado");
-        credential1.setBeneficiary(beneficiary);
+        credential1.setCreditHolder(beneficiary);
         credential1.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
         credentials.add(credential1);
 
@@ -120,11 +120,11 @@ public class CredentialServiceTest {
         Assertions.assertTrue(credentials.size() == credentialsFilteredActiveMock().size()); // check if the amount of credentials filtered in the service is the correct one
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getId() ,credentials.get(0).getId());
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState().getStateName());
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getBeneficiary().getDocumentNumber() ,credentials.get(0).getBeneficiary().getDocumentNumber());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getDocumentNumber() ,credentials.get(0).getCreditHolder().getDocumentNumber());
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getIdDidiCredential() ,credentials.get(0).getIdDidiCredential());
         //Assertions.assertTrue(credentials.get(0).getDateOfExpiry() != null);
         //Assertions.assertTrue(credentials.get(0).getDateOfIssue() != null);
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getBeneficiary().getFirstName() ,credentials.get(0).getBeneficiary().getFirstName());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getFirstName() ,credentials.get(0).getCreditHolder().getFirstName());
     }
 
 
@@ -142,11 +142,11 @@ public class CredentialServiceTest {
         Assertions.assertTrue(credentials.size() == credentialsFilteredRevokedMock().size()); // check if the amount of credentials filtered in the service is the correct one
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getId() ,credentials.get(0).getId());
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState().getStateName());
-        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getBeneficiary().getDocumentNumber() ,credentials.get(0).getBeneficiary().getDocumentNumber());
+        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCreditHolder().getDocumentNumber() ,credentials.get(0).getCreditHolder().getDocumentNumber());
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getIdDidiCredential() ,credentials.get(0).getIdDidiCredential());
         //Assertions.assertTrue(credentials.get(0).getDateOfExpiry() != null);
         //Assertions.assertTrue(credentials.get(0).getDateOfIssue() != null);
-        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getBeneficiary().getFirstName() ,credentials.get(0).getBeneficiary().getFirstName());
+        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCreditHolder().getFirstName() ,credentials.get(0).getCreditHolder().getFirstName());
     }
 
 }

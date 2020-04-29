@@ -1,5 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
@@ -19,15 +21,17 @@ import java.util.stream.Collectors;
 public class PersonCategory implements Category {
 
     String categoryOriginalName;
+    private Categories categoryName;
+    private Class<?> categoryClass;
 
-    AnswerDto name;
-    AnswerDto surname;
-    AnswerDto idType;
-    AnswerDto idNumber;
-    AnswerDto gender;
-    AnswerDto birthDate;
-    AnswerDto relation;
-    PersonType personType;
+    private AnswerDto name;
+    private AnswerDto surname;
+    private AnswerDto idType;
+    private AnswerDto idNumber;
+    private AnswerDto gender;
+    private AnswerDto birthDate;
+    private AnswerDto relation;
+    private PersonType personType;
 
     public PersonCategory(String categoryOriginalName){
         this.name = new AnswerDto(PersonQuestion.NAME);
@@ -39,6 +43,9 @@ public class PersonCategory implements Category {
         this.relation = new AnswerDto(PersonQuestion.RELATION);
 
         this.categoryOriginalName = categoryOriginalName;
+        this.categoryName = Categories.BENEFICIARY_CATEGORY_NAME;//TODO:CREAR TIPO PERSONA O RESOLVER AGRUPACION
+        this.categoryClass = Person.class;
+
 
         String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryOriginalName.replaceAll("DATOS|DEL","")));
 
@@ -46,6 +53,7 @@ public class PersonCategory implements Category {
             this.personType = PersonType.get(personTypeString);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+            log.error("ERROR AL INTENTAR OBTENER EL TIPO DE PERSONA: "+e.getMessage());
         }
     }
 
@@ -94,6 +102,11 @@ public class PersonCategory implements Category {
     }
 
     @Override
+    public Categories getCategoryName(){return categoryName;}
+    @Override
+    public Class<?> getCategoryClass(){return categoryClass;}
+
+    @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
         List<AnswerDto> answers = new LinkedList<>();
         answers.add(this.name);
@@ -114,6 +127,9 @@ public class PersonCategory implements Category {
 
     @Override
     public boolean isRequired(){
+
+        log.info("isRequired: "+personType);
+
         switch (personType){
             case BENEFICIARY:
                 return true;

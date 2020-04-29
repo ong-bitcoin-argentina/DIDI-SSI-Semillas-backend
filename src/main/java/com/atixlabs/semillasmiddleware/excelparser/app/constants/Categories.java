@@ -17,13 +17,15 @@ import java.util.stream.Collectors;
  * getLinkedClass() if not Overridden will return PersonCategory.class
  */
 
+//Person AGRUPA BENEFICIARY/SPOUSE/CHILD/RELATIVE
+//PERSON_CATEGORY_NAME("PERSONA"),
 public enum Categories {
     BENEFICIARY_CATEGORY_NAME("DATOS DEL BENEFICIARIO"),
     SPOUSE_CATEGORY_NAME("DATOS DEL CONYUGE"),
     CHILD_CATEGORY_NAME("DATOS HIJO"){
         @Override
         public Integer getAmount() {
-            return 20;
+            return 11;
         }
     },
     KINSMAN_CATEGORY_NAME("OTRO MIEMBRO DE LA FAMILIA"){

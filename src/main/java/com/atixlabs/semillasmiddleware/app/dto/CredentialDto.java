@@ -56,10 +56,10 @@ public class CredentialDto {
     public CredentialDto(Credential credential) {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiCredential();
-        //this.dateOfIssue = credential.getDateOfIssue();
-        //this.dateOfExpiry = credential.getDateOfExpiry();
-        this.name = credential.getBeneficiary().getFirstName();
-        this.dniBeneficiary = credential.getBeneficiary().getDocumentNumber();
+        this.dateOfIssue = credential.getDateOfIssue();
+        this.dateOfExpiry = credential.getDateOfRevocation();
+        this.name = credential.getCreditHolder().getFirstName();
+        this.dniBeneficiary = credential.getCreditHolder().getDocumentNumber();
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();
         this.credentialType = credential.getCredentialDescription();

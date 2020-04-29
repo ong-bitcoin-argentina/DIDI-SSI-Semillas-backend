@@ -5,29 +5,27 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.*;
-import java.time.LocalDateTime;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
+import java.time.LocalDateTime;
 
 
 @NoArgsConstructor
 @Getter
 @Setter
-@Table(name = "credential_credit")
 @Entity
-@PrimaryKeyJoinColumn(name = "id")
-//@PrimaryKeyJoinColumn(referencedColumnName="id")
+@PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
 
 
 
-    //    private Long idCredit;
+    private Long idCredit;
+
     private String creditName;
 
     private Long idGroup;
 
+    //presidente, secretario y tesorero, se obtiene a partir de la api de Bondarea
     private String groupName;
 
     private String rol;
@@ -36,11 +34,11 @@ public class CredentialCredit extends Credential {
 
     private String creditState;
 
-    private Double amount;
+    private Double amount; //TODO revisar el tipo para monto. Para dinero deberiamos usar BigDecimal
 
     private String beneficiaryDocumentType;
 
-    private Long beneficiaryDocumentNumber;
+    private Long dniBeneficiary;
 
 
     public CredentialCredit(PersonCategory personCategory){
@@ -55,27 +53,23 @@ public class CredentialCredit extends Credential {
         this.setCurrentCycle("imported-from-excel");
         this.setCreditState("pre-credential");
         this.setBeneficiaryDocumentType(personCategory.getIdType());
-        this.setBeneficiaryDocumentNumber(personCategory.getIdNumber());
+        this.setDniBeneficiary(personCategory.getIdNumber());
 
     }
-
-    @Transient
-    private String credentialType = "CredentialCredit";
 
 
     @Override
     public String toString() {
         return "CredentialCredit{" +
-                //"idCredit=" + idCredit +
-                ", creditName='" + creditName + '\'' +
+                "creditName='" + creditName + '\'' +
                 ", idGroup=" + idGroup +
                 ", groupName='" + groupName + '\'' +
                 ", rol='" + rol + '\'' +
                 ", currentCycle='" + currentCycle + '\'' +
                 ", creditState='" + creditState + '\'' +
                 ", amount=" + amount +
-                ", dniBeneficiary=" + beneficiaryDocumentNumber +
-                ", credentialType=" + credentialType +
-                '}' + super.toString();
+                ", beneficiaryDocumentType='" + beneficiaryDocumentType + '\'' +
+                ", beneficiaryDocumentNumber=" + dniBeneficiary +
+                '}';
     }
 }

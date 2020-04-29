@@ -48,7 +48,7 @@ package-backend:
 
   only:
     refs:
-      - semillas-template-from-abi
+      - SEMI-135-setup-ci
       # Only run on develop, release/x.y.x and hotfix/xxxx
       - develop
       - /^release.*$/

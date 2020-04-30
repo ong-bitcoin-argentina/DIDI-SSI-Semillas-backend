@@ -29,14 +29,11 @@ public class CredentialService {
     private CredentialCreditRepository credentialCreditRepository;
 
     @Autowired
-<<<<<<< HEAD
     AnswerCategoryFactory answerCategoryFactory;
-=======
     public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
     }
->>>>>>> develop
 
     @Autowired
     private PersonRepository personRepository;
@@ -73,13 +70,9 @@ public class CredentialService {
 
 
 
-<<<<<<< HEAD
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
-=======
 
 
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String credentialStatus) {
->>>>>>> develop
         List<Credential> credentials;
         try {
          credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);
@@ -91,9 +84,6 @@ public class CredentialService {
          return  credentials;
     }
 
-<<<<<<< HEAD
-    private void buildPerson(SurveyForm surveyForm){
-=======
     public void addCredentialCredit(){
         CredentialCredit credentialCredit = new CredentialCredit();
     }
@@ -107,7 +97,6 @@ public class CredentialService {
 
 
     /*private void buildPerson(SurveyForm surveyForm){
->>>>>>> develop
         log.info("  buildPerson");
 
         //PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
@@ -123,8 +112,6 @@ public class CredentialService {
         }
     }
 
-<<<<<<< HEAD
-=======
     private void buildCreditCredential(SurveyForm surveyForm){
         log.info("  buildCreditCredential");
 
@@ -147,7 +134,6 @@ public class CredentialService {
     */
 
 
->>>>>>> develop
     public void saveCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();
         credentialCredit.setDateOfExpiry(LocalDateTime.now());

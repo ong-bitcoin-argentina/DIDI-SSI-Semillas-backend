@@ -53,6 +53,6 @@ package-backend:
       - develop
       - /^release.*$/
       - /^hotfix.*$/
-    changes:
-      - "**/*"
+  #  changes:
+    #  - "**/*"
 

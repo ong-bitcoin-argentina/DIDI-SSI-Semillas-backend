@@ -1,29 +1,33 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/projectChangeMe-backend:0.0.1-SNAPSHOT-822f8e52
+    image: docker.atixlabs.com/raa/raa-backend:0.0.1-SNAPSHOT-3cb95825
     environment:
       - spring_profiles_active=${ENVIRONMENT}
-      - PROJECTCHANGEME_DB=${PROJECTCHANGEME_DB}
-      - PROJECTCHANGEME_DB_USER=${PROJECTCHANGEME_DB_USER}
-      - PROJECTCHANGEME_DB_PASSWORD=${PROJECTCHANGEME_DB_PASSWORD}
+      - RAA_DB=${RAA_DB}
+      - RAA_DB_USER=${RAA_DB_USER}
+      - RAA_DB_PASSWORD=${RAA_DB_PASSWORD}
+      - CRIMSON_USER=${CRIMSON_USER}
+      - CRIMSON_PASSWORD=${CRIMSON_PASSWORD}
+      - AWS_S3_ACCESS_KEY=${AWS_S3_ACCESS_KEY}
+      - AWS_S3_SECRET_KEY=${AWS_S3_SECRET_KEY}
     depends_on:
       - db
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.backend.rule=Host(`api.${ENVIRONMENT}.projectChangeMe.atixlabs.com`)"
+      - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
       - "traefik.http.routers.backend.entrypoints=web-secure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
   frontend:
-    image: docker.atixlabs.com/projectChangeMe-frontend:0.1.0-5742bc3b
+    image: docker.atixlabs.com/raa/raa-frontend:0.1.0-88c7caed
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
     depends_on:
       - backend
     labels:
       - "traefik.enable=true"
-      - "traefik.http.routers.frontend.rule=Host(`frontend.${ENVIRONMENT}.projectChangeMe.atixlabs.com`)"
+      - "traefik.http.routers.frontend.rule=Host(`${FRONTEND_URL}`)"
       - "traefik.http.routers.frontend.entrypoints=web-secure"
       - "traefik.http.routers.frontend.tls=true"
       - "traefik.http.routers.frontend.tls.certresolver=le"
@@ -50,11 +54,11 @@ services:
       - backend
       - frontend
   db:
-    image: postgres:9.3
+    image: postgres:9.7
     environment:
-      - POSTGRES_USER=${PROJECTCHANGEME_DB_USER}
-      - POSTGRES_PASSWORD=${PROJECTCHANGEME_DB_PASSWORD}
-      - POSTGRES_DB=${PROJECTCHANGEME_DB}
+      - POSTGRES_USER=${RAA_DB_USER}
+      - POSTGRES_PASSWORD=${RAA_DB_PASSWORD}
+      - POSTGRES_DB=${RAA_DB}
     volumes:
       - "/db-data:/var/lib/postgresql/data"
     ports:
@@ -68,4 +72,3 @@ services:
       - "/var/lib/docker/:/var/lib/docker:ro"
     ports:
       - "127.0.0.1:9000:8080"
-    

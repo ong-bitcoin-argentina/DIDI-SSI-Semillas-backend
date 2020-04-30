@@ -44,7 +44,9 @@ package-backend:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
     - docker login -u gitlabci -p $CI_JOB_TOKEN $CI_REGISTRY
     # Tests are skipped as we just executed them in `backend` job
-    - ./mvnw clean -Dmaven.test.skip=true $MAVEN_CLI_OPTS package dockerfile:build dockerfile:push
+    - ./mvnw clean -Dmaven.test.skip=true $MAVEN_CLI_OPTS
+    - ./mvnw install -Dmaven.test.skip=true
+    - ./mvnw package -Dmaven.test.skip=true  dockerfile:build dockerfile:push
 
   only:
     refs:

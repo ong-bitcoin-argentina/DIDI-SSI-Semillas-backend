@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/raa/raa-backend:0.0.1-SNAPSHOT-3cb95825
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-ab20cd30
     environment:
       - spring_profiles_active=${ENVIRONMENT}
       - RAA_DB=${RAA_DB}
@@ -20,7 +20,7 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
   frontend:
-    image: docker.atixlabs.com/raa/raa-frontend:0.1.0-88c7caed
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-ab20cd30
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
     depends_on:

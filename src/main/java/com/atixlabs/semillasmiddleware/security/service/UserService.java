@@ -13,6 +13,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -75,7 +76,7 @@ public class UserService {
         User user;
         if (userResponse.getId() != null) {
             user = repository.findById(userResponse.getId()).orElseThrow(() -> new RuntimeException());
-            if (Strings.isNullOrEmpty(userResponse.getPassword())
+            if (isNullOrEmpty(userResponse.getPassword())
                     || !passwordEncoder.matches(userResponse.getPassword(), user.getPassword())) {
                 throw new RuntimeException();
             }
@@ -88,8 +89,8 @@ public class UserService {
             user = new User();
         }
 
-        if (Strings.isNullOrEmpty(userResponse.getNewPassword())
-                || Strings.isNullOrEmpty(userResponse.getConfirmNewPassword())
+        if (isNullOrEmpty(userResponse.getNewPassword())
+                || isNullOrEmpty(userResponse.getConfirmNewPassword())
                 || !userResponse.getNewPassword().equals(userResponse.getConfirmNewPassword())) {
             throw new RuntimeException("Password not found or not same.");
         }
@@ -180,7 +181,7 @@ public class UserService {
         return (Specification<User>)
                 (root, query, cb) -> {
                     List<Predicate> predicates = Lists.newLinkedList();
-                    if (!Strings.isNullOrEmpty(filter.getSearch())) {
+                    if (!isNullOrEmpty(filter.getSearch())) {
                         String search = "%".concat(filter.getSearch()).concat("%").toUpperCase();
                         predicates.add(
                                 cb.or(
@@ -194,7 +195,7 @@ public class UserService {
                     if (filter.getEnabled().isPresent()) {
                         predicates.add(cb.equal(root.get("active"), filter.getEnabled().get()));
                     }
-                    if (!Strings.isNullOrEmpty(filter.getRole().orElse(null))) {
+                    if (!isNullOrEmpty(filter.getRole().orElse(null))) {
                         String search = "%".concat(filter.getRole().get()).concat("%").toUpperCase();
                         predicates.add(cb.like(cb.upper(root.get("role").get("description")), search));
                     }
@@ -204,6 +205,10 @@ public class UserService {
 
     public Page<User> findUsersFilteredAndPaginated(FilterUserDto filter, Pageable page) {
         return repository.findAll(getUserSpecification(filter), page);
+    }
+
+    private boolean isNullOrEmpty(String word){
+        return (word == null || StringUtils.isEmpty(word));
     }
 
 

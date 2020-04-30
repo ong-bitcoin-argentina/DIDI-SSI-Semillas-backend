@@ -87,7 +87,7 @@ public class CredentialService {
                 loanRepository.save(loan);
 
                 //after create credit, will create benefit holder credential
-                this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER, credit.getId());
+                this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER);
             } else {
                 throw new PersonDoesNotExists("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
                 //this error is important, have to be shown in front

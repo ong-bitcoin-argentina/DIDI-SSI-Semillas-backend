@@ -3,10 +3,7 @@ package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -31,6 +28,9 @@ public class Person {
     private String lastName;
 
     private LocalDate birthDate;
+
+
+
     /*
     @JoinColumn(name = "ID_CREDENTIAL")
     @OneToMany

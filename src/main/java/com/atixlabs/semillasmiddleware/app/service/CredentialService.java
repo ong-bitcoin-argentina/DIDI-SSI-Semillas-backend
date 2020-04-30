@@ -42,13 +42,13 @@ public class CredentialService {
     @Autowired
     private CredentialStateRepository credentialStateRepository;
 
-
+/*
     @Autowired
     public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
     }
-
+*/
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("buildAllCredentialsFromForm: " + this.toString());

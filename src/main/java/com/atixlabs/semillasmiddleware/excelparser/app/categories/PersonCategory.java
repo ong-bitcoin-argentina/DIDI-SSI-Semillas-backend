@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -17,6 +18,7 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Getter
+@Setter
 public class PersonCategory implements Category {
 
     String categoryUniqueName;

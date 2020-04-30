@@ -8,7 +8,7 @@ import org.springframework.stereotype.Repository;
 import java.util.Optional;
 
 @Repository
-public interface CredentialStateRepository extends JpaRepository<CredentialState, Long> , CredentialRepositoryCustom{
+public interface CredentialStateRepository extends JpaRepository<CredentialState, Long>{
 
 
     Optional<CredentialState> findByStateName(String code);

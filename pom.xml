@@ -245,6 +245,29 @@
 		</dependencies>
 	</dependencyManagement>
 
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>com.spotify</groupId>
+				<artifactId>dockerfile-maven-plugin</artifactId>
+				<version>1.4.13</version>
+				<executions>
+					<execution>
+						<id>default</id>
+						<goals>
+						</goals>
+					</execution>
+				</executions>
+				<configuration>
+					<repository>docker.atixlabs.com/semillas/semillas-middleware</repository>
+					<tag>${project.version}-${CI_COMMIT_SHORT_SHA}</tag>
+					<buildArgs>
+						<JAR_FILE>${project.build.finalName}.war</JAR_FILE>
+					</buildArgs>
+				</configuration>
+			</plugin>
+		</plugins>
+		</build>
 
 
 

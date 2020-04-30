@@ -23,6 +23,5 @@ public class CredentialBenefits extends Credential{
 
     private Long dniBeneficiary;
 
-    private Long idRelatedCredentialCredit;
 
 }

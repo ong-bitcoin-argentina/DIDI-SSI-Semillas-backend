@@ -227,7 +227,7 @@ public class CredentialServiceTest {
 
     @Test
     public void createCredentialCreditAndBenefitWithActiveDID() throws Exception {
-        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
+        when(credentialCreditRepository.findByIdBondareaCreditAndCredentialState(anyString())).thenReturn(Optional.empty());
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMock());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
@@ -237,7 +237,7 @@ public class CredentialServiceTest {
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
 
-        verify(credentialCreditRepository, times(1)).save(credentialCreditCaptor.capture());
+        verify(credentialCreditRepository, times(2)).save(credentialCreditCaptor.capture());
         verify(loanRepository, times(1)).save(loanCaptor.capture());
         verify(credentialBenefitsRepository, times(1)).save(credentialBenefitCaptor.capture());
 
@@ -258,6 +258,7 @@ public class CredentialServiceTest {
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
         Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertTrue(creditSaved.getIdHistorical() == creditSaved.getId());
 
         //benefit
         Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
@@ -270,7 +271,7 @@ public class CredentialServiceTest {
 
     @Test
     public void createCredentialCreditAndBenefitWithPendingDIDIState() throws Exception {
-        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
+        when(credentialCreditRepository.findByIdBondareaCreditAndCredentialState(anyString())).thenReturn(Optional.empty());
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMock());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialPendingState());
@@ -313,7 +314,7 @@ public class CredentialServiceTest {
 
     @Test
     public void createCredentialCreditAndHavingBenefitExistence() throws Exception {
-        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
+        when(credentialCreditRepository.findByIdBondareaCreditAndCredentialState(anyString())).thenReturn(Optional.empty());
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMock());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
@@ -343,4 +344,6 @@ public class CredentialServiceTest {
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
         Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
     }
+
+    //test that with an existence credit active will not create, and with an existence credit revoke yes
 }

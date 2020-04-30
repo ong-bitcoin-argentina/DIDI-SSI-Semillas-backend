@@ -41,9 +41,6 @@ public class CredentialCredit extends Credential {
 
     private Long dniBeneficiary;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime modifiedTime;
-
     private LocalDate finalizedTime;
 
 }

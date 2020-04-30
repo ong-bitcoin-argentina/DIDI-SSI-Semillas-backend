@@ -4,9 +4,9 @@ services:
     image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-ab20cd30
     environment:
       - spring_profiles_active=${ENVIRONMENT}
-      - RAA_DB=${RAA_DB}
-      - RAA_DB_USER=${RAA_DB_USER}
-      - RAA_DB_PASSWORD=${RAA_DB_PASSWORD}
+      - SEMILLAS_DB=${SEMILLAS_DB}
+      - SEMILLAS_DB_USER=${SEMILLAS_DB_USER}
+      - SEMILLAS_DB_PASSWORD=${SEMILLAS_DB_PASSWORD}
     depends_on:
       - db
     labels:
@@ -52,9 +52,9 @@ services:
   db:
     image: postgres:11.7
     environment:
-      - POSTGRES_USER=${RAA_DB_USER}
-      - POSTGRES_PASSWORD=${RAA_DB_PASSWORD}
-      - POSTGRES_DB=${RAA_DB}
+      - POSTGRES_USER=${SEMILLAS_DB_USER}
+      - POSTGRES_PASSWORD=${SEMILLAS_DB_PASSWORD}
+      - POSTGRES_DB=${SEMILLAS_DB}
     volumes:
       - "/db-data:/var/lib/postgresql/data"
     ports:

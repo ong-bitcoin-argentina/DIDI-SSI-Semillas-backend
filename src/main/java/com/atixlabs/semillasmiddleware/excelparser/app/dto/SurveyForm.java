@@ -42,7 +42,6 @@ public class SurveyForm {
     }
 
     public SurveyForm(){
-        log.info("calling non-parameter constructor for surveyForm");
     }
 
     public SurveyForm(AnswerRow answerRow){

@@ -38,40 +38,6 @@ public class CredentialService {
     @Autowired
     private PersonRepository personRepository;
 
-    /*public void buildAllCredentialsFromForm(SurveyForm surveyForm)
-    {
-        log.info("buildAllCredentialsFromForm: "+this.toString());
-        buildPerson(surveyForm);
-        buildIdentityOwnerCredential(surveyForm);
-        buildIdentityRelativeCredential(surveyForm);
-        buildEntrepreneurshipCredential(surveyForm);
-        buildHomeCredential(surveyForm);
-    }
-    */
-
-
-    /**
-     * The following are non-public methods, isolating functionality.
-     * to make public methods easier to read.
-     * @param surveyForm
-     */
-
-    private void buildIdentityOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildIdentityRelativeCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildEntrepreneurshipCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildHomeCredential(SurveyForm surveyForm) {
-    }
-
-
-
-
-
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String credentialStatus) {
         List<Credential> credentials;
         try {
@@ -88,50 +54,6 @@ public class CredentialService {
         CredentialCredit credentialCredit = new CredentialCredit();
     }
 
-    private void buildCoursesOwnerCredential(SurveyForm surveyForm) {
-    }
-
-    private void buildCoursesRelativeCredential(SurveyForm surveyForm) {
-    }
-
-
-
-    /*private void buildPerson(SurveyForm surveyForm){
-        log.info("  buildPerson");
-
-        //PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryFromForm(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
-        if(!personCategory.isEmpty()) {
-            Person person = new Person(personCategory);
-
-            Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
-            if(personOptional.isEmpty())
-                personRepository.save(person);
-            else
-                log.info("Ya existe una persona con "+personOptional.get().getDocumentType()+" "+personOptional.get().getDocumentNumber());
-        }
-    }
-
-    private void buildCreditCredential(SurveyForm surveyForm){
-        log.info("  buildCreditCredential");
-
-        PersonCategory personCategory = (PersonCategory) surveyForm.getCategoryData(PersonCategory.class);
-        if(personCategory != null) {
-            CredentialCredit credentialCredit = new CredentialCredit(personCategory);
-
-            Optional<CredentialCredit> credentialCreditOptional = credentialCreditRepository.findByBeneficiaryDocumentTypeAndBeneficiaryDocumentNumber(
-                    credentialCredit.getBeneficiaryDocumentType(), credentialCredit.getDniBeneficiary()
-            );
-
-            if(credentialCreditOptional.isEmpty())
-                credentialCreditRepository.save(credentialCredit);
-            else
-                log.info("Ya existe una credencial para el "+
-                        credentialCredit.getBeneficiaryDocumentType()+" " +
-                        credentialCredit.getDniBeneficiary());
-        }
-    }
-    */
 
 
     public void saveCredentialCreditMock(){

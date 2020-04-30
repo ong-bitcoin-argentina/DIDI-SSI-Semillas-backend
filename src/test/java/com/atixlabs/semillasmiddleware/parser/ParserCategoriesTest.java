@@ -161,7 +161,7 @@ public class ParserCategoriesTest {
         //Assert.assertEquals(Categories.EMPRENDIMIENTO);
     }
 
-    //@Test(expected = InvalidCategoryException.class)
+    @Test
     public void invalidCategoryThrowsInvalidCategoryException(){
         //answerCategoryFactory.get("non-existent category");
         SurveyForm surveyForm = new SurveyForm();

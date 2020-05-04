@@ -35,7 +35,7 @@ backend:
       - "**/*"
 
 package-backend:
-  image: openjdk:11-jdk-slim
+  image: openjdk:11.0.7-slim
   services:
     - docker:19.03.1-dind
   stage: package

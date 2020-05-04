@@ -23,7 +23,7 @@ public enum Categories {
     CHILD_CATEGORY_NAME("DATOS HIJO"){
         @Override
         public Integer getAmount() {
-            return 20;
+            return 11;
         }
     },
     KINSMAN_CATEGORY_NAME("OTRO MIEMBRO DE LA FAMILIA"){

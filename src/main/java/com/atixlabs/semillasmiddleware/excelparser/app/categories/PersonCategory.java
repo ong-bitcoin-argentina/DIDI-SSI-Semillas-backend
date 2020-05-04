@@ -52,7 +52,7 @@ public class PersonCategory implements Category {
     @Override
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
-        PersonQuestion questionMatch = PersonQuestion.get(question);
+        PersonQuestion questionMatch = PersonQuestion.getEnumByStringValue(question);
 
         if (questionMatch == null)
             return;

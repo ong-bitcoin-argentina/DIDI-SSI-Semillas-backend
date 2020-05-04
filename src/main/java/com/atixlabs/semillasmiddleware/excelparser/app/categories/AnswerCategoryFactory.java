@@ -58,7 +58,7 @@ public class AnswerCategoryFactory {
             try {
                 categoryList.add((Category) categoryClass.getConstructor(String.class).newInstance(categoryEnum.getCode()));
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                e.printStackTrace();
+                log.error("No existe archivo de clase asociada a la categoria recibida, no se puede vincular con constructor: "+e.getMessage());
             }
         }
         else {
@@ -66,7 +66,7 @@ public class AnswerCategoryFactory {
                 try {
                     categoryList.add((Category) categoryClass.getConstructor(String.class).newInstance(categoryEnum.getCode()+" "+i));
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
-                    e.printStackTrace();
+                    log.error("No existe archivo de clase asociada a la categoria recibida, no se puede vincular con constructor: "+e.getMessage());
                 }
             }
         }

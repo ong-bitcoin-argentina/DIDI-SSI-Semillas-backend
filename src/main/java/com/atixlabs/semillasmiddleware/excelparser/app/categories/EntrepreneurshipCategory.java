@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.DwellingQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
@@ -8,9 +7,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.LinkedList;
 import java.util.List;
@@ -18,6 +15,7 @@ import java.util.stream.Collectors;
 
 @Setter
 @Getter
+
 public class EntrepreneurshipCategory implements Category {
 
     String categoryOriginalName;
@@ -42,8 +40,9 @@ public class EntrepreneurshipCategory implements Category {
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
+        EntrepreneurshipQuestion questionMatch = null;
 
-        EntrepreneurshipQuestion questionMatch = EntrepreneurshipQuestion.get(question);
+        questionMatch = EntrepreneurshipQuestion.getEnumByStringValue(question);
 
         if (questionMatch==null)
             return;

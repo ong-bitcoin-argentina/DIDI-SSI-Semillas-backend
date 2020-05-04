@@ -5,7 +5,6 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
-import org.springframework.beans.factory.annotation.Autowired;
 
 import java.util.LinkedList;
 import java.util.List;
@@ -30,7 +29,7 @@ public class DwellingCategory implements Category {
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
 
-        DwellingQuestion questionMatch = DwellingQuestion.get(question);
+        DwellingQuestion questionMatch = DwellingQuestion.getEnumByStringValue(question);
 
         if(questionMatch==null)
             return;

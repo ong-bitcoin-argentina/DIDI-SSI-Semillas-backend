@@ -31,7 +31,7 @@ public class DwellingCategory implements Category {
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
 
-        DwellingQuestion questionMatch = DwellingQuestion.get(question);
+        DwellingQuestion questionMatch = DwellingQuestion.getEnumByStringValue(question);
 
         if(questionMatch==null)
             return;

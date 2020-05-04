@@ -9,11 +9,11 @@ import java.util.Date;
 @Component
 public class DateUtil {
 
-    public Date getDateNow(){
+    public static Date getDateNow(){
         return new Date();
     }
 
-    public LocalDateTime getLocalDateTimeNow(){ return LocalDateTime.now();}
+    public static LocalDateTime getLocalDateTimeNow(){ return LocalDateTime.now();}
 
     public LocalDateTime getLocalDateTimeNowWithFormat(DateTimeFormatter formatter){
         String dateNow = LocalDateTime.now().format(formatter);

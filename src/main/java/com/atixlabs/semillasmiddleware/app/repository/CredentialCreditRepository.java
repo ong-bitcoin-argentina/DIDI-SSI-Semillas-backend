@@ -9,4 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CredentialCreditRepository extends JpaRepository<CredentialCredit, Long> {
 
+    Optional<CredentialCredit> findByIdBondareaCredit(String idBondarea);
 }

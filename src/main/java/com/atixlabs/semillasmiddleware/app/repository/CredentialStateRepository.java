@@ -10,6 +10,7 @@ import java.util.Optional;
 @Repository
 public interface CredentialStateRepository extends JpaRepository<CredentialState, Long>{
 
+    Optional<CredentialState> findByStateName(String state);
 
-    Optional<CredentialState> findByStateName(String code);
+
 }

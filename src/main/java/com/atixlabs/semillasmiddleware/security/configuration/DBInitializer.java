@@ -24,20 +24,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DBInitializer implements CommandLineRunner {
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private RoleService roleService;
 
-    @Autowired
     private PermissionRepository permissionRepository;
 
-    @Autowired
     private MenuRepository menuRepository;
 
+    private CredentialStateRepository credentialStateRepository;
+
     @Autowired
-    CredentialStateRepository credentialStateRepository;
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository) {
+        this.userService = userService;
+        this.roleService = roleService;
+        this.permissionRepository = permissionRepository;
+        this.menuRepository = menuRepository;
+        this.credentialStateRepository = credentialStateRepository;
+    }
 
     @Override
     public void run(String... args) throws Exception {

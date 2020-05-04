@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
+import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
@@ -35,6 +36,9 @@ public class Person {
     @JoinColumn(name = "ID_CREDENTIAL")
     @OneToMany
     private List<Credential> credentials;
+
+    @OneToMany
+    private List<DIDHisotoric> DIDIsHisotoric;
 
 
     @OneToMany

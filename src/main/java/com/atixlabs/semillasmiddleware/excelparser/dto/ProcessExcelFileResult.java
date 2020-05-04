@@ -22,8 +22,6 @@ public class ProcessExcelFileResult {
     private int totalEmptyRows = 0;
     private int totalProcessedForms = 0;
     private String fileName = null;
-    private boolean fileValid = true;
-    private String fileError = null;
 
     private List<ExcelErrorDetail> errorRows = new ArrayList<>();
     @JsonIgnore
@@ -61,8 +59,6 @@ public class ProcessExcelFileResult {
                 ", totalEmptyRows=" + totalEmptyRows +
                 ", totalProcessedForms=" + totalProcessedForms +
                 ", fileName='" + fileName + '\'' +
-                ", isFileValid=" + fileValid +
-                ", fileError='" + fileError + '\'' +
                 ", errorRows=" + errorRows +
                 '}';
     }

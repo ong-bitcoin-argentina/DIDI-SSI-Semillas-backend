@@ -16,6 +16,7 @@ import java.util.stream.Collectors;
 
 @Setter
 @Getter
+
 public class EntrepreneurshipCategory implements Category {
 
     private String categoryOriginalName;
@@ -42,8 +43,9 @@ public class EntrepreneurshipCategory implements Category {
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
+        EntrepreneurshipQuestion questionMatch = null;
 
-        EntrepreneurshipQuestion questionMatch = EntrepreneurshipQuestion.get(question);
+        questionMatch = EntrepreneurshipQuestion.getEnumByStringValue(question);
 
         if (questionMatch==null)
             return;

@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CredentialCreditRepository extends JpaRepository<CredentialCredit, Long> {
 
-    Optional<CredentialCredit> findByBeneficiaryDocumentTypeAndBeneficiaryDocumentNumber(String beneficiaryDocumentType, Long beneficiaryDocumentNumber);
+    Optional<CredentialCredit> findByIdBondareaCredit(String idBondarea);
 }

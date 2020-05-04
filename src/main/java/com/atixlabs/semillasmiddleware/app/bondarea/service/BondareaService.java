@@ -19,13 +19,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.net.SocketTimeoutException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -104,9 +101,11 @@ public class BondareaService {
         BondareaLoanDto loan = new BondareaLoanDto();
         loan.setIdBondareaLoan("1L");
         loan.setDni(123456L);
-        loan.setStatusName("Activo");
+        loan.setStatusFullDescription("Activo");
         loan.setAmount((float) 1000);
         loan.setExpiredAmount((float) 0);
+        loan.setCycle("Ciclo 1");
+        loan.setCreationDate("2020/04/27");
         loan.setStatus(55);
 
         return loan;

@@ -4,22 +4,35 @@ INSERT INTO public.credential_state(id, state_name) VALUES (
 INSERT INTO public.credential_state(id, state_name) VALUES (
 '2'::bigint, 'Revocada'::character varying(255));
 
+INSERT INTO public.credential_state(id, state_name) VALUES (
+'3'::bigint, 'Pendiente-didi'::character varying(255));
+
 
 INSERT INTO public.person (
-id, birth_date, document_number, document_type, name) VALUES (
-'1'::bigint, '1999-04-21'::date, '454645687'::bigint, 'jjty'::character varying(255), 'Jorge Perez'::character varying(255));
+id, birth_date, document_number, name) VALUES (
+'1'::bigint, '1999-04-21'::date, '454645687'::bigint, 'Jorge Perez'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number, document_type, name) VALUES (
-'2'::bigint, '1999-04-21'::date, '456456455'::bigint, 'jjty'::character varying(255), 'Tomas Gipson'::character varying(255));
+id, birth_date, document_number,  name) VALUES (
+'2'::bigint, '1999-04-21'::date, '456456455'::bigint, 'Tomas Gipson'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number, document_type, name) VALUES (
-'3'::bigint, '1999-05-25'::date, '547547547'::bigint, 'type'::character varying(255), 'Rodolfo Rodriguez'::character varying(255));
+id, birth_date, document_number,  name) VALUES (
+'3'::bigint, '1999-05-25'::date, '547547547'::bigint, 'Rodolfo Rodriguez'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number, document_type, name) VALUES (
-'4'::bigint, '1999-05-25'::date, '54754754'::bigint, 'type'::character varying(255), 'Rodolfo Rodriguez Jr'::character varying(255));
+id, birth_date, document_number, name) VALUES (
+'4'::bigint, '1999-05-25'::date, '54754754'::bigint, 'Rodolfo Rodriguez Jr'::character varying(255));
+
+INSERT INTO public.person (
+id, birth_date, document_number, name) VALUES (
+'4'::bigint, '1999-05-25'::date, '123456'::bigint, 'Rodolfo Rodriguez Jr'::character varying(255));
+
+INSERT INTO public.person (
+birth_date, document_number, name, id) VALUES (
+'1999-05-26'::date, '1234567'::bigint, 'Alberto Misiones'::character varying(255), '6'::bigint)
+ returning id;
+
 
 
 
@@ -42,12 +55,12 @@ id, credential_description, credential_category, credential_state_id, date_of_ex
 
 
 INSERT INTO public.credential_credit (
-amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id) VALUES (
-'10000'::double precision, 'credito'::character varying(255), 'Vigente'::character varying(255), '4353456345'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '1'::bigint);
+amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id, total_cycles) VALUES (
+'10000'::double precision, 'credito'::character varying(255), 'Vigente'::character varying(255), '4353456345'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '1'::bigint, '12'::bigint);
 
 INSERT INTO public.credential_credit (
-amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id) VALUES (
-'20000'::double precision, 'credito2'::character varying(255), 'Vigente'::character varying(255), '468767'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '2'::bigint);
+amount, credit_name, credit_state, dni_beneficiary, group_name, id_credit, id_group, rol, id, total_cycles) VALUES (
+'20000'::double precision, 'credito2'::character varying(255), 'Vigente'::character varying(255), '468767'::bigint, 'grupo'::character varying(255), '1'::bigint, '1'::bigint, 'rol'::character varying(255), '2'::bigint, '12'::bigint);
 
 INSERT INTO public.credential_entrepreneurship (
 entrepreneurship_address,  end_activity, entrepreneurship_type, main_activity, entrepreneurship_name, start_activity, id) VALUES (

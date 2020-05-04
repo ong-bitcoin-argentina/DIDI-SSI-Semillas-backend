@@ -1,9 +1,10 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
@@ -24,17 +25,14 @@ public class CredentialController {
 
     private CredentialService credentialService;
 
+    private LoanService loanService;
+
     @Autowired
-    public CredentialController(CredentialService credentialService) {
+    public CredentialController(CredentialService credentialService, LoanService loanService) {
         this.credentialService = credentialService;
+        this.loanService = loanService;
     }
 
-
-    @RequestMapping(value = "/createCredit", method = RequestMethod.POST)
-    public void createCredit() {
-        log.info(" createCredit ");
-        credentialService.saveCredentialCreditMock();
-    }
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
@@ -44,12 +42,11 @@ public class CredentialController {
                                                         @RequestParam(required = false) String idDidiCredential,
                                                         @RequestParam(required = false) String dateOfIssue,
                                                         @RequestParam(required = false) String dateOfExpiry,
-                                                        @RequestParam(required = false) List<String> credentialState,
-                                                        @RequestParam(required = false) String credentialStatus) {
+                                                        @RequestParam(required = false) List<String> credentialState) {
 
         List<Credential> credentials;
         try {
-            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);
+            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
         }
         catch (Exception e){
             log.info("There has been an error searching for credentials " + e);
@@ -78,16 +75,22 @@ public class CredentialController {
         return credentialTypes;
     }
 
-    @GetMapping("/status")
-    @ResponseStatus(HttpStatus.OK)
-    public Map<String, String> findCredentialStatus() {
-        Map<String, String> credentialStatus = new HashMap<>();
-        for (CredentialStatusCodes status: CredentialStatusCodes.values()) {
-            credentialStatus.put(status.name(), status.getCode());
+
+    @PostMapping("/generate")
+    @ResponseStatus(HttpStatus.CREATED)
+    public void generateCredentialsCredit(){
+        List<Loan> newLoans = loanService.findLoansWithoutCredential();
+
+        for (Loan loan: newLoans) {
+            try {
+                credentialService.createNewCreditCredentials(loan);
+            }
+            catch (Exception ex){
+
+            }
         }
 
-       // Map<CredentialStatesCodes, String> credentialStatus = (Map<CredentialStatesCodes, String >) Arrays.stream(CredentialStatusCodes.values()).map(state ->Map.of(state,state.getCode())).collect(Collectors.toMap(e -> e, CredentialStatusCodes::getCode));
-        return credentialStatus;
+
     }
 
 

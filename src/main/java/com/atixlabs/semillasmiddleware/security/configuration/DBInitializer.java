@@ -1,5 +1,8 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
 import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.atixlabs.semillasmiddleware.security.repository.PermissionRepository;
@@ -21,17 +24,24 @@ import org.springframework.stereotype.Component;
 @Slf4j
 public class DBInitializer implements CommandLineRunner {
 
-    @Autowired
     private UserService userService;
 
-    @Autowired
     private RoleService roleService;
 
-    @Autowired
     private PermissionRepository permissionRepository;
 
-    @Autowired
     private MenuRepository menuRepository;
+
+    private CredentialStateRepository credentialStateRepository;
+
+    @Autowired
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository) {
+        this.userService = userService;
+        this.roleService = roleService;
+        this.permissionRepository = permissionRepository;
+        this.menuRepository = menuRepository;
+        this.credentialStateRepository = credentialStateRepository;
+    }
 
     @Override
     public void run(String... args) throws Exception {
@@ -160,6 +170,12 @@ public class DBInitializer implements CommandLineRunner {
         menu = menuRepository.findByCode("VIEW_PROFILE");
         if (menu.isPresent()) {
             menuRepository.save(menu.get());
+        }
+
+        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        if (credentialStateOptional.isEmpty()){
+            credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
+            credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
         }
     }
 }

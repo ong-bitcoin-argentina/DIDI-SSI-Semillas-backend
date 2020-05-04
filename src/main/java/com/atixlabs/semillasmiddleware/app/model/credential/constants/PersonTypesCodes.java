@@ -1,14 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 
-public enum CredentialStatusCodes {
+public enum PersonTypesCodes {
 
-    CREDENTIAL_PENDING_BONDAREA("Pendiente-bondarea"),
-    CREDENTIAL_PENDING_DIDI("Pendiente-didi");
-
+    HOLDER("TITULAR"),
+    FAMILY("FAMILIAR");
 
     private String code;
 
-    CredentialStatusCodes(String code) {
+    PersonTypesCodes(String code) {
         this.code = code;
     }
 

@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
+import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
@@ -24,8 +25,6 @@ public class Person {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private String documentType; //TODO enum or class
-
     @Column(unique = true)
     private Long documentNumber;
 
@@ -37,6 +36,9 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
+    @OneToMany
+    private List<DIDHisotoric> DIDIsHisotoric;
+
 
     //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado.
     @OneToOne
@@ -47,7 +49,6 @@ public class Person {
 
     public Person(PersonCategory personCategory){
         this.setName(personCategory.getName()+" "+ personCategory.getSurname());
-        this.setDocumentType(personCategory.getIdType());
         this.setDocumentNumber(personCategory.getIdNumber());
         this.setBirthDate(personCategory.getBirthDate());
     }
@@ -57,7 +58,6 @@ public class Person {
     public String toString() {
         return "Person{" +
                 "id=" + id +
-                ", documentType='" + documentType + '\'' +
                 ", documentNumber=" + documentNumber +
                 ", name='" + name + '\'' +
                 ", birthDate=" + birthDate +

@@ -4,6 +4,7 @@ package com.atixlabs.semillasmiddleware.bondareaService;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
@@ -35,17 +36,21 @@ public class BondareaServiceTest {
     @Captor
     private ArgumentCaptor<Loan> captor;
 
+
     @Before
     public void setupMocks(){
         MockitoAnnotations.initMocks(this);
     }
 
-    private Loan getMockLoan(){
+    public static Loan getMockLoan(){
+        DateUtil dateUtil = new DateUtil();
+
         Loan loan = new Loan();
         loan.setDniPerson(123456L);
         loan.setIdBondareaLoan("1a");
-        loan.setStatusName("Activo");
+        loan.setStatusFullDescription("Activo");
         loan.setExpiredAmount((float) 0);
+        loan.setCreationDate(dateUtil.getLocalDateTimeNow().toLocalDate());
         loan.setStatus(55);
         loan.setIsActive(true);
         loan.setIsDeleted(false);

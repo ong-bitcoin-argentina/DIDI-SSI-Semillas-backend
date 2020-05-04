@@ -16,8 +16,8 @@ import javax.persistence.Transient;
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialBenefits extends Credential{
 
-    //Todo que data lleva ?
-    //Titular y familiar
+    private String beneficiaryType; //TODo titular / familiar -> para fill se consigue por parentezco
 
+    private Long dniBeneficiary;
 
 }

@@ -27,7 +27,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates, String credentialStatus) {
+    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -64,10 +64,6 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
 
         if (credentialStates != null) {
             predicates.add(cb.in(credentialStateEntity.get("stateName")).value(credentialStates));
-        }
-
-        if (credentialStatus != null) {
-            predicates.add(cb.equal(credential.get("credentialStatus").as(String.class), credentialStatus));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));

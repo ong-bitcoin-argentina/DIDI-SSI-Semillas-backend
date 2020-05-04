@@ -6,6 +6,12 @@ import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.*;
@@ -30,9 +36,19 @@ public class CredentialService {
     private CredentialBenefitsRepository credentialBenefitsRepository;
     private DIDHistoricRepository didHistoricRepository;
     private CredentialStateRepository credentialStateRepository;
-
+    private AnswerCategoryFactory answerCategoryFactory;
+    
     @Autowired
-    public CredentialService(CredentialCreditRepository credentialCreditRepository, CredentialRepository credentialRepository, PersonRepository personRepository, LoanRepository loanRepository, CredentialBenefitsRepository credentialBenefitsRepository, DIDHistoricRepository didHistoricRepository, CredentialStateRepository credentialStateRepository) {
+    public CredentialService(
+     CredentialCreditRepository credentialCreditRepository,
+     CredentialRepository credentialRepository,
+     PersonRepository personRepository,
+     LoanRepository loanRepository,
+     CredentialBenefitsRepository credentialBenefitsRepository,
+     DIDHistoricRepository didHistoricRepository,
+     CredentialStateRepository credentialStateRepository,
+     AnswerCategoryFactory answerCategoryFactory
+     ) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
@@ -40,6 +56,7 @@ public class CredentialService {
         this.credentialBenefitsRepository = credentialBenefitsRepository;
         this.didHistoricRepository = didHistoricRepository;
         this.credentialStateRepository = credentialStateRepository;
+        this.answerCategoryFactory = answerCategoryFactory;
     }
 
 

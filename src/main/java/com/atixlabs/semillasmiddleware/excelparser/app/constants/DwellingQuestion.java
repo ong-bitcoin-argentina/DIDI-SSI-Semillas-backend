@@ -16,7 +16,7 @@ public enum DwellingQuestion implements CategoryQuestion {
         this.questionName=questionName;
     }
 
-    public static DwellingQuestion get(String questionName) {
+    public static DwellingQuestion getEnumByStringValue(String questionName) {
         return questionsMap.get(questionName);
     }
 

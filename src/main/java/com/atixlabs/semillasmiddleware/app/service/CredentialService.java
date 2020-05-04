@@ -4,30 +4,24 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-<<<<<<< HEAD
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
-=======
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
->>>>>>> develop
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
@@ -54,21 +48,21 @@ public class CredentialService {
     private DIDHistoricRepository didHistoricRepository;
     private CredentialStateRepository credentialStateRepository;
     private AnswerCategoryFactory answerCategoryFactory;
-    
+
     @Autowired
     public CredentialService(
-     CredentialCreditRepository credentialCreditRepository,
-     CredentialRepository credentialRepository,
-     PersonRepository personRepository,
-     LoanRepository loanRepository,
-     CredentialBenefitsRepository credentialBenefitsRepository,
-     DIDHistoricRepository didHistoricRepository,
-     CredentialStateRepository credentialStateRepository,
-     AnswerCategoryFactory answerCategoryFactory,
-     CredentialIdentityRepository credentialIdentityRepository,
-     CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
-     CredentialDwellingRepository credentialDwellingRepository
-     ) {
+            CredentialCreditRepository credentialCreditRepository,
+            CredentialRepository credentialRepository,
+            PersonRepository personRepository,
+            LoanRepository loanRepository,
+            CredentialBenefitsRepository credentialBenefitsRepository,
+            DIDHistoricRepository didHistoricRepository,
+            CredentialStateRepository credentialStateRepository,
+            AnswerCategoryFactory answerCategoryFactory,
+            CredentialIdentityRepository credentialIdentityRepository,
+            CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
+            CredentialDwellingRepository credentialDwellingRepository
+    ) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
@@ -105,7 +99,7 @@ public class CredentialService {
         //2-verify each person is new, or his data has not changed.
         boolean allCredentialsNewOrInactive = true;
         for (Category category : categoryArrayList) {
-            switch (category.getCategoryName()){
+            switch (category.getCategoryName()) {
                 case BENEFICIARY_CATEGORY_NAME:
                 case SPOUSE_CATEGORY_NAME:
                 case CHILD_CATEGORY_NAME:
@@ -128,7 +122,7 @@ public class CredentialService {
         return allCredentialsNewOrInactive;
     }
 
-    private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult){
+    private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult) {
         CredentialState credentialStateActive = null;
         Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
         if (credentialStateOptional.isPresent())
@@ -144,14 +138,14 @@ public class CredentialService {
         else
             processExcelFileResult.addRowError(
                     "Warning CREDENCIAL DUPLICADA",
-                    "Ya existe una credencial de tipo "+credentialCategoryCode+
-                             " en estado ACTIVO"+
-                             " para el DNI "+beneficiaryDni+" para continuar debe revocarlas manualmente"
+                    "Ya existe una credencial de tipo " + credentialCategoryCode +
+                            " en estado ACTIVO" +
+                            " para el DNI " + beneficiaryDni + " para continuar debe revocarlas manualmente"
             );
         return true;
     }
 
-    private void saveAllCredentialsFromForm(SurveyForm surveyForm){
+    private void saveAllCredentialsFromForm(SurveyForm surveyForm) {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = getPersonFromPersonCategory(creditHolderPersonCategory);
@@ -164,9 +158,10 @@ public class CredentialService {
             saveCredential(category, creditHolder);
         }
     }
-    private void saveCredential(Category category, Person creditHolder){
-        log.info("  saveCredential: "+category.getCategoryName());
-        switch (category.getCategoryName()){
+
+    private void saveCredential(Category category, Person creditHolder) {
+        log.info("  saveCredential: " + category.getCategoryName());
+        switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:
             case CHILD_CATEGORY_NAME:
             case SPOUSE_CATEGORY_NAME:
@@ -179,17 +174,18 @@ public class CredentialService {
             case DWELLING_CATEGORY_NAME:
                 credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder));
                 break;
-
-
-
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
-        List<Credential> credentials;
-        try {
-         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
         }
     }
 
-    private Person getPersonFromPersonCategory(PersonCategory personCategory){
+    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+        List<Credential> credentials;
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+
+        return credentials;
+    }
+
+    private Person getPersonFromPersonCategory(PersonCategory personCategory) {
         Person person = new Person();
         person.setDocumentNumber(personCategory.getIdNumber());
         person.setFirstName(personCategory.getName());
@@ -198,39 +194,39 @@ public class CredentialService {
         return person;
     }
 
-    private boolean arePersonEquals(Person person1, Person person2){
-        return  person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&
+    private boolean arePersonEquals(Person person1, Person person2) {
+        return person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&
                 person1.getFirstName().equals(person2.getFirstName()) &&
                 person1.getLastName().equals(person2.getLastName()) &&
                 person1.getBirthDate().isEqual(person2.getBirthDate());
     }
 
-    private Person savePersonIfNew(Person person){
+    private Person savePersonIfNew(Person person) {
         Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
         if (personOptional.isEmpty())
             return personRepository.save(person);
-        if (!arePersonEquals(person, personOptional.get())){
+        if (!arePersonEquals(person, personOptional.get())) {
             person.setId(personOptional.get().getId());
             return personRepository.save(person);
         }
         return personOptional.get();
     }
 
-    private void buildCredential(Person creditHolder, Credential credential){
+    private void buildCredential(Person creditHolder, Credential credential) {
         creditHolder = savePersonIfNew(creditHolder);
 
         credential.setDateOfIssue(LocalDateTime.now());
         credential.setCreditHolder(creditHolder);
         credential.setCreditHolderDni(creditHolder.getDocumentNumber());
-        credential.setCreditHolderName(creditHolder.getFirstName()+" "+creditHolder.getLastName());
+        credential.setCreditHolderName(creditHolder.getFirstName() + " " + creditHolder.getLastName());
 
         //the beneficiary is the same as the credit holder for all credentials but identity
         //buildIdentityCredential overwrites this value with the different members.
         credential.setBeneficiary(creditHolder);
         credential.setBeneficiaryDni(creditHolder.getDocumentNumber());
-        credential.setBeneficiaryName(creditHolder.getFirstName()+" "+creditHolder.getLastName());
+        credential.setBeneficiaryName(creditHolder.getFirstName() + " " + creditHolder.getLastName());
 
-        credential.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_BONDAREA.getCode());
+        //credential.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_BONDAREA.getCode());
         Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
         credentialStateOptional.ifPresent(credential::setCredentialState);
     }
@@ -245,25 +241,25 @@ public class CredentialService {
 
         credentialIdentity.setBeneficiary(beneficiary);
         credentialIdentity.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        credentialIdentity.setBeneficiaryName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+        credentialIdentity.setBeneficiaryName(beneficiary.getFirstName() + " " + beneficiary.getLastName());
 
         credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
 
-        switch (beneficiaryPersonCategory.getPersonType()){
+        switch (beneficiaryPersonCategory.getPersonType()) {
             case BENEFICIARY:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
                 break;
             case SPOUSE:
             case CHILD:
             case OTHER_KINSMAN:
-                credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILIAR.getCode());
+                credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILY.getCode());
                 break;
         }
 
         return credentialIdentity;
     }
 
-    private CredentialEntrepreneurship buildEntrepreneurshipCredential(Category category, Person creditHolder){
+    private CredentialEntrepreneurship buildEntrepreneurshipCredential(Category category, Person creditHolder) {
         EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
 
         CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
@@ -297,10 +293,20 @@ public class CredentialService {
         return credentialDwelling;
     }
 
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String credentialStatus) {
+    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String
+                                                    credentialStatus) {
         List<Credential> credentials;
         try {
-            credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, credentialStatus);
+            credentials = credentialRepository.findCredentialsWithFilter(
+                    credentialType,
+                    name,
+                    dniBeneficiary,
+                    idDidiCredential,
+                    dateOfExpiry,
+                    dateOfIssue,
+                    credentialState
+            );
         } catch (Exception e) {
             log.info("There has been an error searching for credentials " + e);
             return Collections.emptyList();
@@ -311,22 +317,18 @@ public class CredentialService {
 
     public void saveCredentialCreditMock() {
         CredentialCredit credentialCredit = new CredentialCredit();
-        credentialCredit.setCreditName("credit name");
-        credentialCredit.setIdGroup(1111L);
-        credentialCredit.setGroupName("GroupName");
-        credentialCredit.setRol("rol");
+        credentialCredit.setIdGroup("1111BBB");
         credentialCredit.setAmount(1d);
         credentialCredit.setCurrentCycle("Cycle");
         credentialCredit.setCreditState("state");
         credentialCredit.setCreditHolderDni(29302594L);
-        //credentialCredit.setBeneficiaryDni(29302594L);
         credentialCreditRepository.save(credentialCredit);
-
+    }
 
     public void createNewCreditCredentials(Loan loan) throws Exception {
         //beneficiarieSSSS -> the credit group will be created by separate (not together)
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
-        if(opCreditExistence.isEmpty()) {
+        if (opCreditExistence.isEmpty()) {
             Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
             if (opBeneficiary.isPresent()) {
                 //the documents must coincide
@@ -342,8 +344,7 @@ public class CredentialService {
                 throw new Exception("Person should have been created before...");
                 //this eror is important, have to be shown in front
             }
-        }
-        else{
+        } else {
             loan.setHasCredential(true);
             log.error("The credit with idBondarea " + loan.getIdBondareaLoan() + " has an existent credential ");
         }
@@ -390,88 +391,73 @@ public class CredentialService {
             }
         }
 
-            //This depends of the type of loan from bondarea
-            credentialCredit.setCredentialDescription("type"); // TODO this column will be no longer useful
-            credentialCredit.setCredentialCategory("type ");
+        //This depends of the type of loan from bondarea
+        credentialCredit.setCredentialDescription("type"); // TODO this column will be no longer useful
+        credentialCredit.setCredentialCategory("type ");
 
-            return credentialCredit;
+        return credentialCredit;
 
     }
 
     //now is used only for holders, can be easily changed adding param
-    public void createBenefitsCredential(Person beneficiary){
+    public void createBenefitsCredential(Person beneficiary) {
         Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByDniBeneficiary(beneficiary.getDocumentNumber());
         //TODO if TITULAR has a benefit with state REVOCADA ? create new ? or not ?
         //create benefit if person does not have or is holder
-            if (opBenefits.isEmpty() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode()) ) {
-                CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, PersonTypesCodes.HOLDER);
-                credentialBenefitsRepository.save(benefits);
-            } else {
-                log.info("Person with dni" + beneficiary.getDocumentNumber() + "already has a credential benefits");
-            }
+        if (opBenefits.isEmpty() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode())) {
+            CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, PersonTypesCodes.HOLDER);
+            credentialBenefitsRepository.save(benefits);
+        } else {
+            log.info("Person with dni" + beneficiary.getDocumentNumber() + "already has a credential benefits");
         }
+    }
 
     public List<CredentialDto> findAllCredentialsMock() {
         List<CredentialDto> credentials = new ArrayList<>();
+        return credentials;
     }
+
     /**
-     *
      * @param beneficiary
      * @param personType
      * @return CredentialBenefits
      */
-    public CredentialBenefits buildBenefitsCredential(Person beneficiary, PersonTypesCodes personType){
+    public CredentialBenefits buildBenefitsCredential(Person beneficiary, PersonTypesCodes personType) {
         CredentialBenefits benefits = new CredentialBenefits();
 
         //Person is holder or family
-        if(personType.equals(PersonTypesCodes.HOLDER)){
+        if (personType.equals(PersonTypesCodes.HOLDER)) {
             benefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
             benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
-        }
-        else{
+        } else {
             benefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
             benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
         }
 
-        CredentialDto credential1 = new CredentialDto(1L, 2L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), "Jorge Rodrigues", 29302594L, "Estado", "CrdentialCredit");
-        credentials.add(credential1);
-
-        CredentialDto credential2 = new CredentialDto(2L, 3L, LocalDateTime.now(), LocalDateTime.now().plusDays(1), "Uriel Brama", 29302594L, "Estado", "CrdentialIdentity");
-        credentials.add(credential2);
-
-        CredentialDto credential3 = new CredentialDto(3L, 4L, LocalDateTime.now(), LocalDateTime.now().plusDays(2), "Pepe Grillo", 293025464L, "Estado", "CredentialCredit");
-        credentials.add(credential3);
-
-        CredentialDto credential4 = new CredentialDto(4L, 5L, LocalDateTime.now(), LocalDateTime.now().plusDays(6), "Armando Thompson", 29302594L, "Estado", "CredentialDwelling");
-        credentials.add(credential4);
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
         //TODO credentialCredit.setIdHistorical();
 
 
-
         //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
 
         Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
-        if(opActiveDid.isPresent()) {
+        if (opActiveDid.isPresent()) {
             benefits.setIdDidiReceptor(opActiveDid.get().getIdDidiReceptor());
             Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-            if(opStateActive.isPresent()) {
+            if (opStateActive.isPresent()) {
                 benefits.setCredentialState(opStateActive.get());
                 benefits.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
             }
-        }
-        else{
+        } else {
             //Person do not have a DID yet -> set as pending didi
             Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-            if(opStateActive.isPresent())
-                 benefits.setCredentialState(opStateActive.get());
+            if (opStateActive.isPresent())
+                benefits.setCredentialState(opStateActive.get());
         }
 
         return benefits;
     }
-
-    
 
 }

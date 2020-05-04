@@ -61,7 +61,7 @@ public class CredentialService {
     public void createNewCreditCredentials(Loan loan) throws Exception {
         //beneficiarieSSSS -> the credit group will be created by separate (not together)
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
-        if(!opCreditExistence.isPresent()) {
+        if(opCreditExistence.isEmpty()) {
             Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
             if (opBeneficiary.isPresent()) {
                 //the documents must coincide
@@ -138,7 +138,7 @@ public class CredentialService {
         Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByDniBeneficiary(beneficiary.getDocumentNumber());
         //TODO if TITULAR has a benefit with state REVOCADA ? create new ? or not ?
         //create benefit if person does not have or is holder
-            if (!opBenefits.isPresent() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode()) ) {
+            if (opBenefits.isEmpty() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode()) ) {
                 CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, PersonTypesCodes.HOLDER);
                 credentialBenefitsRepository.save(benefits);
             } else {

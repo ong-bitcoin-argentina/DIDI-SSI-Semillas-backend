@@ -15,6 +15,7 @@ import com.atixlabs.semillasmiddleware.security.service.RoleService;
 import com.atixlabs.semillasmiddleware.security.service.UserService;
 import com.google.common.collect.Sets;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -177,10 +178,18 @@ public class DBInitializer implements CommandLineRunner {
             menuRepository.save(menu.get());
         }
 
+        //Credential States
         Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
         if (credentialStateOptional.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
+        }
+        Optional<CredentialState> credentialStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+        if (credentialStateRevoke.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
+        }
+        Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        if (credentialStatePending.isEmpty()) {
+            credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));
         }
 
         if(!parameterConfigurationRepository.findById(1L).isPresent()){

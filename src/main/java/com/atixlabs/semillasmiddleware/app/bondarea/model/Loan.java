@@ -158,8 +158,6 @@ public class Loan extends AuditableEntity {
 
         this.modifiedTime = loanToUpdate.getModifiedTime();
 
-        this.hasCredential = loanToUpdate.getHasCredential();
-
     }
 
     public Loan() {}

@@ -82,38 +82,38 @@ public class CredentialController {
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.CREATED)
-    public void generateCredentialsCredit(){
+    public void generateCredentialsCredit() {
         List<Loan> newLoans = loanService.findLoansWithoutCredential();
 
-        for (Loan newLoan: newLoans) {
+        for (Loan newLoan : newLoans) {
             try {
                 credentialService.createNewCreditCredentials(newLoan);
-            }
-            catch (Exception ex){
 
+            } catch (PersonDoesNotExists ex) {
+                log.error(ex.getMessage());
             }
+        }
 
             List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
             //if loan has been modified after the credential credit
-            for (Loan loan: loansWithCredentials) {
+            for (Loan loan : loansWithCredentials) {
                 CredentialCredit creditToUpdate = credentialService.validateCredentialCreditToUpdate(loan);
-                if(creditToUpdate != null) {
+                if (creditToUpdate != null) {
                     try {
                         credentialService.updateCredentialCredit(loan, creditToUpdate);
-                        
                     } catch (NoExpiredConfigurationExists ex) {
                         log.error(ex.getMessage());
                     } catch (PersonDoesNotExists ex) {
                         log.error(ex.getMessage());
                     }
+                    catch (Exception ex){
+                        log.error(ex.getMessage());
+                    }
                 }
-
             }
-
         }
 
 
+
+
     }
-
-
-}

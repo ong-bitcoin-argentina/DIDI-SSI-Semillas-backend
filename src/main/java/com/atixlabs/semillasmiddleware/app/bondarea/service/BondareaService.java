@@ -155,16 +155,16 @@ public class BondareaService {
         loan2.setIdBondareaLoan("2L");
         loans.add(loan2);
 
-        //loan 3 modified tag
+        //loan 3 modified cycle
         BondareaLoanDto loan3 = getMockBondareaLoan();
         loan3.setIdBondareaLoan("3L");
-        loan3.setTagBondareaLoan("nuevo tag");
+        loan3.setCycle("Ciclo 2");
         loans.add(loan3);
 
         //loan 4 is in default
         BondareaLoanDto loan4 = getMockBondareaLoan();
         loan4.setIdBondareaLoan("4L");
-        loan4.setExpiredAmount((float) 100);
+        loan4.setExpiredAmount((float) 10500);
         loans.add(loan4);
 
         //new loan

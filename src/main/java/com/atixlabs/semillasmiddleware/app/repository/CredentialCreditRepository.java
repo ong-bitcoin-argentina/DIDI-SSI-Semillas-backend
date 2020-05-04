@@ -13,5 +13,7 @@ public interface CredentialCreditRepository extends JpaRepository<CredentialCred
 
     Optional<CredentialCredit> findByIdBondareaCredit(String idBondarea);
 
+    Optional<CredentialCredit> findByIdBondareaCreditAndCredentialStateIn(String idBondarea, List<CredentialState> credentialStates);
+
     List<CredentialCredit> findByIdGroup(String idGroup);
 }

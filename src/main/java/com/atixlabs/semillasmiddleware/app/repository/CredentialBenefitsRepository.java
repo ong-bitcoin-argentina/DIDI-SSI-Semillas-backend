@@ -9,5 +9,5 @@ import java.util.Optional;
 @Repository
 public interface CredentialBenefitsRepository extends JpaRepository<CredentialBenefits, Long> {
 
-    Optional<CredentialBenefits> findByDniBeneficiary(Long dni);
+    Optional<CredentialBenefits> findByBeneficiaryDni(Long dni);
 }

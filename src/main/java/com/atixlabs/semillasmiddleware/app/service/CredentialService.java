@@ -71,6 +71,9 @@ public class CredentialService {
         this.didHistoricRepository = didHistoricRepository;
         this.credentialStateRepository = credentialStateRepository;
         this.answerCategoryFactory = answerCategoryFactory;
+        this.credentialIdentityRepository = credentialIdentityRepository;
+        this.credentialEntrepreneurshipRepository =  credentialEntrepreneurshipRepository;
+        this.credentialDwellingRepository = credentialDwellingRepository;
     }
 
 
@@ -365,7 +368,22 @@ public class CredentialService {
         credentialCredit.setCreditState(loan.getStatusDescription());
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
-        credentialCredit.setDniBeneficiary(beneficiary.getDocumentNumber());
+
+        //Added Modification CreditHolderDni and CreditHolderId (Dario):
+        credentialCredit.setBeneficiary(beneficiary);
+        credentialCredit.setBeneficiaryDni(beneficiary.getDocumentNumber());
+        credentialCredit.setBeneficiaryName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+
+        credentialCredit.setCreditHolderDni(beneficiary.getDocumentNumber());
+        credentialCredit.setCreditHolder(beneficiary);
+        credentialCredit.setCreditHolderName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+        //End creditHolder changes(Dario)
+
+
+
+
+
+
 
         //Credential Parent fields
         credentialCredit.setDateOfIssue(DateUtil.getLocalDateTimeNow());
@@ -401,7 +419,7 @@ public class CredentialService {
 
     //now is used only for holders, can be easily changed adding param
     public void createBenefitsCredential(Person beneficiary) {
-        Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByDniBeneficiary(beneficiary.getDocumentNumber());
+        Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDni(beneficiary.getDocumentNumber());
         //TODO if TITULAR has a benefit with state REVOCADA ? create new ? or not ?
         //create benefit if person does not have or is holder
         if (opBenefits.isEmpty() || !opBenefits.get().getBeneficiaryType().equals(PersonTypesCodes.HOLDER.getCode())) {
@@ -435,11 +453,18 @@ public class CredentialService {
         }
 
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
+
+        //Added Modification CreditHolderDni and CreditHolderId (Dario):
         benefits.setBeneficiary(beneficiary);
-        benefits.setDniBeneficiary(beneficiary.getDocumentNumber());
+        benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
+        benefits.setBeneficiaryName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+
+        benefits.setCreditHolderDni(beneficiary.getDocumentNumber());
+        benefits.setCreditHolder(beneficiary);
+        benefits.setCreditHolderName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+        //End creditHolder changes(Dario)
+
         //TODO credentialCredit.setIdHistorical();
-
-
         //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
 
         Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);

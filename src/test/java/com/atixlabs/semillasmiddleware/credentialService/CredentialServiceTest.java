@@ -8,7 +8,6 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
@@ -34,13 +33,8 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import com.atixlabs.semillasmiddleware.bondareaService.BondareaServiceTest;
-import com.atixlabs.semillasmiddleware.util.DateUtil;
 
-import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
-import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
@@ -382,7 +376,7 @@ public class CredentialServiceTest {
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
         //credential benefits
-        when(credentialBenefitsRepository.findByDniBeneficiary(anyLong())).thenReturn(Optional.empty());
+        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(Optional.empty());
 
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
@@ -400,7 +394,7 @@ public class CredentialServiceTest {
 
         Assertions.assertEquals(true, savedLoan.getHasCredential());
         Assertions.assertEquals(loan.getIdBondareaLoan(), creditSaved.getIdBondareaCredit());
-        Assertions.assertEquals(loan.getDniPerson(), creditSaved.getDniBeneficiary());
+        Assertions.assertEquals(loan.getDniPerson(), creditSaved.getBeneficiaryDni());
         Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), creditSaved.getCredentialState().getStateName());
         Assertions.assertEquals(0, creditSaved.getAmountExpiredCycles());
         Assertions.assertEquals(loan.getCreationDate(), creditSaved.getCreationDate());
@@ -425,7 +419,7 @@ public class CredentialServiceTest {
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialPendingState());
         //credential benefits
-        when(credentialBenefitsRepository.findByDniBeneficiary(anyLong())).thenReturn(Optional.empty());
+        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(Optional.empty());
 
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
@@ -443,7 +437,7 @@ public class CredentialServiceTest {
 
         Assertions.assertEquals(true, savedLoan.getHasCredential());
         Assertions.assertEquals(loan.getIdBondareaLoan(), creditSaved.getIdBondareaCredit());
-        Assertions.assertEquals(loan.getDniPerson(), creditSaved.getDniBeneficiary());
+        Assertions.assertEquals(loan.getDniPerson(), creditSaved.getBeneficiaryDni());
         Assertions.assertEquals(CredentialStatesCodes.PENDING_DIDI.getCode(), creditSaved.getCredentialState().getStateName());
         Assertions.assertEquals(0, creditSaved.getAmountExpiredCycles());
         Assertions.assertEquals(loan.getCreationDate(), creditSaved.getCreationDate());
@@ -455,7 +449,7 @@ public class CredentialServiceTest {
         //benefit
         Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
         Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode(), credentialBenefits.getCredentialDescription());
-        Assertions.assertEquals(getPersonMock().get().getDocumentNumber(), credentialBenefits.getDniBeneficiary());
+        Assertions.assertEquals(getPersonMock().get().getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
         Assertions.assertEquals(null, credentialBenefits.getIdDidiCredential());
         Assertions.assertEquals(null, credentialBenefits.getIdDidiReceptor());
         Assertions.assertEquals(CredentialStatesCodes.PENDING_DIDI.getCode(), credentialBenefits.getCredentialState().getStateName());
@@ -468,7 +462,7 @@ public class CredentialServiceTest {
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
         //credential benefits
-        when(credentialBenefitsRepository.findByDniBeneficiary(anyLong())).thenReturn(getCredentialBenefitMock());
+        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(getCredentialBenefitMock());
 
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
@@ -484,7 +478,7 @@ public class CredentialServiceTest {
 
         Assertions.assertEquals(true, savedLoan.getHasCredential());
         Assertions.assertEquals(loan.getIdBondareaLoan(), creditSaved.getIdBondareaCredit());
-        Assertions.assertEquals(loan.getDniPerson(), creditSaved.getDniBeneficiary());
+        Assertions.assertEquals(loan.getDniPerson(), creditSaved.getBeneficiaryDni());
         Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), creditSaved.getCredentialState().getStateName());
         Assertions.assertEquals(0, creditSaved.getAmountExpiredCycles());
         Assertions.assertEquals(loan.getCreationDate(), creditSaved.getCreationDate());

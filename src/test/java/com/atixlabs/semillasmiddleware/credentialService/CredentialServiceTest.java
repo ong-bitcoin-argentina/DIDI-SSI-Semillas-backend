@@ -39,7 +39,6 @@ import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -431,10 +430,10 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(any(Long.class))).thenReturn(Optional.of(new Person()));
         when(personRepository.save(any(Person.class))).thenReturn(createPersonMock());
 
-        when(credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialState(
+        when(credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
                 anyLong(),//beneficiaryDni,
                 anyString(),//credentialCategoryCode,
-                any(CredentialState.class)//credentialStateActive
+                any(ArrayList.class)//credentialStateActive
         )).thenReturn(Optional.of(credentialsFilteredActiveMock().get(1)));
 
         log.info(credentialsFilteredActiveMock().get(1).toString());

@@ -25,7 +25,6 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -135,15 +134,17 @@ public class CredentialService {
     }
 
     private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult) {
-        CredentialState credentialStateActive = null;
-        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-        if (credentialStateOptional.isPresent())
-            credentialStateActive = credentialStateOptional.get();
 
-        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialState(
+        ArrayList<String> statesCodesToFind = new ArrayList<>();
+        statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
+        statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+
+        ArrayList<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
+
+        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
                 beneficiaryDni,
                 credentialCategoryCode,
-                credentialStateActive
+                credentialStateActivePending
         );
         if (credentialOptional.isEmpty())
             return false;
@@ -151,8 +152,8 @@ public class CredentialService {
             processExcelFileResult.addRowError(
                     "Warning CREDENCIAL DUPLICADA",
                     "Ya existe una credencial de tipo " + credentialCategoryCode +
-                            " en estado ACTIVO" +
-                            " para el DNI " + beneficiaryDni + " para continuar debe revocarlas manualmente"
+                            " en estado " + credentialOptional.get().getCredentialState().getStateName()+
+                            " para el DNI " + beneficiaryDni + " si desea continuar debe revocarlas manualmente"
             );
         return true;
     }

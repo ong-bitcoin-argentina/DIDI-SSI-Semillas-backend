@@ -37,6 +37,7 @@ public class BondareaController {
         // idAccount not null!!
         try {
             //loans = bondareaService.getLoans("12345", "55"); //loanState 60 -> se consulta con segunda api
+            //loansDto = bondareaService.getLoansMock("","");
             loansDto = bondareaService.getLoansMockSecond("","");
             List<Loan> loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);

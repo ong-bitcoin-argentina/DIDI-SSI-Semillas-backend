@@ -9,30 +9,24 @@ INSERT INTO public.credential_state(id, state_name) VALUES (
 
 
 INSERT INTO public.person (
-id, birth_date, document_number, name) VALUES (
-'1'::bigint, '1999-04-21'::date, '454645687'::bigint, 'Jorge Perez'::character varying(255));
+id, birth_date, document_number, first_name, last_name) VALUES (
+'1'::bigint, '1999-04-21'::date, '454645687'::bigint, 'Jorge'::character varying(255), 'Gómez}'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number,  name) VALUES (
-'2'::bigint, '1999-04-21'::date, '456456455'::bigint, 'Tomas Gipson'::character varying(255));
+id, birth_date, document_number,  first_name, last_name) VALUES (
+'2'::bigint, '1999-04-21'::date, '456456455'::bigint, 'Tomas'::character varying(255), 'Gipson'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number,  name) VALUES (
-'3'::bigint, '1999-05-25'::date, '547547547'::bigint, 'Rodolfo Rodriguez'::character varying(255));
+id, birth_date, document_number,  first_name, last_name) VALUES (
+'3'::bigint, '1999-05-25'::date, '547547547'::bigint, 'Rodolfo'::character varying(255), 'Rodriguez'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number, name) VALUES (
-'4'::bigint, '1999-05-25'::date, '54754754'::bigint, 'Rodolfo Rodriguez Jr'::character varying(255));
+id, birth_date, document_number, first_name, last_name) VALUES (
+'4'::bigint, '1999-05-25'::date, '54754754'::bigint, 'Rodolfo'::character varying(255), 'Rodriguez Jr'::character varying(255));
 
 INSERT INTO public.person (
-id, birth_date, document_number, name) VALUES (
-'4'::bigint, '1999-05-25'::date, '123456'::bigint, 'Rodolfo Rodriguez Jr'::character varying(255));
-
-INSERT INTO public.person (
-birth_date, document_number, name, id) VALUES (
-'1999-05-26'::date, '1234567'::bigint, 'Alberto Misiones'::character varying(255), '6'::bigint)
- returning id;
-
+id, birth_date, document_number, first_name, last_name) VALUES (
+'5'::bigint, '1999-05-25'::date, '123456'::bigint, 'Rodolfo'::character varying(255), 'Rodriguez Jr'::character varying(255));
 
 
 

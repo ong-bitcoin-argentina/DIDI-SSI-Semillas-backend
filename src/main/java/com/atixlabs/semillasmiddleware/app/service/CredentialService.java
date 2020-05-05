@@ -224,7 +224,7 @@ public class CredentialService {
         credential.setBeneficiaryName(creditHolder.getFirstName() + " " + creditHolder.getLastName());
 
         //credential.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_BONDAREA.getCode());
-        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         credentialStateOptional.ifPresent(credential::setCredentialState);
     }
 
@@ -377,8 +377,8 @@ public class CredentialService {
         }
 
         //This depends of the type of loan from bondarea
-        credentialCredit.setCredentialDescription("type");
-        credentialCredit.setCredentialCategory("type ");// TODO this column will be no longer useful
+        credentialCredit.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
+        credentialCredit.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());// TODO this column will be no longer useful
 
         return credentialCredit;
     }
@@ -412,9 +412,11 @@ public class CredentialService {
             //Person is holder or family
             if (personType.equals(PersonTypesCodes.HOLDER)) {
                 benefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
+                benefits.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
                 benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
             } else {
                 benefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
+                benefits.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
                 benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
             }
 
@@ -560,11 +562,16 @@ public class CredentialService {
      * @return
      */
     private BigDecimal sumExpiredAmount(List<CredentialCredit> group){
+
         BigDecimal amountExpired = BigDecimal.ZERO;
 
         for (CredentialCredit credit: group) {
-            amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
+            log.info("sumExpiredAmount: credit: "+credit.getExpiredAmount());
+            amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
+            //todo: parece que hubiera que asignar el resultado de la suma a una variable.
         }
+
+        log.info("sumExpiredAmount: sum: "+amountExpired.toString());
 
         return amountExpired;
     }

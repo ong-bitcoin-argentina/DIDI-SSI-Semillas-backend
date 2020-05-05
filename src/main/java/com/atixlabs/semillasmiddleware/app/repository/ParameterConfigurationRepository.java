@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
+import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -9,11 +10,6 @@ import java.util.List;
 import java.util.Optional;
 
 @Repository
-public interface CredentialCreditRepository extends JpaRepository<CredentialCredit, Long> {
+public interface ParameterConfigurationRepository extends JpaRepository<ParameterConfiguration, Long> {
 
-    Optional<CredentialCredit> findByIdBondareaCredit(String idBondarea);
-
-    Optional<CredentialCredit> findByIdBondareaCreditAndCredentialStateIn(String idBondarea, List<CredentialState> credentialStates);
-
-    List<CredentialCredit> findByIdGroup(String idGroup);
 }

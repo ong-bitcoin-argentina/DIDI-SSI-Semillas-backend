@@ -3,7 +3,11 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
@@ -78,20 +82,38 @@ public class CredentialController {
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.CREATED)
-    public void generateCredentialsCredit(){
+    public void generateCredentialsCredit() {
         List<Loan> newLoans = loanService.findLoansWithoutCredential();
 
-        for (Loan loan: newLoans) {
+        for (Loan newLoan : newLoans) {
             try {
-                credentialService.createNewCreditCredentials(loan);
-            }
-            catch (Exception ex){
+                credentialService.createNewCreditCredentials(newLoan);
 
+            } catch (PersonDoesNotExists ex) {
+                log.error(ex.getMessage());
+            }
+        }
+
+            List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
+            //if loan has been modified after the credential credit
+            for (Loan loan : loansWithCredentials) {
+                CredentialCredit creditToUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+                if (creditToUpdate != null) {
+                    try {
+                        credentialService.updateCredentialCredit(loan, creditToUpdate);
+                    } catch (NoExpiredConfigurationExists ex) {
+                        log.error(ex.getMessage());
+                    } catch (PersonDoesNotExists ex) {
+                        log.error(ex.getMessage());
+                    }
+                    catch (Exception ex){
+                        log.error(ex.getMessage());
+                    }
+                }
             }
         }
 
 
+
+
     }
-
-
-}

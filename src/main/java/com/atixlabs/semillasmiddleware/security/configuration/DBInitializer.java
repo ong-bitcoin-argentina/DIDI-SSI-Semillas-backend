@@ -1,8 +1,10 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
+import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
+import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.atixlabs.semillasmiddleware.security.repository.PermissionRepository;
@@ -13,6 +15,7 @@ import com.atixlabs.semillasmiddleware.security.service.RoleService;
 import com.atixlabs.semillasmiddleware.security.service.UserService;
 import com.google.common.collect.Sets;
 
+import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -34,13 +37,16 @@ public class DBInitializer implements CommandLineRunner {
 
     private CredentialStateRepository credentialStateRepository;
 
+    private ParameterConfigurationRepository parameterConfigurationRepository;
+
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository) {
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
         this.menuRepository = menuRepository;
         this.credentialStateRepository = credentialStateRepository;
+        this.parameterConfigurationRepository = parameterConfigurationRepository;
     }
 
     @Override
@@ -167,17 +173,31 @@ public class DBInitializer implements CommandLineRunner {
             menu.get().setName("My account");
             menuRepository.save(menu.get());
         }
-        menu = menuRepository.findByCode("VIEW_PROFILE");
-        if (menu.isPresent()) {
+
+        if (menuRepository.findByCode("VIEW_PROFILE").isPresent()) {
             menuRepository.save(menu.get());
         }
 
+        //Credential States
         Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-        if (credentialStateOptional.isEmpty()){
+        if (credentialStateOptional.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
+        }
+        Optional<CredentialState> credentialStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+        if (credentialStateRevoke.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
         }
 
+        Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        if (credentialStatePending.isEmpty()) {
+            credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));
+        }
+
+        if(!parameterConfigurationRepository.findById(1L).isPresent()){
+            ParameterConfiguration configuration = new ParameterConfiguration();
+            configuration.setExpiredAmountMax((float) 10250);
+            parameterConfigurationRepository.save(configuration);
+        }
 
     }
 }

@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,7 +37,8 @@ public class CredentialCredit extends Credential {
 
     private String creditState;
 
-    private Double amount; //TODO revisar el tipo para monto. Para dinero deberiamos usar BigDecimal
+    private LocalDate finalizedTime;
+
     private Float expiredAmount; //TODO ? can have money in favour
 
 }

@@ -7,7 +7,6 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
 
 @Getter
 @Setter
@@ -16,6 +15,5 @@ import javax.persistence.Transient;
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialBenefits extends Credential{
 
-    private String beneficiaryType; //TODo titular / familiar -> para fill se consigue por parentezco
-
+    private String beneficiaryType;
 }

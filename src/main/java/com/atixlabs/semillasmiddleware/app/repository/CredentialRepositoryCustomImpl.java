@@ -42,9 +42,11 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
             predicates.add(cb.equal(credential.get("credentialDescription"), credentialType));
         }
 
-        if (name != null) {
-            predicates.add(cb.like(cb.lower(beneficiary.get("name")), "%"+name.toLowerCase()+"%"));
+        if(name != null) {
+            predicates.add(cb.or((cb.like(cb.lower(beneficiary.get("firstName")), "%" + name.toLowerCase() + "%")),
+                    (cb.like(cb.lower(beneficiary.get("lastName")), "%" + name.toLowerCase() + "%"))));
         }
+
 
         if (dniBeneficiary != null) {
             predicates.add(cb.like(beneficiary.get("documentNumber").as(String.class), dniBeneficiary+"%"));

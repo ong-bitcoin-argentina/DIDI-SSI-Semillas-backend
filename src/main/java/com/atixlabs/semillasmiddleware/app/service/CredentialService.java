@@ -562,11 +562,16 @@ public class CredentialService {
      * @return
      */
     private BigDecimal sumExpiredAmount(List<CredentialCredit> group){
+
         BigDecimal amountExpired = BigDecimal.ZERO;
 
         for (CredentialCredit credit: group) {
-            amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
+            log.info("sumExpiredAmount: credit: "+credit.getExpiredAmount());
+            amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
+            //todo: parece que hubiera que asignar el resultado de la suma a una variable.
         }
+
+        log.info("sumExpiredAmount: sum: "+amountExpired.toString());
 
         return amountExpired;
     }

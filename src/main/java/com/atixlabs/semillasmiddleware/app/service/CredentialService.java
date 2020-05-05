@@ -97,7 +97,7 @@ public class CredentialService {
 
         //2-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
-        Person creditHolder = getPersonFromPersonCategory(creditHolderPersonCategory);
+        Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
 
         //2-verify each person is new, or his data has not changed.
         boolean allCredentialsNewOrInactive = true;
@@ -108,7 +108,7 @@ public class CredentialService {
                 case CHILD_CATEGORY_NAME:
                 case KINSMAN_CATEGORY_NAME:
                     PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
-                    Person beneficiary = getPersonFromPersonCategory(beneficiaryPersonCategory);
+                    Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
                     if (isCredentialAlreadyExistent(beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
@@ -151,7 +151,7 @@ public class CredentialService {
     private void saveAllCredentialsFromForm(SurveyForm surveyForm) {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
-        Person creditHolder = getPersonFromPersonCategory(creditHolderPersonCategory);
+        Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
 
         //1-get all data from form
         ArrayList<Category> categoryArrayList = surveyForm.getAllCompletedCategories();
@@ -188,27 +188,11 @@ public class CredentialService {
         return credentials;
     }
 
-    private Person getPersonFromPersonCategory(PersonCategory personCategory) {
-        Person person = new Person();
-        person.setDocumentNumber(personCategory.getIdNumber());
-        person.setFirstName(personCategory.getName());
-        person.setLastName(personCategory.getSurname());
-        person.setBirthDate(personCategory.getBirthDate());
-        return person;
-    }
-
-    private boolean arePersonEquals(Person person1, Person person2) {
-        return person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&
-                person1.getFirstName().equals(person2.getFirstName()) &&
-                person1.getLastName().equals(person2.getLastName()) &&
-                person1.getBirthDate().isEqual(person2.getBirthDate());
-    }
-
     private Person savePersonIfNew(Person person) {
         Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
         if (personOptional.isEmpty())
             return personRepository.save(person);
-        if (!arePersonEquals(person, personOptional.get())) {
+        if (!(person.equalsIgnoreId(person, personOptional.get()))) {
             person.setId(personOptional.get().getId());
             return personRepository.save(person);
         }
@@ -236,7 +220,7 @@ public class CredentialService {
 
     private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder) {
         PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
-        Person beneficiary = getPersonFromPersonCategory(beneficiaryPersonCategory);
+        Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
         beneficiary = savePersonIfNew(beneficiary);
 
         CredentialIdentity credentialIdentity = new CredentialIdentity();
@@ -296,38 +280,6 @@ public class CredentialService {
         return credentialDwelling;
     }
 
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
-            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, String
-                                                    credentialStatus) {
-        List<Credential> credentials;
-        try {
-            credentials = credentialRepository.findCredentialsWithFilter(
-                    credentialType,
-                    name,
-                    dniBeneficiary,
-                    idDidiCredential,
-                    dateOfExpiry,
-                    dateOfIssue,
-                    credentialState
-            );
-        } catch (Exception e) {
-            log.info("There has been an error searching for credentials " + e);
-            return Collections.emptyList();
-        }
-        return credentials;
-    }
-
-
-    public void saveCredentialCreditMock() {
-        CredentialCredit credentialCredit = new CredentialCredit();
-        credentialCredit.setIdGroup("1111BBB");
-        credentialCredit.setAmount(1d);
-        credentialCredit.setCurrentCycle("Cycle");
-        credentialCredit.setCreditState("state");
-        credentialCredit.setCreditHolderDni(29302594L);
-        credentialCreditRepository.save(credentialCredit);
-    }
-
     public void createNewCreditCredentials(Loan loan) throws Exception {
         //beneficiarieSSSS -> the credit group will be created by separate (not together)
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
@@ -353,8 +305,7 @@ public class CredentialService {
         }
     }
 
-
-    private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary) {
+    private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
         log.info("Creating credit credential");
 
         CredentialCredit credentialCredit = new CredentialCredit();
@@ -378,10 +329,6 @@ public class CredentialService {
         credentialCredit.setCreditHolder(beneficiary);
         credentialCredit.setCreditHolderName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
         //End creditHolder changes(Dario)
-
-
-
-
 
 
 
@@ -414,7 +361,6 @@ public class CredentialService {
         credentialCredit.setCredentialCategory("type ");
 
         return credentialCredit;
-
     }
 
     //now is used only for holders, can be easily changed adding param
@@ -484,5 +430,6 @@ public class CredentialService {
 
         return benefits;
     }
+
 
 }

@@ -30,6 +30,27 @@ public class Person {
 
     private LocalDate birthDate;
 
+    @OneToMany
+    private List<DIDHisotoric> DIDIsHisotoric;
+
+
+    //TODO user this
+    public boolean equalsIgnoreId(Person person1, Person person2) {
+        return person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&
+                person1.getFirstName().equals(person2.getFirstName()) &&
+                person1.getLastName().equals(person2.getLastName()) &&
+                person1.getBirthDate().isEqual(person2.getBirthDate());
+    }
+
+    //TODO review (delete static and use this)
+    public static Person getPersonFromPersonCategory(PersonCategory personCategory) {
+        Person person = new Person();
+        person.setDocumentNumber(personCategory.getIdNumber());
+        person.setFirstName(personCategory.getName());
+        person.setLastName(personCategory.getSurname());
+        person.setBirthDate(personCategory.getBirthDate());
+        return person;
+    }
 
 
     /*
@@ -37,9 +58,9 @@ public class Person {
     @OneToMany
     private List<Credential> credentials;
 
-    @OneToMany
-    private List<DIDHisotoric> DIDIsHisotoric;
+*/
 
+/*
 
     @OneToMany
     private List<Application> applications;

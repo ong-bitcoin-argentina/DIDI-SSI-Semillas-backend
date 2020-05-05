@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
@@ -7,6 +8,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
+import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
@@ -16,20 +18,22 @@ import java.util.stream.Collectors;
 
 @Slf4j
 @Getter
+@Setter
 public class PersonCategory implements Category {
 
-    String categoryOriginalName;
+    String categoryUniqueName;
+    private Categories categoryName;
 
-    AnswerDto name;
-    AnswerDto surname;
-    AnswerDto idType;
-    AnswerDto idNumber;
-    AnswerDto gender;
-    AnswerDto birthDate;
-    AnswerDto relation;
-    PersonType personType;
+    private AnswerDto name;
+    private AnswerDto surname;
+    private AnswerDto idType;
+    private AnswerDto idNumber;
+    private AnswerDto gender;
+    private AnswerDto birthDate;
+    private AnswerDto relation;
+    private PersonType personType;
 
-    public PersonCategory(String categoryOriginalName){
+    public PersonCategory(String categoryUniqueName){
         this.name = new AnswerDto(PersonQuestion.NAME);
         this.surname = new AnswerDto(PersonQuestion.SURNAME);
         this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
@@ -38,14 +42,16 @@ public class PersonCategory implements Category {
         this.birthDate = new AnswerDto(PersonQuestion.BIRTHDATE);
         this.relation = new AnswerDto(PersonQuestion.RELATION);
 
-        this.categoryOriginalName = categoryOriginalName;
+        this.categoryUniqueName = categoryUniqueName;
+        this.categoryName = Categories.BENEFICIARY_CATEGORY_NAME;//TODO:CREAR TIPO PERSONA O RESOLVER AGRUPACION
 
-        String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryOriginalName.replaceAll("DATOS|DEL","")));
+        String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryUniqueName.replaceAll("DATOS|DEL","")));
 
         try{
             this.personType = PersonType.get(personTypeString);
         } catch (IllegalArgumentException e) {
             e.printStackTrace();
+            log.error("ERROR AL INTENTAR OBTENER EL TIPO DE PERSONA: "+e.getMessage());
         }
     }
 
@@ -82,16 +88,13 @@ public class PersonCategory implements Category {
         }
     }
 
-
     @Override
-    public Category getData() {
-        return this;
+    public String getCategoryUniqueName(){
+        return categoryUniqueName;
     }
 
     @Override
-    public String getCategoryOriginalName(){
-        return categoryOriginalName;
-    }
+    public Categories getCategoryName(){return categoryName;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
@@ -103,7 +106,7 @@ public class PersonCategory implements Category {
         answers.add(this.birthDate);
         answers.add(this.relation);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryUniqueName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 
@@ -157,7 +160,7 @@ public class PersonCategory implements Category {
     @Override
     public String toString() {
         return "PersonCategory{" +
-                "categoryOriginalName='" + categoryOriginalName + '\'' +
+                "categoryOriginalName='" + categoryUniqueName + '\'' +
                 ", name=" + name +
                 ", surname=" + surname +
                 ", idType=" + idType +

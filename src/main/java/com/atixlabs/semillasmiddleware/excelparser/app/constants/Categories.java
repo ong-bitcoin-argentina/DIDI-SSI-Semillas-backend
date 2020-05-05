@@ -17,6 +17,8 @@ import java.util.stream.Collectors;
  * getLinkedClass() if not Overridden will return PersonCategory.class
  */
 
+//Person AGRUPA BENEFICIARY/SPOUSE/CHILD/RELATIVE
+//PERSON_CATEGORY_NAME("PERSONA"),
 public enum Categories {
     BENEFICIARY_CATEGORY_NAME("DATOS DEL BENEFICIARIO"),
     SPOUSE_CATEGORY_NAME("DATOS DEL CONYUGE"),

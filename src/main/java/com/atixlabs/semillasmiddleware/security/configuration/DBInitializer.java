@@ -177,5 +177,7 @@ public class DBInitializer implements CommandLineRunner {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
         }
+
+
     }
 }

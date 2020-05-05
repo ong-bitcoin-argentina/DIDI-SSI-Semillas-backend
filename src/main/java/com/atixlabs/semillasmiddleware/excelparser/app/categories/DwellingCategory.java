@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.DwellingQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
@@ -13,6 +14,7 @@ import java.util.stream.Collectors;
 public class DwellingCategory implements Category {
 
     String categoryOriginalName;
+    private Categories categoryName = Categories.DWELLING_CATEGORY_NAME;
 
     AnswerDto dwellingType;
     AnswerDto holdingType;
@@ -47,14 +49,12 @@ public class DwellingCategory implements Category {
     }
 
     @Override
-    public Category getData() {
-        return this;
+    public  String getCategoryUniqueName(){
+        return categoryOriginalName;
     }
 
     @Override
-    public  String getCategoryOriginalName(){
-        return categoryOriginalName;
-    }
+    public Categories getCategoryName(){return categoryName;}
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {

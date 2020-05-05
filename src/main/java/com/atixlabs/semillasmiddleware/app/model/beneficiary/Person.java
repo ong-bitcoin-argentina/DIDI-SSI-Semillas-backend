@@ -4,10 +4,7 @@ import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -28,42 +25,46 @@ public class Person {
     @Column(unique = true)
     private Long documentNumber;
 
-    private String name;
+    private String firstName;
+    private String lastName;
 
     private LocalDate birthDate;
-    
-    @JoinColumn(name = "ID_CREDENTIAL")
-    @OneToMany
-    private List<Credential> credentials;
 
     @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
 
-    //Si es titular, no sera un pariente. Si es un pariente tendra en Kinship su titual asociado.
-    @OneToOne
-     private Kinship Kinship;
+    //TODO user this
+    public boolean equalsIgnoreId(Person person1, Person person2) {
+        return person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&
+                person1.getFirstName().equals(person2.getFirstName()) &&
+                person1.getLastName().equals(person2.getLastName()) &&
+                person1.getBirthDate().isEqual(person2.getBirthDate());
+    }
+
+    //TODO review (delete static and use this)
+    public static Person getPersonFromPersonCategory(PersonCategory personCategory) {
+        Person person = new Person();
+        person.setDocumentNumber(personCategory.getIdNumber());
+        person.setFirstName(personCategory.getName());
+        person.setLastName(personCategory.getSurname());
+        person.setBirthDate(personCategory.getBirthDate());
+        return person;
+    }
+
+
+    /*
+    @JoinColumn(name = "ID_CREDENTIAL")
+    @OneToMany
+    private List<Credential> credentials;
+
+*/
+
+/*
 
     @OneToMany
     private List<Application> applications;
-
-    public Person(PersonCategory personCategory){
-        this.setName(personCategory.getName()+" "+ personCategory.getSurname());
-        this.setDocumentNumber(personCategory.getIdNumber());
-        this.setBirthDate(personCategory.getBirthDate());
-    }
-
-
-    @Override
-    public String toString() {
-        return "Person{" +
-                "id=" + id +
-                ", documentNumber=" + documentNumber +
-                ", name='" + name + '\'' +
-                ", birthDate=" + birthDate +
-                ", credentials=" + credentials +
-                '}';
-    }
+*/
 
 
     /*

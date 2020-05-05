@@ -3,11 +3,13 @@ package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 public enum CredentialCategoriesCodes {
 
     FINANCE("Finanzas"),
-    IDENTITY("Identidad"),
     LABOR("Laboral"),
+    EDUCATION("Educación"),
+    IDENTITY("Identidad"),
+    ENTREPRENEURSHIP("Emprendimiento"),
     DWELLING("Vivienda"),
-    BENEFIT("Beneficio Semillas"),
-    EDUCATION("Educación");
+    BENEFIT("Beneficio Semillas");
+
 
     private String code;
 

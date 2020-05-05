@@ -1,19 +1,13 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
-import ch.qos.logback.core.joran.action.IADataForComplexProperty;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
-import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.stereotype.Component;
 
-import javax.naming.ldap.PagedResultsControl;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
@@ -73,12 +67,12 @@ public class SurveyForm {
     }
 
     public void setCategoryData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
-        Category category = this.getCategoryFromForm(answerRow.getCategory(), processExcelFileResult);
+        Category category = this.getCategoryByUniqueName(answerRow.getCategory(), processExcelFileResult);
         if (category != null)
             category.loadData(answerRow, processExcelFileResult);
     }
 
-    public Category getCategoryFromForm(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
+    public Category getCategoryByUniqueName(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
 
         if (categoryToFind == null)
             return null;
@@ -86,7 +80,7 @@ public class SurveyForm {
         categoryToFind = StringUtil.toUpperCaseTrimAndRemoveAccents(categoryToFind);
 
         for (Category value : categoryList) {
-            if (value.getCategoryOriginalName().equals(categoryToFind))
+            if (value.getCategoryUniqueName().equals(categoryToFind))
                 return value;
         }
         if (processExcelFileResult!=null)
@@ -117,9 +111,19 @@ public class SurveyForm {
                 else
                     msg = "Completed OK";
             }
-            log.info("SurveyForm -> isValid: " + category.getCategoryOriginalName() + " "+msg);
+            log.info("SurveyForm -> isValid: " + category.getCategoryUniqueName() + " "+msg);
         }
-
         return allValid;
     }
+
+    public ArrayList<Category> getAllCompletedCategories() {
+        ArrayList<Category> classArrayList = new ArrayList<>();
+
+        for (Category category : categoryList) {
+            if (!category.isEmpty())
+                classArrayList.add(category);
+        }
+        return classArrayList;
+    }
+
 }

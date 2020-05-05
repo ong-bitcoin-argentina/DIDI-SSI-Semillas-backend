@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Slf4j
+@ToString
 public class CredentialDto {
 
     private Long id;
@@ -56,28 +57,12 @@ public class CredentialDto {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiCredential();
         this.dateOfIssue = credential.getDateOfIssue();
-        //this.dateOfExpiry = credential.getDateOfExpiry();
-        this.name = credential.getBeneficiary().getName();
-        this.dniBeneficiary = credential.getBeneficiary().getDocumentNumber();
+        this.dateOfExpiry = credential.getDateOfRevocation();
+        this.name = credential.getCreditHolder().getFirstName();
+        this.dniBeneficiary = credential.getCreditHolder().getDocumentNumber();
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();
         this.credentialType = credential.getCredentialDescription();
     }
 
-
-    @Override
-    public String toString() {
-        return "CredentialDto{" +
-                "id=" + id +
-                ", idDidiCredential=" + idDidiCredential +
-                ", dateOfIssue=" + dateOfIssue +
-                ", dateOfExpiry=" + dateOfExpiry +
-                ", name='" + name + '\'' +
-                ", dniBeneficiary=" + dniBeneficiary +
-                ", credentialState='" + credentialState + '\'' +
-                ", lastUpdate=" + lastUpdate +
-                ", credentialType='" + credentialType + '\'' +
-                ", credentialStatus='" + credentialStatus + '\'' +
-                '}';
-    }
 }

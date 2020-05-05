@@ -1,10 +1,8 @@
 package com.atixlabs.semillasmiddleware.parser;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
@@ -155,8 +153,8 @@ public class ParserCategoriesTest {
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
         Assert.assertEquals(
-                surveyForm.getCategoryFromForm("Emprendimiento", null),
-                surveyForm.getCategoryFromForm("EMPRENDIMIENTO", null)
+                surveyForm.getCategoryByUniqueName("Emprendimiento", null),
+                surveyForm.getCategoryByUniqueName("EMPRENDIMIENTO", null)
         );
 
     }
@@ -166,7 +164,7 @@ public class ParserCategoriesTest {
         //answerCategoryFactory.get("non-existent category");
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
-        Assert.assertNull(surveyForm.getCategoryFromForm("non-existent-category", null));
+        Assert.assertNull(surveyForm.getCategoryByUniqueName("non-existent-category", null));
     }
 
     @Test
@@ -176,10 +174,10 @@ public class ParserCategoriesTest {
 
 
 
-        PersonCategory child = (PersonCategory) surveyForm.getCategoryFromForm("datos hijo 1", null);
+        PersonCategory child = (PersonCategory) surveyForm.getCategoryByUniqueName("datos hijo 1", null);
         Assert.assertEquals(child.getPersonType(), PersonType.CHILD);
 
-        PersonCategory spouse = (PersonCategory) surveyForm.getCategoryFromForm("DATOS DEL CÓNYUGE", null);
+        PersonCategory spouse = (PersonCategory) surveyForm.getCategoryByUniqueName("DATOS DEL CÓNYUGE", null);
         Assert.assertEquals(spouse.getPersonType(), PersonType.SPOUSE);
     }
 
@@ -240,8 +238,8 @@ public class ParserCategoriesTest {
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
         Assert.assertNotEquals(
-                surveyForm.getCategoryFromForm("DATOS HIJO 2", null),
-                surveyForm.getCategoryFromForm("DATOS HIJO 11", null)
+                surveyForm.getCategoryByUniqueName("DATOS HIJO 2", null),
+                surveyForm.getCategoryByUniqueName("DATOS HIJO 11", null)
         );
 
     }

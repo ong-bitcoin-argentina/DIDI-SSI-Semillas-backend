@@ -7,8 +7,7 @@ import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -21,7 +20,7 @@ public class CredentialEntrepreneurship extends Credential {
     private String entrepreneurshipType; //TODO enum or new class?
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDateTime startActivity;
+    private LocalDate startActivity;
 
     private String mainActivity;
 
@@ -29,10 +28,6 @@ public class CredentialEntrepreneurship extends Credential {
 
     private String entrepreneurshipAddress;
 
-    //TODO
-    // private String creditState; //TODO is into super class?? Este campo estaria en creditState, asociada el beneficiary
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDateTime endActivity;
-
+    private LocalDate endActivity;
 }

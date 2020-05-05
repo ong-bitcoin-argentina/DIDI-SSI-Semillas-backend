@@ -113,12 +113,15 @@ public class BondareaService {
 
 
     /**
-     * MOCK PURPOSE
+     * MOCK PURPOSE:
+     * Synchronize new loans mock. It can be used to create loans for the 1st time.
+     * Then to test the creation of credit credential and benefits credentials
+     *
      * @param idAccount
      * @param loanState
      * @return
      */
-    public List<BondareaLoanDto> getMockLoans(String idAccount, String loanState){
+    public List<BondareaLoanDto> getLoansMock(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         BondareaLoanDto loan = getMockBondareaLoan();
@@ -140,12 +143,14 @@ public class BondareaService {
     }
 
     /**
-     * MOCK PURPOSE
+     * MOCK PURPOSE:
+     * Synchronize loans. This is used the 2nd time to update the loans that have already been saved.
+     *
      * @param idAccount
      * @param loanState
      * @return
      */
-    public List<BondareaLoanDto> secondLoansDataAllNew(String idAccount, String loanState){
+    public List<BondareaLoanDto> getLoansMockSecond(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         //id 1 is deleted
@@ -175,6 +180,14 @@ public class BondareaService {
         return loans;
     }
 
+    /**
+     * Productive Version !
+     *
+     * @param idAccount
+     * @param loanState
+     * @return
+     * @throws Exception
+     */
     public List<BondareaLoanDto> getLoans(String idAccount, String loanState) throws Exception {
 
         initializeBondareaApi();
@@ -249,6 +262,8 @@ public class BondareaService {
             existingLoan.setPending(true);
             loanRepository.save(existingLoan);
         }
+
+        log.info("Synchronize Ended Successfully");
 
     }
 

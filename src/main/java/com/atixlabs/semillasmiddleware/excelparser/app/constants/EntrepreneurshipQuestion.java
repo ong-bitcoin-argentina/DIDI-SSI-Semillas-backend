@@ -37,7 +37,7 @@ public enum EntrepreneurshipQuestion implements CategoryQuestion {
         this.questionName = questionName;
     }
 
-    public static EntrepreneurshipQuestion get(String questionName){
+    public static EntrepreneurshipQuestion getEnumByStringValue(String questionName){
         return questionsMap.get(questionName);
     }
 

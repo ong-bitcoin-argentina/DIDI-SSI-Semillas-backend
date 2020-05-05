@@ -46,7 +46,7 @@ public class Loan extends AuditableEntity {
 
     private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 
-    private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes)
+    private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes) //TODO credit type
 
     private String statusDescription; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
 

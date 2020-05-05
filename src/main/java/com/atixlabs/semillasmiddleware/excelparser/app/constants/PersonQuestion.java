@@ -37,7 +37,7 @@ public enum PersonQuestion implements CategoryQuestion {
         this.questionName = questionName;
     }
 
-    public static PersonQuestion get(String questionName) {
+    public static PersonQuestion getEnumByStringValue(String questionName) {
         return questionsMap.get(questionName);
     }
 

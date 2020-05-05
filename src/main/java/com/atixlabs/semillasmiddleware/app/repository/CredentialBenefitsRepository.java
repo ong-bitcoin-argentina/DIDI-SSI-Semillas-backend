@@ -12,10 +12,9 @@ import java.util.Optional;
 @Repository
 public interface CredentialBenefitsRepository extends JpaRepository<CredentialBenefits, Long> {
 
-    List<CredentialBenefits> findByDniBeneficiaryAndCredentialState(Long dni, CredentialState state);
+    List<CredentialBenefits> findByBeneficiaryDniAndCredentialState(Long dni, CredentialState state);
 
-    List<CredentialBenefits> findByDniBeneficiary(Long dni);
+    Optional<CredentialBenefits> findByBeneficiaryDniAndCredentialStateAndBeneficiaryType(Long dni, CredentialState state, String beneficiaryType);
 
-    Optional<CredentialBenefits> findByDniBeneficiaryAndCredentialStateAndBeneficiaryType(Long dni, CredentialState state, String beneficiaryType);
-
+    List<CredentialBenefits> findByBeneficiaryDni(Long dni);
 }

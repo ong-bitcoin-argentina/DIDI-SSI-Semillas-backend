@@ -37,10 +37,8 @@ public class CredentialCredit extends Credential {
 
     private String creditState;
 
-    private Float expiredAmount; //TODO ? can have money in favor ?
-
-    private Long dniBeneficiary;
-
     private LocalDate finalizedTime;
+
+    private Float expiredAmount; //TODO ? can have money in favour
 
 }

@@ -13,6 +13,7 @@ import java.time.LocalDateTime;
 @Getter
 @Setter
 @Slf4j
+@ToString
 public class CredentialDto {
 
     private Long id;
@@ -22,8 +23,8 @@ public class CredentialDto {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime dateOfIssue;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDateTime dateOfExpiry;
+    //@JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    //private LocalDateTime dateOfExpiry;
 
     private String name;
 
@@ -43,7 +44,7 @@ public class CredentialDto {
         this.id = id;
         this.idDidiCredential = idDidiCredential;
         this.dateOfIssue = dateOfIssue;
-        this.dateOfExpiry = dateOfExpiry;
+       // this.dateOfExpiry = dateOfExpiry;
         this.name = name;
         this.dniBeneficiary = dniBeneficiary;
         this.credentialState = creditState;
@@ -56,28 +57,12 @@ public class CredentialDto {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiCredential();
         this.dateOfIssue = credential.getDateOfIssue();
-        //this.dateOfExpiry = credential.getDateOfExpiry();
-        this.name = credential.getBeneficiary().getName();
-        this.dniBeneficiary = credential.getBeneficiary().getDocumentNumber();
+        //this.dateOfExpiry = credential.getDateOfRevocation();
+        this.name = credential.getBeneficiaryName();
+        this.dniBeneficiary = credential.getBeneficiaryDni();
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();
         this.credentialType = credential.getCredentialDescription();
     }
 
-
-    @Override
-    public String toString() {
-        return "CredentialDto{" +
-                "id=" + id +
-                ", idDidiCredential=" + idDidiCredential +
-                ", dateOfIssue=" + dateOfIssue +
-                ", dateOfExpiry=" + dateOfExpiry +
-                ", name='" + name + '\'' +
-                ", dniBeneficiary=" + dniBeneficiary +
-                ", credentialState='" + credentialState + '\'' +
-                ", lastUpdate=" + lastUpdate +
-                ", credentialType='" + credentialType + '\'' +
-                ", credentialStatus='" + credentialStatus + '\'' +
-                '}';
-    }
 }

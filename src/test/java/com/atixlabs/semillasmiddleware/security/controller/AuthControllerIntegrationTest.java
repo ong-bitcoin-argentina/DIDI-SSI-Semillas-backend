@@ -10,10 +10,7 @@ import io.restassured.RestAssured;
 import io.restassured.response.Response;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.http.HttpStatus;
-import org.junit.After;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -29,7 +26,7 @@ import static org.springframework.boot.test.context.SpringBootTest.WebEnvironmen
 @Slf4j
 public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
 
-   /* @Autowired
+   @Autowired
     private JwtTokenProvider jwtTokenProvider;
 
 
@@ -43,6 +40,7 @@ public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
     }
 
     @Test
+    @Ignore
     public void loginSuccessful() {
 
         Response response = login(JwtRequest.builder().username("admin@atixlabs.com").password("admin").build());
@@ -54,6 +52,7 @@ public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
     }
 
     @Test
+    @Ignore
     public void loginUnsuccessful() {
 
         login(JwtRequest.builder().username("invalid user").password("no pass").build())
@@ -72,6 +71,7 @@ public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
     }
 
     @Test
+    @Ignore
     public void logoutSuccesfull() {
 
         String token = loginAndGetToken(JwtRequest.builder().username("admin").password("password").build());
@@ -87,5 +87,5 @@ public class AuthControllerIntegrationTest extends BasicAuthIntegrationTest{
         Assert.assertFalse(response.getBody().equals(true));
 
 
-    } */
+    }
 }

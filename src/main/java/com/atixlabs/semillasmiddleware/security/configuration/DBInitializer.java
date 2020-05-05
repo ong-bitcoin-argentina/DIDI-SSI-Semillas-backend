@@ -187,6 +187,7 @@ public class DBInitializer implements CommandLineRunner {
         if (credentialStateRevoke.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
         }
+
         Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         if (credentialStatePending.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));

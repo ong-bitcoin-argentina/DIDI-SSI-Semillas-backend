@@ -13,8 +13,6 @@ import javax.persistence.*;
 @ToString
 public class CredentialState {
 
-    //LA DECISION DE QUE SEA UNA TABLA ES PORQUE SI EL DIA DE MAÑANA CAMBIA LA FORMA DE DECIRLE "VIGENTE" A UN ESTADO, NO PODRIAS MODIFICARLO EN CADA CREDENCIAL
-    // EN CAMBIO ASI, SIMPLEMENTE MODIFICAS EL NOMBRE QUE TIENE EN AL TABLA
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;

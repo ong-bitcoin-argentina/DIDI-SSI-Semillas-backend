@@ -16,8 +16,4 @@ import javax.persistence.PrimaryKeyJoinColumn;
 public class CredentialBenefits extends Credential{
 
     private String beneficiaryType;
-
-    private Long dniBeneficiary;
-
-
 }

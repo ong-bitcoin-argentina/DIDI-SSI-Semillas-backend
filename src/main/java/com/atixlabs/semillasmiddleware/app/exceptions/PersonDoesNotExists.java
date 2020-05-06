@@ -5,5 +5,7 @@ import lombok.Getter;
 @Getter
 public class PersonDoesNotExists extends Exception {
 
-  public PersonDoesNotExists(String s) {}
+  public PersonDoesNotExists(String s) {
+    super(s);
+  }
 }

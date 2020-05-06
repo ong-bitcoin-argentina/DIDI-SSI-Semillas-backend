@@ -35,6 +35,7 @@ public class BondareaService {
     public BondareaService (LoanRepository loanRepository){
         this.loanRepository = loanRepository;
     }
+
     @Value("${bondarea.base_url}")
     private String serviceURL;
 

@@ -135,11 +135,11 @@ public class CredentialService {
 
     private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult) {
 
-        ArrayList<String> statesCodesToFind = new ArrayList<>();
+        List<String> statesCodesToFind = new ArrayList<>();
         statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
         statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
 
-        ArrayList<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
+        List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
 
         Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
                 beneficiaryDni,
@@ -387,24 +387,22 @@ public class CredentialService {
 
     public void createNewBenefitsCredential(Person beneficiary, PersonTypesCodes personType) {
         log.info("Creating benefits credential");
-        List<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDni(beneficiary.getDocumentNumber());
-        //filter the active or pending benefits
-        List<CredentialBenefits> benefitsActiveOrPending = opBenefits.stream().filter(credentialBenefits -> (credentialBenefits.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()) || (credentialBenefits.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())))).collect(Collectors.toList());
-        //filter the exact benefits type
-        List<CredentialBenefits> benefitsTypeActiveOrPending = benefitsActiveOrPending.stream().filter(credentialBenefit -> credentialBenefit.getBeneficiaryType().equals(personType.getCode())).collect(Collectors.toList());
-        //create benefit if person does not have one or | do not have the type wanted to create. Or is not Active nor pending
-        if (benefitsTypeActiveOrPending.size() == 0) {
-            CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, personType);
+        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+        if (pendingAndActiveState.size() == 2) {
+            Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(beneficiary.getDocumentNumber(), pendingAndActiveState, personType.getCode());
+            //create benefit if person does not have one or | do not have the type wanted to create. Or is not Active nor pending
+            if (opBenefits.isEmpty()) {
+                CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, personType);
 
-            //get the new id and save it on id historic
-            benefits = credentialBenefitsRepository.save(benefits);
-            benefits.setIdHistorical(benefits.getId());
-            credentialBenefitsRepository.save(benefits);
-        } else {
-            log.info("Person with dni " + beneficiary.getDocumentNumber() + " already has a credential benefits");
+                //get the new id and save it on id historic
+                benefits = credentialBenefitsRepository.save(benefits);
+                benefits.setIdHistorical(benefits.getId());
+                credentialBenefitsRepository.save(benefits);
+            } else {
+                log.info("Person with dni " + beneficiary.getDocumentNumber() + " already has a credential benefits");
+            }
         }
     }
-
 
 
     public CredentialBenefits buildBenefitsCredential(Person beneficiary, PersonTypesCodes personType){
@@ -440,6 +438,7 @@ public class CredentialService {
 
             Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
             if (opActiveDid.isPresent()) {
+                //set did and credential to active
                 benefits.setIdDidiReceptor(opActiveDid.get().getIdDidiReceptor());
                 benefits.setIdDidiCredential(opActiveDid.get().getIdDidiReceptor());
                 Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
@@ -461,28 +460,24 @@ public class CredentialService {
      * @param loan
      * @return the credit or null
      */
-    public CredentialCredit validateCredentialCreditToUpdate(Loan loan){
-        Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-        Optional<CredentialState> opStatePending = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-        if(opStateActive.isPresent() && opStatePending.isPresent()) {
-            Optional<CredentialCredit> opCredit = credentialCreditRepository.findByIdBondareaCreditAndCredentialStateIn(loan.getIdBondareaLoan(), List.of(opStateActive.get(), opStatePending.get()));
-            if (opCredit.isPresent()) {
-                CredentialCredit credit = opCredit.get();
-                if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || loan.getStatusDescription() != credit.getCreditState()/*||  loan.getTotalCuotas...*/) {
-                    // the loan has changed, return credit to be update
-                    return credit;
-                } else {
-                    return null;
-                }
+    public CredentialCredit validateCredentialCreditToUpdate(Loan loan) {
+        // the credential could be in state active | pending | revoke. In each case the credential can be update, as long as the loan has the same id.
+        Optional<CredentialCredit> opCredit = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
+        if (opCredit.isPresent()) {
+            CredentialCredit credit = opCredit.get();
+            if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || loan.getStatusDescription() != credit.getCreditState()/*||  loan.getTotalCuotas...*/) {
+                // the loan has changed, return credit to be update
+                return credit;
             } else {
-                // the credit had been set that has a credential credit, but no credential credit exist with the bondarea id
-                // the next time loans are going to be check, a new credential credit would be create
-                loan.setHasCredential(false);
-                loanRepository.save(loan);
                 return null;
             }
+        } else {
+            // the credit had been set that has a credential credit, but no credential credit exist with the bondarea id
+            // the next time loans are going to be check, a new credential credit would be create
+            loan.setHasCredential(false);
+            loanRepository.save(loan);
+            return null;
         }
-        return null;
     }
 
 
@@ -508,35 +503,37 @@ public class CredentialService {
             // if credit is finalized credential will be revoke
             if (loan.getStatus() == 60) { // its ok to use 60 state ?
                 credit.setFinalizedTime(DateUtil.getLocalDateTimeNow().toLocalDate());
-                //TODO No se revoca credito pero beneficio si, si este fuera el unico
+                credentialCreditRepository.save(updateCredit);
+                //TODO No se revoca credito pero beneficio si, si este fuera su unico credito (logica de revocacion)
             }
             else{
                 if(loan.getIsDeleted()){
-                    // TODO revoke and set to deleted the loan ?
+                    // TODO revoke and set to deleted the loan ? if the loan is set to delete, activate the revoke
                 }
                 else {
-                    // validate the expired amount
-                    List<CredentialCredit> creditGroup = credentialCreditRepository.findByIdGroup(loan.getIdGroup()); //TODO filter with active or pending credential
-                    BigDecimal amountExpired = sumExpiredAmount(creditGroup);
+                    List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                    if (pendingAndActiveState.size() == 2) {
+                        // validate the expired amount (need to be lower than the sum expiredAmount of all the credit group
+                        List<CredentialCredit> creditGroup = credentialCreditRepository.findByIdGroupAndCredentialStateIn(loan.getIdGroup(), pendingAndActiveState);
+                        BigDecimal amountExpired = sumExpiredAmount(creditGroup);
 
-                    Optional<ParameterConfiguration> config = parameterConfigurationRepository.findById(1L); //TODO Este ID asi no tiene que ir
-                    if (config.isPresent()) {
-                        BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
-                        if (amountExpired.compareTo(maxAmount) > 0 ){
-                            int cyclesExpired = updateCredit.getAmountExpiredCycles();
-                            updateCredit.setAmountExpiredCycles(++cyclesExpired);
-                            credentialCreditRepository.save(updateCredit);
-                            //TODO revoke group credit and benefits
+                        Optional<ParameterConfiguration> config = parameterConfigurationRepository.findById(1L); //TODO Este ID asi no tiene que ir
+                        if (config.isPresent()) {
+                            BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
+                            if (amountExpired.compareTo(maxAmount) > 0) {
+                                int cyclesExpired = updateCredit.getAmountExpiredCycles();
+                                updateCredit.setAmountExpiredCycles(++cyclesExpired);
+                                credentialCreditRepository.save(updateCredit);
+                                //TODO revoke group credit and benefits
+                            } else {
+                                //if credit has no expired amount
+                                // try to create credential benefits in case holder does not have
+                                this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER);
+                            }
+                        } else {
+                            log.error("There is no configuration for getting the maximum expired amount.");
+                            throw new NoExpiredConfigurationExists("There is no configuration for getting the maximum expired amount. Imposible to check the credential credit");
                         }
-                        else{
-                            //if credit has no expired amount
-                            // try to create credential benefits in case holder does not have
-                            this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER);
-                        }
-                    }
-                    else{
-                        log.error("There is no configuration for getting the maximum expired amount.");
-                        throw new NoExpiredConfigurationExists("There is no configuration for getting the maximum expired amount. Imposible to check the credential credit");
                     }
                 }
             }
@@ -547,7 +544,7 @@ public class CredentialService {
         }
     }
 
-    // this is only a temporal and bad revoke, to use the update method.
+    // this is only a temporal and a wrong revoke process , to use the update method.
     private void revokeTemporal(CredentialCredit credit){
         Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
         if (opStateRevoke.isPresent()) {
@@ -563,15 +560,11 @@ public class CredentialService {
      * @return
      */
     private BigDecimal sumExpiredAmount(List<CredentialCredit> group){
-
         BigDecimal amountExpired = BigDecimal.ZERO;
 
         for (CredentialCredit credit: group) {
-            log.info("sumExpiredAmount: credit: "+credit.getExpiredAmount());
             amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
-            //todo: parece que hubiera que asignar el resultado de la suma a una variable.
         }
-
         log.info("sumExpiredAmount: sum: "+amountExpired.toString());
 
         return amountExpired;

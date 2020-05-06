@@ -69,6 +69,7 @@ public class CredentialServiceTest {
     private CredentialIdentityRepository credentialIdentityRepository;
     @Mock
     private CredentialDwellingRepository credentialDwellingRepository;
+
     @Mock
     private CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository;
 
@@ -266,9 +267,13 @@ public class CredentialServiceTest {
 
     private Optional<CredentialState> getCredentialPendingState(){
         CredentialState state = new CredentialState();
-        state.setId(1L);
+        state.setId(2L);
         state.setStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         return Optional.of(state);
+    }
+
+    private List<CredentialState> getStateActivePending(){
+        return List.of(getCredentialActiveState().get(), getCredentialPendingState().get());
     }
 
     private List<Credential> credentialsFilteredActiveMock() {
@@ -453,10 +458,11 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(BondareaServiceTest.getMockLoan(), getPersonMockWithDid().get()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get());
-        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(Collections.emptyList());
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.empty());
 
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
@@ -499,10 +505,11 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(Optional.of(getBeneficiaryMockWithoutDID()));
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialPendingState());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(BondareaServiceTest.getMockLoan(), getBeneficiaryMockWithoutDID()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getPendingCredentialHolderBenefitMock(getPersonMockWithDid().get()));
-        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(Collections.emptyList());
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.empty());
 
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
@@ -545,10 +552,11 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(BondareaServiceTest.getMockLoan(), getPersonMockWithDid().get()));
 
         //credential benefits
-        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(List.of(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get()));
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()));
 
         Loan loan = BondareaServiceTest.getMockLoan();
         credentialService.createNewCreditCredentials(loan);
@@ -592,6 +600,7 @@ public class CredentialServiceTest {
     }
 
     //TODO try to create benefit with revoke benefits. Or with familiar
+    // test update(expired amount is higher than the set one) | loan has finish status | the benefits was revoked and credit too
 
 
 }

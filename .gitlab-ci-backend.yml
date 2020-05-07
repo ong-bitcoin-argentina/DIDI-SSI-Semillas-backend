@@ -25,7 +25,7 @@ stages:
 backend:
   image: openjdk:11-jdk-slim
   services:
-    - name: postgres:11.1
+    - name: postgres:11.7
       alias: db
   stage: test
   script:
@@ -35,7 +35,7 @@ backend:
       - "**/*"
 
 package-backend:
-  image: openjdk:11-jdk-slim
+  image: openjdk:11.0.7-slim
   services:
     - docker:19.03.1-dind
   stage: package
@@ -44,15 +44,17 @@ package-backend:
     - curl -fsSL https://get.docker.com -o get-docker.sh && sh get-docker.sh
     - docker login -u gitlabci -p $CI_JOB_TOKEN $CI_REGISTRY
     # Tests are skipped as we just executed them in `backend` job
-    - ./mvnw clean -Dmaven.test.skip=true $MAVEN_CLI_OPTS package dockerfile:build dockerfile:push
+    - ./mvnw clean -Dmaven.test.skip=true $MAVEN_CLI_OPTS
+    - ./mvnw install -Dmaven.test.skip=true
+    - ./mvnw package -Dmaven.test.skip=true  dockerfile:build dockerfile:push
 
   only:
     refs:
-      - semillas-template-from-abi
+      - SEMI-135-setup-ci
       # Only run on develop, release/x.y.x and hotfix/xxxx
       - develop
       - /^release.*$/
       - /^hotfix.*$/
-    changes:
-      - "**/*"
+  #  changes:
+    #  - "**/*"
 

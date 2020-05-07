@@ -26,25 +26,39 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping("/auth")
+<<<<<<< HEAD
 @CrossOrigin(
         origins = "*",
         methods = {RequestMethod.GET, RequestMethod.POST})
 public class AuthController {
 
     @Autowired
+=======
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+public class AuthController {
+
+    private static final Logger logger = LoggerFactory.getLogger(AuthController.class);
+
+>>>>>>> origin
     private AuthenticationManager authenticationManager;
-    @Autowired
     private JwtTokenProvider jwtTokenProvider;
-    @Autowired
     private JwtUserDetailsService userDetailsService;
 
     @Autowired
+<<<<<<< HEAD
     private UserPermissionsService userPermissionsService;
+=======
+    public AuthController(AuthenticationManager authenticationManager, JwtTokenProvider jwtTokenProvider, JwtUserDetailsService userDetailsService) {
+        this.authenticationManager = authenticationManager;
+        this.jwtTokenProvider = jwtTokenProvider;
+        this.userDetailsService = userDetailsService;
+    }
+>>>>>>> origin
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
+    @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
         try {
-            log.info(" -createAuthenticationToken "+authenticationRequest.getUsername());
             Authentication authentication = this.authenticate(authenticationRequest.getUsername().trim(), authenticationRequest.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);

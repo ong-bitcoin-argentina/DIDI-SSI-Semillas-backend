@@ -42,15 +42,13 @@ public class BondareaServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    public static Loan getMockLoan(){
-        DateUtil dateUtil = new DateUtil();
-
+    public Loan getMockLoan(){
         Loan loan = new Loan();
         loan.setDniPerson(123456L);
         loan.setIdBondareaLoan("1a");
         loan.setStatusFullDescription("Activo");
         loan.setExpiredAmount((float) 0);
-        loan.setCreationDate(dateUtil.getLocalDateTimeNow().toLocalDate());
+        loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
         loan.setStatus(55);
         loan.setPending(false);
 

@@ -493,8 +493,6 @@ public class CredentialService {
     }
 
 
-
-
     /**
      * 2nd Step in the process "Generate", after create the new credits.
      * This process will check the previous credential credit and his loan, to update and | or revoke.

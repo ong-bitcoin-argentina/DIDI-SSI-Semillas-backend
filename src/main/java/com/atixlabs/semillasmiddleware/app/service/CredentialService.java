@@ -299,11 +299,11 @@ public class CredentialService {
      */
     public void createNewCreditCredentials(Loan loan) throws PersonDoesNotExists {
         //beneficiarieSSSS -> the credit group will be created by separate (not together)
+        log.info("Creating Credential Credit ");
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
         if (opCreditExistence.isEmpty()) {
             Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
             if (opBeneficiary.isPresent()) {
-                //the documents must coincide
                 CredentialCredit credit = this.buildCreditCredential(loan, opBeneficiary.get());
                 loan.setHasCredential(true);
 
@@ -311,6 +311,7 @@ public class CredentialService {
                 //get the new id and save it on id historic
                 credit.setIdHistorical(credit.getId());
                 credentialCreditRepository.save(credit);
+                log.info("Credential Credit created for dni: " + opBeneficiary.get().getDocumentNumber());
 
                 loanRepository.save(loan);
 
@@ -330,7 +331,6 @@ public class CredentialService {
 
 
     private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
-        log.info("Creating credit credential");
 
         CredentialCredit credentialCredit = new CredentialCredit();
         credentialCredit.setIdBondareaCredit(loan.getIdBondareaLoan());
@@ -386,7 +386,7 @@ public class CredentialService {
 
 
     public void createNewBenefitsCredential(Person beneficiary, PersonTypesCodes personType) {
-        log.info("Creating benefits credential");
+        log.info("Creating Credential Benefits");
         List<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDni(beneficiary.getDocumentNumber());
         //filter the active or pending benefits
         List<CredentialBenefits> benefitsActiveOrPending = opBenefits.stream().filter(credentialBenefits -> (credentialBenefits.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()) || (credentialBenefits.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())))).collect(Collectors.toList());
@@ -400,6 +400,8 @@ public class CredentialService {
             benefits = credentialBenefitsRepository.save(benefits);
             benefits.setIdHistorical(benefits.getId());
             credentialBenefitsRepository.save(benefits);
+            log.info("Credential Credit created for dni: " + beneficiary.getDocumentNumber());
+
         } else {
             log.info("Person with dni " + beneficiary.getDocumentNumber() + " already has a credential benefits");
         }

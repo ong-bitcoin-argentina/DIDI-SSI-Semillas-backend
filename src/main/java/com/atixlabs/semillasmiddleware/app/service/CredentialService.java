@@ -512,6 +512,8 @@ public class CredentialService {
         if (opBeneficiary.isPresent()) {
             CredentialCredit updateCredit = this.buildCreditCredential(loan, opBeneficiary.get());
             updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
+            //set the amount expired cycles of the previous credential to accumulate the expired cycles
+            updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
             credentialCreditRepository.save(updateCredit);
 
 
@@ -538,7 +540,8 @@ public class CredentialService {
                             BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
                             if (amountExpired.compareTo(maxAmount) > 0) {
                                 int cyclesExpired = updateCredit.getAmountExpiredCycles();
-                                updateCredit.setAmountExpiredCycles(++cyclesExpired);
+                                cyclesExpired++;
+                                updateCredit.setAmountExpiredCycles(cyclesExpired);
                                 credentialCreditRepository.save(updateCredit);
                                 log.info("Credit is default. Count +1 cycles expired for credential credit id: " + credit.getId());
                                 //TODO revoke group credit and benefits

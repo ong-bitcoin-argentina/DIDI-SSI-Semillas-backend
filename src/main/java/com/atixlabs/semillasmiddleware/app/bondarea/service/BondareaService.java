@@ -102,6 +102,7 @@ public class BondareaService {
         loan.setIdBondareaLoan("1L");
         loan.setDni(24580963L);
         loan.setStatusFullDescription("Activo");
+        loan.setIdGroup("group1");
         loan.setAmount((float) 1000);
         loan.setExpiredAmount((float) 0);
         loan.setCycle("Ciclo 1");

@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
+import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -34,7 +35,6 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -399,12 +399,18 @@ public class CredentialService {
                 benefits.setIdHistorical(benefits.getId());
                 credentialBenefitsRepository.save(benefits);
             } else {
-                log.info("Person with dni " + beneficiary.getDocumentNumber() + " already has a credential benefits");
+                log.info("Person with dni " + beneficiary.getDocumentNumber() + " hsd already a credential benefits");
             }
         }
     }
 
 
+    /**
+     *
+     * @param beneficiary
+     * @param personType
+     * @return
+     */
     public CredentialBenefits buildBenefitsCredential(Person beneficiary, PersonTypesCodes personType){
             CredentialBenefits benefits = new CredentialBenefits();
 
@@ -433,7 +439,6 @@ public class CredentialService {
             benefits.setCreditHolderName(beneficiary.getFirstName() + " " + beneficiary.getLastName());
             //End creditHolder changes
 
-            //TODO credentialCredit.setIdHistorical();
             //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();
 
             Optional<DIDHisotoric> opActiveDid = didHistoricRepository.findByIdPersonAndIsActive(beneficiary.getId(), true);
@@ -457,19 +462,24 @@ public class CredentialService {
 
     /**
      * Validate if the credential needs to be updated.
+     * The credential could be in state active | pending | revoke. In each case the credential can be update, as long as the loan has the same id.
+     *
      * @param loan
-     * @return the credit or null
+     * @return Credential Credit or null
      */
     public CredentialCredit validateCredentialCreditToUpdate(Loan loan) {
-        // the credential could be in state active | pending | revoke. In each case the credential can be update, as long as the loan has the same id.
-        Optional<CredentialCredit> opCredit = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
+        //get the credit credential by idBondarea and get the last created for this credential credit
+        Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
         if (opCredit.isPresent()) {
-            CredentialCredit credit = opCredit.get();
-            if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || loan.getStatusDescription() != credit.getCreditState()/*||  loan.getTotalCuotas...*/) {
-                // the loan has changed, return credit to be update
-                return credit;
-            } else {
-                return null;
+            // if it does not have finish date (finishDate indicate that the credit has finished or has been canceled)
+            if (opCredit.get().getFinishDate() == null) {
+                CredentialCredit credit = opCredit.get();
+                if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatusDescription().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
+                    // the loan has changed, return credit to be update
+                    return credit;
+                } else {
+                    return null;
+                }
             }
         } else {
             // the credit had been set that has a credential credit, but no credential credit exist with the bondarea id
@@ -478,20 +488,25 @@ public class CredentialService {
             loanRepository.save(loan);
             return null;
         }
+        return null;
     }
 
 
+
+
     /**
-     * 2nd Step in the process, after create the new credits. This process will check the previous credential credit and his loan, to update and | or revoke.
-     * If there has been a change the credentials is revoked and generated a new one.
+     * 2nd Step in the process "Generate", after create the new credits.
+     * This process will check the previous credential credit and his loan, to update and | or revoke.
+     * If there has been a change, credential will be revoke, then generate a new one.
      *
      * @param loan
      * @param credit
+     * @throws NoExpiredConfigurationExists
+     * @throws PersonDoesNotExists
      */
     public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws NoExpiredConfigurationExists, PersonDoesNotExists{
         Long idHistoricCredit = credit.getIdHistorical();
-        //TODO revoke credit -> save id historic
-        revokeTemporal(credit);
+        setRevokeCreditCredentialToUpdate(credit);
 
         Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
         if (opBeneficiary.isPresent()) {
@@ -501,13 +516,14 @@ public class CredentialService {
 
 
             // if credit is finalized credential will be revoke
-            if (loan.getStatus() == 60) { // its ok to use 60 state ?
-                credit.setFinalizedTime(DateUtil.getLocalDateTimeNow().toLocalDate());
+            if (loan.getStatus() == 60) { // its ok to use 60 state ? -> use statusDescription
+                updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
                 credentialCreditRepository.save(updateCredit);
+                log.info("Credential Credit is set to finalize, for credential id " + credit.getId());
                 //TODO No se revoca credito pero beneficio si, si este fuera su unico credito (logica de revocacion)
             }
             else{
-                if(loan.getIsDeleted()){
+                if(loan.getStatusDescription()!= null && loan.getStatusDescription().equals("Cancelado")){ //TODO will change to use enum of status to set the credit state
                     // TODO revoke and set to deleted the loan ? if the loan is set to delete, activate the revoke
                 }
                 else {
@@ -517,13 +533,14 @@ public class CredentialService {
                         List<CredentialCredit> creditGroup = credentialCreditRepository.findByIdGroupAndCredentialStateIn(loan.getIdGroup(), pendingAndActiveState);
                         BigDecimal amountExpired = sumExpiredAmount(creditGroup);
 
-                        Optional<ParameterConfiguration> config = parameterConfigurationRepository.findById(1L); //TODO Este ID asi no tiene que ir
+                        Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
                         if (config.isPresent()) {
                             BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
                             if (amountExpired.compareTo(maxAmount) > 0) {
                                 int cyclesExpired = updateCredit.getAmountExpiredCycles();
                                 updateCredit.setAmountExpiredCycles(++cyclesExpired);
                                 credentialCreditRepository.save(updateCredit);
+                                log.info("Credit is default. Count +1 cycles expired for credential credit id: " + credit.getId());
                                 //TODO revoke group credit and benefits
                             } else {
                                 //if credit has no expired amount
@@ -532,7 +549,7 @@ public class CredentialService {
                             }
                         } else {
                             log.error("There is no configuration for getting the maximum expired amount.");
-                            throw new NoExpiredConfigurationExists("There is no configuration for getting the maximum expired amount. Imposible to check the credential credit");
+                            throw new NoExpiredConfigurationExists("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
                         }
                     }
                 }
@@ -544,8 +561,13 @@ public class CredentialService {
         }
     }
 
-    // this is only a temporal and a wrong revoke process , to use the update method.
-    private void revokeTemporal(CredentialCredit credit){
+    /**
+     * This method is only to set Credential Credit on status REVOKE.
+     * It is the 1st step before updating the Credential Credit.
+     * (do not use it for revoke process)
+     * @param credit
+     */
+    private void setRevokeCreditCredentialToUpdate(CredentialCredit credit){
         Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
         if (opStateRevoke.isPresent()) {
             credit.setCredentialState(opStateRevoke.get());
@@ -554,10 +576,11 @@ public class CredentialService {
     }
 
     /**
-     * Acumulate the expired amount of the credit group.
+     * Accumulate the expired amount of the credit group.
      * This able to check if the group is default.
+     *
      * @param group
-     * @return
+     * @return BigDecimal (sum)
      */
     private BigDecimal sumExpiredAmount(List<CredentialCredit> group){
         BigDecimal amountExpired = BigDecimal.ZERO;
@@ -565,7 +588,6 @@ public class CredentialService {
         for (CredentialCredit credit: group) {
             amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
         }
-        log.info("sumExpiredAmount: sum: "+amountExpired.toString());
 
         return amountExpired;
     }

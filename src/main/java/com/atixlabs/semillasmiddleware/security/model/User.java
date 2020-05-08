@@ -14,7 +14,7 @@ import java.util.Objects;
 @Getter
 @Setter
 @Entity
-@Table(name = "users", schema="security")
+@Table(name = "users")
 public class User extends AuditableEntity{
 
     private static final PasswordEncoder pwEncoder = new BCryptPasswordEncoder();

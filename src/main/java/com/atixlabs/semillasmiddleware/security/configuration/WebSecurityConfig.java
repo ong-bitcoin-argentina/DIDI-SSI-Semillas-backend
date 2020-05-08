@@ -30,9 +30,17 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Autowired
     private JwtRequestFilter jwtRequestFilter;
 
-    @Autowired
+   /* @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
         auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
+    }*/
+
+    @Override
+    public void configure(AuthenticationManagerBuilder authenticationManagerBuilder)
+            throws Exception {
+        authenticationManagerBuilder
+                .userDetailsService(jwtUserDetailsService)
+                .passwordEncoder(passwordEncoder());
     }
 
     @Bean
@@ -79,33 +87,29 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests().antMatchers("*").permitAll()
              ;
     }*/
-//TODO habilitarrrrrr
+
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
-
-        httpSecurity.cors()
-                    .and().csrf().disable()
-                    .authorizeRequests()
-                    .antMatchers(AUTH_WHITELIST).permitAll().
-                    antMatchers("/auth/login").permitAll()
-                    .antMatchers("/api/file/upload").permitAll()
-                    .anyRequest().authenticated().and().
-                        exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint).and().sessionManagement()
-                    .sessionCreationPolicy(SessionCreationPolicy.STATELESS);
+        httpSecurity
+                .cors()
+                .and()
+                .csrf()
+                .disable()
+                .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
+                .and()
+                .sessionManagement()
+                .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                .and()
+                .authorizeRequests()
+                .antMatchers(AUTH_WHITELIST)
+                .permitAll()
+                .antMatchers("/auth/login")
+                .permitAll()
+                .anyRequest()
+                .authenticated();
 
         httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
     }
-
-
-    //TODO only for initial dev, delete it
-    /*@Override
-    protected void configure(AuthenticationManagerBuilder auth) throws Exception {
-
-        auth.inMemoryAuthentication()
-                      .withUser("admin").password(passwordEncoder().encode("admin")).roles("ADMIN");
-
-    }*/
-
 
 
 }

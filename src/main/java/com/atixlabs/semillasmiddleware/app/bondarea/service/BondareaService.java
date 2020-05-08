@@ -19,13 +19,10 @@ import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.net.SocketTimeoutException;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
-import java.util.stream.Collector;
-import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -38,6 +35,7 @@ public class BondareaService {
     public BondareaService (LoanRepository loanRepository){
         this.loanRepository = loanRepository;
     }
+
     @Value("${bondarea.base_url}")
     private String serviceURL;
 
@@ -103,10 +101,14 @@ public class BondareaService {
     private BondareaLoanDto getMockBondareaLoan(){
         BondareaLoanDto loan = new BondareaLoanDto();
         loan.setIdBondareaLoan("1L");
-        loan.setDni(123456L);
-        loan.setStatusName("Activo");
+        loan.setDni(24580963L);
+        loan.setStatusFullDescription("Activo");
+        loan.setIdGroup("group1");
         loan.setAmount((float) 1000);
         loan.setExpiredAmount((float) 0);
+        loan.setCycle("Ciclo 1");
+        loan.setCreationDate("2020/04/27");
+        loan.setStatusDescription("");
         loan.setStatus(55);
 
         return loan;
@@ -114,12 +116,15 @@ public class BondareaService {
 
 
     /**
-     * MOCK PURPOSE
+     * MOCK PURPOSE:
+     * Synchronize new loans mock. It can be used to create loans for the 1st time.
+     * Then to test the creation of credit credential and benefits credentials
+     *
      * @param idAccount
      * @param loanState
      * @return
      */
-    public List<BondareaLoanDto> getMockLoans(String idAccount, String loanState){
+    public List<BondareaLoanDto> getLoansMock(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         BondareaLoanDto loan = getMockBondareaLoan();
@@ -141,31 +146,35 @@ public class BondareaService {
     }
 
     /**
-     * MOCK PURPOSE
+     * MOCK PURPOSE:
+     * Synchronize loans. This is used the 2nd time to update the loans that have already been saved.
+     *
      * @param idAccount
      * @param loanState
      * @return
      */
-    public List<BondareaLoanDto> secondLoansDataAllNew(String idAccount, String loanState){
+    public List<BondareaLoanDto> getLoansMockSecond(String idAccount, String loanState){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         //id 1 is deleted
 
-        //loan 2 is the same
+        //loan 2 is finalize
         BondareaLoanDto loan2 = getMockBondareaLoan();
         loan2.setIdBondareaLoan("2L");
+        loan2.setStatusDescription("Finalizado");
+        loan2.setStatus(60);
         loans.add(loan2);
 
-        //loan 3 modified tag
+        //loan 3 modified cycle
         BondareaLoanDto loan3 = getMockBondareaLoan();
         loan3.setIdBondareaLoan("3L");
-        loan3.setTagBondareaLoan("nuevo tag");
+        loan3.setCycle("Ciclo 2");
         loans.add(loan3);
 
         //loan 4 is in default
         BondareaLoanDto loan4 = getMockBondareaLoan();
         loan4.setIdBondareaLoan("4L");
-        loan4.setExpiredAmount((float) 100);
+        loan4.setExpiredAmount((float) 10500);
         loans.add(loan4);
 
         //new loan
@@ -176,7 +185,14 @@ public class BondareaService {
         return loans;
     }
 
-    public List<BondareaLoanDto> getLoans(String idAccount, String loanState) throws Exception {
+    /**
+     * Productive Version !
+     *
+     * @param loanState
+     * @return
+     * @throws Exception
+     */
+    public List<BondareaLoanDto> getLoans(String loanState, String idBondareaLoan, String date) throws Exception {
 
         initializeBondareaApi();
         log.info("getBondareaLoans:");
@@ -185,7 +201,7 @@ public class BondareaService {
         loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m";
 
 
-        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, /*idAccount,*/ loanColumns, loanState);
+        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, loanColumns, loanState, idBondareaLoan, date);
 
         BondareaLoanResponse bondareaLoanResponse;
         try {
@@ -193,7 +209,7 @@ public class BondareaService {
 
             if (response.code() == 200) {
                 bondareaLoanResponse = response.body();
-                log.info("Response body " + response.body());
+                log.info("Bondarea get loans has been successfully executed " + response.body());
             }
             else
             {
@@ -218,53 +234,26 @@ public class BondareaService {
 
     }
 
-    //Second endpoint -> request for one id and get the status
-    public BondareaLoanDto getLoanState(String idBocs) throws Exception {
-        initializeBondareaApi();
-        log.info("getBondareaLoanState:");
 
-        Call<BondareaLoanDto> callSync = bondareaEndpoint.getLoanState("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, idBocs);
-
-        BondareaLoanDto loanDto = null;
-        try {
-            Response<BondareaLoanDto> response = callSync.execute();
-            if (response.code() == 200) {
-                loanDto = response.body();
-                log.info("Response body " + response.body());
-            }
-            else
-            {
-                return null;
-            }
-
-        }
-        catch (SocketTimeoutException ex){
-            log.error(" Bondarea timeout ", ex);
-        }
-
-        catch(Exception ex){
-            log.error("Bondarea error ", ex);
-        }
-
-        return loanDto;
-    }
-
-
+    /**
+     * Getting the new loans from synchronize, for each loan -> find if exists on DB:
+     *      if not -> create.
+     *      if exists -> merge with the new one.
+     * 2nd step -> get from DB the ones that has not been modified -> set them to pending
+     * @param newLoans
+     */
     public void updateExistingLoans(List<Loan> newLoans) {
-        //List<Loan> existingLoans = loanRepository.findAll();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm");
-        LocalDateTime updateTime = new DateUtil().getLocalDateTimeNowWithFormat(formatter);
+        LocalDateTime updateTime = DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm");
 
         //update or create loans
         for (Loan loanToSave : newLoans) {
+            loanToSave.setModifiedTime(updateTime);
             //if the newLoan existed previously -> update. Else create.
             Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanToSave.getIdBondareaLoan());
             //There is a previous loan
             if (opLoanToUpdate.isPresent()) {
                 //update
                 Loan loanToUpdate = opLoanToUpdate.get();
-                loanToUpdate.setModifiedTime(updateTime);
                 loanToUpdate.merge(loanToSave);
                 loanRepository.save(loanToUpdate);
             } else {
@@ -275,26 +264,32 @@ public class BondareaService {
 
         List<Loan> loansToReview = loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(updateTime);
         for (Loan existingLoan : loansToReview) {
-            //this loan has been deleted on the new list, so this loan needs to be checked (is eliminated or is terminated)
+            //this loan has been deleted on the new list, so this loan needs to be checked (is eliminated or has finished)
             existingLoan.setPending(true);
             loanRepository.save(existingLoan);
         }
 
+        log.info("Synchronize Ended Successfully");
+
     }
 
     /**
-     * This method check if pending loans are deleted/canceled or finished, then update this status
+     * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
-    //This method is incomplete
-    public void validatePendingLoans() throws Exception {
+    public void determinatePendingLoans() throws Exception {
+        String finalizeState = "60";
         List<Loan> pendingLoans = loanRepository.findAllByPending(true);
-
         for (Loan pendingLoan: pendingLoans) {
-                BondareaLoanDto loanDto = getLoanState(pendingLoan.getIdBondareaLoan());
+            List<BondareaLoanDto> loansDto = this.getLoans(finalizeState, pendingLoan.getIdBondareaLoan(), "");
+
+            Loan loan = new Loan(loanDto);
                 //a la espera de info sobre endpoint
 
-        }
     }
+}
+
+
+
 
 
 

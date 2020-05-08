@@ -9,15 +9,18 @@ import java.util.Date;
 @Component
 public class DateUtil {
 
-    public Date getDateNow(){
+    public static Date getDateNow(){
         return new Date();
     }
 
-    public LocalDateTime getLocalDateTimeNow(){ return LocalDateTime.now();}
+    public static LocalDateTime getLocalDateTimeNow(){ return LocalDateTime.now();}
 
-    public LocalDateTime getLocalDateTimeNowWithFormat(DateTimeFormatter formatter){
+    public static LocalDateTime getLocalDateTimeNowWithFormat(String pattern){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         String dateNow = LocalDateTime.now().format(formatter);
         return (LocalDateTime.parse(dateNow, formatter));
     }
+
+
 
 }

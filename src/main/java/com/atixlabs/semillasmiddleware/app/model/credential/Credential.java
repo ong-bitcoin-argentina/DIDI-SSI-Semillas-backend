@@ -1,25 +1,29 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
+import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @Getter
 @Setter
+@Table(name = "credential")
 @Entity
-@Table
 @Inheritance( strategy = InheritanceType.JOINED )
+@ToString
 public abstract class Credential extends AuditableEntity {
 
     @Id
-    @GeneratedValue( strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idDidiIssueer;
+    private Long idDidiIssuer;
 
     private Long idDidiReceptor;
 
@@ -30,32 +34,26 @@ public abstract class Credential extends AuditableEntity {
 
     private LocalDateTime dateOfIssue;
 
-    private LocalDateTime dateOfExpiry;
+    private LocalDateTime dateOfRevocation;
 
-    private Long idRelatedCredential;
+    //private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
+                                      // ya que es la credencial principal. Las credcenciales familiares se pueden encontrar filtrando a las personas que
+                                      // asociado el dni del titular
+
+    @ManyToOne
+    private Person creditHolder;
+    private Long creditHolderDni;
+    private String creditHolderName;
 
     @ManyToOne
     private Person beneficiary;
+    private Long beneficiaryDni;
+    private String beneficiaryName;
 
-    private String credentialState;
+    @ManyToOne
+    private CredentialState credentialState;
 
     private String credentialDescription;
 
-
-    @Override
-    public String toString() {
-        return "Credential{" +
-                "id=" + id +
-                ", idDidiIssueer=" + idDidiIssueer +
-                ", idDidiReceptor=" + idDidiReceptor +
-                ", idDidiCredential=" + idDidiCredential +
-                ", idHistorical=" + idHistorical +
-                ", dateOfIssue=" + dateOfIssue +
-                ", dateOfExpiry=" + dateOfExpiry +
-                ", idRelatedCredential=" + idRelatedCredential +
-                ", beneficiary=" + beneficiary +
-                ", credentialState='" + credentialState + '\'' +
-                ", credentialType='" + credentialDescription + '\'' +
-                '}';
-    }
+    private String credentialCategory;
 }

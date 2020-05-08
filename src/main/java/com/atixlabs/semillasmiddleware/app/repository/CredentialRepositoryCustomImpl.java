@@ -3,32 +3,23 @@ package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.Criteria;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Repository;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.criteria.*;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.Date;
 import java.util.List;
 
 
 @Service
 @Slf4j
-public class CredentialServiceCustomImpl implements CredentialServiceCustom {
-
-    @Autowired
-    CredentialRepository credentialRepository;
+public class CredentialRepositoryCustomImpl implements CredentialRepositoryCustom {
 
     @PersistenceContext
     protected EntityManager em;
@@ -36,7 +27,7 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -44,18 +35,21 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
         Root<Credential> credential = cq.from(Credential.class);
         List<Predicate> predicates = new ArrayList<>();
 
-        Join<Credential, Person> children = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, Person> beneficiary = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, CredentialState> credentialStateEntity = credential.join("credentialState", JoinType.LEFT);
 
         if (credentialType != null) {
             predicates.add(cb.equal(credential.get("credentialDescription"), credentialType));
         }
 
-        if (name != null) {
-            predicates.add(cb.like(cb.lower(children.get("name")), "%"+name.toLowerCase()+"%"));
+        if(name != null) {
+            predicates.add(cb.or((cb.like(cb.lower(beneficiary.get("firstName")), "%" + name.toLowerCase() + "%")),
+                    (cb.like(cb.lower(beneficiary.get("lastName")), "%" + name.toLowerCase() + "%"))));
         }
 
+
         if (dniBeneficiary != null) {
-            predicates.add(cb.like(children.get("documentNumber").as(String.class), dniBeneficiary+"%"));
+            predicates.add(cb.like(beneficiary.get("documentNumber").as(String.class), dniBeneficiary+"%"));
         }
 
         if (idDidiCredential != null) {
@@ -70,8 +64,8 @@ public class CredentialServiceCustomImpl implements CredentialServiceCustom {
             predicates.add(cb.like(credential.get("dateOfIssue").as(String.class), dateOfIssue+"%"));
         }
 
-        if (credentialState != null) {
-            predicates.add(cb.in(credential.get("credentialState")).value(credentialState));
+        if (credentialStates != null) {
+            predicates.add(cb.in(credentialStateEntity.get("stateName")).value(credentialStates));
         }
 
         cq.where(predicates.toArray(new Predicate[0]));

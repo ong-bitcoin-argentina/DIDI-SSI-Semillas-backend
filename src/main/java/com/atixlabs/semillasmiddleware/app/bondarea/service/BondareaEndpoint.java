@@ -18,20 +18,7 @@ public interface BondareaEndpoint {
                                         @Query(value = "idm") String idm,
                                       //  @Query("idCuenta") String idCuenta,
                                         @Query(value = "cols") String columns,
-                                        @Query(value = "estados") String states);
-
-
-    @GET("/")
-    Call<BondareaLoanDto> getLoanState(@Query(value = "c") String c,
-                                       @Query(value = "v"  ) String v,
-                                       @Query(value = "url" ) String url,
-                                       @Query(value = "access_key") String access_key,
-                                       @Query(value = "access_token") String access_token,
-                                       @Query(value = "idm") String idm,
-                                       @Query(value = "id_bocs") String id_bocs);
-
-    // second endpoint to validate one persona and their loan status -> validar
-
-
-
-}
+                                        @Query(value = "estados") String states,
+                                        @Query(value = "idPrestamo") String idLoan,
+                                        @Query(value = "fechaCalculo") String date);
+    }

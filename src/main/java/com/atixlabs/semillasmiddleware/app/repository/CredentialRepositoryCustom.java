@@ -4,7 +4,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 
 import java.util.List;
 
-public interface CredentialServiceCustom {
+public interface CredentialRepositoryCustom {
 
     List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState);
 

@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -17,16 +18,21 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Table
 @ToString
+@Slf4j
 public class Loan extends AuditableEntity {
 
     @PrePersist
     private void preSetValues(){
-        if(this.isActive == null)
-            this.isActive = true;
-        if(this.isDeleted == null)
-            this.isDeleted = false;
+      //  if(this.isActive == null)
+        //    this.isActive = true;
+        //if(this.isDeleted == null)
+          //  this.isDeleted = false;
         if(this.pending == null)
             this.pending = false;
+        if(this.hasCredential == null)
+            this.hasCredential = false;
+        if(this.statusDescription == null)
+            this.statusDescription = "";
     }
 
 
@@ -36,30 +42,30 @@ public class Loan extends AuditableEntity {
 
     private Long dniPerson;
 
-    @Column(columnDefinition = "boolean default true") //TODO check this functionality
-    private Boolean isActive;
+    //@Column(columnDefinition = "boolean default true") //TODO check this functionality. Is not working
+    //private Boolean isActive;
 
-    @Column(columnDefinition = "boolean default false")
-    private Boolean isDeleted;
+    //@Column(columnDefinition = "boolean default false")
+   // private Boolean isDeleted;
 
-    private String idBondareaLoan;
+    private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 
-    private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes)
+    private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes) //TODO credit type
 
-    private String statusName; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
+    private String statusDescription; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
 
     private int status; // Estado numérico del préstamo (Ej.0=Preparación, 55= Activo, 60=finalizado)
 
-    private String statusDescription; // Deccripcion de estado ?
+    private String statusFullDescription; // Deccripcion de estado ?
 
-    @Column(columnDefinition = "boolean default false")
+    //@Column(columnDefinition = "boolean default false")
     private Boolean pending;
 
-    private String idIndividual; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
+    private String idProductLoan;  //ID de producto de préstamo (Ej.  B26F5FKZ)
 
-    private String idGroup; // ID del crédito grupal y su estado (Ej.55-B26F5FKZ)
+    private String idGroup; // ID del   crédito grupal y su estado (Ej.55-B26F5FKZ)
 
-    private String loanName; // Nombre asignado al crédito (Ej. Ciclo 2)
+    private String cycleDescription; // Nombre asignado al crédito (Ej. Ciclo 2)
 
     private LocalDate creationDate; // Fecha de otorgamiento cuentas
 
@@ -76,6 +82,8 @@ public class Loan extends AuditableEntity {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime modifiedTime;
 
+    private Boolean hasCredential;
+
 
 
     public Loan(BondareaLoanDto loanDto) {
@@ -85,17 +93,17 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        this.statusName =  loanDto.getStatusName();
+        this.statusDescription =  loanDto.getStatusDescription();
 
         this.status =   loanDto.getStatus();
 
-        this.statusDescription =  loanDto.getStatusDescription();
+        this.statusFullDescription =  loanDto.getStatusFullDescription();
 
-        this.idIndividual =   loanDto.getIdIndividual();
+        this.idProductLoan =   loanDto.getIdProductLoan();
 
         this.idGroup =   loanDto.getIdGroup();
 
-        this.loanName =   loanDto.getLoanName();
+        this.cycleDescription =   loanDto.getCycle();
 
         this.personName =   loanDto.getPersonName();
 
@@ -105,13 +113,18 @@ public class Loan extends AuditableEntity {
 
         this.expiredAmount =   loanDto.getExpiredAmount();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        if(loanDto.getDateFirstInstalment() != null) {
-            this.dateFirstInstalment = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
-        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+            if (loanDto.getDateFirstInstalment() != null) {
+                this.dateFirstInstalment = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+            }
 
-        if(loanDto.getCreationDate() != null) {
-            this.creationDate = LocalDate.parse(loanDto.getCreationDate(), formatter);
+            if (loanDto.getCreationDate() != null) {
+                this.creationDate = LocalDate.parse(loanDto.getCreationDate(), formatter);
+            }
+        }
+        catch (Exception ex){
+            log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanDto.getCreationDate());
         }
 
     }
@@ -120,7 +133,7 @@ public class Loan extends AuditableEntity {
 
         this.dniPerson = loanToUpdate.getDniPerson();
 
-        this.isActive = loanToUpdate.getIsActive();
+        //this.isActive = loanToUpdate.getIsActive();
         //this.isDeleted = loanToUpdate.getIsDeleted();
         //this.pending = loanToUpdate.getPending();
 
@@ -128,17 +141,17 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanToUpdate.getTagBondareaLoan();
 
-        this.statusName = loanToUpdate.getStatusName();
+        this.statusDescription = loanToUpdate.getStatusDescription();
 
         this.status = loanToUpdate.getStatus();
 
-        this.statusDescription = loanToUpdate.getStatusDescription();
+        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
 
-        this.idIndividual = loanToUpdate.getIdIndividual();
+        this.idProductLoan = loanToUpdate.getIdProductLoan();
 
         this.idGroup = loanToUpdate.getIdGroup();
 
-        this.loanName = loanToUpdate.getLoanName();
+        this.cycleDescription = loanToUpdate.getCycleDescription();
 
         this.creationDate = loanToUpdate.getCreationDate();
 
@@ -151,6 +164,8 @@ public class Loan extends AuditableEntity {
         this.dateFirstInstalment = loanToUpdate.getDateFirstInstalment();
 
         this.expiredAmount = loanToUpdate.getExpiredAmount();
+
+        this.modifiedTime = loanToUpdate.getModifiedTime();
 
     }
 

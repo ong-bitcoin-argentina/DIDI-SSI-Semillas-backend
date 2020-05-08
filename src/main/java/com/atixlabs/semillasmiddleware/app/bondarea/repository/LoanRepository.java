@@ -19,4 +19,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findAllByModifiedTimeNotAndModifiedTimeNotNull(LocalDateTime updateTime);
 
     Optional<Loan> findByIdBondareaLoan(String idBocs);
+
+    List<Loan> findAllByHasCredentialFalse();
+
+    List<Loan> findAllByHasCredentialTrue();
 }

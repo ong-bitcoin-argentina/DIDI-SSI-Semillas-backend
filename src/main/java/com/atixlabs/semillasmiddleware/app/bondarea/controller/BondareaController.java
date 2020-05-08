@@ -3,12 +3,15 @@ package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -29,25 +32,25 @@ public class BondareaController {
     }
 
 
-    @GetMapping("/getLoans")
+    @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> getLoans()  {
+    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoans()  {
         log.info("BONDAREA - GET LOANS");
         List<BondareaLoanDto> loansDto;
-        // idAccount not null!!
+        List<Loan> loans;
         try {
-            //loans = bondareaService.getLoans("12345", "55"); //loanState 60 -> se consulta con segunda api
-            loansDto = bondareaService.secondLoansDataAllNew("","");
-            List<Loan> loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
+            LocalDateTime date = DateUtil.getLocalDateTimeNowWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+            loansDto = bondareaService.getLoans("55", "", date.toString());
+            //loansDto = bondareaService.getLoansMock("","");
+            //loansDto = bondareaService.getLoansMockSecond("","");
+            loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);
-            bondareaService.validatePendingLoans();
-
+            bondareaService.determinatePendingLoans();
         }
         catch (Exception ex){
+            log.error("Could not synchronized data from Bondarea !"+ ex.getMessage());
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
-
-        //El proceso deberia tomar todos los prestamos y actualizar la tabla intermedia para manejar la data
 
         return new ResponseEntity<>(loansDto, HttpStatus.OK);
     }

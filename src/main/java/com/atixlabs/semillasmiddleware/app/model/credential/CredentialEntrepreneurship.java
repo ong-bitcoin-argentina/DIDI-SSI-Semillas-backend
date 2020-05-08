@@ -1,13 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
-import java.time.LocalDateTime;
+import java.time.LocalDate;
 
 @Getter
 @Setter
@@ -16,20 +16,18 @@ import java.time.LocalDateTime;
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialEntrepreneurship extends Credential {
 
+    // Comercio, Producción,Servicio
     private String entrepreneurshipType; //TODO enum or new class?
 
-    private LocalDateTime startActivity;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate startActivity;
 
     private String mainActivity;
 
-    private String nameEntrepreneurship;
+    private String entrepreneurshipName;
 
-    private String addressEntrepreneurship;
+    private String entrepreneurshipAddress;
 
-    private String creditState; //TODO is into super class??
-
-    private LocalDateTime endActivity;
-
-    @Transient
-    private String credentialType = "CredentialEntrepreneurship";
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate endActivity;
 }

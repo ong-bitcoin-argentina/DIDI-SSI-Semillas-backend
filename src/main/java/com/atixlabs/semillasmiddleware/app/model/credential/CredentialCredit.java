@@ -1,56 +1,44 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
-import javax.persistence.Transient;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 
+@NoArgsConstructor
 @Getter
 @Setter
-@NoArgsConstructor
 @Entity
+@ToString
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialCredit extends Credential {
 
-    private Long idCredit;
+    private String idBondareaCredit;
 
-    private String creditName;
+    private LocalDate creationDate;
 
-    private Long idGroup;
+    private String creditType; //TODO  Credito semilla / escolar / estacional / individual / de motos/de min. desarrolo social
 
-    private String groupName;
-
-    private String rol;
+    private String idGroup;
 
     private String currentCycle;
 
+    private int totalCycles;
+
+    private int amountExpiredCycles;
+
     private String creditState;
 
-    private Double amount;
+    private LocalDate finishDate;
 
-    private Long dniBeneficiary;
+    private Float expiredAmount; //TODO ? can have money in favour
 
-    @Transient
-    private String credentialType = "CredentialCredit";
-
-
-    @Override
-    public String toString() {
-        return "CredentialCredit{" +
-                "idCredit=" + idCredit +
-                ", creditName='" + creditName + '\'' +
-                ", idGroup=" + idGroup +
-                ", groupName='" + groupName + '\'' +
-                ", rol='" + rol + '\'' +
-                ", currentCycle='" + currentCycle + '\'' +
-                ", creditState='" + creditState + '\'' +
-                ", amount=" + amount +
-                ", dniBeneficiary=" + dniBeneficiary +
-                ", credentialType=" + credentialType +
-                '}' + super.toString();
-    }
 }

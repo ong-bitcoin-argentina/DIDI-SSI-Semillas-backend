@@ -58,7 +58,7 @@ public class CredentialDto {
         this.idDidiCredential = credential.getIdDidiCredential();
         this.dateOfIssue = credential.getDateOfIssue();
         //this.dateOfExpiry = credential.getDateOfRevocation();
-        this.name = credential.getBeneficiaryName();
+        this.name = credential.getBeneficiaryFirstName() +" "+ credential.getBeneficiaryLastName();
         this.dniBeneficiary = credential.getBeneficiaryDni();
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();

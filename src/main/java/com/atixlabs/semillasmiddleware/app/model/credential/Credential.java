@@ -43,12 +43,14 @@ public abstract class Credential extends AuditableEntity {
     @ManyToOne
     private Person creditHolder;
     private Long creditHolderDni;
-    private String creditHolderName;
+    private String creditHolderFirstName;
+    private String creditHolderLastName;
 
     @ManyToOne
     private Person beneficiary;
     private Long beneficiaryDni;
-    private String beneficiaryName;
+    private String beneficiaryFirstName;
+    private String beneficiaryLastName;
 
     @ManyToOne
     private CredentialState credentialState;

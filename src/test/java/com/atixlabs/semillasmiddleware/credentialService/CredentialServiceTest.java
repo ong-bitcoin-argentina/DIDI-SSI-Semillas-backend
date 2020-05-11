@@ -169,7 +169,8 @@ public class CredentialServiceTest {
         credentialIdentity.setId(2L);
         credentialIdentity.setCreditHolderDni(34534534L);
         credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-        credentialIdentity.setBeneficiaryName("Pepito");
+        credentialIdentity.setBeneficiaryFirstName("Pepito");
+        credentialIdentity.setBeneficiaryFirstName("Pepito Apellido");
         credentialIdentity.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
         credentialIdentity.setDateOfIssue(DateUtil.getLocalDateTimeNow().minusDays(14));
         credentialIdentity.setBeneficiary(beneficiary);
@@ -180,7 +181,8 @@ public class CredentialServiceTest {
         credentialIdentity2.setId(3L);
         credentialIdentity2.setCreditHolderDni(34534534L);
         credentialIdentity2.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-        credentialIdentity2.setBeneficiaryName("Pepito");
+        credentialIdentity2.setBeneficiaryFirstName("Pepito");
+        credentialIdentity2.setBeneficiaryLastName("Pepito Apellido");
         credentialIdentity2.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
         credentialIdentity2.setDateOfIssue(DateUtil.getLocalDateTimeNow().minusDays(14));
         credentialIdentity2.setBeneficiary(beneficiary);

@@ -1,27 +1,22 @@
 package com.atixlabs.semillasmiddleware.app.didi.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAuthRequest;
+import com.atixlabs.semillasmiddleware.app.didi.dto.*;
 import retrofit2.Call;
 import retrofit2.http.*;
 
 public interface DidiEndpoint {
-/*
-    @GET("/")
-    Call<BondareaLoanResponse> getLoans(@Query(value = "c") String c,
-                                        @Query(value = "v") String v,
-                                        @Query(value = "url") String url,
-                                        @Query(value = "access_key") String access_key,
-                                        @Query(value = "access_token") String access_token,
-                                        @Query(value = "idm") String idm,
-                                        //  @Query("idCuenta") String idCuenta,
-                                        @Query(value = "cols") String columns,
-                                        @Query(value = "estados") String states);
-*/
-
-    // second endpoint to validate one persona and their loan status -> validar
 
     @POST("user/login")
-    Call<String> getAuthToken(@Body DidiAuthRequest didiAuthRequest);
+    Call<DidiAuthResponse> getAuthToken(@Body DidiAuthRequestBody didiAuthRequestBody);
+
+    @POST("Cert/")
+    @FormUrlEncoded
+    Call<DidiCreateCredentialResponse> createCredential(
+            @Header("token") String token,
+            @Field("templateId") String templateId,
+            @Field("split") boolean split,
+            @Field("data") DidiCredentialData didiCredentialData);
+
 /*
     @POST("banks/{bank_id}/accounts/{account_id}/{view_id}/wallet/cvu")
     Call<BindCVUResponse> createCVU(@Header("Authorization") String token,

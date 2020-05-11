@@ -10,6 +10,9 @@ import lombok.ToString;
 public class DidiAuthResponse {
     private String status;
     private DidiAuthResponseData data;
+
+    private String errorCode;//when error
+    private String message;//when error
 }
 
 

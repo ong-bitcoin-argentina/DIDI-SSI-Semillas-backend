@@ -14,7 +14,7 @@ import java.util.Optional;
 @Repository
 public interface LoanRepository extends JpaRepository<Loan, Long> {
 
-    List<Loan> findAllByPending(boolean pending);
+    List<Loan> findAllByStatus(String status);
 
     List<Loan> findAllByModifiedTimeNotAndModifiedTimeNotNull(LocalDateTime updateTime);
 

@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -10,6 +11,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -39,9 +41,9 @@ public class BondareaController {
         List<BondareaLoanDto> loansDto;
         List<Loan> loans;
         try {
-            LocalDateTime date = DateUtil.getLocalDateTimeNowWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            loansDto = bondareaService.getLoans("55", "", date.toString());
-            //loansDto = bondareaService.getLoansMock("","");
+            LocalDate date = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+            //loansDto = bondareaService.getLoans(BondareaStatusCodes.ACTIVE.getCode(), "", date.toString());
+            loansDto = bondareaService.getLoansMockSecond("","");
             //loansDto = bondareaService.getLoansMockSecond("","");
             loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);

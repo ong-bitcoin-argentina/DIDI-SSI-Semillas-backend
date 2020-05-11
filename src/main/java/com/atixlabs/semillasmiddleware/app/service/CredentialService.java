@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
@@ -331,7 +332,6 @@ public class CredentialService {
 
 
     private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
-
         CredentialCredit credentialCredit = new CredentialCredit();
         credentialCredit.setIdBondareaCredit(loan.getIdBondareaLoan());
         // TODO we need the type from bondarea - credentialCredit.setCreditType();
@@ -340,7 +340,7 @@ public class CredentialService {
         //TODO data for checking - credentialCredit.totalCycles;
 
         credentialCredit.setAmountExpiredCycles(0);
-        credentialCredit.setCreditState(loan.getStatusDescription());
+        credentialCredit.setCreditState(loan.getStatus());
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
 
@@ -475,7 +475,7 @@ public class CredentialService {
             // if it does not have finish date (finishDate indicate that the credit has finished or has been canceled)
             if (opCredit.get().getFinishDate() == null) {
                 CredentialCredit credit = opCredit.get();
-                if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatusDescription().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
+                if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatus().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
                     // the loan has changed, return credit to be update
                     return credit;
                 } else {
@@ -517,14 +517,17 @@ public class CredentialService {
 
 
             // if credit is finalized credential will be revoke
-            if (loan.getStatus() == 60) { // its ok to use 60 state ? -> use statusDescription
+            if (loan.getStatus().equals(LoanStatusCodes.FINALIZED.getCode())){
                 updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
                 credentialCreditRepository.save(updateCredit);
                 log.info("Credential Credit is set to finalize, for credential id " + credit.getId());
                 //TODO No se revoca credito pero beneficio si, si este fuera su unico credito (logica de revocacion)
             }
             else{
-                if(loan.getStatusDescription()!= null && loan.getStatusDescription().equals("Cancelado")){ //TODO will change to use enum of status to set the credit state
+                if(loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())){
+                    updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
+                    credentialCreditRepository.save(updateCredit);
+                    log.info("Credential Credit is set to cancelled, for credential id " + credit.getId());
                     // TODO revoke and set to deleted the loan ? if the loan is set to delete, activate the revoke
                 }
                 else {

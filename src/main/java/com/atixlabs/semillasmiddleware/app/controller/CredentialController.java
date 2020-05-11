@@ -91,12 +91,10 @@ public class CredentialController {
             if (creditToUpdate != null) {
                 try {
                     credentialService.updateCredentialCredit(loan, creditToUpdate);
-                } catch (NoExpiredConfigurationExists ex) {
-                    log.error(ex.getMessage());
-                } catch (PersonDoesNotExists ex) {
+                } catch (NoExpiredConfigurationExists | PersonDoesNotExists ex) {
                     log.error(ex.getMessage());
                 } catch (Exception ex) {
-                    log.error(ex.getMessage());
+                    log.error("Error ! " + ex.getMessage());
                 }
             }
         }

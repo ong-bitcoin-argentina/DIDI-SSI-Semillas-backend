@@ -27,12 +27,8 @@ public class Loan extends AuditableEntity {
         //    this.isActive = true;
         //if(this.isDeleted == null)
           //  this.isDeleted = false;
-        if(this.pending == null)
-            this.pending = false;
         if(this.hasCredential == null)
             this.hasCredential = false;
-        if(this.statusDescription == null)
-            this.statusDescription = "";
     }
 
 
@@ -52,14 +48,7 @@ public class Loan extends AuditableEntity {
 
     private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes) //TODO credit type
 
-    private String statusDescription; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
-
-    private int status; // Estado numérico del préstamo (Ej.0=Preparación, 55= Activo, 60=finalizado)
-
-    private String statusFullDescription; // Deccripcion de estado ?
-
-    //@Column(columnDefinition = "boolean default false")
-    private Boolean pending;
+    private String status;
 
     private String idProductLoan;  //ID de producto de préstamo (Ej.  B26F5FKZ)
 
@@ -93,11 +82,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        this.statusDescription =  loanDto.getStatusDescription();
-
-        this.status =   loanDto.getStatus();
-
-        this.statusFullDescription =  loanDto.getStatusFullDescription();
+        //this.status =   loanDto.getStatus();
 
         this.idProductLoan =   loanDto.getIdProductLoan();
 
@@ -141,11 +126,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanToUpdate.getTagBondareaLoan();
 
-        this.statusDescription = loanToUpdate.getStatusDescription();
-
         this.status = loanToUpdate.getStatus();
-
-        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
 
         this.idProductLoan = loanToUpdate.getIdProductLoan();
 

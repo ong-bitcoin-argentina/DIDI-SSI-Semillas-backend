@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-ef8a9f6e
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-fb3bdb7e
     environment:
       - spring_profiles_active=${ENVIRONMENT}
       - SEMILLAS_DB=${SEMILLAS_DB}
@@ -16,7 +16,7 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
   frontend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-f5408ab5
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-c93610ce
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
     depends_on:

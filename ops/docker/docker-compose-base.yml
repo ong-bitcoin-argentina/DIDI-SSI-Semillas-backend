@@ -16,7 +16,7 @@ services:
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
   frontend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-c93610ce
+    image: docker.atixlabs.com/semillas/semillas/semillas-middleware-frontend:0.0.1-c93610ce
     environment:
       - ENVIRONMENT=${ENVIRONMENT}
     depends_on:

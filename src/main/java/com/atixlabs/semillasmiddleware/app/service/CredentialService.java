@@ -141,7 +141,7 @@ public class CredentialService {
 
         ArrayList<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
 
-        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
+        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                 beneficiaryDni,
                 credentialCategoryCode,
                 credentialStateActivePending
@@ -384,7 +384,7 @@ public class CredentialService {
 
         //This depends of the type of loan from bondarea
         credentialCredit.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
-        credentialCredit.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());// TODO this column will be no longer useful
+        credentialCredit.setCredentialCategory(CredentialCategoriesCodes.CREDIT.getCode());// TODO this column will be no longer useful
 
         return credentialCredit;
     }
@@ -418,11 +418,11 @@ public class CredentialService {
             //Person is holder or family
             if (personType.equals(PersonTypesCodes.HOLDER)) {
                 benefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
-                benefits.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
+                benefits.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
                 benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
             } else {
                 benefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
-                benefits.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
+                benefits.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
                 benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
             }
 

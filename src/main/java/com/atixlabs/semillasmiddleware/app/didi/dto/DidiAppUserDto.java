@@ -5,7 +5,7 @@ import lombok.ToString;
 
 @ToString
 @Getter
-public class DidiAppUser {
+public class DidiAppUserDto {
     private Long dni;
     private String did;
 }

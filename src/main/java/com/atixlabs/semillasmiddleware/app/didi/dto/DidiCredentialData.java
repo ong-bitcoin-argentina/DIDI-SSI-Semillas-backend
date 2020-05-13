@@ -3,9 +3,11 @@ package com.atixlabs.semillasmiddleware.app.didi.dto;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import lombok.Getter;
+import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 
+@Slf4j
 @Getter
 public class DidiCredentialData {
     private ArrayList<DidiCredentialDataElem> cert;
@@ -30,6 +32,18 @@ public class DidiCredentialData {
 
         this.others = new ArrayList<>();
     }
+
+    public String getDidFromParticipant(){
+        for (ArrayList<DidiCredentialDataElem> didiCredentialDataElems : participant) {
+            log.info(didiCredentialDataElems.toString());
+            for (DidiCredentialDataElem didiCredentialDataElem : didiCredentialDataElems) {
+                if(didiCredentialDataElem.getName().equals("DID"))
+                    return didiCredentialDataElem.getValue();
+            }
+        }
+        return null;
+    }
+
 
     @Override
     public String toString() {

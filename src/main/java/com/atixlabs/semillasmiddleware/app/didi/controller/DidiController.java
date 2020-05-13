@@ -1,7 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.didi.controller;
 
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUser;
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiCreateCredentialResponse;
+import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,24 +16,38 @@ public class DidiController {
 
     public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
+    private DidiAppUserService didiAppUserService;
     private DidiService didiService;
 
     @Autowired
-    public DidiController(DidiService didiService) {
+    public DidiController(DidiAppUserService didiAppUserService, DidiService didiService) {
+        this.didiAppUserService = didiAppUserService;
         this.didiService = didiService;
+
     }
 
+
+    @PostMapping("/didi")
+    @ResponseStatus(HttpStatus.OK)
+    public String registerNewDidiAppUser(@RequestBody DidiAppUserDto didiAppUserDto){
+        return didiAppUserService.registerNewAppUser(didiAppUserDto);
+    }
+
+    //ONLY FOR TESTING
     @GetMapping("/didi/login")
     @ResponseStatus(HttpStatus.OK)
     public String authDidi() {
         return didiService.getAuthToken();
     }
 
-    @PostMapping("/didi")
+    @GetMapping("/didi/sync")
     @ResponseStatus(HttpStatus.OK)
-    public DidiCreateCredentialResponse updateDidiCredentialData(@RequestBody DidiAppUser didiAppUser){
+    public String didiCredentialSync() {
 
-        return didiService.createCredentialDidi(didiAppUser);
+        return didiService.didiCredentialSync();
     }
+
+
+
 
 }

@@ -15,4 +15,20 @@ public class DidiCreateCredentialResponse {
 
     private String errorCode;//when error
     private String message;//when error
+
+
+    public void getCredentialData(){
+
+        if (this.status.equals("success")){
+
+            for (DidiCredential didiCredential : data) {
+                DidiCredentialData didiCredentialData = didiCredential.getData();
+
+
+
+            }
+        }
+    }
+
+
 }

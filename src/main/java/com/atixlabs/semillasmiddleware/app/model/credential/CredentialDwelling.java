@@ -20,6 +20,11 @@ public class CredentialDwelling extends Credential {
     private String possessionType;
     //TODO campo que faltaba respuesta: "Distrito de Residencia" String
 
-
+    public CredentialDwelling(CredentialDwelling credentialDwelling){
+        super(credentialDwelling);
+        this.dwellingType = credentialDwelling.dwellingType;
+        this.dwellingAddress = credentialDwelling.dwellingAddress;
+        this.possessionType = credentialDwelling.possessionType;
+    }
 
 }

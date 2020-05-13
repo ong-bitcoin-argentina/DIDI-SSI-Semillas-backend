@@ -117,8 +117,8 @@ public class CredentialServiceTest {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        benefits.setIdDidiCredential(1234L);
-        benefits.setIdDidiReceptor(1234L);
+        benefits.setIdDidiCredential("1234L");
+        benefits.setIdDidiReceptor("1234L");
 
         return  Optional.of(benefits);
     }
@@ -155,7 +155,7 @@ public class CredentialServiceTest {
 
         CredentialCredit credential1 = new CredentialCredit();
         credential1.setId(1L);
-        credential1.setIdDidiCredential(2L);
+        credential1.setIdDidiCredential("2L");
         credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfRevocation(LocalDateTime.now().plusDays(14));
@@ -211,8 +211,8 @@ public class CredentialServiceTest {
         credential1.setBeneficiary(personMock);
 
 
-        credential1.setIdDidiCredential(1234L);
-        credential1.setIdDidiReceptor(1234L);
+        credential1.setIdDidiCredential("1234L");
+        credential1.setIdDidiReceptor("1234L");
 
         credential1.setIdHistorical(1L);
 
@@ -245,7 +245,7 @@ public class CredentialServiceTest {
         DIDHisotoric didi = new DIDHisotoric();
         didi.setId(1L);
         didi.setActive(true);
-        didi.setIdDidiReceptor(1234L);
+        didi.setIdDidiReceptor("1234L");
         didi.setIdPerson(1245L);
         return didi;
     }
@@ -432,7 +432,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(any(Long.class))).thenReturn(Optional.of(new Person()));
         when(personRepository.save(any(Person.class))).thenReturn(createPersonMock());
 
-        when(credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
+        when(credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                 anyLong(),//beneficiaryDni,
                 anyString(),//credentialCategoryCode,
                 any(ArrayList.class)//credentialStateActive

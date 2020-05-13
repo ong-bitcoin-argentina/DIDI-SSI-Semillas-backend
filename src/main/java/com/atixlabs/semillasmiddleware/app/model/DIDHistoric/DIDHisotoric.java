@@ -15,7 +15,7 @@ public class DIDHisotoric {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idDidiReceptor;
+    private String idDidiReceptor;
 
     private Long idPerson;
 

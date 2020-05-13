@@ -1,6 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.didi.service;
 
+import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.*;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -20,6 +23,7 @@ import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.util.ArrayList;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -31,14 +35,34 @@ public class DidiService {
 
     private CredentialRepository credentialRepository;
     private CredentialStateRepository credentialStateRepository;
+    private DidiAppUserRepository didiAppUserRepository;
+    private CredentialIdentityRepository credentialIdentityRepository;
+    private CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository;
+    private CredentialDwellingRepository credentialDwellingRepository;
+    private CredentialBenefitsRepository credentialBenefitsRepository;
+    private CredentialCreditRepository credentialCreditRepository;
 
     @Autowired
     public DidiService(
             CredentialRepository credentialRepository,
-            CredentialStateRepository credentialStateRepository
+            CredentialStateRepository credentialStateRepository,
+            DidiAppUserRepository didiAppUserRepository,
+
+            CredentialIdentityRepository credentialIdentityRepository,
+            CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
+            CredentialDwellingRepository credentialDwellingRepository,
+            CredentialBenefitsRepository credentialBenefitsRepository,
+            CredentialCreditRepository credentialCreditRepository
     ) {
         this.credentialRepository = credentialRepository;
         this.credentialStateRepository = credentialStateRepository;
+        this.didiAppUserRepository = didiAppUserRepository;
+
+        this.credentialIdentityRepository = credentialIdentityRepository;
+        this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
+        this.credentialDwellingRepository = credentialDwellingRepository;
+        this.credentialBenefitsRepository = credentialBenefitsRepository;
+        this.credentialCreditRepository = credentialCreditRepository;
 
         this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
     }
@@ -58,7 +82,6 @@ public class DidiService {
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
-        //contains service link with factory
         //ScalarsConverterFactory - allows String response for debug purposes.
         //GsonConverterFactory - decodes response into final target object
         Retrofit retrofit = new Retrofit.Builder()
@@ -89,29 +112,124 @@ public class DidiService {
         return null;
     }
 
-    public DidiCreateCredentialResponse createCredentialDidi(DidiAppUser didiAppUser){
-        log.info("createCredentialDidi:");
+    public String didiCredentialSync(){
+        log.info("didiCredentialSync:");
 
-        Optional<Credential> pendingCredentialOp = getPendingCredentials(didiAppUser.getDni());
+        //1-Busco registros en AppUser con estado SYNC_MISSING O SYNC_ERROR (todo: validar si SYNC_ERROR vuelvo a intentar):
+        ArrayList<String> didiSyncStatus = new ArrayList<>();
+        didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
+        didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
+        ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
 
-        if (pendingCredentialOp.isPresent()){
-            log.info("Aca tengo que actualizar la data del user");
-            return  createCredentialDidiCall(new DidiCredentialData(pendingCredentialOp.get(), didiAppUser.getDid()));
+        if (didiAppUsers.size()<=0)
+            return "Ningun usuario que sincronizar con didi";
+
+        ArrayList<Long> dniList = new ArrayList<>();
+        for (DidiAppUser didiAppUser : didiAppUsers) {
+            dniList.add(didiAppUser.getDni());
         }
 
+        //2-Busco credenciales que tienen el listado de DNIs (en estado PENDING_DIDI + OK? - REVOCADAS)
+        ArrayList<Credential> pendingCredentials = getCredentialsByCredentialStateAndBeneficiaryDniIn(
+                CredentialStatesCodes.PENDING_DIDI.getCode(),
+                dniList
+        );
+
+        if (pendingCredentials == null || pendingCredentials.size()<=0)
+            return "Los Did guardados no tienen su credencial creada anteriormente mediante la encuesta";
+
+        log.info("El usuario fue encontrado en la base y tiene una credencial de identidad en estado PENDING_DIDI");
+        //3-TODO: LLAMAR METODO DE REVOCACION DE URIEL (validar que sucede si revoco pero luego didi falla)
+
+        //4-Invoco a Didi para cada credencial en la lista (todo: validar si tengo que revocar las activas en didi)
+        for (Credential pendingCredential : pendingCredentials) {
+            log.info(pendingCredential.toString());
+
+            String currentDid = Objects.requireNonNull(findAppUserFromDni(pendingCredential.getBeneficiaryDni(), didiAppUsers)).getDid();
+
+            DidiCredentialData didiCredentialData = new DidiCredentialData(pendingCredential, currentDid);
+            DidiCreateCredentialResponse didiCreateCredentialResponse = createCredentialDidiCall(didiCredentialData);
+
+            if (didiCreateCredentialResponse!= null && didiCreateCredentialResponse.getStatus().equals("success")) {
+                log.info("la credencial fue creada con exito persistiendo datos en la base");
+
+                String credentialDidiId = didiCreateCredentialResponse.getData().get(0).get_id();
+                //String newDid = didiCreateCredentialResponse.getData().get(0).getData().getDidFromParticipant();
+
+                //todo: ACA ESTOY HACIENDO UN UPDATE QUE SOLO ESTA BIEN SI ES PRE-CREDENCIAL
+                if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())) {
+                    //actualizo cuando es una pre-credencial en estado PENDING_DIDI sino doy de alta una nueva.
+                    pendingCredential.setIdDidiReceptor(currentDid);
+                    pendingCredential.setIdDidiCredential(credentialDidiId);
+                    credentialRepository.save(pendingCredential);
+                }
+                else {
+                    //es una credencial con estado activo o revocado, debo crear una nueva.
+                    //todo: validar si tomo el valor de tipo de credencial y creo una nueva del mismo tipo
+                    switch (CredentialCategoriesCodes.getEnumByStringValue(pendingCredential.getCredentialCategory())){
+                        case IDENTITY:
+                            Optional<CredentialIdentity> credentialIdentityOp = credentialIdentityRepository.findById(pendingCredential.getId());
+                            CredentialIdentity credentialIdentity = new CredentialIdentity(credentialIdentityOp.get());
+                            credentialIdentity.setIdDidiReceptor(currentDid);
+                            credentialIdentity.setIdDidiCredential(credentialDidiId);
+                            credentialIdentityRepository.save(credentialIdentity);
+
+
+
+                            break;
+                        case DWELLING:
+                            Optional<CredentialDwelling> credentialDwellingOp = credentialDwellingRepository.findById(pendingCredential.getId());
+                            CredentialDwelling credentialDwelling = new CredentialDwelling(credentialDwellingOp.get());
+                            credentialDwelling.setIdDidiReceptor(currentDid);
+                            credentialDwelling.setIdDidiCredential(credentialDidiId);
+                            credentialDwellingRepository.save(credentialDwelling);
+                            break;
+                        case ENTREPRENEURSHIP:
+                            Optional<CredentialEntrepreneurship> credentialEntrepreneurshipOp = credentialEntrepreneurshipRepository.findById(pendingCredential.getId());
+                            CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship(credentialEntrepreneurshipOp.get());
+                            credentialEntrepreneurship.setIdDidiReceptor(currentDid);
+                            credentialEntrepreneurship.setIdDidiCredential(credentialDidiId);
+                            credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
+                            break;
+                            //todo:verificar si se requiere actualizar benefit y credit
+                        /*
+                        case BENEFIT:
+                            credentialBenefitsRepository.save(new CredentialBenefits(pendingCredential));
+                            break;
+                        case CREDIT:
+                            credentialCreditRepository.save(new CredentialCredit(pendingCredential));
+                            break;
+                         */
+                    }
+                    //todo: revisar que pasa que no actualiza correctamente el estado
+                    DidiAppUser didiAppUser = findAppUserFromDni(pendingCredential.getBeneficiaryDni(), didiAppUsers);
+                    if (didiAppUser!=null) {
+                        didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
+                        didiAppUserRepository.save(didiAppUser);
+                    }
+                }
+                log.info("La credencial fue actualizada con exito, se obtuvo el id de didi: " + credentialDidiId);
+            }
+            log.error("Ocurrio un error al intentar crear la credencial en didi");
+        }
+
+        return "finalizado el proceso de sync";
+    }
+
+    private ArrayList<Credential> getCredentialsByCredentialStateAndBeneficiaryDniIn(String credentialState, ArrayList<Long> dniList){
+        Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(credentialState);
+        if (credentialStatePending.isPresent())
+            return credentialRepository.findByCredentialStateAndBeneficiaryDniIn(credentialStatePending.get(), dniList);
         return null;
     }
 
-    private Optional<Credential> getPendingCredentials(Long beneficiaryDni){
-        Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-
-        if (credentialStatePending.isPresent()){
-            ArrayList<CredentialState> credentialStates = new ArrayList<>();
-            credentialStates.add(credentialStatePending.get());
-            return credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(beneficiaryDni, CredentialCategoriesCodes.IDENTITY.getCode(), credentialStates);
+    private DidiAppUser findAppUserFromDni(Long dni, ArrayList<DidiAppUser> didiAppUsers) {
+        //busco el nuevo did asociado al dni
+        for (DidiAppUser didiAppUser : didiAppUsers) {
+            if (didiAppUser.getDni().equals(dni))
+                return didiAppUser;
         }
-
-        return Optional.empty();
+        return null;
     }
 
     private DidiCreateCredentialResponse createCredentialDidiCall(DidiCredentialData didiCredentialData){
@@ -140,12 +258,3 @@ public class DidiService {
     }
 
 }
-
-/*
-        if (pendingCredentialOp != null) {
-            for (Credential credential : pendingCredentialOp) {
-                didiResponse.add(createCredentialDidiCall(new DidiCredentialRespData(credential)));
-            }
-        }
-
-*/

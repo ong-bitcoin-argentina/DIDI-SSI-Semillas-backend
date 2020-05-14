@@ -172,16 +172,15 @@ public class DidiService {
                             CredentialIdentity credentialIdentity = new CredentialIdentity(credentialIdentityOp.get());
                             credentialIdentity.setIdDidiReceptor(currentDid);
                             credentialIdentity.setIdDidiCredential(credentialDidiId);
+                            setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialIdentity);
                             credentialIdentityRepository.save(credentialIdentity);
-
-
-
                             break;
                         case DWELLING:
                             Optional<CredentialDwelling> credentialDwellingOp = credentialDwellingRepository.findById(pendingCredential.getId());
                             CredentialDwelling credentialDwelling = new CredentialDwelling(credentialDwellingOp.get());
                             credentialDwelling.setIdDidiReceptor(currentDid);
                             credentialDwelling.setIdDidiCredential(credentialDidiId);
+                            setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialDwelling);
                             credentialDwellingRepository.save(credentialDwelling);
                             break;
                         case ENTREPRENEURSHIP:
@@ -189,6 +188,7 @@ public class DidiService {
                             CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship(credentialEntrepreneurshipOp.get());
                             credentialEntrepreneurship.setIdDidiReceptor(currentDid);
                             credentialEntrepreneurship.setIdDidiCredential(credentialDidiId);
+                            setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialEntrepreneurship);
                             credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
                             break;
                             //todo:verificar si se requiere actualizar benefit y credit
@@ -200,17 +200,20 @@ public class DidiService {
                             credentialCreditRepository.save(new CredentialCredit(pendingCredential));
                             break;
                          */
+                        default:
+                            log.error("El tipo de credencial indicado no existe");
                     }
-                    //todo: revisar que pasa que no actualiza correctamente el estado
-                    DidiAppUser didiAppUser = findAppUserFromDni(pendingCredential.getBeneficiaryDni(), didiAppUsers);
-                    if (didiAppUser!=null) {
-                        didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
-                        didiAppUserRepository.save(didiAppUser);
-                    }
+                }
+
+                DidiAppUser didiAppUser = findAppUserFromDni(pendingCredential.getBeneficiaryDni(), didiAppUsers);
+                if (didiAppUser!=null) {
+                    didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
+                    didiAppUserRepository.save(didiAppUser);
                 }
                 log.info("La credencial fue actualizada con exito, se obtuvo el id de didi: " + credentialDidiId);
             }
-            log.error("Ocurrio un error al intentar crear la credencial en didi");
+            else
+                log.error("Ocurrio un error al intentar crear la credencial en didi");
         }
 
         return "finalizado el proceso de sync";
@@ -220,6 +223,15 @@ public class DidiService {
         Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(credentialState);
         if (credentialStatePending.isPresent())
             return credentialRepository.findByCredentialStateAndBeneficiaryDniIn(credentialStatePending.get(), dniList);
+        return null;
+    }
+
+    private Credential setCredentialState(String credentialStateString, Credential credential){
+        Optional<CredentialState> credentialState = credentialStateRepository.findByStateName(credentialStateString);
+        if (credentialState.isPresent()){
+            credential.setCredentialState(credentialState.get());
+            return credential;
+        }
         return null;
     }
 

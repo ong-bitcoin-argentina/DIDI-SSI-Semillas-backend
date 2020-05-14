@@ -496,9 +496,9 @@ public class CredentialService {
      * @param credit
      */
     public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws NoExpiredConfigurationExists, PersonDoesNotExists{
+        // revoke credit -> save id historic
         Long idHistoricCredit = credit.getIdHistorical();
-        //TODO revoke credit -> save id historic
-        revokeTemporal(credit);
+        revokeOneCredential(credit.getId());
 
         Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
         if (opBeneficiary.isPresent()) {
@@ -549,16 +549,7 @@ public class CredentialService {
         }
     }
 
-    // this is only a temporal and bad revoke, to use the update method.
-    private void revokeTemporal(CredentialCredit credit){
-        Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
-        if (opStateRevoke.isPresent()) {
-            credit.setCredentialState(opStateRevoke.get());
-            credentialCreditRepository.save(credit);
-        }
-    }
-
-    /**
+      /**
      * Acumulate the expired amount of the credit group.
      * This able to check if the group is default.
      * @param group
@@ -578,6 +569,31 @@ public class CredentialService {
 
         return amountExpired;
     }
+
+
+    /**
+     * Revoke only for internal usage. It depends of the business logic.
+     * @param idCredential
+     */
+    protected void revokeOneCredential(Long idCredential){
+        Optional<Credential> opCredentialToRevoke = credentialRepository.findById(idCredential);
+        if(opCredentialToRevoke.isPresent()) {
+            //get revoke state
+            Credential credentialToRevoke = opCredentialToRevoke.get();
+            Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+            if (opStateRevoke.isPresent()) {
+                credentialToRevoke.setCredentialState(opStateRevoke.get());
+                //todo: set the reason of revoke ?
+                credentialRepository.save(credentialToRevoke);
+            }
+        }else{
+            //todo throw non-existent credential ?
+            log.error("Error you are trying to revoke ");
+        }
+    }
+
+
+    revoke padre, filtra por tipo... switch by types
 
 
 }

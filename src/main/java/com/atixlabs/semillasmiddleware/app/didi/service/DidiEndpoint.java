@@ -11,11 +11,18 @@ public interface DidiEndpoint {
 
     @POST("Cert/")
     @FormUrlEncoded
-    Call<DidiCreateCredentialResponse> createCredential(
+    Call<DidiCreateCredentialResponse> createCertificate(
             @Header("token") String token,
             @Field("templateId") String templateId,
             @Field("split") boolean split,
             @Field("data") DidiCredentialData didiCredentialData);
+
+    @POST("Cert/{credential_id}/emmit")
+    @FormUrlEncoded
+    Call<DidiCreateCredentialResponse> emmitCertificate(
+            @Header("token") String token,
+            @Path("credential_id") String didiCredentialIdPath,
+            @Field("credentialId") String didiCredentialId);
 
 /*
     @POST("banks/{bank_id}/accounts/{account_id}/{view_id}/wallet/cvu")

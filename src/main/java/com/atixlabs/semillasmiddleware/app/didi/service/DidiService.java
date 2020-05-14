@@ -148,7 +148,7 @@ public class DidiService {
             String currentDid = Objects.requireNonNull(findAppUserFromDni(pendingCredential.getBeneficiaryDni(), didiAppUsers)).getDid();
 
             DidiCredentialData didiCredentialData = new DidiCredentialData(pendingCredential, currentDid);
-            DidiCreateCredentialResponse didiCreateCredentialResponse = createCredentialDidiCall(didiCredentialData);
+            DidiCreateCredentialResponse didiCreateCredentialResponse = this.createCertificateDidi(didiCredentialData);
 
             if (didiCreateCredentialResponse!= null && didiCreateCredentialResponse.getStatus().equals("success")) {
                 log.info("la credencial fue creada con exito persistiendo datos en la base");
@@ -244,10 +244,10 @@ public class DidiService {
         return null;
     }
 
-    private DidiCreateCredentialResponse createCredentialDidiCall(DidiCredentialData didiCredentialData){
+    private DidiCreateCredentialResponse createCertificateDidi(DidiCredentialData didiCredentialData){
         String token = getAuthToken();
 
-        Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCredential(
+        Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(
                 token,
                 "5eb589be3ac4af0256d2053a",
                 true,
@@ -257,13 +257,36 @@ public class DidiService {
         log.info(didiCredentialData.toString());
         try {
             Response<DidiCreateCredentialResponse> response = callSync.execute();
-            log.info("didi-response-message:");
+            log.info("createCertificate - response:");
             if (response.body() != null)
                 log.info(response.body().toString());
             return response.body();
         }
         catch (Exception ex) {
-            log.error("createCredentialDidiCall: Didi Request error", ex);
+            log.error("createCertificateDidi: Didi Request error", ex);
+        }
+
+        return null;
+    }
+
+    private DidiCreateCredentialResponse emmitCertificateDidi(String didiCredentialId){
+        String token = getAuthToken();
+
+        Call<DidiCreateCredentialResponse> callSync = endpointInterface.emmitCertificate(
+                token,
+                didiCredentialId,
+                didiCredentialId
+        );
+
+        try {
+            Response<DidiCreateCredentialResponse> response = callSync.execute();
+            log.info("emmitCertificate: response:");
+            if (response.body() != null)
+                log.info(response.body().toString());
+            return response.body();
+        }
+        catch (Exception ex) {
+            log.error("emmitCertificateDidi: Didi Request error", ex);
         }
 
         return null;

@@ -16,7 +16,7 @@ public class DidiCredentialData {
 
     public DidiCredentialData(Credential credential, String did){
         this.cert = new ArrayList<>();
-        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", CredentialCategoriesCodes.IDENTITY.getCode()));
+        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", credential.getCredentialCategory()));
         cert.add(new DidiCredentialDataElem("DNI", credential.getBeneficiaryDni().toString()));
 
         this.participant = new ArrayList<>();
@@ -32,18 +32,6 @@ public class DidiCredentialData {
 
         this.others = new ArrayList<>();
     }
-
-    public String getDidFromParticipant(){
-        for (ArrayList<DidiCredentialDataElem> didiCredentialDataElems : participant) {
-            log.info(didiCredentialDataElems.toString());
-            for (DidiCredentialDataElem didiCredentialDataElem : didiCredentialDataElems) {
-                if(didiCredentialDataElem.getName().equals("DID"))
-                    return didiCredentialDataElem.getValue();
-            }
-        }
-        return null;
-    }
-
 
     @Override
     public String toString() {

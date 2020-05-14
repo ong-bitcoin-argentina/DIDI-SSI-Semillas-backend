@@ -36,6 +36,8 @@ import java.math.BigDecimal;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
+
 @Slf4j
 @Service
 public class CredentialService {
@@ -570,30 +572,64 @@ public class CredentialService {
         return amountExpired;
     }
 
+    private boolean revokeCredential(Credential credentialToRevoke) {
+        boolean haveRevoke = true;
+        //validate credential is in bd
+        Optional<Credential> opCredential = credentialRepository.findById(credentialToRevoke.getId());
+        if (opCredential.isPresent()) {
+            switch (credentialToRevoke.getCredentialDescription()){
+                case CREDENTIAL_DWELLING.getCode():
+                case CREDENTIAL_ENTREPRENEURSHIP.getCode():
+                    this.revokeComplete(credentialToRevoke);
+                    break;
+                case CREDENTIAL_IDENTITY:
+                    //revoke the holder identity, then the familiars ones of the holder, then the identity of each familiar
+                    this.revokeComplete(credentialToRevoke);
+                    List<Credential> credential = credentialRepository.findByCreditHolderDni(credentialToRevoke.getCreditHolderDni());
+            }
+
+        } else {
+            //todo throw non-existent credential ?
+            log.error("Error you are trying to revoke ");
+            haveRevoke = false;
+        }
+
+
+        return  haveRevoke;
+    }
+
+    /**
+     * Revoke on db and on didi
+     */
+    private void revokeComplete(Credential credentialToRevoke){
+        //here is important to manage the different actions, and need to be synchronize at the end.
+        //todo call revoke on didi
+        this.revokeOneCredential(credentialToRevoke);
+    }
 
     /**
      * Revoke only for internal usage. It depends of the business logic.
-     * @param idCredential
+     * @param credentialToRevoke
+     * @return boolean
      */
-    protected void revokeOneCredential(Long idCredential){
-        Optional<Credential> opCredentialToRevoke = credentialRepository.findById(idCredential);
-        if(opCredentialToRevoke.isPresent()) {
+    protected boolean revokeOneCredential(Credential credentialToRevoke){
+        boolean haveRevoke = true;
             //get revoke state
-            Credential credentialToRevoke = opCredentialToRevoke.get();
             Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
             if (opStateRevoke.isPresent()) {
                 credentialToRevoke.setCredentialState(opStateRevoke.get());
-                //todo: set the reason of revoke ?
+                //todo: set the reason of revocation ?
+                credentialToRevoke.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
                 credentialRepository.save(credentialToRevoke);
+                log.info("Credential with id "+ credentialToRevoke.getId() + "has been revoked");
             }
-        }else{
-            //todo throw non-existent credential ?
-            log.error("Error you are trying to revoke ");
-        }
+            else{
+                haveRevoke = false;
+                log.error("The state revoke could not be found");
+            }
+
+        return haveRevoke;
     }
-
-
-    revoke padre, filtra por tipo... switch by types
 
 
 }

@@ -21,14 +21,12 @@ public class Loan extends AuditableEntity {
 
     @PrePersist
     private void preSetValues(){
-        if(this.isActive == null)
-            this.isActive = true;
-        if(this.isDeleted == null)
-            this.isDeleted = false;
         if(this.pending == null)
             this.pending = false;
         if(this.hasCredential == null)
             this.hasCredential = false;
+        if(this.statusDescription == null)
+            this.statusDescription = "";
     }
 
 
@@ -37,12 +35,6 @@ public class Loan extends AuditableEntity {
     private Long id;
 
     private Long dniPerson;
-
-    //@Column(columnDefinition = "boolean default true") //TODO check this functionality. Is not working
-    private Boolean isActive;
-
-    //@Column(columnDefinition = "boolean default false")
-    private Boolean isDeleted;
 
     private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 
@@ -89,7 +81,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        this.statusFullDescription =  loanDto.getStatusFullDescription();
+        this.statusDescription =  loanDto.getStatusDescription();
 
         this.status =   loanDto.getStatus();
 
@@ -132,7 +124,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanToUpdate.getTagBondareaLoan();
 
-        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
+        this.statusDescription = loanToUpdate.getStatusDescription();
 
         this.status = loanToUpdate.getStatus();
 

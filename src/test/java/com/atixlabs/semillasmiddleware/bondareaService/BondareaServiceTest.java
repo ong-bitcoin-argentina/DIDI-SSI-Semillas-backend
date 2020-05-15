@@ -42,18 +42,14 @@ public class BondareaServiceTest {
         MockitoAnnotations.initMocks(this);
     }
 
-    public static Loan getMockLoan(){
-        DateUtil dateUtil = new DateUtil();
-
+    public Loan getMockLoan(){
         Loan loan = new Loan();
         loan.setDniPerson(123456L);
         loan.setIdBondareaLoan("1a");
         loan.setStatusFullDescription("Activo");
         loan.setExpiredAmount((float) 0);
-        loan.setCreationDate(dateUtil.getLocalDateTimeNow().toLocalDate());
+        loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
         loan.setStatus(55);
-        loan.setIsActive(true);
-        loan.setIsDeleted(false);
         loan.setPending(false);
 
         return loan;
@@ -171,8 +167,6 @@ public class BondareaServiceTest {
 
         Assertions.assertEquals(firstLoansData().get(0).getIdBondareaLoan(), firstLoan.getIdBondareaLoan());
         Assertions.assertTrue(firstLoan.getDniPerson() != null);
-        Assertions.assertTrue(firstLoan.getIsActive());
-        Assertions.assertTrue(firstLoan.getIsDeleted() == false);
 
     }
 
@@ -185,7 +179,7 @@ public class BondareaServiceTest {
         when(loanRepository.findByIdBondareaLoan("2a")).thenReturn(Optional.of(firstLoansData().get(1)));
         when(loanRepository.findByIdBondareaLoan("3a")).thenReturn(Optional.of(firstLoansData().get(2)));
         when(loanRepository.findByIdBondareaLoan("4a")).thenReturn(Optional.of(firstLoansData().get(3)));
-        when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.ofNullable(null));
+        when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.empty());
 
         when(loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(any())).thenReturn(List.of(firstLoansData().get(0)));
 
@@ -207,9 +201,9 @@ public class BondareaServiceTest {
 
     @Test
     public void updateLoansOldToPending() {
-        when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.ofNullable(null));
-        when(loanRepository.findByIdBondareaLoan("6a")).thenReturn(Optional.ofNullable(null));
-        when(loanRepository.findByIdBondareaLoan("7a")).thenReturn(Optional.ofNullable(null));
+        when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.empty());
+        when(loanRepository.findByIdBondareaLoan("6a")).thenReturn(Optional.empty());
+        when(loanRepository.findByIdBondareaLoan("7a")).thenReturn(Optional.empty());
 
         when(loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(any())).thenReturn(firstLoansData());
 
@@ -222,9 +216,9 @@ public class BondareaServiceTest {
 
         Assertions.assertTrue(loansSaves.size() > firstLoansData().size());
 
-        //the active loans will be all. But some are pending -> 7
-        List<Loan> activeLoans = loansSaves.stream().filter(loan -> loan.getIsActive() == true).collect(Collectors.toList());
-        Assertions.assertEquals(7, activeLoans.size() );
+        //the active loans will be all. But some are pending -> 3
+        List<Loan> activeLoans = loansSaves.stream().filter(loan -> loan.getPending() == false).collect(Collectors.toList());
+        Assertions.assertEquals(3, activeLoans.size() );
 
         // the pending loans will be the older loans in this case -> 4
         List<Loan> pendingLoans = loansSaves.stream().filter(loan -> loan.getPending() == true).collect(Collectors.toList());

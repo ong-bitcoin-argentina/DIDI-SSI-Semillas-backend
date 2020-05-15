@@ -14,7 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
-import retrofit2.GsonConverterFactory;
+import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
@@ -100,12 +100,14 @@ public class BondareaService {
     private BondareaLoanDto getMockBondareaLoan(){
         BondareaLoanDto loan = new BondareaLoanDto();
         loan.setIdBondareaLoan("1L");
-        loan.setDni(123456L);
+        loan.setDni(24580963L);
         loan.setStatusFullDescription("Activo");
+        loan.setIdGroup("group1");
         loan.setAmount((float) 1000);
         loan.setExpiredAmount((float) 0);
         loan.setCycle("Ciclo 1");
         loan.setCreationDate("2020/04/27");
+        loan.setStatusDescription("");
         loan.setStatus(55);
 
         return loan;
@@ -155,9 +157,11 @@ public class BondareaService {
 
         //id 1 is deleted
 
-        //loan 2 is the same
+        //loan 2 is finalize
         BondareaLoanDto loan2 = getMockBondareaLoan();
         loan2.setIdBondareaLoan("2L");
+        loan2.setStatusDescription("Finalizado");
+        loan2.setStatus(60);
         loans.add(loan2);
 
         //loan 3 modified cycle

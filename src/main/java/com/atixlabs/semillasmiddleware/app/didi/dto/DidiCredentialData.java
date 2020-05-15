@@ -14,7 +14,7 @@ public class DidiCredentialData {
     private ArrayList<ArrayList<DidiCredentialDataElem>> participant;
     private ArrayList<DidiCredentialDataElem> others;
 
-    public DidiCredentialData(Credential credential, String did){
+    public DidiCredentialData(Credential credential){
         this.cert = new ArrayList<>();
         cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", credential.getCredentialCategory()));
         cert.add(new DidiCredentialDataElem("DNI", credential.getBeneficiaryDni().toString()));
@@ -24,7 +24,7 @@ public class DidiCredentialData {
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();
 
         //DID + NOMBRE + APELLIDO are mandatory fields
-        part.add(new DidiCredentialDataElem("DID", did));
+        part.add(new DidiCredentialDataElem("DID", credential.getIdDidiReceptor()));
         part.add(new DidiCredentialDataElem("NOMBRE", credential.getBeneficiaryFirstName()));
         part.add(new DidiCredentialDataElem("APELLIDO", credential.getBeneficiaryLastName()));
 

@@ -191,15 +191,22 @@ public class DidiService {
                             setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialEntrepreneurship);
                             credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
                             break;
-                            //todo:verificar si se requiere actualizar benefit y credit
-                        /*
                         case BENEFIT:
-                            credentialBenefitsRepository.save(new CredentialBenefits(pendingCredential));
+                            Optional<CredentialBenefits> credentialBenefitsOp = credentialBenefitsRepository.findById(pendingCredential.getId());
+                            CredentialBenefits credentialBenefits = new CredentialBenefits(credentialBenefitsOp.get());
+                            credentialBenefits.setIdDidiReceptor(currentDid);
+                            credentialBenefits.setIdDidiCredential(credentialDidiId);
+                            setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialBenefits);
+                            credentialBenefitsRepository.save(credentialBenefits);
                             break;
                         case CREDIT:
-                            credentialCreditRepository.save(new CredentialCredit(pendingCredential));
+                            Optional<CredentialCredit> credentialCreditOp = credentialCreditRepository.findById(pendingCredential.getId());
+                            CredentialCredit credentialCredit = new CredentialCredit(credentialCreditOp.get());
+                            credentialCredit.setIdDidiReceptor(currentDid);
+                            credentialCredit.setIdDidiCredential(credentialDidiId);
+                            setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialCredit);
+                            credentialCreditRepository.save(credentialCredit);
                             break;
-                         */
                         default:
                             log.error("El tipo de credencial indicado no existe");
                     }

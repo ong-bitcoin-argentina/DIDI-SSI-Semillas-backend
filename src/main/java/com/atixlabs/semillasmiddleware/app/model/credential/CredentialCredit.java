@@ -41,4 +41,18 @@ public class CredentialCredit extends Credential {
 
     private Float expiredAmount; //TODO ? can have money in favour
 
+    public CredentialCredit(CredentialCredit credentialCredit) {
+        super(credentialCredit);
+        this.idBondareaCredit = credentialCredit.idBondareaCredit;
+        this.creationDate = credentialCredit.creationDate;
+        this.creditType = credentialCredit.creditType;
+        this.idGroup = credentialCredit.idGroup;
+        this.currentCycle = credentialCredit.currentCycle;
+        this.totalCycles = credentialCredit.totalCycles;
+        this.amountExpiredCycles = credentialCredit.amountExpiredCycles;
+        this.creditState = credentialCredit.creditState;
+        this.finalizedTime = credentialCredit.finalizedTime;
+        this.expiredAmount = credentialCredit.expiredAmount;
+    }
+
 }

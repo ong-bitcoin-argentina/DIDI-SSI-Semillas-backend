@@ -500,7 +500,7 @@ public class CredentialService {
     public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws NoExpiredConfigurationExists, PersonDoesNotExists{
         // revoke credit -> save id historic
         Long idHistoricCredit = credit.getIdHistorical();
-        revokeOneCredential(credit.getId());
+        revokeOneCredential(credit);
 
         Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
         if (opBeneficiary.isPresent()) {
@@ -577,15 +577,19 @@ public class CredentialService {
         //validate credential is in bd
         Optional<Credential> opCredential = credentialRepository.findById(credentialToRevoke.getId());
         if (opCredential.isPresent()) {
-            switch (credentialToRevoke.getCredentialDescription()){
-                case CREDENTIAL_DWELLING.getCode():
-                case CREDENTIAL_ENTREPRENEURSHIP.getCode():
+            CredentialTypesCodes credentialType = CredentialTypesCodes.valueOf(credentialToRevoke.getCredentialDescription());
+            switch (credentialType){
+                case CREDENTIAL_DWELLING:
+                case CREDENTIAL_ENTREPRENEURSHIP:
                     this.revokeComplete(credentialToRevoke);
                     break;
                 case CREDENTIAL_IDENTITY:
                     //revoke the holder identity, then the familiars ones of the holder, then the identity of each familiar
                     this.revokeComplete(credentialToRevoke);
-                    List<Credential> credential = credentialRepository.findByCreditHolderDni(credentialToRevoke.getCreditHolderDni());
+                    List<Credential> familiarCredentials = credentialRepository.findByCreditHolderDni(credentialToRevoke.getCreditHolderDni());
+                    for (Credential credential : familiarCredentials) {
+
+                    }
             }
 
         } else {
@@ -599,16 +603,19 @@ public class CredentialService {
     }
 
     /**
-     * Revoke on db and on didi
+     * Revoke on DB and revoke on didi
+     *
+     * @param credentialToRevoke
      */
     private void revokeComplete(Credential credentialToRevoke){
         //here is important to manage the different actions, and need to be synchronize at the end.
         //todo call revoke on didi
-        this.revokeOneCredential(credentialToRevoke);
+        boolean revokedOnSemillas = this.revokeOneCredential(credentialToRevoke);
     }
 
     /**
-     * Revoke only for internal usage. It depends of the business logic.
+     * Revoke only for internal usage. Only revokes the credential on the DB.
+     *
      * @param credentialToRevoke
      * @return boolean
      */

@@ -86,13 +86,14 @@ public class CredentialController {
     @PatchMapping("/revoke/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long id){
-            credentialService.revoke(id);
+        //todo method on service-> try to revoke. Search the credential from id and then call the appropriate revoke method.
+           // credentialService.revokeComplete();
             return  ResponseEntity.status(HttpStatus.OK).body("Revoked succesfully");
-        }
-        else
+
+        /*else
         {
             return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error there is no credential with id " + id);
-        }
+        }*/
 
     }
 

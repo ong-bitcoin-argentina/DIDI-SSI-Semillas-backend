@@ -14,6 +14,7 @@ import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 //import retrofit2.GsonConverterFactory;
@@ -41,6 +42,14 @@ public class DidiService {
     private CredentialBenefitsRepository credentialBenefitsRepository;
     private CredentialCreditRepository credentialCreditRepository;
 
+    private String didiBaseUrl;
+    private String didiUsername;
+    private String didiPassword;
+    private String didiTemplateCodeIdentity;
+    private String didiTemplateCodeEntrepreneurship;
+    private String didiTemplateCodeDwelling;
+    private String didiTemplateCodeBenefit;
+
     @Autowired
     public DidiService(
             CredentialRepository credentialRepository,
@@ -51,8 +60,14 @@ public class DidiService {
             CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
             CredentialDwellingRepository credentialDwellingRepository,
             CredentialBenefitsRepository credentialBenefitsRepository,
-            CredentialCreditRepository credentialCreditRepository
-    ) {
+            CredentialCreditRepository credentialCreditRepository,
+            @Value("${didi.base_url}") String didiBaseUrl,
+            @Value("${didi.username}") String didiUsername,
+            @Value("${didi.password}") String didiPassword,
+            @Value("${didi.template_code_identity}") String didiTemplateCodeIdentity,
+            @Value("${didi.template_code_entrepreneurship}") String didiTemplateCodeEntrepreneurship,
+            @Value("${didi.template_code_dwelling}") String didiTemplateCodeDwelling,
+            @Value("${didi.template_code_benefit}") String didiTemplateCodeBenefit) {
         this.credentialRepository = credentialRepository;
         this.credentialStateRepository = credentialStateRepository;
         this.didiAppUserRepository = didiAppUserRepository;
@@ -62,13 +77,19 @@ public class DidiService {
         this.credentialDwellingRepository = credentialDwellingRepository;
         this.credentialBenefitsRepository = credentialBenefitsRepository;
         this.credentialCreditRepository = credentialCreditRepository;
+        this.didiBaseUrl = didiBaseUrl;
+        this.didiUsername = didiUsername;
+        this.didiPassword = didiPassword;
+        this.didiTemplateCodeIdentity = didiTemplateCodeIdentity;
+        this.didiTemplateCodeEntrepreneurship = didiTemplateCodeEntrepreneurship;
+        this.didiTemplateCodeDwelling = didiTemplateCodeDwelling;
+        this.didiTemplateCodeBenefit = didiTemplateCodeBenefit;
 
         this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
     }
 
     private Object endpointInterfaceBuilder(Class<?> classToCreateEndpoint) {
         log.info("initializeServiceController:");
-        String serviceURL = "http://192.81.218.211:3500/api/1.0/didi_issuer/";
 
         //contains json converter and date format configuration
         Gson gson = new GsonBuilder()
@@ -84,7 +105,7 @@ public class DidiService {
         //ScalarsConverterFactory - allows String response for debug purposes.
         //GsonConverterFactory - decodes response into final target object
         Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(serviceURL)
+                .baseUrl(didiBaseUrl)
                 .addConverterFactory(ScalarsConverterFactory.create())
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClient)
@@ -96,7 +117,7 @@ public class DidiService {
 
     public String getAuthToken() {
         log.info("getAuthToken:");
-        DidiAuthRequestBody didiAuthRequestBody = new DidiAuthRequestBody("semillas", "semillas_password");
+        DidiAuthRequestBody didiAuthRequestBody = new DidiAuthRequestBody(didiUsername, didiPassword);
         Call<DidiAuthResponse> callSync = endpointInterface.getAuthToken(didiAuthRequestBody);
 
         try {
@@ -197,16 +218,16 @@ public class DidiService {
 
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
             case IDENTITY:
-                didiTemplateCode = "5ec2d3163fbea6397dcde5d3";
+                didiTemplateCode = didiTemplateCodeIdentity;
                 break;
             case ENTREPRENEURSHIP:
-                didiTemplateCode = "5ec2d5173fbea6397dcde5e4";
+                didiTemplateCode = didiTemplateCodeEntrepreneurship;
                 break;
             case DWELLING:
-                didiTemplateCode = "5ec2d67c3fbea6397dcde5f4";
+                didiTemplateCode = didiTemplateCodeDwelling;
                 break;
             case BENEFIT:
-                didiTemplateCode = "5ec2d7493fbea6397dcde601";
+                didiTemplateCode = didiTemplateCodeBenefit;
                 break;
             default:
                 log.error("La categoria de credencial no es valida");

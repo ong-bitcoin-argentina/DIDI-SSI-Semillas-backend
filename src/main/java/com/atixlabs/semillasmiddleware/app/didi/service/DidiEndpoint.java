@@ -21,8 +21,7 @@ public interface DidiEndpoint {
     @FormUrlEncoded
     Call<DidiCreateCredentialResponse> emmitCertificate(
             @Header("token") String token,
-            @Path("credential_id") String didiCredentialIdPath,
-            @Field("credentialId") String didiCredentialId);
+            @Path("credential_id") String credential_id);
 
 /*
     @POST("banks/{bank_id}/accounts/{account_id}/{view_id}/wallet/cvu")

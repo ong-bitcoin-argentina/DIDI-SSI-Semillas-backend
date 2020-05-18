@@ -186,10 +186,37 @@ public class DidiService {
     private DidiCreateCredentialResponse createCertificateDidi(Credential credential){
         String token = getAuthToken();
         DidiCredentialData didiCredentialData = new DidiCredentialData(credential);
+        String didiTemplateCode = "";
+
+        /*
+        "_id": "5ec2d3163fbea6397dcde5d3", "name": "Identidad Semilas v1"
+        "_id": "5ec2d5173fbea6397dcde5e4", "name": "Emprendimiento Semillas v1"
+        "_id": "5ec2d67c3fbea6397dcde5f4", "name": "Vivienda Semillas v1"
+        "_id": "5ec2d7493fbea6397dcde601", "name": "Beneficio Semillas v1"
+        */
+
+        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
+            case IDENTITY:
+                didiTemplateCode = "5ec2d3163fbea6397dcde5d3";
+                break;
+            case ENTREPRENEURSHIP:
+                didiTemplateCode = "5ec2d5173fbea6397dcde5e4";
+                break;
+            case DWELLING:
+                didiTemplateCode = "5ec2d67c3fbea6397dcde5f4";
+                break;
+            case BENEFIT:
+                didiTemplateCode = "5ec2d7493fbea6397dcde601";
+                break;
+            default:
+                log.error("La categoria de credencial no es valida");
+                return null;
+        }
+
 
         Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(
                 token,
-                "5eb589be3ac4af0256d2053a",
+                didiTemplateCode,
                 true,
                 didiCredentialData
         );
@@ -199,7 +226,7 @@ public class DidiService {
             Response<DidiCreateCredentialResponse> response = callSync.execute();
             log.info("createCertificate - response:");
             if (response.body() != null)
-                log.info(response.body().toString());
+                log.info("RESPONSE: "+response.body().toString());
             return response.body();
         }
         catch (Exception ex) {
@@ -214,9 +241,7 @@ public class DidiService {
 
         Call<DidiCreateCredentialResponse> callSync = endpointInterface.emmitCertificate(
                 token,
-                didiCredentialId,
-                didiCredentialId
-        );
+                didiCredentialId);
 
         try {
             Response<DidiCreateCredentialResponse> response = callSync.execute();

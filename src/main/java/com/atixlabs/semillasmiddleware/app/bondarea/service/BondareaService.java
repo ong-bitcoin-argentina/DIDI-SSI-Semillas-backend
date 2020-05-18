@@ -3,7 +3,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.service;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaStatusCodes;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -121,11 +121,12 @@ public class BondareaService {
      * Synchronize new loans mock. It can be used to create loans for the 1st time.
      * Then to test the creation of credit credential and benefits credentials
      *
-     * @param idAccount
      * @param loanState
+     * @param idBondareaLoan
+     * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansMock(String idAccount, String loanState){
+    public List<BondareaLoanDto> getLoansMock(String loanState, String idBondareaLoan, String date){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         BondareaLoanDto loan = getMockBondareaLoan();
@@ -150,11 +151,12 @@ public class BondareaService {
      * MOCK PURPOSE:
      * Synchronize loans. This is used the 2nd time to update the loans that have already been saved.
      *
-     * @param idAccount
      * @param loanState
+     * @param idBondareaLoan
+     * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansMockSecond(String idAccount, String loanState){
+    public List<BondareaLoanDto> getLoansMockSecond(String loanState, String idBondareaLoan, String date){
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         //id 1 is not with state 55
@@ -197,9 +199,12 @@ public class BondareaService {
 
     /**
      * Productive Version !
+     * Bondarea url documentation: https://docs.google.com/document/d/1eb46Rr67EZwolSzNlg4muwHyXEvbHpRldtttWZSnpBU/edit
      *
      * @param loanState
-     * @return
+     * @param idBondareaLoan
+     * @param date
+     * @return List<BondareaLoanDto>
      * @throws Exception
      */
     public List<BondareaLoanDto> getLoans(String loanState, String idBondareaLoan, String date) throws Exception {
@@ -287,14 +292,39 @@ public class BondareaService {
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
-    public void determinatePendingLoans(){
+    public void setPendingLoansFinalStatus(){
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {
             try {
-                //List<BondareaLoanDto> loansDto = this.getLoans(BondareaStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
+                List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
 
-                List<BondareaLoanDto> loansDto = this.getLoansFinalizedMock(BondareaStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
+                if (loansDto.size() > 0) {
+                    // if there is a loan will be the one we filtered with the same id and status finalized
+                    pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
+                    loanRepository.save(pendingLoan);
+                } else {
+                    // if there is no loan, is because has been cancelled
+                    pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
+                    loanRepository.save(pendingLoan);
+                }
+            } catch (Exception ex) {
+                log.error("Error determining pending loans " + ex.getMessage());
+            }
+        }
+    }
+
+
+    /**
+     * Determinate for each loan in pending state whether it has been canceled or has finished.
+     */
+    public void setPendingLoansFinalStatusMock(){
+        List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
+
+        for (Loan pendingLoan : pendingLoans) {
+            try {
+
+                List<BondareaLoanDto> loansDto = this.getLoansFinalizedMock(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
                 if (loansDto.size() > 0) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());

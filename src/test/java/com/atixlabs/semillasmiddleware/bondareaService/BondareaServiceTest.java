@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.bondareaService;
 
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
@@ -229,7 +228,7 @@ public class BondareaServiceTest {
     @Test
     public void determinatePendingLoanToFinish(){
       //  when(loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode())).thenReturn(pendientes);
-        //when(bondareaService.getLoans(BondareaStatusCodes.FINALIZED.getCode(), anyString(),"")).thenReturn(vuelve 1 l)
+        //when(bondareaService.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), anyString(),"")).thenReturn(vuelve 1 l)
     //TODO
 
 

@@ -11,13 +11,17 @@ public enum CredentialCategoriesCodes {
     BENEFIT("Beneficio Semillas"),
     CREDIT("Crediticia");
     private String code;
+
     CredentialCategoriesCodes(String code) {
         this.code = code;
     }
+
     public String getCode() {
         return this.code;
     }
+
     static final Map<String, CredentialCategoriesCodes> codeMap = Arrays.stream(values()).collect(Collectors.toMap(CredentialCategoriesCodes::getCode, p->p));
+
     public static CredentialCategoriesCodes getEnumByStringValue(String codeString) {
         return codeMap.get(codeString);
     }

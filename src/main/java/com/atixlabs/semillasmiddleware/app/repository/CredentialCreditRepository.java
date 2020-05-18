@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import org.checkerframework.checker.nullness.Opt;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -16,4 +17,6 @@ public interface CredentialCreditRepository extends JpaRepository<CredentialCred
     Optional<CredentialCredit> findByIdBondareaCreditAndCredentialStateIn(String idBondarea, List<CredentialState> credentialStates);
 
     List<CredentialCredit> findByIdGroup(String idGroup);
+
+    List<CredentialCredit> findByCreditHolderDniAndCredentialStateIn(Long holderDni, List<CredentialState> credentialStates);
 }

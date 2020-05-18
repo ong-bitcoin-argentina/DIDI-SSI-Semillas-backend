@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -13,6 +14,5 @@ public interface CredentialStateRepository extends JpaRepository<CredentialState
 
     Optional<CredentialState> findByStateName(String state);
 
-
-    ArrayList<CredentialState> findByStateNameIn(ArrayList<String> statesCodesArrayList);
+    List<CredentialState> findByStateNameIn(List<String> statesCodesArrayList);
 }

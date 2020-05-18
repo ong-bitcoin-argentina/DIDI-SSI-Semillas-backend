@@ -1,23 +1,24 @@
 package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public enum CredentialCategoriesCodes {
-
-    FINANCE("Finanzas"),
-    LABOR("Laboral"),
-    EDUCATION("Educación"),
     IDENTITY("Identidad"),
-    ENTREPRENEURSHIP("Emprendimiento"),
     DWELLING("Vivienda"),
-    BENEFIT("Beneficio Semillas");
-
-
+    ENTREPRENEURSHIP("Emprendimiento"),
+    BENEFIT("Beneficio Semillas"),
+    CREDIT("Crediticia");
     private String code;
-
     CredentialCategoriesCodes(String code) {
         this.code = code;
     }
-
     public String getCode() {
         return this.code;
+    }
+    static final Map<String, CredentialCategoriesCodes> codeMap = Arrays.stream(values()).collect(Collectors.toMap(CredentialCategoriesCodes::getCode, p->p));
+    public static CredentialCategoriesCodes getEnumByStringValue(String codeString) {
+        return codeMap.get(codeString);
     }
 }

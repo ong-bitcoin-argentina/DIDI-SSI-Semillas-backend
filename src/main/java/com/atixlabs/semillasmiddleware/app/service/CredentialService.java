@@ -572,24 +572,41 @@ public class CredentialService {
         return amountExpired;
     }
 
-    private boolean revokeCredential(Credential credentialToRevoke) {
+    public boolean revokeCredential(Credential credentialToRevoke) {
         boolean haveRevoke = true;
+
+        log.info("revokeCredential - Filtering credential for revoking credential id: "+ credentialToRevoke.getId());
         //validate credential is in bd
         Optional<Credential> opCredential = credentialRepository.findById(credentialToRevoke.getId());
         if (opCredential.isPresent()) {
-            CredentialTypesCodes credentialType = CredentialTypesCodes.valueOf(credentialToRevoke.getCredentialDescription());
+            CredentialTypesCodes credentialType;
+            try {
+                credentialType = CredentialTypesCodes.valueOf(credentialToRevoke.getCredentialDescription());
+            }
+            catch (IllegalArgumentException ex){
+                log.error("Impossible to revoke credential. There is no credential with type " + credentialToRevoke.getCredentialDescription());
+                return false;
+            }
+
             switch (credentialType){
                 case CREDENTIAL_DWELLING:
                 case CREDENTIAL_ENTREPRENEURSHIP:
                     this.revokeComplete(credentialToRevoke);
                     break;
                 case CREDENTIAL_IDENTITY:
-                    //revoke the holder identity, then the familiars ones of the holder, then the identity of each familiar
+                    //revoke the holder identity, then the familiars identity of the holder, then the identity of each familiar with the same holder
                     this.revokeComplete(credentialToRevoke);
+                    //find all the identities that the dni of the holder is into.
                     List<Credential> familiarCredentials = credentialRepository.findByCreditHolderDni(credentialToRevoke.getCreditHolderDni());
                     for (Credential credential : familiarCredentials) {
-
+                        this.revokeComplete(credential);
                     }
+                    //todo find and then revoke the identity of the familiar credential being the owner the familiar
+                    break;
+                case CREDENTIAL_IDENTITY_FAMILY:
+                    //revoke the identities of the familiar: the one created by the survey and if it exists, the one created because the person download the app.
+                    filter by dniHolder and dniBeneficiary equals-> revoke
+
             }
 
         } else {
@@ -608,6 +625,7 @@ public class CredentialService {
      * @param credentialToRevoke
      */
     private void revokeComplete(Credential credentialToRevoke){
+        log.info("revokeComplete - Starting revoking process for credential id: "+ credentialToRevoke.getId());
         //here is important to manage the different actions, and need to be synchronize at the end.
         //todo call revoke on didi
         boolean revokedOnSemillas = this.revokeOneCredential(credentialToRevoke);
@@ -620,6 +638,7 @@ public class CredentialService {
      * @return boolean
      */
     protected boolean revokeOneCredential(Credential credentialToRevoke){
+        log.info("revokeOneCredential - Revoking the credential "+ credentialToRevoke.getId());
         boolean haveRevoke = true;
             //get revoke state
             Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
@@ -628,7 +647,7 @@ public class CredentialService {
                 //todo: set the reason of revocation ?
                 credentialToRevoke.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
                 credentialRepository.save(credentialToRevoke);
-                log.info("Credential with id "+ credentialToRevoke.getId() + "has been revoked");
+                log.info("Credential with id "+ credentialToRevoke.getId() + "has been revoked!");
             }
             else{
                 haveRevoke = false;

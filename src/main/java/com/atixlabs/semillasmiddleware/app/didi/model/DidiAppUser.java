@@ -33,7 +33,14 @@ public class DidiAppUser extends AuditableEntity {
     public DidiAppUser() {
         this.syncStatus = DidiSyncStatus.SYNC_MISSING.getCode();
     }
-    public void loadFromDto(DidiAppUserDto didiAppUserDto) {
+
+    public DidiAppUser(Long dni, String did, String syncStatus) {
+        this.dni = dni;
+        this.did = did;
+        this.syncStatus = syncStatus;
+    }
+
+    public DidiAppUser(DidiAppUserDto didiAppUserDto) {
         this.dni = didiAppUserDto.getDni();
         this.did = didiAppUserDto.getDid();
         this.syncStatus = DidiSyncStatus.SYNC_MISSING.getCode();

@@ -46,8 +46,7 @@ public class DidiAppUserService {
 
         //if DNI is new.
         if (didiAppUser == null) {
-            didiAppUser = new DidiAppUser();
-            didiAppUser.loadFromDto(didiAppUserDto);
+            didiAppUser = new DidiAppUser(didiAppUserDto);
             didiAppUserRepository.save(didiAppUser);
             return "El nuevo usuario se registro correctamente.";
         }
@@ -60,14 +59,15 @@ public class DidiAppUserService {
                     return "El usuario con Dni: " + didiAppUser.getDni() + " ya posee sus credenciales validadas o en espera con Didi, no se realizó ninguna operación";
 
                 case SYNC_ERROR:
-                    didiAppUser.loadFromDto(didiAppUserDto);
+                    didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
                     didiAppUserRepository.save(didiAppUser);
                     return "Se ha registrado una nueva solucitud de vinculacion de usuario con DID";
             }
         }
         else {
             //if DID is different requires sync:
-            didiAppUser.loadFromDto(didiAppUserDto);
+            didiAppUser.setDid(didiAppUserDto.getDid());
+            didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
             didiAppUserRepository.save(didiAppUser);
             return "Se ha modificado el DID para un usuario que posee credenciales, se generarán nuevas credenciales.";
         }

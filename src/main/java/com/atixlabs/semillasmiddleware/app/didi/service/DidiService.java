@@ -11,6 +11,7 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
+import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,7 +32,7 @@ import java.util.concurrent.TimeUnit;
 @Service
 public class DidiService {
 
-    private DidiEndpoint endpointInterface = null; //BindEndpointInterface bindEndpointInterface = null;
+    private DidiEndpoint endpointInterface = null;
 
     private CredentialRepository credentialRepository;
     private CredentialStateRepository credentialStateRepository;
@@ -49,7 +50,22 @@ public class DidiService {
     private String didiTemplateCodeEntrepreneurship;
     private String didiTemplateCodeDwelling;
     private String didiTemplateCodeBenefit;
-
+/*
+    @Value("${didi.base_url}")
+    private String didiBaseUrl;
+    @Value("${didi.username}")
+    private String didiUsername;
+    @Value("${didi.password}")
+    private String didiPassword;
+    @Value("${didi.template_code_identity}")
+    private String didiTemplateCodeIdentity;
+    @Value("${didi.template_code_entrepreneurship}")
+    private String didiTemplateCodeEntrepreneurship;
+    @Value("${didi.template_code_dwelling}")
+    private String didiTemplateCodeDwelling;
+    @Value("${didi.template_code_benefit}")
+    private String didiTemplateCodeBenefit;
+*/
     @Autowired
     public DidiService(
             CredentialRepository credentialRepository,
@@ -85,11 +101,11 @@ public class DidiService {
         this.didiTemplateCodeDwelling = didiTemplateCodeDwelling;
         this.didiTemplateCodeBenefit = didiTemplateCodeBenefit;
 
-        this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
+        //this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
     }
 
     private Object endpointInterfaceBuilder(Class<?> classToCreateEndpoint) {
-        log.info("initializeServiceController:");
+        log.info("endpointInterfaceBuilder - setting up retrofit configuration:");
 
         //contains json converter and date format configuration
         Gson gson = new GsonBuilder()
@@ -117,6 +133,8 @@ public class DidiService {
 
     public String getAuthToken() {
         log.info("getAuthToken:");
+        if (this.endpointInterface == null)
+            this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
         DidiAuthRequestBody didiAuthRequestBody = new DidiAuthRequestBody(didiUsername, didiPassword);
         Call<DidiAuthResponse> callSync = endpointInterface.getAuthToken(didiAuthRequestBody);
 
@@ -132,7 +150,7 @@ public class DidiService {
         return null;
     }
 
-    public String didiCredentialSync(){
+    public String didiCredentialSync() {
         log.info("didiCredentialSync:");
 
         //1-Busco registros en AppUser con estado SYNC_MISSING O SYNC_ERROR (todo: validar si SYNC_ERROR vuelvo a intentar):
@@ -141,7 +159,7 @@ public class DidiService {
         didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
         ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
 
-        if (didiAppUsers.size()<=0)
+        if (didiAppUsers.size() <= 0)
             return "No existen credenciales pendientes para enviar hacia didi";
 
         ArrayList<Long> dniList = new ArrayList<>();
@@ -180,43 +198,34 @@ public class DidiService {
         return "finalizado el proceso de sync";
     }
 
-    private void createAndEmmitCertificateDidi(Credential credential){
+    private void createAndEmmitCertificateDidi(Credential credential) {
 
-        DidiCreateCredentialResponse didiCreateCredentialResponse = createCertificateDidi(credential);
+        DidiCreateCredentialResponse didiCreateCredentialResponse = this.createCertificateDidi(credential);
 
-        if (didiCreateCredentialResponse!= null && didiCreateCredentialResponse.getStatus().equals("success")){
+        if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals("success")) {
 
             //TODO: PROBAR EL EMMIT EN INSOMNIA Y LUEGO RETOCAR emmitCertificateDidi
             //didiCreateCredentialResponse = emmitCertificateDidi(didiCreateCredentialResponse.getData().get(0).get_id());
 
             //if (didiCreateCredentialResponse!=null && didiCreateCredentialResponse.getStatus().equals("success")){
 
-                //todo salio bien  actualizo bd:
-                this.saveEmittedCredential(didiCreateCredentialResponse, credential);
+            //todo salio bien  actualizo bd:
+            this.saveEmittedCredential(didiCreateCredentialResponse, credential);
 
             //}
             //else {
             //    log.error("fallo la emision de la credencial en didi");
             //}
-        }
-        else {
+        } else {
             log.error("fallo la creacion de la credencial en didi");
         }
     }
 
-    private DidiCreateCredentialResponse createCertificateDidi(Credential credential){
-        String token = getAuthToken();
-        DidiCredentialData didiCredentialData = new DidiCredentialData(credential);
+    private DidiCreateCredentialResponse createCertificateDidi(Credential credential) {
+        log.info("createCertificateDidi");
+
         String didiTemplateCode = "";
-
-        /*
-        "_id": "5ec2d3163fbea6397dcde5d3", "name": "Identidad Semilas v1"
-        "_id": "5ec2d5173fbea6397dcde5e4", "name": "Emprendimiento Semillas v1"
-        "_id": "5ec2d67c3fbea6397dcde5f4", "name": "Vivienda Semillas v1"
-        "_id": "5ec2d7493fbea6397dcde601", "name": "Beneficio Semillas v1"
-        */
-
-        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
+        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())) {
             case IDENTITY:
                 didiTemplateCode = didiTemplateCodeIdentity;
                 break;
@@ -235,29 +244,34 @@ public class DidiService {
         }
 
 
-        Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(
-                token,
-                didiTemplateCode,
-                true,
-                didiCredentialData
-        );
+        DidiCredentialData didiCredentialData = new DidiCredentialData(credential);
+        return createCertificateDidiCall(didiTemplateCode, didiCredentialData);
+    }
+
+    public DidiCreateCredentialResponse createCertificateDidiCall(String didiTemplateCode, DidiCredentialData didiCredentialData) {
+        log.info("createCertificateDidiCall");
+        this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
+        String token = getAuthToken();
+
+        Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(token,didiTemplateCode,true,didiCredentialData);
 
         log.info(didiCredentialData.toString());
         try {
             Response<DidiCreateCredentialResponse> response = callSync.execute();
-            log.info("createCertificate - response:");
+            log.info("createCertificateDidiCall - response:");
             if (response.body() != null)
-                log.info("RESPONSE: "+response.body().toString());
+                log.info("RESPONSE: " + response.body().toString());
             return response.body();
+        } catch (Exception ex) {
+            log.error("createCertificateDidiCall: Didi Request error", ex);
         }
-        catch (Exception ex) {
-            log.error("createCertificateDidi: Didi Request error", ex);
-        }
-
         return null;
     }
 
-    private DidiCreateCredentialResponse emmitCertificateDidi(String didiCredentialId){
+
+    private DidiCreateCredentialResponse emmitCertificateDidi(String didiCredentialId) {
+
+        this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
         String token = getAuthToken();
 
         Call<DidiCreateCredentialResponse> callSync = endpointInterface.emmitCertificate(
@@ -270,16 +284,15 @@ public class DidiService {
             if (response.body() != null)
                 log.info(response.body().toString());
             return response.body();
-        }
-        catch (Exception ex) {
+        } catch (Exception ex) {
             log.error("emmitCertificateDidi: Didi Request error", ex);
         }
 
         return null;
     }
 
-    private void saveEmittedCredential(DidiCreateCredentialResponse didiCreateCredentialResponse, Credential pendingCredential){
-        if (didiCreateCredentialResponse!= null && didiCreateCredentialResponse.getStatus().equals("success")) {
+    private void saveEmittedCredential(DidiCreateCredentialResponse didiCreateCredentialResponse, Credential pendingCredential) {
+        if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals("success")) {
             log.info("la credencial fue creada con exito persistiendo datos en la base");
 
             String credentialDidiId = didiCreateCredentialResponse.getData().get(0).get_id();
@@ -290,11 +303,10 @@ public class DidiService {
                 //actualizo cuando es una pre-credencial en estado PENDING_DIDI sino doy de alta una nueva.
                 pendingCredential.setIdDidiCredential(credentialDidiId);
                 credentialRepository.save(pendingCredential);
-            }
-            else {
+            } else {
                 //es una credencial con estado activo o revocado, debo crear una nueva.
                 //todo: validar si tomo el valor de tipo de credencial y creo una nueva del mismo tipo
-                switch (CredentialCategoriesCodes.getEnumByStringValue(pendingCredential.getCredentialCategory())){
+                switch (CredentialCategoriesCodes.getEnumByStringValue(pendingCredential.getCredentialCategory())) {
                     case IDENTITY:
                         Optional<CredentialIdentity> credentialIdentityOp = credentialIdentityRepository.findById(pendingCredential.getId());
                         CredentialIdentity credentialIdentity = new CredentialIdentity(credentialIdentityOp.get());
@@ -336,12 +348,11 @@ public class DidiService {
             }
 
             log.info("La credencial fue actualizada con exito, se obtuvo el id de didi: " + credentialDidiId);
-        }
-        else
+        } else
             log.error("Ocurrio un error al intentar crear la credencial en didi");
     }
 
-    private void setCredentialState(String credentialStateString, Credential credential){
+    private void setCredentialState(String credentialStateString, Credential credential) {
         Optional<CredentialState> credentialState = credentialStateRepository.findByStateName(credentialStateString);
         credentialState.ifPresent(credential::setCredentialState);
     }
@@ -355,9 +366,9 @@ public class DidiService {
         return null;
     }
 
-    private void updateAppUserStatus(Long dni, ArrayList<DidiAppUser> didiAppUsers){
+    private void updateAppUserStatus(Long dni, ArrayList<DidiAppUser> didiAppUsers) {
         DidiAppUser didiAppUser = findAppUserDidByDni(dni, didiAppUsers);
-        if (didiAppUser!=null) {
+        if (didiAppUser != null) {
             didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
             didiAppUserRepository.save(didiAppUser);
         }

@@ -23,10 +23,6 @@ public class Loan extends AuditableEntity {
 
     @PrePersist
     private void preSetValues(){
-      //  if(this.isActive == null)
-        //    this.isActive = true;
-        //if(this.isDeleted == null)
-          //  this.isDeleted = false;
         if(this.hasCredential == null)
             this.hasCredential = false;
     }
@@ -37,12 +33,6 @@ public class Loan extends AuditableEntity {
     private Long id;
 
     private Long dniPerson;
-
-    //@Column(columnDefinition = "boolean default true") //TODO check this functionality. Is not working
-    //private Boolean isActive;
-
-    //@Column(columnDefinition = "boolean default false")
-   // private Boolean isDeleted;
 
     private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 

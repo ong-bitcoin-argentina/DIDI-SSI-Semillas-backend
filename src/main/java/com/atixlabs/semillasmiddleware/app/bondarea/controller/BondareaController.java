@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -39,9 +40,7 @@ public class BondareaController {
         List<Loan> loans;
         try {
             LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            //loansDto = bondareaService.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
-            loansDto = bondareaService.getLoansMockSecond("","", "");
-            //loansDto = bondareaService.getLoansMockSecond("","");
+            loansDto = bondareaService.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
             loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);
             bondareaService.setPendingLoansFinalStatus();

@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.bondareaService;
 
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -46,11 +47,9 @@ public class BondareaServiceTest {
         Loan loan = new Loan();
         loan.setDniPerson(123456L);
         loan.setIdBondareaLoan("1a");
-        loan.setStatusFullDescription("Activo");
+        //loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
         loan.setExpiredAmount((float) 0);
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
-        loan.setStatus(55);
-        loan.setPending(false);
 
         return loan;
     }
@@ -191,10 +190,10 @@ public class BondareaServiceTest {
         List<Loan> loansSaves = captor.getAllValues();
 
         Assertions.assertTrue(loansSaves.size() > firstLoansData().size());
-        Assertions.assertEquals(true, loansSaves.get(4).getPending());
-        Assertions.assertTrue(loansSaves.get(1).getTagBondareaLoan() != firstLoansData().get(2).getTagBondareaLoan());
+        Assertions.assertEquals(LoanStatusCodes.PENDING.getCode(), loansSaves.get(4).getStatus());
+        Assertions.assertFalse(loansSaves.get(1).getTagBondareaLoan().equals(firstLoansData().get(2).getTagBondareaLoan()));
 
-        List<Loan> pendingLoans = loansSaves.stream().filter(loan -> loan.getPending() == true).collect(Collectors.toList());
+        List<Loan> pendingLoans = loansSaves.stream().filter(loan -> loan.getStatus().equals(LoanStatusCodes.PENDING.getCode())).collect(Collectors.toList());
         Assertions.assertEquals(1, pendingLoans.size() );
 
     }
@@ -217,12 +216,21 @@ public class BondareaServiceTest {
         Assertions.assertTrue(loansSaves.size() > firstLoansData().size());
 
         //the active loans will be all. But some are pending -> 3
-        List<Loan> activeLoans = loansSaves.stream().filter(loan -> loan.getPending() == false).collect(Collectors.toList());
+        List<Loan> activeLoans = loansSaves.stream().filter(loan -> loan.getStatus().equals(LoanStatusCodes.ACTIVE.getCode())).collect(Collectors.toList());
         Assertions.assertEquals(3, activeLoans.size() );
 
         // the pending loans will be the older loans in this case -> 4
-        List<Loan> pendingLoans = loansSaves.stream().filter(loan -> loan.getPending() == true).collect(Collectors.toList());
+        List<Loan> pendingLoans = loansSaves.stream().filter(loan -> loan.getStatus().equals(LoanStatusCodes.PENDING.getCode())).collect(Collectors.toList());
         Assertions.assertEquals(4, pendingLoans.size() );
+
+    }
+
+    @Test
+    public void determinatePendingLoanToFinish(){
+      //  when(loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode())).thenReturn(pendientes);
+        //when(bondareaService.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), anyString(),"")).thenReturn(vuelve 1 l)
+    //TODO
+
 
     }
 

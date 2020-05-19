@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.credentialService;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
@@ -122,14 +123,10 @@ public class CredentialServiceTest {
         loan.setIdBondareaLoan("1a");
         loan.setIdGroup("group1");
         loan.setCycleDescription("Ciclo 1");
-        loan.setStatusDescription("");
-        loan.setStatusFullDescription("Activo");
+        loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
         loan.setHasCredential(true);
         loan.setExpiredAmount((float) 0);
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
-        loan.setStatus(55);
-        loan.setPending(false);
-
         return loan;
     }
 
@@ -142,7 +139,7 @@ public class CredentialServiceTest {
 
     private Loan getLoanWithFinishState(){
         Loan loan = getMockLoan();
-        loan.setStatus(60);
+        loan.setStatus(LoanStatusCodes.FINALIZED.getCode());
 
         return loan;
     }
@@ -264,13 +261,12 @@ public class CredentialServiceTest {
         credential1.setIdGroup(loan.getIdGroup());
         credential1.setCurrentCycle(loan.getCycleDescription());
         credential1.setAmountExpiredCycles(0);
-        credential1.setCreditState(loan.getStatusDescription());
+        credential1.setCreditState(loan.getStatus());
         credential1.setExpiredAmount(loan.getExpiredAmount());
         credential1.setCreationDate(loan.getCreationDate());
         credential1.setBeneficiaryDni(personMock.getDocumentNumber());
         credential1.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credential1.setBeneficiary(personMock);
-
 
         credential1.setIdDidiCredential(1234L);
         credential1.setIdDidiReceptor(1234L);
@@ -290,7 +286,7 @@ public class CredentialServiceTest {
         credential1.setIdGroup(loan.getIdGroup());
         credential1.setCurrentCycle(loan.getCycleDescription());
         credential1.setAmountExpiredCycles(0);
-        credential1.setCreditState(loan.getStatusDescription());
+        credential1.setCreditState(loan.getStatus());
         credential1.setExpiredAmount(loan.getExpiredAmount());
         credential1.setCreationDate(loan.getCreationDate());
         credential1.setBeneficiaryDni(personMock.getDocumentNumber());
@@ -556,7 +552,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
         Assertions.assertTrue(creditSaved.getIdHistorical() == creditSaved.getId());
 
         //benefit
@@ -603,7 +599,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(null, creditSaved.getIdDidiCredential());
         Assertions.assertEquals(null, creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
 
         //benefit
         Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
@@ -648,7 +644,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
     }
 
     @Test
@@ -744,7 +740,7 @@ public class CredentialServiceTest {
         Assertions.assertEquals(creditOld.getIdHistorical(), creditUpdate.getIdHistorical());
         Assertions.assertEquals(creditOld.getAmountExpiredCycles(), creditUpdate.getAmountExpiredCycles());
         Assertions.assertEquals(creditOld.getExpiredAmount(), creditUpdate.getExpiredAmount());
-        Assertions.assertEquals(getMockLoan().getStatusDescription(), creditUpdate.getCreditState());
+        Assertions.assertEquals(getMockLoan().getStatus(), creditUpdate.getCreditState());
         Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), creditOld.getCredentialState().getStateName());
     }
 
@@ -784,7 +780,7 @@ public class CredentialServiceTest {
         Assertions.assertEquals(creditOld.getIdHistorical(), creditUpdate.getIdHistorical());
         Assertions.assertEquals(creditOld.getAmountExpiredCycles(), creditUpdate.getAmountExpiredCycles());
         Assertions.assertEquals(creditOld.getExpiredAmount(), creditUpdate.getExpiredAmount());
-        Assertions.assertEquals(loan.getStatusDescription(), creditUpdate.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditUpdate.getCreditState());
         Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), creditOld.getCredentialState().getStateName());
     }
 
@@ -823,7 +819,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditUpdate.getDateOfIssue());
         Assertions.assertEquals(creditOld.getIdHistorical(), creditUpdate.getIdHistorical());
         Assertions.assertEquals(creditOld.getExpiredAmount(), creditUpdate.getExpiredAmount());
-        Assertions.assertEquals(loan.getStatusDescription(), creditUpdate.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditUpdate.getCreditState());
         Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), creditOld.getCredentialState().getStateName());
     }
     

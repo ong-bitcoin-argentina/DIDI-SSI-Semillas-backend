@@ -12,4 +12,6 @@ import java.util.Optional;
 @Repository
 public interface ParameterConfigurationRepository extends JpaRepository<ParameterConfiguration, Long> {
 
+    Optional<ParameterConfiguration> findByConfigurationName(String configName);
+
 }

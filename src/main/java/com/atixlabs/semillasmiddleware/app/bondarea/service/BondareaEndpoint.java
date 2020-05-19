@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
@@ -17,11 +18,7 @@ public interface BondareaEndpoint {
                                         @Query(value = "idm") String idm,
                                       //  @Query("idCuenta") String idCuenta,
                                         @Query(value = "cols") String columns,
-                                        @Query(value = "estados") String states);
-
-
-    // second endpoint to validate one persona and their loan status -> validar
-
-
-
-}
+                                        @Query(value = "estados") String states,
+                                        @Query(value = "idPrestamo") String idLoan,
+                                        @Query(value = "fechaCalculo") String date);
+    }

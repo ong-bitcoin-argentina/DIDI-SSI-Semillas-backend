@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
+import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
@@ -193,9 +194,10 @@ public class DBInitializer implements CommandLineRunner {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));
         }
 
-        if(!parameterConfigurationRepository.findById(1L).isPresent()){
+        if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
             configuration.setExpiredAmountMax((float) 10250);
+            configuration.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
             parameterConfigurationRepository.save(configuration);
         }
 

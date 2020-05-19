@@ -38,9 +38,6 @@ public abstract class Credential extends AuditableEntity {
 
     protected LocalDateTime dateOfRevocation;
 
-    //private Long idRelatedCredential; //TODO: Cual es la finalidad ? Si se asocia las credenciales del titular deberia estar en credentialCredit ya
-                                      // ya que es la credencial principal. Las credcenciales familiares se pueden encontrar filtrando a las personas que
-                                      // asociado el dni del titular
 
     @ManyToOne
     protected Person creditHolder;

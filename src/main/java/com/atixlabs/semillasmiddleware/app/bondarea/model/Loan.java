@@ -6,6 +6,7 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -17,16 +18,11 @@ import java.time.format.DateTimeFormatter;
 @Entity
 @Table
 @ToString
+@Slf4j
 public class Loan extends AuditableEntity {
 
     @PrePersist
     private void preSetValues(){
-        if(this.isActive == null)
-            this.isActive = true;
-        if(this.isDeleted == null)
-            this.isDeleted = false;
-        if(this.pending == null)
-            this.pending = false;
         if(this.hasCredential == null)
             this.hasCredential = false;
     }
@@ -38,24 +34,11 @@ public class Loan extends AuditableEntity {
 
     private Long dniPerson;
 
-    //@Column(columnDefinition = "boolean default true") //TODO check this functionality. Is not working
-    private Boolean isActive;
-
-    //@Column(columnDefinition = "boolean default false")
-    private Boolean isDeleted;
-
     private String idBondareaLoan; // ID del crédito individual. Para créditosgrupales representa el tramo del crédito grupal   (Ej. B26F5FKZ)
 
     private String tagBondareaLoan; // Nombre del producto de préstamo (Ej. Recurrentes) //TODO credit type
 
-    private String statusDescription; // Estado del préstamo (Ej. Preparación, Activo, Finalizado)
-
-    private int status; // Estado numérico del préstamo (Ej.0=Preparación, 55= Activo, 60=finalizado)
-
-    private String statusFullDescription; // Deccripcion de estado ?
-
-    //@Column(columnDefinition = "boolean default false")
-    private Boolean pending;
+    private String status;
 
     private String idProductLoan;  //ID de producto de préstamo (Ej.  B26F5FKZ)
 
@@ -89,11 +72,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        this.statusFullDescription =  loanDto.getStatusFullDescription();
-
-        this.status =   loanDto.getStatus();
-
-        this.statusFullDescription =  loanDto.getStatusFullDescription();
+        //this.status =   loanDto.getStatus();
 
         this.idProductLoan =   loanDto.getIdProductLoan();
 
@@ -109,13 +88,18 @@ public class Loan extends AuditableEntity {
 
         this.expiredAmount =   loanDto.getExpiredAmount();
 
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
-        if(loanDto.getDateFirstInstalment() != null) {
-            this.dateFirstInstalment = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
-        }
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+            if (loanDto.getDateFirstInstalment() != null) {
+                this.dateFirstInstalment = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+            }
 
-        if(loanDto.getCreationDate() != null) {
-            this.creationDate = LocalDate.parse(loanDto.getCreationDate(), formatter);
+            if (loanDto.getCreationDate() != null) {
+                this.creationDate = LocalDate.parse(loanDto.getCreationDate(), formatter);
+            }
+        }
+        catch (Exception ex){
+            log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanDto.getCreationDate());
         }
 
     }
@@ -132,11 +116,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanToUpdate.getTagBondareaLoan();
 
-        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
-
         this.status = loanToUpdate.getStatus();
-
-        this.statusFullDescription = loanToUpdate.getStatusFullDescription();
 
         this.idProductLoan = loanToUpdate.getIdProductLoan();
 

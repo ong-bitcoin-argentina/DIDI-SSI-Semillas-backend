@@ -109,24 +109,6 @@ public class CredentialController {
                 log.error(ex.getMessage());
             }
         }
-
-            List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
-            //if loan has been modified after the credential credit
-            for (Loan loan : loansWithCredentials) {
-                CredentialCredit creditToUpdate = credentialService.validateCredentialCreditToUpdate(loan);
-                if (creditToUpdate != null) {
-                    try {
-                        credentialService.updateCredentialCredit(loan, creditToUpdate);
-                    } catch (NoExpiredConfigurationExists ex) {
-                        log.error(ex.getMessage());
-                    } catch (PersonDoesNotExists ex) {
-                        log.error(ex.getMessage());
-                    }
-                    catch (Exception ex){
-                        log.error(ex.getMessage());
-                    }
-                }
-            }
         }
 
 }

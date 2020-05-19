@@ -51,7 +51,7 @@ public class CredentialCredit extends Credential {
         this.totalCycles = credentialCredit.totalCycles;
         this.amountExpiredCycles = credentialCredit.amountExpiredCycles;
         this.creditState = credentialCredit.creditState;
-        this.finalizedTime = credentialCredit.finalizedTime;
+        this.finishDate = credentialCredit.finishDate;
         this.expiredAmount = credentialCredit.expiredAmount;
     }
 

@@ -6,6 +6,7 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 @Repository
@@ -16,7 +17,7 @@ public interface CredentialRepository extends JpaRepository<Credential, Long> , 
 
     ArrayList<Credential> findByCredentialCategoryAndCredentialState(String code, CredentialState credentialStatePending);
 
-    Optional<Credential> findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(Long beneficiaryDni, String credentialCategoryCode, ArrayList<CredentialState> credentialStateActivePending);
+    Optional<Credential> findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(Long beneficiaryDni, String credentialCategoryCode, List<CredentialState> credentialStateActivePending);
 
     ArrayList<Credential> findByCreditHolderDniIn(ArrayList<Long> dniList);
 

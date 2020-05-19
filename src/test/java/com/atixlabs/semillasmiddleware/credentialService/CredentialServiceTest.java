@@ -168,8 +168,8 @@ public class CredentialServiceTest {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        benefits.setIdDidiCredential(1234L);
-        benefits.setIdDidiReceptor(1234L);
+        benefits.setIdDidiCredential("1234L");
+        benefits.setIdDidiReceptor("1234L");
 
         return  Optional.of(benefits);
     }
@@ -526,7 +526,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get());
@@ -573,7 +573,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(Optional.of(getBeneficiaryMockWithoutDID()));
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialPendingState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getPendingCredentialHolderBenefitMock(getPersonMockWithDid().get()));
@@ -620,7 +620,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
 
         //credential benefits
@@ -715,7 +715,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(getCredentialPendingState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.findByIdGroupAndCredentialStateIn(anyString(), anyList())).thenReturn(List.of(creditCreated));
         when(parameterConfigurationRepository.findByConfigurationName(anyString())).thenReturn(getParamConfiguration());
 

@@ -27,8 +27,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     private JwtAuthenticationEntryPoint jwtAuthenticationEntryPoint;
     @Autowired
     private UserDetailsService jwtUserDetailsService;
-    @Autowired
-    private JwtRequestFilter jwtRequestFilter;
+
+    @Bean
+    public JwtRequestFilter jwtAuthenticationFilter() {
+        return new JwtRequestFilter();
+    }
+
 
    /* @Autowired
     public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
@@ -103,12 +107,12 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authorizeRequests()
                 .antMatchers(AUTH_WHITELIST)
                 .permitAll()
-                .antMatchers("/auth/login")
+                .antMatchers("/auth/login/**")
                 .permitAll()
                 .anyRequest()
                 .authenticated();
 
-        httpSecurity.addFilterBefore(jwtRequestFilter, UsernamePasswordAuthenticationFilter.class);
+        httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
 

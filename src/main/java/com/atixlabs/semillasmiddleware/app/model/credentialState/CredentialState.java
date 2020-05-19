@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.credentialState;
 
+import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
@@ -11,7 +12,7 @@ import javax.persistence.*;
 @Setter
 @Table
 @ToString
-public class CredentialState {
+public class CredentialState extends AuditableEntity {
 
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)

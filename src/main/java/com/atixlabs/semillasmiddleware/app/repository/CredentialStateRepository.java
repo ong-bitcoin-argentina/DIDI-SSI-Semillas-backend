@@ -14,5 +14,6 @@ public interface CredentialStateRepository extends JpaRepository<CredentialState
 
     Optional<CredentialState> findByStateName(String state);
 
-    List<CredentialState> findByStateNameIn(List<String> statesCodes);
+    List<CredentialState> findByStateNameIn(List<String> statesCodesArrayList);
+
 }

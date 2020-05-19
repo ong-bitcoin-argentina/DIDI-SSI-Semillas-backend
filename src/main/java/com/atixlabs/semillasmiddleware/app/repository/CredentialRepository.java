@@ -12,7 +12,6 @@ import java.util.Optional;
 @Repository
 public interface CredentialRepository extends JpaRepository<Credential, Long> , CredentialRepositoryCustom{
 
-
     ArrayList<Credential> findByCredentialStateAndBeneficiaryDniIn(CredentialState credentialState, ArrayList<Long> dniList);
 
     ArrayList<Credential> findByCredentialCategoryAndCredentialState(String code, CredentialState credentialStatePending);

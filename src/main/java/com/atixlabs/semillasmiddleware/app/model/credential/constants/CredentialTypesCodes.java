@@ -1,5 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 
+import java.util.Arrays;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public enum CredentialTypesCodes {
 
     CREDENTIAL_CREDIT("Crediticia"),
@@ -18,5 +22,11 @@ public enum CredentialTypesCodes {
 
     public String getCode() {
         return this.code;
+    }
+
+    static final Map<String, CredentialTypesCodes> codeMap = Arrays.stream(values()).collect(Collectors.toMap(CredentialTypesCodes::getCode, p->p));
+
+    public static CredentialTypesCodes getEnumByStringValue(String codeString) {
+        return codeMap.get(codeString);
     }
 }

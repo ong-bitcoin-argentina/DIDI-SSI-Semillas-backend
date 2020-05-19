@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.model.credential.constants;
 
-import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 
 import java.util.Arrays;
 import java.util.Map;

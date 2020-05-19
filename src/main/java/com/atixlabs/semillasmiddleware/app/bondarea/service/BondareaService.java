@@ -103,7 +103,7 @@ public class BondareaService {
     private BondareaLoanDto getMockBondareaLoan(){
         BondareaLoanDto loan = new BondareaLoanDto();
         loan.setIdBondareaLoan("1L");
-        loan.setDni(24580963L);
+        loan.setDni(24580963L); //dni from survey_ok
         loan.setStatusFullDescription("Activo");
         loan.setIdGroup("group1");
         loan.setAmount((float) 1000);

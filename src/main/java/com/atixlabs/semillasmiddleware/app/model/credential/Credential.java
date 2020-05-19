@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -11,6 +12,7 @@ import javax.persistence.*;
 import java.io.Serializable;
 import java.time.LocalDateTime;
 
+@NoArgsConstructor
 @Getter
 @Setter
 @Table(name = "credential")
@@ -21,36 +23,63 @@ public abstract class Credential extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
+    protected Long id;
 
-    private Long idDidiIssuer;
+    protected String idDidiIssuer;//fixed value given by semillas
 
-    private Long idDidiReceptor;
+    protected String idDidiReceptor;//value generated from user when downloading the app.
 
     @Column(unique = true)
-    private Long idDidiCredential;
+    protected String idDidiCredential;//value returned from didi when issuing the credential.
 
-    private Long idHistorical;
+    protected Long idHistorical;
 
-    private LocalDateTime dateOfIssue;
+    protected LocalDateTime dateOfIssue;
 
-    private LocalDateTime dateOfRevocation;
+    protected LocalDateTime dateOfRevocation;
 
-
-    @ManyToOne
-    private Person creditHolder;
-    private Long creditHolderDni;
-    private String creditHolderName;
 
     @ManyToOne
-    private Person beneficiary;
-    private Long beneficiaryDni;
-    private String beneficiaryName;
+    protected Person creditHolder;
+    protected Long creditHolderDni;
+    protected String creditHolderFirstName;
+    protected String creditHolderLastName;
 
     @ManyToOne
-    private CredentialState credentialState;
+    protected Person beneficiary;
+    protected Long beneficiaryDni;
+    protected String beneficiaryFirstName;
+    protected String beneficiaryLastName;
 
-    private String credentialDescription;
+    @ManyToOne
+    protected CredentialState credentialState;
 
-    private String credentialCategory;
+    protected String credentialDescription;
+
+    protected String credentialCategory;
+
+    public Credential(Credential credential){
+        //this.id = credential.id;//id is not copied to save as new Credential.
+        this.id = null;
+        this.idDidiIssuer = credential.idDidiIssuer;
+        this.idDidiReceptor = credential.idDidiReceptor;
+        this.idDidiCredential = credential.idDidiCredential;
+        this.idHistorical = credential.idHistorical;
+        this.dateOfIssue = credential.dateOfIssue;
+        this.dateOfRevocation = credential.dateOfRevocation;
+
+        this.creditHolder = credential.creditHolder;
+        this.creditHolderDni = credential.creditHolderDni;
+        this.creditHolderFirstName = credential.creditHolderFirstName;
+        this.creditHolderLastName = credential.creditHolderLastName;
+
+        this.beneficiary = credential.beneficiary;
+        this.beneficiaryDni = credential.beneficiaryDni;
+        this.beneficiaryFirstName = credential.beneficiaryFirstName;
+        this.beneficiaryLastName = credential.beneficiaryLastName;
+
+        this.credentialState = credential.credentialState;
+        this.credentialDescription = credential.credentialDescription;
+        this.credentialCategory = credential.credentialCategory;
+    }
 }

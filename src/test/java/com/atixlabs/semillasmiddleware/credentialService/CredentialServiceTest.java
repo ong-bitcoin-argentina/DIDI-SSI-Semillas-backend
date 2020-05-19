@@ -156,8 +156,8 @@ public class CredentialServiceTest {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        benefits.setIdDidiCredential(1234L);
-        benefits.setIdDidiReceptor(1234L);
+        benefits.setIdDidiCredential("1234L");
+        benefits.setIdDidiReceptor("1234L");
 
         return  Optional.of(benefits);
     }
@@ -171,8 +171,8 @@ public class CredentialServiceTest {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        benefits.setIdDidiCredential(1234L);
-        benefits.setIdDidiReceptor(1234L);
+        benefits.setIdDidiCredential("1234L");
+        benefits.setIdDidiReceptor("1234L");
 
         return  Optional.of(benefits);
     }
@@ -229,7 +229,7 @@ public class CredentialServiceTest {
 
         CredentialCredit credential1 = new CredentialCredit();
         credential1.setId(1L);
-        credential1.setIdDidiCredential(2L);
+        credential1.setIdDidiCredential("2L");
         credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfRevocation(LocalDateTime.now().plusDays(14));
@@ -243,7 +243,8 @@ public class CredentialServiceTest {
         credentialIdentity.setId(2L);
         credentialIdentity.setCreditHolderDni(34534534L);
         credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-        credentialIdentity.setBeneficiaryName("Pepito");
+        credentialIdentity.setBeneficiaryFirstName("Pepito");
+        credentialIdentity.setBeneficiaryFirstName("Pepito Apellido");
         credentialIdentity.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
         credentialIdentity.setDateOfIssue(DateUtil.getLocalDateTimeNow().minusDays(14));
         credentialIdentity.setBeneficiary(beneficiary);
@@ -254,7 +255,8 @@ public class CredentialServiceTest {
         credentialIdentity2.setId(3L);
         credentialIdentity2.setCreditHolderDni(34534534L);
         credentialIdentity2.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-        credentialIdentity2.setBeneficiaryName("Pepito");
+        credentialIdentity2.setBeneficiaryFirstName("Pepito");
+        credentialIdentity2.setBeneficiaryLastName("Pepito Apellido");
         credentialIdentity2.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
         credentialIdentity2.setDateOfIssue(DateUtil.getLocalDateTimeNow().minusDays(14));
         credentialIdentity2.setBeneficiary(beneficiary);
@@ -282,8 +284,9 @@ public class CredentialServiceTest {
         credential1.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credential1.setBeneficiary(personMock);
 
-        credential1.setIdDidiCredential(1234L);
-        credential1.setIdDidiReceptor(1234L);
+
+        credential1.setIdDidiCredential("1234L");
+        credential1.setIdDidiReceptor("1234L");
 
         credential1.setIdHistorical(1L);
 
@@ -330,7 +333,7 @@ public class CredentialServiceTest {
         DIDHisotoric didi = new DIDHisotoric();
         didi.setId(1L);
         didi.setActive(true);
-        didi.setIdDidiReceptor(1234L);
+        didi.setIdDidiReceptor("1234L");
         didi.setIdPerson(1245L);
         return didi;
     }
@@ -528,7 +531,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(any(Long.class))).thenReturn(Optional.of(new Person()));
         when(personRepository.save(any(Person.class))).thenReturn(createPersonMock());
 
-        when(credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
+        when(credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                 anyLong(),//beneficiaryDni,
                 anyString(),//credentialCategoryCode,
                 any(ArrayList.class)//credentialStateActive
@@ -551,7 +554,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get());
@@ -598,7 +601,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(Optional.of(getBeneficiaryMockWithoutDID()));
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialPendingState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getPendingCredentialHolderBenefitMock(getPersonMockWithDid().get()));
@@ -645,7 +648,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
 
         //credential benefits
@@ -740,7 +743,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(getCredentialPendingState());
-        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
         when(credentialCreditRepository.findByIdGroupAndCredentialStateIn(anyString(), anyList())).thenReturn(List.of(creditCreated));
         when(parameterConfigurationRepository.findByConfigurationName(anyString())).thenReturn(getParamConfiguration());
 

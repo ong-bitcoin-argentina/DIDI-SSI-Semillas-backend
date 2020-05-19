@@ -16,7 +16,7 @@ public class DIDHisotoric extends AuditableEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idDidiReceptor;
+    private String idDidiReceptor;
 
     private Long idPerson;
 

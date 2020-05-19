@@ -16,4 +16,9 @@ import javax.persistence.PrimaryKeyJoinColumn;
 public class CredentialBenefits extends Credential{
 
     private String beneficiaryType;
+
+    public CredentialBenefits(CredentialBenefits credentialBenefits) {
+        super(credentialBenefits);
+        this.beneficiaryType = credentialBenefits.beneficiaryType;
+    }
 }

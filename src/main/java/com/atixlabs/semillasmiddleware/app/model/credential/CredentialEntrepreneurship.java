@@ -30,4 +30,16 @@ public class CredentialEntrepreneurship extends Credential {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endActivity;
+
+
+    public CredentialEntrepreneurship(CredentialEntrepreneurship credentialEntrepreneurship){
+        super(credentialEntrepreneurship);
+        this.entrepreneurshipType = credentialEntrepreneurship.entrepreneurshipType;
+        this.startActivity = credentialEntrepreneurship.startActivity;
+        this.mainActivity = credentialEntrepreneurship.mainActivity;
+        this.entrepreneurshipName = credentialEntrepreneurship.entrepreneurshipName;
+        this.entrepreneurshipAddress = credentialEntrepreneurship.entrepreneurshipAddress;
+        this.endActivity = credentialEntrepreneurship.endActivity;
+    }
+
 }

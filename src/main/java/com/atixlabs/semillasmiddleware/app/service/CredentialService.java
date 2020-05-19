@@ -145,7 +145,7 @@ public class CredentialService {
 
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
 
-        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
+        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                 beneficiaryDni,
                 credentialCategoryCode,
                 credentialStateActivePending
@@ -220,13 +220,15 @@ public class CredentialService {
         credential.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credential.setCreditHolder(creditHolder);
         credential.setCreditHolderDni(creditHolder.getDocumentNumber());
-        credential.setCreditHolderName(creditHolder.getFirstName() + " " + creditHolder.getLastName());
+        credential.setCreditHolderFirstName(creditHolder.getFirstName());
+        credential.setCreditHolderLastName(creditHolder.getLastName());
 
         //the beneficiary is the same as the credit holder for all credentials but identity
         //buildIdentityCredential overwrites this value with the different members.
         credential.setBeneficiary(creditHolder);
         credential.setBeneficiaryDni(creditHolder.getDocumentNumber());
-        credential.setBeneficiaryName(creditHolder.getFirstName() + " " + creditHolder.getLastName());
+        credential.setBeneficiaryFirstName(creditHolder.getFirstName());
+        credential.setBeneficiaryLastName(creditHolder.getLastName());
 
         //credential.setCredentialStatus(CredentialStatusCodes.CREDENTIAL_PENDING_BONDAREA.getCode());
         Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
@@ -243,7 +245,8 @@ public class CredentialService {
 
         credentialIdentity.setBeneficiary(beneficiary);
         credentialIdentity.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        credentialIdentity.setBeneficiaryName(beneficiary.getFirstName() + " " + beneficiary.getLastName());
+        credentialIdentity.setBeneficiaryFirstName(beneficiary.getFirstName());
+        credentialIdentity.setBeneficiaryLastName(beneficiary.getLastName());
 
         credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
 
@@ -350,11 +353,13 @@ public class CredentialService {
         //Added Modification CreditHolderDni and CreditHolderId
         credentialCredit.setBeneficiary(beneficiary);
         credentialCredit.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        credentialCredit.setBeneficiaryName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+        credentialCredit.setBeneficiaryFirstName(beneficiary.getFirstName());
+        credentialCredit.setBeneficiaryLastName(beneficiary.getLastName());
 
         credentialCredit.setCreditHolderDni(beneficiary.getDocumentNumber());
         credentialCredit.setCreditHolder(beneficiary);
-        credentialCredit.setCreditHolderName(beneficiary.getFirstName()+" "+beneficiary.getLastName());
+        credentialCredit.setCreditHolderFirstName(beneficiary.getFirstName());
+        credentialCredit.setCreditHolderLastName(beneficiary.getLastName());
         //End creditHolder changes
 
         //Credential Parent fields
@@ -382,7 +387,7 @@ public class CredentialService {
 
         //This depends of the type of loan from bondarea
         credentialCredit.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
-        credentialCredit.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());// TODO this column will be no longer useful
+        credentialCredit.setCredentialCategory(CredentialCategoriesCodes.CREDIT.getCode());// TODO this column will be no longer useful
 
         return credentialCredit;
     }
@@ -421,11 +426,11 @@ public class CredentialService {
             //Person is holder or family
             if (personType.equals(PersonTypesCodes.HOLDER)) {
                 benefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
-                benefits.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
+                benefits.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
                 benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
             } else {
                 benefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
-                benefits.setCredentialCategory(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
+                benefits.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
                 benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
             }
 
@@ -435,12 +440,14 @@ public class CredentialService {
             //Added Modification CreditHolderDni and CreditHolderId
             benefits.setBeneficiary(beneficiary);
             benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
-            benefits.setBeneficiaryName(beneficiary.getFirstName() + " " + beneficiary.getLastName());
+            benefits.setBeneficiaryFirstName(beneficiary.getFirstName());
+            benefits.setBeneficiaryLastName(beneficiary.getLastName());
 
 
             benefits.setCreditHolderDni(beneficiary.getDocumentNumber());
             benefits.setCreditHolder(beneficiary);
-            benefits.setCreditHolderName(beneficiary.getFirstName() + " " + beneficiary.getLastName());
+            benefits.setCreditHolderFirstName(beneficiary.getFirstName());
+            benefits.setCreditHolderLastName(beneficiary.getLastName());
             //End creditHolder changes
 
             //TODO this should be took from DB - credentialCredit.setIdDidiIssuer();

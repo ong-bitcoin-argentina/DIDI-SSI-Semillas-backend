@@ -334,7 +334,7 @@ public class CredentialService {
     }
 
 
-    private CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
+    public CredentialCredit buildCreditCredential(Loan loan, Person beneficiary){
         CredentialCredit credentialCredit = new CredentialCredit();
         credentialCredit.setIdBondareaCredit(loan.getIdBondareaLoan());
         // TODO we need the type from bondarea - credentialCredit.setCreditType();
@@ -515,9 +515,9 @@ public class CredentialService {
         if (opBeneficiary.isPresent()) {
             CredentialCredit updateCredit = this.buildCreditCredential(loan, opBeneficiary.get());
             updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
-            //set the amount expired cycles of the previous credential to accumulate the expired cycles
+            //set the amount expired cycles of thque  previous credential to accumulate the expired cycles
             updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
-            credentialCreditRepository.save(updateCredit);
+            updateCredit = credentialCreditRepository.save(updateCredit);
 
 
             // if credit is finalized credential will be revoke
@@ -525,7 +525,16 @@ public class CredentialService {
                 updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
                 credentialCreditRepository.save(updateCredit);
                 log.info("Credential Credit is set to finalize, for credential id " + credit.getId());
-                //TODO No se revoca credito pero beneficio si, si este fuera su unico credito (logica de revocacion)
+
+                //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
+                List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
+                //there have to be only 1. The holder only have at max 1 holder benefits.
+                if(benefitsHolder.size() > 0)
+                    this.revokeCredential(updateCredit.getId());
+                else {
+                    log.info("There is no active or pending benefits of the holder to be revoked");
+                }
             }
             else{
                 if(loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())){
@@ -533,6 +542,8 @@ public class CredentialService {
                     credentialCreditRepository.save(updateCredit);
                     log.info("Credential Credit is set to cancelled, for credential id " + credit.getId());
                     // TODO revoke and set to deleted the loan ? if the loan is set to delete, activate the revoke
+                    //revoke the whole group including the benefits of them and his familiars
+                    this.revokeCredential(updateCredit.getId());
                 }
                 else {
                     List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
@@ -624,6 +635,7 @@ public class CredentialService {
                 case CREDENTIAL_BENEFITS_FAMILY:
                     this.revokeComplete(credentialToRevoke);
                     break;
+
                 case CREDENTIAL_IDENTITY:
                     //find all the identities that the dni of the holder is into. (with state active or pending)
                     List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
@@ -636,7 +648,9 @@ public class CredentialService {
                     for (Credential credential : holderIdentities) {
                         this.revokeComplete(credential);
                     }
+
                     break;
+
                 case CREDENTIAL_IDENTITY_FAMILY:
                     //revoke the identities of the familiar: the one created by the survey and if it exists, the one created because the person download the app. (with state active or pending)
                     activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
@@ -652,17 +666,22 @@ public class CredentialService {
                     break;
                     
                 case CREDENTIAL_BENEFITS:
-                    //revoke if the holder does not have another credit and revoke benefits family, if the familiar does not have a credit too.
+                    //revoke if the holder does not have another credit and revoke benefits family, and all the familiars.
                     activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
                     List<CredentialCredit> creditsActivePending = credentialCreditRepository.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
                     if(creditsActivePending.size() == 0)
                         this.revokeComplete(credentialToRevoke);
                     else {
-                         log.info("Impossible to revoke credential benefit. There is/are credential/s credit in state active or pending.");
+                         log.info("Impossible to revoke credential benefit. There is/are not credential/s credit in state active or pending.");
                          haveRevoke = false;
                     }
+                    //get the familiar benefits in which the holder is within
+                    List<CredentialBenefits> familiarBenefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(credentialToRevoke.getCreditHolderDni(), activePendingStates, PersonTypesCodes.FAMILY.getCode());
+                    for (CredentialBenefits familiarBenefit: familiarBenefits){
+                        this.revokeComplete(familiarBenefit);
+                    }
 
-                    //todo revoke benefits familiar using the dni holder and type familiar
+                    break;
 
                 case CREDENTIAL_CREDIT:
                     //get the credit credential to get the group
@@ -673,7 +692,7 @@ public class CredentialService {
                         List<CredentialCredit> creditsGroup = credentialCreditRepository.findByIdGroupAndCredentialStateIn(credentialCredit.get().getIdGroup(), activePendingStates );
                         //for each holder credit -> revoke credit -> revoke benefits -> revoke familiar benefits
                         for (CredentialCredit credit: creditsGroup) {
-                             this.revokeComplete(credit);
+                             this.revokeComplete(credit); //todo validate succesfull revocation to continue
                              //get benefits with holder dni (holder benefits and familiar benefits)
                              activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
                             List<CredentialBenefits> benefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(credit.getCreditHolderDni(), activePendingStates);
@@ -692,7 +711,8 @@ public class CredentialService {
                          log.error("Error you are trying to revoke ");
                          haveRevoke = false;
                     }
-                    
+
+                    break;
             }
 
         } else {
@@ -710,8 +730,8 @@ public class CredentialService {
      * @param credentialToRevoke
      */
     private void revokeComplete(Credential credentialToRevoke){
-        log.info("Starting revoking process for credential id: "+ credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
         //here is important to manage the different actions, and need to be synchronize at the end.
+        log.info("Starting revoking process for credential id: "+ credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
         //todo call revoke on didi
         boolean revokedOnSemillas = this.revokeOneCredential(credentialToRevoke);
         // validate the whole transaction using revokedOnSemillas and then the check of didi
@@ -731,27 +751,31 @@ public class CredentialService {
         Optional<Credential> credential = credentialRepository.findById(credentialToRevoke.getId());
         if (credential.isEmpty()) {
             haveRevoke = false;
-            log.error("The credential with id: "+ credentialToRevoke.getId() + " is not in the database");
-        }
-
-        //get revoke state
-        Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
-        if (opStateRevoke.isPresent()) {
-            //revoke if the credential is not revoked yet
-            if (credential.get().getCredentialState().equals(opStateRevoke.get())) {
-                log.info("The credential " + credential.get().getId() + " has already been revoked");
-                haveRevoke = false;
-            }
-
-            credentialToRevoke.setCredentialState(opStateRevoke.get());
-            //todo: set the reason of revocation ?
-            credentialToRevoke.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
-            credentialRepository.save(credentialToRevoke);
-            log.info("Credential with id " + credentialToRevoke.getId() + " has been revoked!"); //then append also the reason
+            log.error("The credential with id: " + credentialToRevoke.getId() + " is not in the database");
         } else {
-            haveRevoke = false;
-            log.error("The state revoke could not be found");
+
+            //get revoke state
+            Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+            if (opStateRevoke.isPresent()) {
+                //revoke if the credential is not revoked yet
+                if (credential.get().getCredentialState().equals(opStateRevoke.get())) {
+                    log.info("The credential " + credential.get().getId() + " has already been revoked");
+                    haveRevoke = false;
+                } else {
+
+                    credentialToRevoke.setCredentialState(opStateRevoke.get());
+                    //todo: set the reason of revocation ?
+                    credentialToRevoke.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
+                    credentialRepository.save(credentialToRevoke);
+                    log.info("Credential with id " + credentialToRevoke.getId() + " has been revoked!"); //then append also the reason
+                }
+            } else {
+                haveRevoke = false;
+                log.error("The state revoke could not be found");
+            }
         }
+
+
 
         return haveRevoke;
     }

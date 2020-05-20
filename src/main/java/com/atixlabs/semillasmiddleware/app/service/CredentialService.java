@@ -538,7 +538,7 @@ public class CredentialService {
                 List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
                 //there have to be only 1. The holder only have at max 1 holder benefits.
                 if(benefitsHolder.size() > 0)
-                    this.revokeCredential(updateCredit.getId());
+                    this.revokeCredential(benefitsHolder.get(0).getId());
                 else {
                     log.info("There is no active or pending benefits of the holder to be revoked");
                 }

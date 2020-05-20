@@ -35,7 +35,7 @@ public class BondareaController {
 
     @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoans()  {
+    public ResponseEntity<List<Loan>> synchronizeBondareaLoans()  {
         log.info("BONDAREA - GET LOANS");
         List<BondareaLoanDto> loansDto;
         List<Loan> loans;
@@ -51,7 +51,7 @@ public class BondareaController {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(loansDto, HttpStatus.OK);
+        return new ResponseEntity<>(loans, HttpStatus.OK);
     }
 
 
@@ -63,9 +63,8 @@ public class BondareaController {
      */
     @PostMapping("/synchronizeMock")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson)  {
+    public ResponseEntity<List<Loan>> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson)  {
         log.info("BONDAREA - GET LOANS");
-        List<BondareaLoanDto> loansDto;
         List<Loan> loans;
         try {
           //  LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
@@ -79,7 +78,7 @@ public class BondareaController {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(Collections.emptyList(), HttpStatus.OK);
+        return new ResponseEntity<>(loans, HttpStatus.OK);
     }
 
 

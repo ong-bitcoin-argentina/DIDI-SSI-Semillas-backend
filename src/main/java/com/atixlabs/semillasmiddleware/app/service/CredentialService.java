@@ -485,6 +485,7 @@ public class CredentialService {
             // if it does not have finish date (finishDate indicate that the credit has finished or has been canceled)
             if (opCredit.get().getFinishDate() == null) {
                 CredentialCredit credit = opCredit.get();
+                //todo this validation need to consider the case when the credit group has been revoked
                 if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatus().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
                     // the loan has changed, return credit to be update
                     return credit;
@@ -575,8 +576,10 @@ public class CredentialService {
                             } else {
                                 //if credit has no expired amount
                                 // try to create credential benefits in case holder does not have
+                                //TODO here need to validate if its ok to generate again the benefits
                                 this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER);
                             }
+
 
                         } else {
                             log.error("There is no configuration for getting the maximum expired amount.");
@@ -585,6 +588,7 @@ public class CredentialService {
                     }
                 }
             }
+            log.info("Credential credit updated " + " id: " + updateCredit.getId());
         }
         else {
             log.error("Person had been created and credential credit too, but person has been deleted eventually");
@@ -673,9 +677,9 @@ public class CredentialService {
                     break;
                     
                 case CREDENTIAL_BENEFITS:
-                    //revoke if the holder does not have another credit and revoke benefits family, and all the familiars.
+                    //revoke if the holder does not have another credit(active or pending, and did not finish) and revoke benefits family, and all the familiars.
                     activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialCredit> creditsActivePending = credentialCreditRepository.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
+                    List<CredentialCredit> creditsActivePending = credentialCreditRepository.findByCreditHolderDniAndCredentialStateInAndFinishDateIsNull(credentialToRevoke.getCreditHolderDni(), activePendingStates);
                     if(creditsActivePending.size() == 0)
                         this.revokeComplete(credentialToRevoke);
                     else {

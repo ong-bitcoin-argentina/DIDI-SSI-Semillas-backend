@@ -354,6 +354,7 @@ public class BondareaService {
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
     public void setPendingLoansFinalStatusMock(){
+        log.info("Determinating the final state of the loans in pending state");
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {

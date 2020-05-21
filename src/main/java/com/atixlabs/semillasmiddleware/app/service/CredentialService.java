@@ -515,6 +515,7 @@ public class CredentialService {
      * @throws PersonDoesNotExists
      */
     public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws NoExpiredConfigurationExists, PersonDoesNotExists{
+        log.info("Updating credential credit " + credit.getId());
         // revoke credit -> save id historic
         Long idHistoricCredit = credit.getIdHistorical();
         revokeOneCredential(credit);
@@ -532,7 +533,7 @@ public class CredentialService {
             if (loan.getStatus().equals(LoanStatusCodes.FINALIZED.getCode())){
                 updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
                 credentialCreditRepository.save(updateCredit);
-                log.info("Credential Credit is set to finalize, for credential id " + credit.getId());
+                log.info("Credential Credit is set to finalize, for credential id " + updateCredit.getId());
 
                 //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
                 List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
@@ -548,8 +549,8 @@ public class CredentialService {
                 if(loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())){
                     updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
                     credentialCreditRepository.save(updateCredit);
-                    log.info("Credential Credit is set to cancelled, for credential id " + credit.getId());
-                    // TODO revoke and set to deleted the loan ? if the loan is set to delete, activate the revoke
+                    log.info("Credential Credit is set to cancelled, for credential id " + updateCredit.getId());
+
                     //revoke the whole group including the benefits of them and his familiars
                     this.revokeCredential(updateCredit.getId());
                 }
@@ -568,7 +569,7 @@ public class CredentialService {
                                 cyclesExpired++;
                                 updateCredit.setAmountExpiredCycles(cyclesExpired);
                                 credentialCreditRepository.save(updateCredit);
-                                log.info("Credit is default. Count +1 cycles expired for credential credit id: " + credit.getId());
+                                log.info("Credit is default. Count +1 cycles expired for credential credit id: " + updateCredit.getId());
 
                                 //revoke the whole group including the benefits of them and his familiars
                                 this.revokeCredential(updateCredit.getId());

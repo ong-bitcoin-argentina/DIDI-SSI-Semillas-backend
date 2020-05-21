@@ -405,7 +405,7 @@ public class CredentialService {
                 credentialBenefitsRepository.save(benefits);
                 log.info("Credential Credit created for dni: " + beneficiary.getDocumentNumber());
             } else {
-                log.info("Person with dni " + beneficiary.getDocumentNumber() + " hsd already a credential benefits");
+                log.info("Person with dni " + beneficiary.getDocumentNumber() + " had already a credential benefits");
             }
         }
     }
@@ -549,6 +549,11 @@ public class CredentialService {
                     log.info("Credential Credit is set to cancelled, for credential id " + updateCredit.getId());
 
                     //todo la revocacion no es como la mora. Ver especificaciones
+                    //Revoke each credential credit of the credit group
+                    List<CredentialCredit> creditGroup =  this.getCreditGroup(loan.getIdGroup());
+                    for (CredentialCredit creditOfGroup: creditGroup) {
+                        this.revokeComplete(creditOfGroup);
+                    }
                     //revoke the whole group including the benefits of them and his familiars
                     this.revokeCredential(updateCredit.getId());
                 }
@@ -733,6 +738,11 @@ public class CredentialService {
         return  haveRevoke;
     }
 
+    /**
+     * Get the credit group with the idGroup as long as the credits are not revoked.
+     * @param idGroup
+     * @return List<CredentialCredit>
+     */
     private List<CredentialCredit> getCreditGroup(String idGroup){
         List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
         //get the group that is not revoked

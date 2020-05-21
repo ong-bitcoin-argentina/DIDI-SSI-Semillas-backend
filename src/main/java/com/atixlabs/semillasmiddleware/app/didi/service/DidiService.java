@@ -9,6 +9,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.*;
+import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import lombok.extern.slf4j.Slf4j;
@@ -34,9 +35,13 @@ public class DidiService {
     private DidiEndpoint endpointInterface = null;
     private String didiAuthToken = null;
 
+
+    private DidiAppUserRepository didiAppUserRepository;
+    private DidiAppUserService didiAppUserService;
+
+    private CredentialService credentialService;
     private CredentialRepository credentialRepository;
     private CredentialStateRepository credentialStateRepository;
-    private DidiAppUserRepository didiAppUserRepository;
     private CredentialIdentityRepository credentialIdentityRepository;
     private CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository;
     private CredentialDwellingRepository credentialDwellingRepository;
@@ -68,9 +73,14 @@ public class DidiService {
 */
     @Autowired
     public DidiService(
+            DidiAppUserService didiAppUserService,
+            DidiAppUserRepository didiAppUserRepository,
+
+            CredentialService credentialService,
             CredentialRepository credentialRepository,
             CredentialStateRepository credentialStateRepository,
-            DidiAppUserRepository didiAppUserRepository,
+
+
 
             CredentialIdentityRepository credentialIdentityRepository,
             CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
@@ -84,9 +94,13 @@ public class DidiService {
             @Value("${didi.template_code_entrepreneurship}") String didiTemplateCodeEntrepreneurship,
             @Value("${didi.template_code_dwelling}") String didiTemplateCodeDwelling,
             @Value("${didi.template_code_benefit}") String didiTemplateCodeBenefit) {
+
+        this.didiAppUserService = didiAppUserService;
+        this.didiAppUserRepository = didiAppUserRepository;
+
+        this.credentialService = credentialService;
         this.credentialRepository = credentialRepository;
         this.credentialStateRepository = credentialStateRepository;
-        this.didiAppUserRepository = didiAppUserRepository;
 
         this.credentialIdentityRepository = credentialIdentityRepository;
         this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
@@ -156,52 +170,75 @@ public class DidiService {
     }
 
     public String didiCredentialSync() {
-        log.info("didiCredentialSync:");
+        log.info("didiSync: started");
 
         //1-Busco registros en AppUser con estado SYNC_MISSING O SYNC_ERROR (todo: validar si SYNC_ERROR vuelvo a intentar):
         ArrayList<String> didiSyncStatus = new ArrayList<>();
         didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
-        didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
+        //didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
         ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
 
         if (didiAppUsers.size() <= 0)
-            return "No existen credenciales pendientes para enviar hacia didi";
+            return "didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi";
 
         ArrayList<Long> dniList = new ArrayList<>();
         for (DidiAppUser didiAppUser : didiAppUsers) {
             dniList.add(didiAppUser.getDni());
         }
 
-        //2a-Busco credenciales que tengan el DNI como creditHolder - indica si es titular.
+        //2-Busco credenciales que tengan el DNI como creditHolder - indica si es titular.
         ArrayList<Credential> creditHolders = credentialRepository.findByCreditHolderDniIn(dniList);
-
-        //3-Creo y emito credenciales de titulares
-        for (Credential credential : creditHolders) {
-            //es titular de alguna credito - debo emitir en didi todas las credenciales.
-            String creditHolderReceivedDid = findAppUserDidByDni(credential.getCreditHolderDni(), didiAppUsers).getDid();
-            credential.setIdDidiReceptor(creditHolderReceivedDid);//registro el did recibido
-            createAndEmmitCertificateDidi(credential);
-            updateAppUserStatus(credential.getCreditHolderDni(), didiAppUsers);
-        }
-
-
-        //4-Busco credenciales que tengan el DNI como beneficiary
+        //3-Busco credenciales que tengan el DNI como beneficiary
         ArrayList<Credential> beneficiaries = credentialRepository.findByBeneficiaryDniIn(dniList);
 
-        //5-Invoco a Didi para cada credencial en la lista (todo: validar si tengo que revocar las activas en didi)
-        for (Credential credential : beneficiaries) {
-            //es beneficiario de algun credito - debo emitir solamente su credencial.
-            //IMPORTANT: cuando creditHolder = beneficiary ya se cubrio en el for anterior.
-            if (!credential.getCreditHolderDni().equals(credential.getBeneficiaryDni())) {
-                String beneficiaryReceivedDid = findAppUserDidByDni(credential.getBeneficiaryDni(), didiAppUsers).getDid();
-                credential.setIdDidiReceptor(beneficiaryReceivedDid);//registro el did recibido
-                createAndEmmitCertificateDidi(credential);
-                updateAppUserStatus(credential.getBeneficiaryDni(), didiAppUsers);
-            }
+        if (creditHolders.size()<=0 && beneficiaries.size()<=0)
+            return "didiSync: No existen credenciales pendientes para enviar hacia didi";
+
+        //3-Trabajo sobre cada credencial de beneficiario
+        //  es beneficiario de algun credito - debo emitir solamente su credencial.
+        //  Si getCreditHolderDni() != credential.getBeneficiaryDni() es beneficiario
+        //  IMPORTANT: cuando creditHolder = beneficiary ya se cubrirá en siguiente for
+        for (Credential credentialB : beneficiaries) {
+            if (!credentialB.getCreditHolderDni().equals(credentialB.getBeneficiaryDni()))
+                ahoraLeDefinoNombre(credentialB);
         }
 
-        return "finalizado el proceso de sync";
+        //4-Creo y emito credenciales de titulares
+        for (Credential credentialH : creditHolders) {
+            this.ahoraLeDefinoNombre(credentialH);
+        }
+
+
+
+        log.info("didiSync: ended");
+        return "didiSync: ended";
     }
+
+    private void ahoraLeDefinoNombre(Credential credential){
+        switch (CredentialStatesCodes.getEnumByStringValue(credential.getCredentialState().getStateName())){
+            case CREDENTIAL_ACTIVE:
+                if (credential.getIdDidiCredential() != null) {
+                    log.info("didiSync: 1.a Revocar credenciales de titular activas en didi");
+                    if (this.didiDeleteCertificate(credential.getIdDidiCredential()))
+                        credentialService.revokeCredential(credential.getId());
+                }
+            case PENDING_DIDI:
+                if (credential.getIdDidiCredential() != null) {
+                    log.info("didiSync: 1.b no-break continuo revocacion en semillas");
+                    credentialService.revokeCredential(credential.getId());
+                }
+                log.info("didiSync: 2  doy de alta credenciales nuevas");
+                String creditHolderReceivedDid = didiAppUserRepository.findByDni(credential.getCreditHolderDni()).getDid();
+                credential.setIdDidiReceptor(creditHolderReceivedDid);//registro el did recibido
+                createAndEmmitCertificateDidi(credential);
+                break;
+            case CREDENTIAL_REVOKE:
+                log.info("didiSync: TODO: Definir accionar con credenciales revocadas, por ahora las ignora");
+                break;
+        }
+    }
+
+
 
     private void createAndEmmitCertificateDidi(Credential credential) {
 
@@ -209,30 +246,32 @@ public class DidiService {
 
         if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals("success")) {
 
-            log.info("didiCertificateId to emmit: "+didiCreateCredentialResponse.getData().get(0).get_id());
+            log.info("didiSync: certificateId to emmit: "+didiCreateCredentialResponse.getData().get(0).get_id());
             DidiEmmitCredentialResponse didiEmmitCredentialResponse = emmitCertificateDidi(didiCreateCredentialResponse.getData().get(0).get_id());
 
             if (didiEmmitCredentialResponse!=null)
-                log.info("didiEmmitCertificate Response: "+didiEmmitCredentialResponse.toString());
+                log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
 
             if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals("success")){
-                log.info("La credencial fue emitida en didi, persistiendo datos en bd");
+                log.info("didiSync: La credencial fue emitida, persistiendo datos en bd");
                 this.saveEmittedCredential(didiEmmitCredentialResponse, credential);
+                this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_OK.getCode());
             }
             else {
-                log.error("Fallo la emision de la credencial en didi borrando el certificado creado pero no-emitido del didi-issuer");
-                //todo: eliminar la credencial creada pero no emitida.
+                log.error("didiSync: Fallo la emision de la certificado, borrando el certificado creado pero no-emitido del didi-issuer");
                 this.didiDeleteCertificate(didiCreateCredentialResponse.getData().get(0).get_id());
+                this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
             }
         } else {
-            log.error("fallo la creacion de la credencial en didi");
+            log.error("didiSync: fallo la creacion de la certificado");
+            this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
         }
     }
 
 
 
     private DidiCreateCredentialResponse createCertificateDidi(Credential credential) {
-        log.info("createCertificateDidi");
+        log.info("didiSync: createCertificateDidi");
 
         String didiTemplateCode = "";
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())) {
@@ -249,7 +288,7 @@ public class DidiService {
                 didiTemplateCode = didiTemplateCodeBenefit;
                 break;
             default:
-                log.error("La categoria de credencial no es valida");
+                log.error("didiSync: La categoria de credencial no es valida");
                 return null;
         }
 
@@ -259,19 +298,19 @@ public class DidiService {
     }
 
     public DidiCreateCredentialResponse createCertificateDidiCall(String didiTemplateCode, DidiCredentialData didiCredentialData) {
-        log.info("createCertificateDidiCall");
+        log.info("didiSync: createCertificateDidiCall");
 
         Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(didiAuthToken,didiTemplateCode,true,didiCredentialData);
 
         log.info(didiCredentialData.toString());
         try {
             Response<DidiCreateCredentialResponse> response = callSync.execute();
-            log.info("createCertificateDidiCall - response:");
+            log.info("didiSync: createCertificateDidiCall - response:");
             if (response.body() != null)
-                log.info("RESPONSE: " + response.body().toString());
+                log.info(response.body().toString());
             return response.body();
         } catch (Exception ex) {
-            log.error("createCertificateDidiCall: Didi Request error", ex);
+            log.error("didiSync: createCertificateDidiCall: Request error", ex);
         }
         return null;
     }
@@ -285,18 +324,18 @@ public class DidiService {
 
         try {
             Response<DidiEmmitCredentialResponse> response = callSync.execute();
-            log.info("emmitCertificate: response:");
+            log.info("didiSync: emmitCertificate - response:");
             if (response.body() != null)
                 log.info(response.body().toString());
             return response.body();
         } catch (Exception ex) {
-            log.error("emmitCertificateDidi: Didi Request error", ex);
+            log.error("didiSync: emmitCertificateDidi: Request error", ex);
         }
 
         return null;
     }
 
-    public DidiEmmitCredentialResponse didiDeleteCertificate(String CredentialToRevokeDidiId) {
+    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId) {
 
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(
                 didiAuthToken,
@@ -304,18 +343,19 @@ public class DidiService {
 
         try {
             Response<DidiEmmitCredentialResponse> response = callSync.execute();
-            log.info("deleteCertificate: response:");
+            log.info("didiSync: deleteCertificate - response:");
             if (response.body() != null)
                 log.info(response.body().toString());
-            return response.body();
+            //return response.body();
+            return true;
         } catch (Exception ex) {
-            log.error("emmitCertificateDidi: Didi Request error", ex);
+            log.error("didiSync: emmitCertificateDidi: Request error", ex);
         }
-        return null;
+        return false;
     }
 
     private void saveEmittedCredential(DidiEmmitCredentialResponse didiEmmitCredentialResponse, Credential pendingCredential) {
-        log.info("saveEmittedCredential:");
+        log.info("didiSync: saveEmittedCredential:");
 
         if (didiEmmitCredentialResponse != null && didiEmmitCredentialResponse.getStatus().equals("success")) {
             String credentialDidiId = didiEmmitCredentialResponse.getData().get_id();
@@ -365,35 +405,18 @@ public class DidiService {
                         credentialCreditRepository.save(credentialCredit);
                         break;
                     default:
-                        log.error("El tipo de credencial indicado no existe");
+                        log.error("didiSync: El tipo de credencial indicado no existe");
                 }
             }
 
-            log.info("La credencial fue actualizada con exito, se obtuvo el id de didi: " + credentialDidiId);
+            log.info("didiSync: La credencial fue actualizada con exito, se obtuvo el id de didi: " + credentialDidiId);
         } else
-            log.error("Ocurrio un error al intentar crear la credencial en didi");
+            log.error("didiSync: Ocurrio un error al intentar crear la credencial en didi");
     }
 
     private void setCredentialState(String credentialStateString, Credential credential) {
         Optional<CredentialState> credentialState = credentialStateRepository.findByStateName(credentialStateString);
         credentialState.ifPresent(credential::setCredentialState);
-    }
-
-    private DidiAppUser findAppUserDidByDni(Long dni, ArrayList<DidiAppUser> didiAppUsers) {
-        //busco el nuevo did asociado al dni
-        for (DidiAppUser didiAppUser : didiAppUsers) {
-            if (didiAppUser.getDni().equals(dni))
-                return didiAppUser;
-        }
-        return null;
-    }
-
-    private void updateAppUserStatus(Long dni, ArrayList<DidiAppUser> didiAppUsers) {
-        DidiAppUser didiAppUser = findAppUserDidByDni(dni, didiAppUsers);
-        if (didiAppUser != null) {
-            didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
-            didiAppUserRepository.save(didiAppUser);
-        }
     }
 
     public DidiGetAllCredentialResponse didiGetAllCredentials(){

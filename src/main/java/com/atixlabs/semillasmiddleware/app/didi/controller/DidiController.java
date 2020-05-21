@@ -63,7 +63,8 @@ public class DidiController {
             didiService.didiDeleteCertificate(credential.get_id());
         }
 
-        return "Todas las credenciales fueron borradas";
+        log.info("Finalizo el proceso de borrado");
+        return "Finalizo el proceso de borrado";
     }
 
 }

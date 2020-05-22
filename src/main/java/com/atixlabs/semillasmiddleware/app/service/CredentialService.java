@@ -33,6 +33,7 @@ import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -624,7 +625,7 @@ public class CredentialService {
      * @return
      */
     public boolean revokeCredential(Long id) {
-        boolean haveRevoke = true;
+        boolean haveRevokeOk = true;
 
         log.info("Filtering credential with id: "+ id);
         //validate credential is in bd
@@ -656,7 +657,7 @@ public class CredentialService {
 
                     if (holderIdentities.size() == 0) {
                         log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
-                        haveRevoke = false;
+                        haveRevokeOk = false;
                     }
                     for (Credential credential : holderIdentities) {
                         this.revokeComplete(credential);
@@ -671,7 +672,7 @@ public class CredentialService {
                                                                     credentialToRevoke.getBeneficiaryDni(), activePendingStates);
                     if (familiarIdentities.size() == 0) {
                         log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
-                        haveRevoke = false;
+                        haveRevokeOk = false;
                     }
                     for (Credential credential : familiarIdentities) {
                         this.revokeComplete(credential);
@@ -693,7 +694,7 @@ public class CredentialService {
                     }
                     else {
                          log.info("Impossible to revoke credential benefit. There is/are not credential/s credit in state active or pending.");
-                         haveRevoke = false;
+                         haveRevokeOk = false;
                     }
 
                     break;
@@ -706,7 +707,7 @@ public class CredentialService {
                         List<CredentialCredit> creditsGroup = this.getCreditGroup(credentialCredit.get().getIdGroup());
                         //for each holder credit -> revoke credit -> revoke benefits -> revoke familiar benefits
                         for (CredentialCredit credit: creditsGroup) {
-                             this.revokeComplete(credit); //todo validate succesfull revocation to continue
+                             haveRevokeOk = this.revokeComplete(credit); //todo validate succesfull revocation to continue
                              //get benefits with holder dni (holder benefits and familiar benefits)
                              activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
                             List<CredentialBenefits> benefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(credit.getCreditHolderDni(), activePendingStates);
@@ -723,7 +724,7 @@ public class CredentialService {
                     }
                     else{
                          log.error("Error you are trying to revoke ");
-                         haveRevoke = false;
+                         haveRevokeOk = false;
                     }
 
                     break;
@@ -732,10 +733,10 @@ public class CredentialService {
         } else {
             //todo throw non-existent credential ?
             log.error("Error you are trying to revoke ");
-            haveRevoke = false;
+            haveRevokeOk = false;
         }
 
-        return  haveRevoke;
+        return  haveRevokeOk;
     }
 
     /**
@@ -755,13 +756,20 @@ public class CredentialService {
      * Revoke on DB and revoke on didi
      *
      * @param credentialToRevoke
+     * @return
      */
-    private void revokeComplete(Credential credentialToRevoke){
+    private boolean revokeComplete(Credential credentialToRevoke){
         //here is important to manage the different actions, and need to be synchronize at the end.
         log.info("Starting revoking process for credential id: "+ credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
-        //todo call revoke on didi
-        boolean revokedOnSemillas = this.revokeOneCredential(credentialToRevoke);
-        // validate the whole transaction using revokedOnSemillas and then the check of didi
+        log.info("Here revoke on didi");
+        // boolean revokedOk=   //todo call revoke on didi
+        // if didi fail the credential need to know that is needed to be revoked (here think in the best resolution).
+        // if this revoke came from the revocation business we will need to throw an error to rollback any change done before.
+       // if(revokedOk)
+        boolean revokedOk = this.revokeOneCredential(credentialToRevoke);
+        return revokedOk;
+        // validate the whole transaction using boolean and then the check of didi
+
     }
 
     /**

@@ -611,6 +611,18 @@ public class CredentialService {
         return amountExpired;
     }
 
+    public Credential validateCredentialExistence(Long id){
+        //validate credential is in bd
+        Optional<Credential> opCredential = credentialRepository.findById(id);
+        if (opCredential.isPresent()) {
+            return opCredential.get();
+        }
+        else {
+            log.error("There is no credential with id: " + id);
+            return null;
+        }
+    }
+
     /**
      * Revocation with the business logic.
      * For particular revocations use, this.revokeComplete()
@@ -621,14 +633,12 @@ public class CredentialService {
         boolean haveRevoke = true;
 
         log.info("Filtering credential with id: "+ id);
-        //validate credential is in bd
-        Optional<Credential> opCredential = credentialRepository.findById(id);
-        if (opCredential.isPresent()) {
-            //get the credential
-            Credential credentialToRevoke = opCredential.get();
+
+            Credential credentialToRevoke = validateCredentialExistence(id);
+            if(credentialToRevoke != null){
             CredentialTypesCodes credentialType;
             try {
-                credentialType = CredentialTypesCodes.getEnumByStringValue(opCredential.get().getCredentialDescription());
+                credentialType = CredentialTypesCodes.getEnumByStringValue(credentialToRevoke.getCredentialDescription());
             }
             catch (IllegalArgumentException ex){
                 log.error("Impossible to revoke credential. There is no credential with type " + credentialToRevoke.getCredentialDescription());
@@ -724,7 +734,7 @@ public class CredentialService {
 
         } else {
             //todo throw non-existent credential ?
-            log.error("Error you are trying to revoke ");
+            log.error("Error you are trying to revoke an non existent credential " + id);
             haveRevoke = false;
         }
 
@@ -754,9 +764,8 @@ public class CredentialService {
         log.info("Revoking the credential " + credentialToRevoke.getId());
         boolean haveRevoke = true;
 
-        //validate if the credential is in db
-        Optional<Credential> credential = credentialRepository.findById(credentialToRevoke.getId());
-        if (credential.isEmpty()) {
+        Credential credential = this.validateCredentialExistence(credentialToRevoke.getId());
+        if (credential == null) {
             haveRevoke = false;
             log.error("The credential with id: " + credentialToRevoke.getId() + " is not in the database");
         } else {
@@ -765,8 +774,8 @@ public class CredentialService {
             Optional<CredentialState> opStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
             if (opStateRevoke.isPresent()) {
                 //revoke if the credential is not revoked yet
-                if (credential.get().getCredentialState().equals(opStateRevoke.get())) {
-                    log.info("The credential " + credential.get().getId() + " has already been revoked");
+                if (credential.getCredentialState().equals(opStateRevoke.get())) {
+                    log.info("The credential " + credential.getId() + " has already been revoked");
                     haveRevoke = false;
                 } else {
 
@@ -781,8 +790,6 @@ public class CredentialService {
                 log.error("The state revoke could not be found");
             }
         }
-
-
 
         return haveRevoke;
     }

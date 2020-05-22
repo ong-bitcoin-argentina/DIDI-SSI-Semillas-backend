@@ -1,7 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.DwellingQuestion;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -21,9 +21,9 @@ public class DwellingCategory implements Category {
     AnswerDto district;
 
     public DwellingCategory(String categoryOriginalName){
-        this.dwellingType = new AnswerDto(DwellingQuestion.DWELLING_TYPE);
-        this.holdingType = new AnswerDto(DwellingQuestion.HOLDING_TYPE);
-        this.district = new AnswerDto(DwellingQuestion.DISTRICT);
+        this.dwellingType = new AnswerDto(DidiSyncStatus.DWELLING_TYPE);
+        this.holdingType = new AnswerDto(DidiSyncStatus.HOLDING_TYPE);
+        this.district = new AnswerDto(DidiSyncStatus.DISTRICT);
 
         this.categoryOriginalName = categoryOriginalName;
     }
@@ -31,7 +31,7 @@ public class DwellingCategory implements Category {
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
 
-        DwellingQuestion questionMatch = DwellingQuestion.getEnumByStringValue(question);
+        DidiSyncStatus questionMatch = DidiSyncStatus.getEnumByStringValue(question);
 
         if(questionMatch==null)
             return;

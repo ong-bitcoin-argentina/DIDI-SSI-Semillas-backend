@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.DIDHistoric;
 
+import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -9,13 +10,13 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table
-public class DIDHisotoric {
+public class DIDHisotoric extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    private Long idDidiReceptor;
+    private String idDidiReceptor;
 
     private Long idPerson;
 

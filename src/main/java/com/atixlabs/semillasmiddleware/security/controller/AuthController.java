@@ -44,6 +44,7 @@ public class AuthController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public ResponseEntity<?> createAuthenticationToken(@RequestBody JwtRequest authenticationRequest) throws Exception {
         try {
+            log.info(" -createAuthenticationToken "+authenticationRequest.getUsername());
             Authentication authentication = this.authenticate(authenticationRequest.getUsername().trim(), authenticationRequest.getPassword());
 
             SecurityContextHolder.getContext().setAuthentication(authentication);

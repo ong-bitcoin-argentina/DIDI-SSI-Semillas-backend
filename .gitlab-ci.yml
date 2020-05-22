@@ -33,7 +33,7 @@ deploy-staging:
     - cd ./ops/docker && bash ./deploy.sh "staging"
   only:
     refs:
-      - semillas-28-ambientes-qa-uat
+      - SEMI-135-setup-ci
       # Only run on release/x.y.x and hotfix/xxxx
       - /^release.*$/
       - develop

@@ -1,9 +1,12 @@
 package com.atixlabs.semillasmiddleware.credentialService;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
+import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
@@ -32,7 +35,6 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import com.atixlabs.semillasmiddleware.bondareaService.BondareaServiceTest;
 
 import org.junit.Before;
 import org.mockito.*;
@@ -63,12 +65,16 @@ public class CredentialServiceTest {
 
     @Mock
     private CredentialRepository credentialRepository;
+    
     @Mock
     private CredentialStateRepository credentialStateRepository;
+    
     @Mock
     private CredentialIdentityRepository credentialIdentityRepository;
+    
     @Mock
     private CredentialDwellingRepository credentialDwellingRepository;
+
     @Mock
     private CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository;
 
@@ -84,8 +90,14 @@ public class CredentialServiceTest {
     @Mock
     private CredentialBenefitsRepository credentialBenefitsRepository;
 
+    @Mock
+    private ParameterConfigurationRepository parameterConfigurationRepository;
+
     @Captor
     private ArgumentCaptor<CredentialCredit> credentialCreditCaptor;
+
+    @Captor
+    private ArgumentCaptor<Credential> credentialCaptor;
 
     @Captor
     private ArgumentCaptor<CredentialBenefits> credentialBenefitCaptor;
@@ -108,6 +120,33 @@ public class CredentialServiceTest {
         return person;
     }
 
+    private Loan getMockLoan(){
+        Loan loan = new Loan();
+        loan.setDniPerson(123456L);
+        loan.setIdBondareaLoan("1a");
+        loan.setIdGroup("group1");
+        loan.setCycleDescription("Ciclo 1");
+        loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
+        loan.setHasCredential(true);
+        loan.setExpiredAmount((float) 0);
+        loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
+        return loan;
+    }
+
+    private Loan getLoanWithExpiredAmount(){
+        Loan loan = getMockLoan();
+        loan.setExpiredAmount((float) 10000);
+
+        return loan;
+    }
+
+    private Loan getLoanWithFinishState(){
+        Loan loan = getMockLoan();
+        loan.setStatus(LoanStatusCodes.FINALIZED.getCode());
+
+        return loan;
+    }
+
     private Optional<CredentialBenefits> getCredentialHolderBenefitMock(Person beneficiary){
         CredentialBenefits benefits = new CredentialBenefits();
         benefits.setId(1L);
@@ -117,11 +156,35 @@ public class CredentialServiceTest {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
-        benefits.setIdDidiCredential(1234L);
-        benefits.setIdDidiReceptor(1234L);
+        benefits.setIdDidiCredential("1234L");
+        benefits.setIdDidiReceptor("1234L");
 
         return  Optional.of(benefits);
     }
+
+    private Optional<CredentialBenefits> getCredentialHolderBenefitRevokeMock(Person beneficiary){
+        CredentialBenefits benefits = new CredentialBenefits();
+        benefits.setId(1L);
+        benefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
+        benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
+        benefits.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
+        benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
+        benefits.setBeneficiary(beneficiary);
+        benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
+        benefits.setIdDidiCredential("1234L");
+        benefits.setIdDidiReceptor("1234L");
+
+        return  Optional.of(benefits);
+    }
+
+    private Optional<ParameterConfiguration> getParamConfiguration(){
+        ParameterConfiguration config = new ParameterConfiguration();
+        config.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
+        config.setExpiredAmountMax((float) 100);
+
+        return Optional.of(config);
+    }
+
 
     private CredentialBenefits getPendingCredentialHolderBenefitMock(Person beneficiary){
         CredentialBenefits benefits = new CredentialBenefits();
@@ -132,7 +195,18 @@ public class CredentialServiceTest {
         benefits.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         benefits.setBeneficiary(beneficiary);
         benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
+        benefits.setCreditHolderDni(beneficiary.getDocumentNumber());
+        benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
         return  benefits;
+    }
+
+    private CredentialBenefits getPendingCredentialFamiliarBenefitMock(Person beneficiary){
+        CredentialBenefits benefits = getPendingCredentialHolderBenefitMock(beneficiary);
+        benefits.setId(1 + beneficiary.getId());
+        benefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
+        benefits.setBeneficiaryDni(beneficiary.getDocumentNumber());
+
+        return benefits;
     }
 
     private CredentialBenefits getRevokedCredentialHolderBenefitMock(Person beneficiary){
@@ -155,7 +229,7 @@ public class CredentialServiceTest {
 
         CredentialCredit credential1 = new CredentialCredit();
         credential1.setId(1L);
-        credential1.setIdDidiCredential(2L);
+        credential1.setIdDidiCredential("2L");
         credential1.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode());
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfRevocation(LocalDateTime.now().plusDays(14));
@@ -169,7 +243,8 @@ public class CredentialServiceTest {
         credentialIdentity.setId(2L);
         credentialIdentity.setCreditHolderDni(34534534L);
         credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-        credentialIdentity.setBeneficiaryName("Pepito");
+        credentialIdentity.setBeneficiaryFirstName("Pepito");
+        credentialIdentity.setBeneficiaryFirstName("Pepito Apellido");
         credentialIdentity.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
         credentialIdentity.setDateOfIssue(DateUtil.getLocalDateTimeNow().minusDays(14));
         credentialIdentity.setBeneficiary(beneficiary);
@@ -180,7 +255,8 @@ public class CredentialServiceTest {
         credentialIdentity2.setId(3L);
         credentialIdentity2.setCreditHolderDni(34534534L);
         credentialIdentity2.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-        credentialIdentity2.setBeneficiaryName("Pepito");
+        credentialIdentity2.setBeneficiaryFirstName("Pepito");
+        credentialIdentity2.setBeneficiaryLastName("Pepito Apellido");
         credentialIdentity2.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
         credentialIdentity2.setDateOfIssue(DateUtil.getLocalDateTimeNow().minusDays(14));
         credentialIdentity2.setBeneficiary(beneficiary);
@@ -201,7 +277,7 @@ public class CredentialServiceTest {
         credential1.setIdGroup(loan.getIdGroup());
         credential1.setCurrentCycle(loan.getCycleDescription());
         credential1.setAmountExpiredCycles(0);
-        credential1.setCreditState(loan.getStatusDescription());
+        credential1.setCreditState(loan.getStatus());
         credential1.setExpiredAmount(loan.getExpiredAmount());
         credential1.setCreationDate(loan.getCreationDate());
         credential1.setBeneficiaryDni(personMock.getDocumentNumber());
@@ -209,8 +285,8 @@ public class CredentialServiceTest {
         credential1.setBeneficiary(personMock);
 
 
-        credential1.setIdDidiCredential(1234L);
-        credential1.setIdDidiReceptor(1234L);
+        credential1.setIdDidiCredential("1234L");
+        credential1.setIdDidiReceptor("1234L");
 
         credential1.setIdHistorical(1L);
 
@@ -227,23 +303,37 @@ public class CredentialServiceTest {
         credential1.setIdGroup(loan.getIdGroup());
         credential1.setCurrentCycle(loan.getCycleDescription());
         credential1.setAmountExpiredCycles(0);
-        credential1.setCreditState(loan.getStatusDescription());
+        credential1.setCreditState(loan.getStatus());
         credential1.setExpiredAmount(loan.getExpiredAmount());
         credential1.setCreationDate(loan.getCreationDate());
         credential1.setBeneficiaryDni(personMock.getDocumentNumber());
         credential1.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credential1.setBeneficiary(personMock);
+        credential1.setCreditHolder(personMock);
+        credential1.setCreditHolderDni(personMock.getDocumentNumber());
 
         credential1.setIdHistorical(1L);
 
         return credential1;
     }
 
+    private List<CredentialCredit> getCreditGroupExpiredMock() {
+        List<CredentialCredit> creditsGroup = new ArrayList<>();
+        //credit with expired amount
+        CredentialCredit creditExpired = getPendingCreditMock(getLoanWithExpiredAmount(), getBeneficiaryMockWithoutDID());
+        creditsGroup.add(creditExpired);
+        //normal credit
+        CredentialCredit creditOk = getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID());
+        creditsGroup.add(creditOk);
+
+        return creditsGroup;
+    }
+
     private DIDHisotoric getDIDHistoricMock() {
         DIDHisotoric didi = new DIDHisotoric();
         didi.setId(1L);
         didi.setActive(true);
-        didi.setIdDidiReceptor(1234L);
+        didi.setIdDidiReceptor("1234L");
         didi.setIdPerson(1245L);
         return didi;
     }
@@ -266,9 +356,20 @@ public class CredentialServiceTest {
 
     private Optional<CredentialState> getCredentialPendingState(){
         CredentialState state = new CredentialState();
-        state.setId(1L);
+        state.setId(2L);
         state.setStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         return Optional.of(state);
+    }
+
+    private Optional<CredentialState> getCredentialRevokeState(){
+        CredentialState state = new CredentialState();
+        state.setId(3L);
+        state.setStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+        return Optional.of(state);
+    }
+
+    private List<CredentialState> getStateActivePending(){
+        return List.of(getCredentialActiveState().get(), getCredentialPendingState().get());
     }
 
     private List<Credential> credentialsFilteredActiveMock() {
@@ -430,7 +531,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(any(Long.class))).thenReturn(Optional.of(new Person()));
         when(personRepository.save(any(Person.class))).thenReturn(createPersonMock());
 
-        when(credentialRepository.findByBeneficiaryDniAndAndCredentialCategoryAndCredentialStateIn(
+        when(credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                 anyLong(),//beneficiaryDni,
                 anyString(),//credentialCategoryCode,
                 any(ArrayList.class)//credentialStateActive
@@ -453,12 +554,13 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
-        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(BondareaServiceTest.getMockLoan(), getPersonMockWithDid().get()));
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
+        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get());
-        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(Collections.emptyList());
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.empty());
 
-        Loan loan = BondareaServiceTest.getMockLoan();
+        Loan loan = getMockLoan();
         credentialService.createNewCreditCredentials(loan);
 
         verify(credentialCreditRepository, times(2)).save(credentialCreditCaptor.capture()); //because the id historic
@@ -481,7 +583,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
         Assertions.assertTrue(creditSaved.getIdHistorical() == creditSaved.getId());
 
         //benefit
@@ -499,12 +601,13 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(Optional.of(getBeneficiaryMockWithoutDID()));
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialPendingState());
-        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(BondareaServiceTest.getMockLoan(), getBeneficiaryMockWithoutDID()));
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
+        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID()));
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getPendingCredentialHolderBenefitMock(getPersonMockWithDid().get()));
-        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(Collections.emptyList());
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.empty());
 
-        Loan loan = BondareaServiceTest.getMockLoan();
+        Loan loan = getMockLoan();
         credentialService.createNewCreditCredentials(loan);
 
         verify(credentialCreditRepository, times(2)).save(credentialCreditCaptor.capture());
@@ -527,7 +630,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(null, creditSaved.getIdDidiCredential());
         Assertions.assertEquals(null, creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
 
         //benefit
         Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
@@ -545,12 +648,13 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
         when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.of(getDIDHistoricMock()));
         when(credentialStateRepository.findByStateName(anyString())).thenReturn(getCredentialActiveState());
-        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(BondareaServiceTest.getMockLoan(), getPersonMockWithDid().get()));
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
+        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
 
         //credential benefits
-        when(credentialBenefitsRepository.findByBeneficiaryDni(anyLong())).thenReturn(List.of(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get()));
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()));
 
-        Loan loan = BondareaServiceTest.getMockLoan();
+        Loan loan = getMockLoan();
         credentialService.createNewCreditCredentials(loan);
 
         verify(credentialCreditRepository, times(2)).save(credentialCreditCaptor.capture());
@@ -571,15 +675,15 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatusDescription(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
     }
 
     @Test
     public void tryToCreateCredentialCreditButHasAlready() throws Exception {
-        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.of(getActiveCreditMock(BondareaServiceTest.getMockLoan(), getPersonMockWithDid().get())));
+        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.of(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get())));
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
 
-        Loan loan = BondareaServiceTest.getMockLoan();
+        Loan loan = getMockLoan();
         credentialService.createNewCreditCredentials(loan);
 
         verify(credentialCreditRepository, times(0)).save(credentialCreditCaptor.capture());
@@ -591,7 +695,229 @@ public class CredentialServiceTest {
         Assertions.assertEquals(true, savedLoan.getHasCredential());
     }
 
-    //TODO try to create benefit with revoke benefits. Or with familiar
+
+    @Test
+    public void validateCredentialCreditToBeUpdateLoanHasChanged() {
+        when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
+
+        //loan has a different expired amount comparing with credential credit
+        Loan loan = getLoanWithExpiredAmount();
+        CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+
+        Assertions.assertNotNull(creditToBeUpdate);
+    }
+
+    @Test
+    public void validateCredentialCreditToBeUpdateLoanIsTheSame() {
+        when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
+
+        //loan has not changed
+        Loan loan = getMockLoan();
+        CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+
+        Assertions.assertNull(creditToBeUpdate);
+    }
+
+    @Test
+    public void validateCredentialCreditButThereIsNOCredentialCreditCreated() {
+        when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.empty());
+
+        //loan has not changed
+        Loan loan = getMockLoan();
+        CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+
+        verify(loanRepository, times(1)).save(loanCaptor.capture());
+        Loan loanUpdated = loanCaptor.getValue();
+
+        Assertions.assertNull(creditToBeUpdate);
+        Assertions.assertTrue(loanUpdated.getHasCredential() != getMockLoan().getHasCredential()); // the loan is set to not having credential
+    }
+
+    @Test
+    public void updateCredentialCreditOK() throws Exception {
+        CredentialCredit creditCreated = getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID());
+
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(getCredentialRevokeState());
+
+        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
+        when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
+        when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(getCredentialPendingState());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn((ArrayList<CredentialState>) getStateActivePending());
+        when(credentialCreditRepository.findByIdGroupAndCredentialStateIn(anyString(), anyList())).thenReturn(List.of(creditCreated));
+        when(parameterConfigurationRepository.findByConfigurationName(anyString())).thenReturn(getParamConfiguration());
+
+        //credential benefits
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(getCredentialHolderBenefitMock(getBeneficiaryMockWithoutDID()));
+
+        //revoke
+        when(credentialRepository.findById(anyLong())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
+
+
+        credentialService.updateCredentialCredit(getMockLoan(), creditCreated);
+
+        verify(credentialCreditRepository, times(1)).save(credentialCreditCaptor.capture());
+        verify(loanRepository, times(0)).save(loanCaptor.capture());
+        verify(credentialBenefitsRepository, times(0)).save(credentialBenefitCaptor.capture());
+        verify(credentialRepository, times(1)).save(credentialCaptor.capture());
+
+        CredentialCredit creditUpdate = credentialCreditCaptor.getAllValues().get(0);
+        Credential creditOld = credentialCaptor.getAllValues().get(0);
+
+        log.info("credit updated " + creditUpdate.toString());
+
+        Assertions.assertEquals(getMockLoan().getIdBondareaLoan(), creditUpdate.getIdBondareaCredit());
+        Assertions.assertEquals(getMockLoan().getDniPerson(), creditUpdate.getBeneficiaryDni());
+        Assertions.assertNotNull(creditUpdate.getCredentialState().getStateName());
+        Assertions.assertEquals(0, creditUpdate.getAmountExpiredCycles());
+        Assertions.assertEquals(getMockLoan().getCreationDate(), creditUpdate.getCreationDate());
+        Assertions.assertNotNull(creditUpdate.getDateOfIssue());
+        Assertions.assertEquals(creditCreated.getIdHistorical(), creditUpdate.getIdHistorical());
+        Assertions.assertEquals(creditCreated.getAmountExpiredCycles(), creditUpdate.getAmountExpiredCycles());
+        Assertions.assertEquals(creditCreated.getExpiredAmount(), creditUpdate.getExpiredAmount());
+        Assertions.assertEquals(getMockLoan().getStatus(), creditUpdate.getCreditState());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), creditOld.getCredentialState().getStateName());
+    }
+
+    @Test
+    public void updateCredentialCreditFinishLoan() throws Exception {
+        CredentialCredit creditCreated = getPendingCreditMock(getLoanWithFinishState(), getBeneficiaryMockWithoutDID());
+        CredentialBenefits benefits = getPendingCredentialHolderBenefitMock(getBeneficiaryMockWithoutDID());
+        CredentialBenefits benefitFamiliar1 = getPendingCredentialFamiliarBenefitMock(getBeneficiaryMockWithoutDID());
+        CredentialBenefits benefitFamiliar2 = getPendingCredentialFamiliarBenefitMock(getBeneficiaryMockWithoutDID());
+
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(getCredentialRevokeState());
+
+        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
+        when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
+        when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(getCredentialPendingState());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialCreditRepository.findByIdGroupAndCredentialStateIn(anyString(), anyList())).thenReturn(List.of(creditCreated));
+        when(parameterConfigurationRepository.findByConfigurationName(anyString())).thenReturn(getParamConfiguration());
+        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID()));
+
+        //revoke process
+        when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.of(benefits));
+        when(credentialCreditRepository.findByCreditHolderDniAndCredentialStateIn(anyLong(),anyList())).thenReturn(Collections.emptyList()); // the holder dont have another credit
+        when(credentialRepository.findById(anyLong())).thenReturn(Optional.of(getPendingCredentialHolderBenefitMock(getBeneficiaryMockWithoutDID())));
+       //todo here is returning the same object, and when the first is revoked the second too
+        when(credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(List.of(benefitFamiliar1,benefitFamiliar2));
+
+        Loan loan = getLoanWithFinishState();
+        credentialService.updateCredentialCredit(loan, creditCreated);
+
+        verify(credentialCreditRepository, times(2)).save(credentialCreditCaptor.capture());
+        verify(loanRepository, times(0)).save(loanCaptor.capture());
+        verify(credentialBenefitsRepository, times(0)).save(credentialBenefitCaptor.capture());
+        //TODO must be 4
+        verify(credentialRepository, times(2)).save(credentialCaptor.capture()); //1 for update credit and 2 because benefits holder and familiar have revoked
+
+        //update process
+        Credential creditOld = credentialCaptor.getAllValues().get(0);
+        CredentialCredit creditUpdate = credentialCreditCaptor.getAllValues().get(1);
+
+        //revoke process -> this is because the group we set have only 2 holders
+        Credential credentialBenefitHolderRevoked = credentialCaptor.getAllValues().get(1);
+        //Credential credentialBenefitsFamiliarRevoked = credentialCaptor.getAllValues().get(2);
+        //Credential credentialBenefitsFamiliar2Revoked = credentialCaptor.getAllValues().get(3);
+
+        log.info("credit updated " + creditUpdate.toString());
+
+        Assertions.assertNotNull(creditUpdate.getFinishDate());
+        Assertions.assertEquals(loan.getIdBondareaLoan(), creditUpdate.getIdBondareaCredit());
+        Assertions.assertEquals(loan.getDniPerson(), creditUpdate.getBeneficiaryDni());
+        Assertions.assertNotNull(creditUpdate.getCredentialState().getStateName());
+        Assertions.assertEquals(0, creditUpdate.getAmountExpiredCycles());
+        Assertions.assertEquals(loan.getCreationDate(), creditUpdate.getCreationDate());
+        Assertions.assertNotNull(creditUpdate.getDateOfIssue());
+        Assertions.assertEquals(creditOld.getIdHistorical(), creditUpdate.getIdHistorical());
+        Assertions.assertEquals(creditCreated.getAmountExpiredCycles(), creditUpdate.getAmountExpiredCycles());
+        Assertions.assertEquals(loan.getExpiredAmount(), creditUpdate.getExpiredAmount());
+        //Assertions.assertEquals(loan.getStatus(), creditUpdate.getCreditState());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), creditOld.getCredentialState().getStateName());
+
+        //revoke
+        Assertions.assertNotNull(credentialBenefitHolderRevoked.getDateOfRevocation());
+        Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode(),credentialBenefitHolderRevoked.getCredentialDescription());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), credentialBenefitHolderRevoked.getCredentialState().getStateName());
+    }
+
+
+    @Test
+    public void updateCredentialCreditInDefault() throws Exception {
+        CredentialCredit creditCreated = getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID());
+        CredentialBenefits benefits = getPendingCredentialHolderBenefitMock(getBeneficiaryMockWithoutDID());
+
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(getCredentialRevokeState());
+
+        when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
+        when(personRepository.findByDocumentNumber(anyLong())).thenReturn(getPersonMockWithDid());
+        when(didHistoricRepository.findByIdPersonAndIsActive(anyLong(), anyBoolean())).thenReturn(Optional.empty());
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(getCredentialPendingState());
+        when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
+        when(credentialCreditRepository.findByIdGroupAndCredentialStateIn(anyString(), anyList())).thenReturn(getCreditGroupExpiredMock());
+        when(parameterConfigurationRepository.findByConfigurationName(anyString())).thenReturn(getParamConfiguration());
+        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(getLoanWithExpiredAmount(), getBeneficiaryMockWithoutDID()));
+
+        // revocation process
+        when(credentialRepository.findById(anyLong())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID())));
+        when(credentialCreditRepository.findById(anyLong())).thenReturn(Optional.of(creditCreated));
+        when(credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(anyLong(), anyList())).thenReturn(List.of(benefits)); //solamente tiene la suya de titular
+
+        Loan loan = getLoanWithExpiredAmount();
+        credentialService.updateCredentialCredit(loan, creditCreated);
+
+        verify(credentialCreditRepository, times(2)).save(credentialCreditCaptor.capture());
+        verify(loanRepository, times(0)).save(loanCaptor.capture());
+        verify(credentialBenefitsRepository, times(0)).save(credentialBenefitCaptor.capture());
+        verify(credentialRepository, times(5)).save(credentialCaptor.capture()); //1 for update credit and 4 because credits group is in defeault
+
+        //update process
+        Credential creditOld = credentialCaptor.getAllValues().get(0); //credit saved after revoke
+        CredentialCredit creditUpdate = credentialCreditCaptor.getAllValues().get(1);
+
+        //revoke process -> this is because the group we set have only 2 holders
+        Credential credentialCreditRevoked = credentialCaptor.getAllValues().get(1);
+        Credential credentialBenefitsRevoked = credentialCaptor.getAllValues().get(2);
+        Credential credentialCreditRevoked2 = credentialCaptor.getAllValues().get(3);
+        Credential credentialBenefitsRevoked2 = credentialCaptor.getAllValues().get(4);
+
+
+        log.info("credit updated " + creditUpdate.toString());
+
+        Assertions.assertEquals(loan.getIdBondareaLoan(), creditUpdate.getIdBondareaCredit());
+        Assertions.assertEquals(loan.getDniPerson(), creditUpdate.getBeneficiaryDni());
+        Assertions.assertNotNull(creditUpdate.getCredentialState().getStateName());
+        Assertions.assertEquals(creditCreated.getAmountExpiredCycles() +1 , creditUpdate.getAmountExpiredCycles());
+        Assertions.assertEquals(loan.getCreationDate(), creditUpdate.getCreationDate());
+        Assertions.assertNotNull(creditUpdate.getDateOfIssue());
+        Assertions.assertEquals(creditOld.getIdHistorical(), creditUpdate.getIdHistorical());
+        Assertions.assertEquals(loan.getExpiredAmount(), creditUpdate.getExpiredAmount());
+        Assertions.assertEquals(loan.getStatus(), creditUpdate.getCreditState());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), creditOld.getCredentialState().getStateName());
+
+        //revocation asserts
+        Assertions.assertNotNull(credentialCreditRevoked.getDateOfRevocation());
+        Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode(),credentialCreditRevoked.getCredentialDescription());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), credentialCreditRevoked.getCredentialState().getStateName());
+
+        Assertions.assertNotNull(credentialBenefitsRevoked.getDateOfRevocation());
+        Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode(),credentialBenefitsRevoked.getCredentialDescription());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), credentialBenefitsRevoked.getCredentialState().getStateName());
+
+        Assertions.assertNotNull(credentialCreditRevoked2.getDateOfRevocation());
+        Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_CREDIT.getCode(),credentialCreditRevoked2.getCredentialDescription());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), credentialCreditRevoked2.getCredentialState().getStateName());
+
+        Assertions.assertNotNull(credentialBenefitsRevoked2.getDateOfRevocation());
+        Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode(),credentialBenefitsRevoked2.getCredentialDescription());
+        Assertions.assertEquals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode(), credentialBenefitsRevoked2.getCredentialState().getStateName());
+
+
+    }
+    
+    
 
 
 }

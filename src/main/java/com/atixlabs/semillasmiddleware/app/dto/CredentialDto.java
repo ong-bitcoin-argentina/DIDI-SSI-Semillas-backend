@@ -18,7 +18,7 @@ public class CredentialDto {
 
     private Long id;
 
-    private Long idDidiCredential;
+    private String idDidiCredential;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDateTime dateOfIssue;
@@ -40,7 +40,7 @@ public class CredentialDto {
     private String credentialStatus;
 
 
-    public CredentialDto(Long id, Long idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState, String credentialType) {
+    public CredentialDto(Long id, String idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState, String credentialType) {
         this.id = id;
         this.idDidiCredential = idDidiCredential;
         this.dateOfIssue = dateOfIssue;
@@ -58,7 +58,7 @@ public class CredentialDto {
         this.idDidiCredential = credential.getIdDidiCredential();
         this.dateOfIssue = credential.getDateOfIssue();
         //this.dateOfExpiry = credential.getDateOfRevocation();
-        this.name = credential.getBeneficiaryName();
+        this.name = credential.getBeneficiaryFirstName() +" "+ credential.getBeneficiaryLastName();
         this.dniBeneficiary = credential.getBeneficiaryDni();
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();

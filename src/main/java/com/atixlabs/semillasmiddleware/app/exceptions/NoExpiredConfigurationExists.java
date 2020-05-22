@@ -7,5 +7,7 @@ import lombok.Getter;
 public class NoExpiredConfigurationExists extends Exception {
 
 
-  public NoExpiredConfigurationExists(String s) {}
+  public NoExpiredConfigurationExists(String s) {
+    super(s);
+  }
 }

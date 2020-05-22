@@ -38,6 +38,8 @@ public abstract class Credential extends AuditableEntity {
 
     protected LocalDateTime dateOfRevocation;
 
+    protected Long revocationReason;
+
 
     @ManyToOne
     protected Person creditHolder;

@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -34,7 +35,7 @@ public class BondareaController {
 
     @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoans()  {
+    public ResponseEntity<List<Loan>> synchronizeBondareaLoans()  {
         log.info("BONDAREA - GET LOANS");
         List<BondareaLoanDto> loansDto;
         List<Loan> loans;
@@ -50,7 +51,7 @@ public class BondareaController {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(loansDto, HttpStatus.OK);
+        return new ResponseEntity<>(loans, HttpStatus.OK);
     }
 
 
@@ -60,16 +61,15 @@ public class BondareaController {
      * Then to test the creation of credit credential and benefits credentials
      *
      */
-    @PostMapping("/synchronizeMock1")
+    @PostMapping("/synchronizeMock")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoansMock1()  {
+    public ResponseEntity<List<Loan>> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson)  {
         log.info("BONDAREA - GET LOANS");
-        List<BondareaLoanDto> loansDto;
         List<Loan> loans;
         try {
-            LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            loansDto = bondareaService.getLoansMock("","", todayPlusOne.toString());
-            loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
+          //  LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+            //loansDto = bondareaService.getLoansMock("","", todayPlusOne.toString());
+            loans = loansJson.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
             bondareaService.updateExistingLoans(loans);
             bondareaService.setPendingLoansFinalStatusMock();
         }
@@ -78,33 +78,10 @@ public class BondareaController {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
 
-        return new ResponseEntity<>(loansDto, HttpStatus.OK);
+        return new ResponseEntity<>(loans, HttpStatus.OK);
     }
 
-    /**
-     * Synchronize loans. This is used the 2nd time to update the loans that have already been saved.
-     *
-     */
-    @PostMapping("/synchronizeMock2")
-    @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoansMock2()  {
-        log.info("BONDAREA - GET LOANS");
-        List<BondareaLoanDto> loansDto;
-        List<Loan> loans;
-        try {
-            LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            loansDto = bondareaService.getLoansMockSecond("","", todayPlusOne.toString());
-            loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
-            bondareaService.updateExistingLoans(loans);
-            bondareaService.setPendingLoansFinalStatusMock();
-        }
-        catch (Exception ex){
-            log.error("Could not synchronized data from Bondarea !"+ ex.getMessage());
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
-        }
 
-        return new ResponseEntity<>(loansDto, HttpStatus.OK);
-    }
 
 
     }

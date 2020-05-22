@@ -10,15 +10,15 @@ INSERT INTO public.credential_state(id, state_name) VALUES (
 
 INSERT INTO public.person (
 id, birth_date, document_number, first_name, last_name) VALUES (
-'1'::bigint, '1999-04-21'::date, '454645687'::bigint, 'Jorge'::character varying(255), 'Gómez}'::character varying(255));
+'6'::bigint, '1999-04-21'::date, '24580962'::bigint, 'Jorge'::character varying(255), 'Gómez'::character varying(255));
 
 INSERT INTO public.person (
 id, birth_date, document_number,  first_name, last_name) VALUES (
-'2'::bigint, '1999-04-21'::date, '456456455'::bigint, 'Tomas'::character varying(255), 'Gipson'::character varying(255));
+'7'::bigint, '1999-04-21'::date, '24580961'::bigint, 'Tomas'::character varying(255), 'Gipson'::character varying(255));
 
 INSERT INTO public.person (
 id, birth_date, document_number,  first_name, last_name) VALUES (
-'3'::bigint, '1999-05-25'::date, '547547547'::bigint, 'Rodolfo'::character varying(255), 'Rodriguez'::character varying(255));
+'8'::bigint, '1999-05-25'::date, '24580960'::bigint, 'Rodolfo'::character varying(255), 'Rodriguez'::character varying(255));
 
 INSERT INTO public.person (
 id, birth_date, document_number, first_name, last_name) VALUES (

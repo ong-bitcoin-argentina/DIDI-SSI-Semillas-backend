@@ -55,6 +55,7 @@ public class DidiService {
     private String didiTemplateCodeEntrepreneurship;
     private String didiTemplateCodeDwelling;
     private String didiTemplateCodeBenefit;
+    private String didiTemplateCodeCredit;
 /*
     @Value("${didi.base_url}")
     private String didiBaseUrl;
@@ -80,8 +81,6 @@ public class DidiService {
             CredentialRepository credentialRepository,
             CredentialStateRepository credentialStateRepository,
 
-
-
             CredentialIdentityRepository credentialIdentityRepository,
             CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
             CredentialDwellingRepository credentialDwellingRepository,
@@ -93,7 +92,8 @@ public class DidiService {
             @Value("${didi.template_code_identity}") String didiTemplateCodeIdentity,
             @Value("${didi.template_code_entrepreneurship}") String didiTemplateCodeEntrepreneurship,
             @Value("${didi.template_code_dwelling}") String didiTemplateCodeDwelling,
-            @Value("${didi.template_code_benefit}") String didiTemplateCodeBenefit) {
+            @Value("${didi.template_code_benefit}") String didiTemplateCodeBenefit,
+            @Value("${didi.template_code_credit}") String didiTemplateCodeCredit) {
 
         this.didiAppUserService = didiAppUserService;
         this.didiAppUserRepository = didiAppUserRepository;
@@ -114,6 +114,7 @@ public class DidiService {
         this.didiTemplateCodeEntrepreneurship = didiTemplateCodeEntrepreneurship;
         this.didiTemplateCodeDwelling = didiTemplateCodeDwelling;
         this.didiTemplateCodeBenefit = didiTemplateCodeBenefit;
+        this.didiTemplateCodeCredit = didiTemplateCodeCredit;
 
         this.setUpRetrofitForDidiAndGetToken();
     }
@@ -198,38 +199,47 @@ public class DidiService {
         //  es beneficiario de algun credito - debo emitir solamente su credencial.
         //  Si getCreditHolderDni() != credential.getBeneficiaryDni() es beneficiario
         //  IMPORTANT: cuando creditHolder = beneficiary ya se cubrirá en siguiente for
-        for (Credential credentialB : beneficiaries) {
-            if (!credentialB.getCreditHolderDni().equals(credentialB.getBeneficiaryDni()))
-                ahoraLeDefinoNombre(credentialB);
+        for (Credential credential : beneficiaries) {
+            log.info("BENEFICIARIES");
+            log.info(credential.toString());
+            if (!credential.getCreditHolderDni().equals(credential.getBeneficiaryDni())) {
+                String receivedDid = didiAppUserRepository.findByDni(credential.getBeneficiaryDni()).getDid();
+                updateCredentialDidAndDidiSync(credential, receivedDid);
+            }
         }
 
         //4-Creo y emito credenciales de titulares
-        for (Credential credentialH : creditHolders) {
-            this.ahoraLeDefinoNombre(credentialH);
+        for (Credential credential : creditHolders) {
+            log.info("CREDIT HOLDERS");
+            log.info(credential.toString());
+            String receivedDid = didiAppUserRepository.findByDni(credential.getCreditHolderDni()).getDid();
+            this.updateCredentialDidAndDidiSync(credential, receivedDid);
         }
-
-
 
         log.info("didiSync: ended");
         return "didiSync: ended";
     }
 
-    private void ahoraLeDefinoNombre(Credential credential){
+    private void updateCredentialDidAndDidiSync(Credential credential, String receivedDid){
+        log.info("didiSync: credencial para evaluar:");
+        log.info(credential.toString());
         switch (CredentialStatesCodes.getEnumByStringValue(credential.getCredentialState().getStateName())){
             case CREDENTIAL_ACTIVE:
                 if (credential.getIdDidiCredential() != null) {
-                    log.info("didiSync: 1.a Revocar credenciales de titular activas en didi");
+                    log.info("didiSync: 1.a Revocar credencial activa en didi");
                     if (this.didiDeleteCertificate(credential.getIdDidiCredential()))
-                        credentialService.revokeCredential(credential.getId());
+                        //credentialService.revokeCredential(credential.getId());//este metodo revoca tambien familiares y pierdo sync con didi.
+                        credentialService.revokeComplete(credential);
                 }
             case PENDING_DIDI:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
-                    credentialService.revokeCredential(credential.getId());
+                    //credentialService.revokeCredential(credential.getId());//este metodo revoca tambien familiares y pierdo sync con didi.
+                    credentialService.revokeComplete(credential);
                 }
                 log.info("didiSync: 2  doy de alta credenciales nuevas");
-                String creditHolderReceivedDid = didiAppUserRepository.findByDni(credential.getCreditHolderDni()).getDid();
-                credential.setIdDidiReceptor(creditHolderReceivedDid);//registro el did recibido
+                //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
+                credential.setIdDidiReceptor(receivedDid);//registro el did recibido
                 createAndEmmitCertificateDidi(credential);
                 break;
             case CREDENTIAL_REVOKE:
@@ -286,6 +296,9 @@ public class DidiService {
                 break;
             case BENEFIT:
                 didiTemplateCode = didiTemplateCodeBenefit;
+                break;
+            case CREDIT:
+                didiTemplateCode = didiTemplateCodeCredit;
                 break;
             default:
                 log.error("didiSync: La categoria de credencial no es valida");

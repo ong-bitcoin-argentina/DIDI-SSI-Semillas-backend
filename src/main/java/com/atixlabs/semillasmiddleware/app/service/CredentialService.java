@@ -250,14 +250,20 @@ public class CredentialService {
 
         credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
 
+
+        credentialIdentity.setBeneficiaryGender(beneficiary.getGender());
+        credentialIdentity.setBeneficiaryBirthDate(beneficiary.getBirthDate());
+
         switch (beneficiaryPersonCategory.getPersonType()) {
             case BENEFICIARY:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
+                credentialIdentity.setRelationWithCreditHolder("titular");//todo parar a enum
                 break;
             case SPOUSE:
             case CHILD:
             case OTHER_KINSMAN:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILY.getCode());
+                credentialIdentity.setRelationWithCreditHolder("familiar");//todo pasar a enum
                 break;
         }
 
@@ -736,7 +742,7 @@ public class CredentialService {
      *
      * @param credentialToRevoke
      */
-    private void revokeComplete(Credential credentialToRevoke){
+    public void revokeComplete(Credential credentialToRevoke){
         //here is important to manage the different actions, and need to be synchronize at the end.
         log.info("Starting revoking process for credential id: "+ credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
         //todo call revoke on didi

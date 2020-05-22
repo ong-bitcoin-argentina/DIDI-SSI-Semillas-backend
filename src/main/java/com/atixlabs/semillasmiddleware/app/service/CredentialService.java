@@ -734,7 +734,7 @@ public class CredentialService {
 
         } else {
             //todo throw non-existent credential ?
-            log.error("Error you are trying to revoke an non existent credential " + id);
+            log.error("Error you are trying to revoke a non existent credential " + id);
             haveRevoke = false;
         }
 

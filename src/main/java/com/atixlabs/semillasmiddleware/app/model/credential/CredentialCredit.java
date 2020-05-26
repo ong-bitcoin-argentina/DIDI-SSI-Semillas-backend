@@ -39,7 +39,7 @@ public class CredentialCredit extends Credential {
 
     private LocalDate finishDate;
 
-    private Float expiredAmount; //TODO ? can have money in favour
+    private Float expiredAmount;
 
     public CredentialCredit(CredentialCredit credentialCredit) {
         super(credentialCredit);

@@ -33,7 +33,6 @@ import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 
 import java.math.BigDecimal;
 import java.util.*;
@@ -248,14 +247,20 @@ public class CredentialService {
 
         credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
 
+
+        credentialIdentity.setBeneficiaryGender(beneficiary.getGender());
+        credentialIdentity.setBeneficiaryBirthDate(beneficiary.getBirthDate());
+
         switch (beneficiaryPersonCategory.getPersonType()) {
             case BENEFICIARY:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
+                credentialIdentity.setRelationWithCreditHolder("titular");//todo parar a enum
                 break;
             case SPOUSE:
             case CHILD:
             case OTHER_KINSMAN:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILY.getCode());
+                credentialIdentity.setRelationWithCreditHolder("familiar");//todo pasar a enum
                 break;
         }
 
@@ -756,9 +761,9 @@ public class CredentialService {
      * Revoke on DB and revoke on didi
      *
      * @param credentialToRevoke
-     * @return
+     * @return boolean
      */
-    private boolean revokeComplete(Credential credentialToRevoke){
+    public boolean revokeComplete(Credential credentialToRevoke){
         //here is important to manage the different actions, and need to be synchronize at the end.
         log.info("Starting revoking process for credential id: "+ credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
         log.info("Here revoke on didi");

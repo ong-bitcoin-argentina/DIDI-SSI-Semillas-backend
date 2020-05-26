@@ -1,12 +1,17 @@
 package com.atixlabs.semillasmiddleware.app.didi.controller;
 
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
+import com.atixlabs.semillasmiddleware.app.didi.dto.DidiCredential;
+import com.atixlabs.semillasmiddleware.app.didi.dto.DidiEmmitCredentialResponse;
+import com.atixlabs.semillasmiddleware.app.didi.dto.DidiGetAllCredentialResponse;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.constraints.NotNull;
 
 @RestController
 @RequestMapping(DidiController.URL_MAPPING_CREDENTIAL)
@@ -49,5 +54,19 @@ public class DidiController {
 
 
 
+    //todo: delete on production environment, this endpoint is for testing purposes only, to keep clean didi-issuer
+
+    @DeleteMapping("/didi/all/")
+    @ResponseStatus(HttpStatus.OK)
+    public String didiDeleteAllCredentials() {
+        DidiGetAllCredentialResponse didiGetAllCredentialResponse = didiService.didiGetAllCredentials();
+
+        for (DidiCredential credential : didiGetAllCredentialResponse.getData()) {
+            didiService.didiDeleteCertificate(credential.get_id());
+        }
+
+        log.info("Finalizo el proceso de borrado");
+        return "Finalizo el proceso de borrado";
+    }
 
 }

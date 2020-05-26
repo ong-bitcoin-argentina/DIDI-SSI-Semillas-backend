@@ -176,7 +176,7 @@ public class DidiService {
         //1-Busco registros en AppUser con estado SYNC_MISSING O SYNC_ERROR (todo: validar si SYNC_ERROR vuelvo a intentar):
         ArrayList<String> didiSyncStatus = new ArrayList<>();
         didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
-        //didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
+        didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
         ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
 
         if (didiAppUsers.size() <= 0)
@@ -191,6 +191,7 @@ public class DidiService {
         ArrayList<Credential> creditHolders = credentialRepository.findByCreditHolderDniIn(dniList);
         //3-Busco credenciales que tengan el DNI como beneficiary
         ArrayList<Credential> beneficiaries = credentialRepository.findByBeneficiaryDniIn(dniList);
+        //todo ver pendientes -> borrar credenciales de los listados anteriores
 
         if (creditHolders.size()<=0 && beneficiaries.size()<=0)
             return "didiSync: No existen credenciales pendientes para enviar hacia didi";
@@ -227,14 +228,19 @@ public class DidiService {
             case CREDENTIAL_ACTIVE:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.a Revocar credencial activa en didi");
-                    if (this.didiDeleteCertificate(credential.getIdDidiCredential()))
+                    //todo call method to revoke didi and credential from CredentialService
+                    if (this.didiDeleteCertificate(credential.getIdDidiCredential())) {
                         //credentialService.revokeCredential(credential.getId());//este metodo revoca tambien familiares y pierdo sync con didi.
                         credentialService.revokeComplete(credential);
+
+                        credential.setIdDidiReceptor(receivedDid);//registro el did recibido
+                        createAndEmmitCertificateDidi(credential);
+                    }
                 }
+            break;
             case PENDING_DIDI:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
-                    //credentialService.revokeCredential(credential.getId());//este metodo revoca tambien familiares y pierdo sync con didi.
                     credentialService.revokeComplete(credential);
                 }
                 log.info("didiSync: 2  doy de alta credenciales nuevas");
@@ -243,7 +249,7 @@ public class DidiService {
                 createAndEmmitCertificateDidi(credential);
                 break;
             case CREDENTIAL_REVOKE:
-                log.info("didiSync: TODO: Definir accionar con credenciales revocadas, por ahora las ignora");
+              //TODO: Definir accionar con credenciales revocadas, por ahora las ignora");
                 break;
         }
     }
@@ -271,10 +277,12 @@ public class DidiService {
                 log.error("didiSync: Fallo la emision de la certificado, borrando el certificado creado pero no-emitido del didi-issuer");
                 this.didiDeleteCertificate(didiCreateCredentialResponse.getData().get(0).get_id());
                 this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
+                //todo save credential como pendiente didi
             }
         } else {
             log.error("didiSync: fallo la creacion de la certificado");
             this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
+            //todo save credential como pendiente didi
         }
     }
 
@@ -331,9 +339,7 @@ public class DidiService {
 
     private DidiEmmitCredentialResponse emmitCertificateDidi(String didiCredentialId) {
 
-        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.emmitCertificate(
-                didiAuthToken,
-                didiCredentialId);
+        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.emmitCertificate(didiAuthToken, didiCredentialId);
 
         try {
             Response<DidiEmmitCredentialResponse> response = callSync.execute();
@@ -350,9 +356,7 @@ public class DidiService {
 
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId) {
 
-        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(
-                didiAuthToken,
-                CredentialToRevokeDidiId);
+        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
 
         try {
             Response<DidiEmmitCredentialResponse> response = callSync.execute();

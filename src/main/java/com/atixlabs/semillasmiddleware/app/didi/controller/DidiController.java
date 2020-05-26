@@ -55,7 +55,7 @@ public class DidiController {
 
 
     //todo: delete on production environment, this endpoint is for testing purposes only, to keep clean didi-issuer
-/*
+
     @DeleteMapping("/didi/all/")
     @ResponseStatus(HttpStatus.OK)
     public String didiDeleteAllCredentials() {
@@ -68,5 +68,5 @@ public class DidiController {
         log.info("Finalizo el proceso de borrado");
         return "Finalizo el proceso de borrado";
     }
- */
+
 }

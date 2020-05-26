@@ -749,6 +749,7 @@ public class CredentialServiceTest {
         when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
         when(credentialCreditRepository.findByIdGroupAndCredentialStateIn(anyString(), anyList())).thenReturn(List.of(creditCreated));
         when(parameterConfigurationRepository.findByConfigurationName(anyString())).thenReturn(getParamConfiguration());
+        when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID()));
 
         //credential benefits
         when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(getCredentialHolderBenefitMock(getBeneficiaryMockWithoutDID()));

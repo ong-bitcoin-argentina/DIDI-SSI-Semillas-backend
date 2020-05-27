@@ -18,10 +18,20 @@ public interface DidiEndpoint {
             @Field("data") DidiCredentialData didiCredentialData);
 
     @POST("Cert/{credential_id}/emmit")
-    @FormUrlEncoded
-    Call<DidiCreateCredentialResponse> emmitCertificate(
+    Call<DidiEmmitCredentialResponse> emmitCertificate(
             @Header("token") String token,
             @Path("credential_id") String credential_id);
+
+
+    //http://192.81.218.211:3500/api/1.0/didi_issuer/Cert/5ec5950dd9e6e10f342ba959
+    @DELETE("Cert/{credential_id}")
+    Call<DidiEmmitCredentialResponse> deleteCertificate(
+            @Header("token") String token,
+            @Path("credential_id") String credential_id);
+
+    @GET("Cert/all")
+    Call<DidiGetAllCredentialResponse> getAllCertificates(
+            @Header("token") String token);
 
 /*
     @POST("banks/{bank_id}/accounts/{account_id}/{view_id}/wallet/cvu")

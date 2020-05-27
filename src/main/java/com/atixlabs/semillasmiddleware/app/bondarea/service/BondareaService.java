@@ -184,6 +184,41 @@ public class BondareaService {
         return loans;
     }
 
+
+    /**
+     * MOCK PURPOSE:
+     * Synchronize loans. This get the 4 loans but one is in default.
+     *
+     * @param loanState
+     * @param idBondareaLoan
+     * @param date
+     * @return
+     */
+    public List<BondareaLoanDto> getLoansOneInDefaultMock(String loanState, String idBondareaLoan, String date){
+
+        BondareaLoanDto loan = getMockBondareaLoan();
+        List<BondareaLoanDto> loans = new ArrayList<>();
+
+        loans.add(loan);
+
+        BondareaLoanDto loan2 = getMockBondareaLoan();
+        loan2.setIdBondareaLoan("2L");
+        loans.add(loan2);
+
+        BondareaLoanDto loan3 = getMockBondareaLoan();
+        loan3.setIdBondareaLoan("3L");
+        loans.add(loan3);
+
+        //loan 4 is in default
+        BondareaLoanDto loan4 = getMockBondareaLoan();
+        loan4.setIdBondareaLoan("4L");
+        loan4.setExpiredAmount((float) 10500);
+        loans.add(loan4);
+
+        return loans;
+    }
+
+
     private List<BondareaLoanDto> getLoansFinalizedMock(String code, String idBondareaLoan, String date){
         List<BondareaLoanDto> loans = new ArrayList<>();
         //loan 2 is finalize
@@ -195,7 +230,6 @@ public class BondareaService {
 
         return loans;
     }
-
 
 
     /**
@@ -320,6 +354,7 @@ public class BondareaService {
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
     public void setPendingLoansFinalStatusMock(){
+        log.info("Determinating the final state of the loans in pending state");
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {

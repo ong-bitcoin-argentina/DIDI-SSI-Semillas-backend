@@ -84,4 +84,6 @@ public abstract class Credential extends AuditableEntity {
         this.credentialDescription = credential.credentialDescription;
         this.credentialCategory = credential.credentialCategory;
     }
+
+
 }

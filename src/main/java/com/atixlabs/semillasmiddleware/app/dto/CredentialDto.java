@@ -32,7 +32,7 @@ public class CredentialDto {
 
     private String credentialState;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime lastUpdate;
 
     private String credentialType;

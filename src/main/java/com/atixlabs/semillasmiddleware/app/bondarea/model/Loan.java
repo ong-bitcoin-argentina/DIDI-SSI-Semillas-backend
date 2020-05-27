@@ -21,6 +21,7 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 public class Loan extends AuditableEntity {
 
+
     @PrePersist
     private void preSetValues(){
         if(this.hasCredential == null)
@@ -138,6 +139,44 @@ public class Loan extends AuditableEntity {
 
         this.modifiedTime = loanToUpdate.getModifiedTime();
 
+    }
+
+    public Loan(LoanDto loanDto) {
+        this.dniPerson = loanDto.getDniPerson();
+
+        this.idBondareaLoan = loanDto.getIdBondareaLoan();
+
+        this.tagBondareaLoan = loanDto.getTagBondareaLoan();
+
+        this.status =   loanDto.getStatus();
+
+        this.idProductLoan =   loanDto.getIdProductLoan();
+
+        this.idGroup =   loanDto.getIdGroup();
+
+        this.cycleDescription =   loanDto.getCycleDescription();
+
+        this.personName =   loanDto.getPersonName();
+
+        this.userId =   loanDto.getUserId();
+
+        this.amount =  loanDto.getAmount();
+
+        this.expiredAmount =   loanDto.getExpiredAmount();
+
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+            if (loanDto.getDateFirstInstalment() != null) {
+                this.dateFirstInstalment = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+            }
+
+            if (loanDto.getCreationDate() != null) {
+                this.creationDate = LocalDate.parse(loanDto.getCreationDate(), formatter);
+            }
+        }
+        catch (Exception ex){
+            log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanDto.getCreationDate());
+        }
     }
 
     public Loan() {}

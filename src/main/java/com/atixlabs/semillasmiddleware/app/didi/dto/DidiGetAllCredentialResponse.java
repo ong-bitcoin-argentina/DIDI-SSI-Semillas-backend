@@ -9,7 +9,7 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @ToString
-public class DidiCreateCredentialResponse {
+public class DidiGetAllCredentialResponse {
     private String status;
     private ArrayList<DidiCredential> data;
 

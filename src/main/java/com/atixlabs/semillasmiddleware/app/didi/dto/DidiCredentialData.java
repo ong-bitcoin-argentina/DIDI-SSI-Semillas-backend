@@ -49,6 +49,9 @@ public class DidiCredentialData {
             case BENEFIT:
                 buildDidiCredentialDataFromBenefit((CredentialBenefits) credential);
                 break;
+            case CREDIT:
+                buildDidiCredentialDataFromCredit((CredentialCredit) credential);
+                break;
             default:
                 log.error("NO EXISTE el tipo de credencial para enviar a didi");
                 break;
@@ -58,11 +61,11 @@ public class DidiCredentialData {
     private void buildDidiCredentialDataFromIdentity(CredentialIdentity credential){
         cert.add(new DidiCredentialDataElem("Dni Titular", credential.getCreditHolderDni().toString()));
         cert.add(new DidiCredentialDataElem("Nombre Titular", credential.getCreditHolderFirstName()+" "+credential.getCreditHolderLastName()));
-        cert.add(new DidiCredentialDataElem("Relacion con Titular", "Familiar"));//todo: mapear dato
+        cert.add(new DidiCredentialDataElem("Relacion con Titular",credential.getRelationWithCreditHolder()));
         cert.add(new DidiCredentialDataElem("Dni Beneficiario", credential.getBeneficiaryDni().toString()));
         cert.add(new DidiCredentialDataElem("Nombre Beneficiario", credential.getBeneficiaryFirstName()+" "+credential.getBeneficiaryLastName()));
-        cert.add(new DidiCredentialDataElem("Genero", "Masculino"));//todo: mapear dato
-        cert.add(new DidiCredentialDataElem("Fecha de Nacimiento", "2000/01/01"));//todo: mapear dato
+        cert.add(new DidiCredentialDataElem("Genero", credential.getBeneficiaryGender()));
+        cert.add(new DidiCredentialDataElem("Fecha de Nacimiento", credential.getBeneficiaryBirthDate().toString()));
     }
 
     private void buildDidiCredentialDataFromDwelling(CredentialDwelling credential){
@@ -81,11 +84,34 @@ public class DidiCredentialData {
 
     private void buildDidiCredentialDataFromBenefit(CredentialBenefits credential){
         cert.add(new DidiCredentialDataElem("Dni Beneficiario", credential.getBeneficiaryDni().toString()));
-        cert.add(new DidiCredentialDataElem("Caracter", "Familiar"));//todo: mapear dato
+        cert.add(new DidiCredentialDataElem("Caracter", credential.getBeneficiaryType()));
+    }
+
+    private void buildDidiCredentialDataFromCredit(CredentialCredit credential){
+        cert.add(new DidiCredentialDataElem("Dni Titular", credential.getBeneficiaryDni().toString()));
+        cert.add(new DidiCredentialDataElem("Id Credito", credential.getIdBondareaCredit()));
+        cert.add(new DidiCredentialDataElem("Tipo de Credito", credential.getCreditType()));
+        //cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
+        cert.add(new DidiCredentialDataElem("Estado de Credito", credential.getCreditState()));
+        cert.add(new DidiCredentialDataElem("Saldo Vencido", credential.getExpiredAmount().toString()));
+        cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycle()));
+        cert.add(new DidiCredentialDataElem("Cuotas Totales", String.valueOf(credential.getTotalCycles())));
+        cert.add(new DidiCredentialDataElem("Cuotas Vencidas", String.valueOf(credential.getAmountExpiredCycles())));
     }
 
 }
-/*EMPRENDIMIENTO
+/*CREDITO
+    "value":"Vivienda Semillas v1", "name":"CERTIFICADO O CURSO"
+    "value":"30111111", "name":"Dni Titular"
+    "value":"SEM-CRED-01", "name":"Id Credito"
+    "value":"SEM-CRED", "name":"Tipo de Credito"
+    "value":"GRUPO-AX1", "name":"Id Grupo"
+    "value":"VIGENTE", "name":"Estado de Credito"
+    "value":"0", "name":"Saldo Vencido"
+    "value":"2", "name":"Cuota"
+    "value":"12", "name":"Cuotas Totales"
+    "value":"0", "name":"Cuotas Vencidas"
+EMPRENDIMIENTO
             "value": "Vivienda Semillas v1",            "_id": "5ec2f5303fbea6397dcde622",            "name": "CERTIFICADO O CURSO"
             "value": "Comercio",            "_id": "5ec2f5303fbea6397dcde623",            "name": "Tipo de Emprendimiento"
             "value": "2010/01/01",            "_id": "5ec2f5303fbea6397dcde624",            "name": "Inicio de Actividad"

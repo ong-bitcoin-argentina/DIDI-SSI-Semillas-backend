@@ -29,6 +29,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -196,7 +197,8 @@ public class CredentialService {
             idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
         List<Credential> credentials;
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
-
+        //order by update time asc
+        Collections.sort(credentials, Comparator.comparing(Credential::getUpdated));
         return credentials;
     }
 

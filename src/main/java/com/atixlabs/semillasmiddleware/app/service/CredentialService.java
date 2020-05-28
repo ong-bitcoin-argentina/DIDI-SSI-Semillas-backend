@@ -221,17 +221,17 @@ public class CredentialService {
         return revocationReasons;
     }
 
-    public String getReasonFromId(Long idReason){
+    public Optional<String> getReasonFromId(Long idReason){
         if(idReason != null) {
             Optional<RevocationReason> reason = revocationReasonRepository.findById(idReason);
             if (reason.isPresent()) {
                 //validate if the reason could be one allowed to the user.
                 Map<Long, String> reasonsForUser = getRevocationReasonsForUser();
                 if (reasonsForUser.containsValue(reason.get().getReason()))
-                    return reason.get().getReason();
+                    return Optional.of(reason.get().getReason());
             }
         }
-        return null;
+        return Optional.empty();
     }
 
     private Person savePersonIfNew(Person person) {

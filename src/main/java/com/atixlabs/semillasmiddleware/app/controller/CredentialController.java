@@ -86,28 +86,25 @@ public class CredentialController {
     public Map<Long, String> findRevocationReasons() {
         //todo this is not the best option to obtain the reasons able by the user.
         Map<Long, String> revocationReasons = new HashMap<>();
-        revocationReasons = credentialService.getRevocationReasonsForUser();
-        return revocationReasons;
+        return credentialService.getRevocationReasonsForUser();
     }
 
 
     @PatchMapping("/revoke/{idCredential}/reason/{idReason}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long idCredential, @PathVariable @NotNull @Min(1) Long idReason){
-        //todo method on service-> try to revoke. Search the credential from id and then call the appropriate revoke method.
+        Optional<String> opRevocationReason = credentialService.getReasonFromId(idReason);
+        if(opRevocationReason.isPresent()) {
+            credentialService.revokeCredential(idCredential, opRevocationReason.get());
+            return ResponseEntity.status(HttpStatus.OK).body("Revoked successfully");
+        }
+        else
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Is not possible to revoke with reason " + idReason);
 
-            String revocationReason = credentialService.getReasonFromId(idReason);
-            if(revocationReason != null) {
-                credentialService.revokeCredential(idCredential, revocationReason);
-                return ResponseEntity.status(HttpStatus.OK).body("Revoked succesfully");
-            }
-            else
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Is not possible to revoke with reason " + idReason);
-
-        /*else
-        {
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error there is no credential with id " + id);
-        }*/
+    /*else
+    {
+        return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error there is no credential with id " + id);
+    }*/
 
     }
 

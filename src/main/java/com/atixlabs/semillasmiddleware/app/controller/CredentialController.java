@@ -92,7 +92,7 @@ public class CredentialController {
                 if (revokeOk)
                     return ResponseEntity.status(HttpStatus.OK).body("Revoked succesfully");
                 else
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error trying to revoke credential with id: " + id);
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + id);
             }
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Credential with id: " + id + " is not manually revocable");
         }else {

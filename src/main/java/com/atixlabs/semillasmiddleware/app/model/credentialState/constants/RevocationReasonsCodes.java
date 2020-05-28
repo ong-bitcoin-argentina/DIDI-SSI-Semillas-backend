@@ -25,9 +25,4 @@ public enum RevocationReasonsCodes {
         return this.code;
     }
 
-    //to map the value code from front and get the name
-    static final Map<String, RevocationReasonsCodes> codeMap = Arrays.stream(values()).collect(Collectors.toMap(RevocationReasonsCodes::getCode, p->p));
-    public static RevocationReasonsCodes getEnumByStringValue(String codeString) {
-        return codeMap.get(codeString);
-    }
 }

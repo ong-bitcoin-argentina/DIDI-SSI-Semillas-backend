@@ -9,9 +9,9 @@ import java.util.ArrayList;
 @Getter
 @Setter
 @ToString
-public class DidiCreateCredentialResponse {
+public class DidiEmmitCredentialResponse {
     private String status;
-    private ArrayList<DidiCredential> data;
+    private DidiCredential data;
 
     private String errorCode;//when error
     private String message;//when error

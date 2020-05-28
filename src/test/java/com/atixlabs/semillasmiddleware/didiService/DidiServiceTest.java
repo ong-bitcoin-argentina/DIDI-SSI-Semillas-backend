@@ -121,6 +121,7 @@ public class DidiServiceTest {
     }
 
     @Test
+    @Ignore
     public void didiCredentialSyncEmpty() {
         ArrayList<DidiAppUser> didiAppUsers = new ArrayList<>();
         when(didiAppUserRepository.findBySyncStatusIn(any(ArrayList.class))).thenReturn(didiAppUsers);

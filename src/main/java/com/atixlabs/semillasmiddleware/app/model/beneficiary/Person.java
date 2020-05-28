@@ -30,6 +30,8 @@ public class Person {
 
     private LocalDate birthDate;
 
+    private String gender;
+
     @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
@@ -49,6 +51,7 @@ public class Person {
         person.setFirstName(personCategory.getName());
         person.setLastName(personCategory.getSurname());
         person.setBirthDate(personCategory.getBirthDate());
+        person.setGender(personCategory.getGender());
         return person;
     }
 

@@ -60,8 +60,7 @@ public class CredentialController {
             return Collections.emptyList();
         }
 
-        List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
-        return credentialsDto;
+        return credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
     }
 
     @GetMapping("/states")

@@ -198,7 +198,7 @@ public class CredentialService {
         List<Credential> credentials;
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
         //order by update time asc
-        Collections.sort(credentials, Comparator.comparing(Credential::getUpdated));
+        credentials.sort(Comparator.comparing(Credential::getUpdated).reversed());
         return credentials;
     }
 

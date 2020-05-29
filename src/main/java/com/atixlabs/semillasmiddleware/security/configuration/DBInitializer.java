@@ -4,8 +4,11 @@ import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfigur
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
 import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.atixlabs.semillasmiddleware.security.repository.PermissionRepository;
@@ -16,7 +19,6 @@ import com.atixlabs.semillasmiddleware.security.service.RoleService;
 import com.atixlabs.semillasmiddleware.security.service.UserService;
 import com.google.common.collect.Sets;
 
-import java.util.List;
 import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
@@ -40,14 +42,17 @@ public class DBInitializer implements CommandLineRunner {
 
     private ParameterConfigurationRepository parameterConfigurationRepository;
 
+    private RevocationReasonRepository revocationReasonRepository;
+
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository) {
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
         this.menuRepository = menuRepository;
         this.credentialStateRepository = credentialStateRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
+        this.revocationReasonRepository = revocationReasonRepository;
     }
 
     @Override
@@ -199,6 +204,25 @@ public class DBInitializer implements CommandLineRunner {
             configuration.setExpiredAmountMax((float) 10250);
             configuration.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
             parameterConfigurationRepository.save(configuration);
+        }
+
+        //revocation reasons
+        if(revocationReasonRepository.findAll().size() == 0){
+            RevocationReason updateReason = new RevocationReason(RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+            revocationReasonRepository.save(updateReason);
+
+            RevocationReason cancelledReason = new RevocationReason(RevocationReasonsCodes.CANCELLED.getCode());
+            revocationReasonRepository.save(cancelledReason);
+
+
+            RevocationReason expiredReason = new RevocationReason(RevocationReasonsCodes.EXPIRED_INFO.getCode());
+            revocationReasonRepository.save(expiredReason);
+
+            RevocationReason unlinkingReason = new RevocationReason(RevocationReasonsCodes.UNLINKING.getCode());
+            revocationReasonRepository.save(unlinkingReason);
+
+            RevocationReason defaultReason = new RevocationReason(RevocationReasonsCodes.DEFAULT.getCode());
+            revocationReasonRepository.save(defaultReason);
         }
 
     }

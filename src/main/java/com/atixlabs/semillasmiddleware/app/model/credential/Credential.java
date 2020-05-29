@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -37,6 +38,9 @@ public abstract class Credential extends AuditableEntity {
     protected LocalDateTime dateOfIssue;
 
     protected LocalDateTime dateOfRevocation;
+
+    @ManyToOne
+    protected RevocationReason revocationReason;
 
 
     @ManyToOne

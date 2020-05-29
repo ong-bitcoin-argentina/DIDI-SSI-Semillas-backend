@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.google.gson.Gson;
@@ -231,7 +232,7 @@ public class DidiService {
                     //todo call method to revoke didi and credential from CredentialService
                     if (this.didiDeleteCertificate(credential.getIdDidiCredential())) {
                         //credentialService.revokeCredential(credential.getId());//este metodo revoca tambien familiares y pierdo sync con didi.
-                        credentialService.revokeComplete(credential);
+                        credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
 
                         credential.setIdDidiReceptor(receivedDid);//registro el did recibido
                         createAndEmmitCertificateDidi(credential);
@@ -241,7 +242,7 @@ public class DidiService {
             case PENDING_DIDI:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
-                    credentialService.revokeComplete(credential);
+                    credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
                 }
                 log.info("didiSync: 2  doy de alta credenciales nuevas");
                 //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();

@@ -39,18 +39,7 @@ public class CredentialDto {
 
     private String credentialStatus;
 
-
-    public CredentialDto(Long id, String idDidiCredential, LocalDateTime dateOfIssue, LocalDateTime dateOfExpiry, String name, Long dniBeneficiary, String creditState, String credentialType) {
-        this.id = id;
-        this.idDidiCredential = idDidiCredential;
-        this.dateOfIssue = dateOfIssue;
-       // this.dateOfExpiry = dateOfExpiry;
-        this.name = name;
-        this.dniBeneficiary = dniBeneficiary;
-        this.credentialState = creditState;
-        this.credentialType = credentialType;
-
-    }
+    private boolean isRevocable;
 
 
     public CredentialDto(Credential credential) {
@@ -63,6 +52,7 @@ public class CredentialDto {
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();
         this.credentialType = credential.getCredentialDescription();
+        this.isRevocable = credential.isManuallyRevocable();
     }
 
 }

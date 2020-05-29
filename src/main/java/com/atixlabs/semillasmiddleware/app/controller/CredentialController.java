@@ -7,7 +7,6 @@ import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExis
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
@@ -85,16 +84,20 @@ public class CredentialController {
     @PatchMapping("/revoke/{id}")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long id){
-        //todo method on service-> try to revoke. Search the credential from id and then call the appropriate revoke method.
-
-            credentialService.revokeCredential(id);
-            return  ResponseEntity.status(HttpStatus.OK).body("Revoked succesfully");
-
-        /*else
-        {
-            return  ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Error there is no credential with id " + id);
-        }*/
-
+        Optional<Credential> credentialToRevoke =credentialService.getCredentialById(id);
+        if(credentialToRevoke.isPresent()) {
+            if (credentialToRevoke.get().isManuallyRevocable()) {
+                boolean revokeOk = credentialService.revokeCredential(id);
+                if (revokeOk)
+                    return ResponseEntity.status(HttpStatus.OK).body("Revoked succesfully");
+                else
+                    return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + id);
+            }
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Credential with id: " + id + " is not manually revocable");
+        }else {
+            log.error("There is no credential with id: " + id);
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no credential with id: " + id);
+        }
     }
 
 

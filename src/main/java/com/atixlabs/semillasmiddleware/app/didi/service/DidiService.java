@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.google.gson.Gson;
@@ -230,16 +231,18 @@ public class DidiService {
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.a Revocar credencial activa en didi");
 
-                    if (credentialService.revokeComplete(credential)) {
+                    if (credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode())) {
                         credential.setIdDidiReceptor(receivedDid);//registro el did recibido
                         createAndEmmitCertificateDidi(credential);
                     }
                 }
             break;
+
             case PENDING_DIDI:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
-                    if (credentialService.revokeCredentialOnlyOnSemillas(credential)) {
+
+                    if (credentialService.revokeCredentialOnlyOnSemillas(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode())){
 
                         log.info("didiSync: 2  doy de alta credenciales nuevas");
                         //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
@@ -247,6 +250,7 @@ public class DidiService {
                         createAndEmmitCertificateDidi(credential);
                     }
                 }
+
                 break;
             case CREDENTIAL_REVOKE:
               //TODO: Definir accionar con credenciales revocadas, por ahora las ignora");

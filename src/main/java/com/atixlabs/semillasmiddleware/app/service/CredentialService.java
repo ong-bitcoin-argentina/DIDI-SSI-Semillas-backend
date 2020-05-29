@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.service;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
@@ -56,6 +57,7 @@ public class CredentialService {
     private CredentialStateRepository credentialStateRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
     private AnswerCategoryFactory answerCategoryFactory;
+    private DidiService didiService;
     private RevocationReasonRepository revocationReasonRepository;
 
 
@@ -73,6 +75,7 @@ public class CredentialService {
             CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
             CredentialDwellingRepository credentialDwellingRepository,
             ParameterConfigurationRepository parameterConfigurationRepository,
+            DidiService didiService,
             RevocationReasonRepository revocationReasonRepository) {
             this.credentialCreditRepository = credentialCreditRepository;
             this.credentialRepository = credentialRepository;
@@ -86,6 +89,7 @@ public class CredentialService {
             this.credentialIdentityRepository = credentialIdentityRepository;
             this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
             this.credentialDwellingRepository = credentialDwellingRepository;
+            this.didiService = didiService;
             this.revocationReasonRepository = revocationReasonRepository;
     }
 
@@ -557,7 +561,8 @@ public class CredentialService {
         log.info("Updating credential credit " + credit.getId());
         // revoke credit -> save id historic
         Long idHistoricCredit = credit.getIdHistorical();
-        revokeOneCredential(credit, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+        revokeCredentialOnlyOnSemillas(credit, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+
 
         Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
         if (opBeneficiary.isPresent()) {
@@ -815,13 +820,23 @@ public class CredentialService {
      * @param credentialToRevoke
      * @return boolean
      */
-    public boolean revokeComplete(Credential credentialToRevoke, String reasonCode){
+    public boolean revokeComplete(Credential credentialToRevoke , String reasonCode) {
         //here is important to manage the different actions, and need to be synchronize at the end.
-        log.info("Starting revoking process for credential id: "+ credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
-        //todo call revoke on didi
-       return this.revokeOneCredential(credentialToRevoke, reasonCode);
-        // validate the whole transaction using revokedOnSemillas and then the check of didi
+        boolean revokedOk;  //todo call revoke on didi
+        log.info("Starting revoking process for credential id: " + credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
+        log.info("Revoking on didi");
+        if (didiService.didiDeleteCertificate(credentialToRevoke.getIdDidiCredential())) {
+            // if didi fail the credential need to know that is needed to be revoked (here think in the best resolution).
+            // if this revoke came from the revocation business we will need to throw an error to rollback any change done before.
+            revokedOk = this.revokeCredentialOnlyOnSemillas(credentialToRevoke, reasonCode);
+        } else {
+            log.info("There was an error deleting credential id: " + credentialToRevoke.getId() + " on didi");
+            revokedOk = false;
+        }
+
+        return revokedOk;
     }
+
 
     /**
      * Revoke only for internal usage. Only revokes the credential on the DB.
@@ -829,7 +844,8 @@ public class CredentialService {
      * @param credentialToRevoke
      * @return boolean
      */
-    protected boolean revokeOneCredential(Credential credentialToRevoke, String reasonCode) {
+
+    public boolean revokeCredentialOnlyOnSemillas(Credential credentialToRevoke, String reasonCode) {
         log.info("Revoking the credential " + credentialToRevoke.getId());
         boolean haveRevoke = true;
 

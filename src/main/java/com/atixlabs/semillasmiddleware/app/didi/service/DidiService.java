@@ -17,6 +17,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 //import retrofit2.GsonConverterFactory;
@@ -78,7 +79,7 @@ public class DidiService {
             DidiAppUserService didiAppUserService,
             DidiAppUserRepository didiAppUserRepository,
 
-            CredentialService credentialService,
+            @Lazy CredentialService credentialService,
             CredentialRepository credentialRepository,
             CredentialStateRepository credentialStateRepository,
 
@@ -229,25 +230,27 @@ public class DidiService {
             case CREDENTIAL_ACTIVE:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.a Revocar credencial activa en didi");
-                    //todo call method to revoke didi and credential from CredentialService
-                    if (this.didiDeleteCertificate(credential.getIdDidiCredential())) {
-                        //credentialService.revokeCredential(credential.getId());//este metodo revoca tambien familiares y pierdo sync con didi.
-                        credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
 
+                    if (credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode())) {
                         credential.setIdDidiReceptor(receivedDid);//registro el did recibido
                         createAndEmmitCertificateDidi(credential);
                     }
                 }
             break;
+
             case PENDING_DIDI:
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
-                    credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+
+                    if (credentialService.revokeCredentialOnlyOnSemillas(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode())){
+
+                        log.info("didiSync: 2  doy de alta credenciales nuevas");
+                        //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
+                        credential.setIdDidiReceptor(receivedDid);//registro el did recibido
+                        createAndEmmitCertificateDidi(credential);
+                    }
                 }
-                log.info("didiSync: 2  doy de alta credenciales nuevas");
-                //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
-                credential.setIdDidiReceptor(receivedDid);//registro el did recibido
-                createAndEmmitCertificateDidi(credential);
+
                 break;
             case CREDENTIAL_REVOKE:
               //TODO: Definir accionar con credenciales revocadas, por ahora las ignora");
@@ -278,13 +281,20 @@ public class DidiService {
                 log.error("didiSync: Fallo la emision de la certificado, borrando el certificado creado pero no-emitido del didi-issuer");
                 this.didiDeleteCertificate(didiCreateCredentialResponse.getData().get(0).get_id());
                 this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
-                //todo save credential como pendiente didi
+                this.saveCredentialOnPending(credential);
             }
         } else {
             log.error("didiSync: fallo la creacion de la certificado");
             this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
-            //todo save credential como pendiente didi
+            this.saveCredentialOnPending(credential);
         }
+    }
+
+    //todo must be use a transaction to rollback
+    private void saveCredentialOnPending(Credential credential){
+        this.setCredentialState(CredentialStatesCodes.PENDING_DIDI.getCode(), credential);
+        credential.setDateOfRevocation(null);
+        credentialRepository.save(credential);
     }
 
 
@@ -386,11 +396,13 @@ public class DidiService {
                 credentialRepository.save(pendingCredential);
             } else {
                 //es una credencial con estado activo o revocado, debo crear una nueva.
+                //todo the cases must use the different builds that exist for credentials.
                 switch (CredentialCategoriesCodes.getEnumByStringValue(pendingCredential.getCredentialCategory())) {
                     case IDENTITY:
                         Optional<CredentialIdentity> credentialIdentityOp = credentialIdentityRepository.findById(pendingCredential.getId());
                         CredentialIdentity credentialIdentity = new CredentialIdentity(credentialIdentityOp.get());
                         credentialIdentity.setIdDidiCredential(credentialDidiId);
+                        credentialIdentity.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialIdentity);
                         credentialIdentityRepository.save(credentialIdentity);
                         break;
@@ -398,6 +410,7 @@ public class DidiService {
                         Optional<CredentialDwelling> credentialDwellingOp = credentialDwellingRepository.findById(pendingCredential.getId());
                         CredentialDwelling credentialDwelling = new CredentialDwelling(credentialDwellingOp.get());
                         credentialDwelling.setIdDidiCredential(credentialDidiId);
+                        credentialDwelling.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialDwelling);
                         credentialDwellingRepository.save(credentialDwelling);
                         break;
@@ -405,6 +418,7 @@ public class DidiService {
                         Optional<CredentialEntrepreneurship> credentialEntrepreneurshipOp = credentialEntrepreneurshipRepository.findById(pendingCredential.getId());
                         CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship(credentialEntrepreneurshipOp.get());
                         credentialEntrepreneurship.setIdDidiCredential(credentialDidiId);
+                        credentialEntrepreneurship.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialEntrepreneurship);
                         credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
                         break;
@@ -412,6 +426,7 @@ public class DidiService {
                         Optional<CredentialBenefits> credentialBenefitsOp = credentialBenefitsRepository.findById(pendingCredential.getId());
                         CredentialBenefits credentialBenefits = new CredentialBenefits(credentialBenefitsOp.get());
                         credentialBenefits.setIdDidiCredential(credentialDidiId);
+                        credentialBenefits.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialBenefits);
                         credentialBenefitsRepository.save(credentialBenefits);
                         break;
@@ -419,6 +434,7 @@ public class DidiService {
                         Optional<CredentialCredit> credentialCreditOp = credentialCreditRepository.findById(pendingCredential.getId());
                         CredentialCredit credentialCredit = new CredentialCredit(credentialCreditOp.get());
                         credentialCredit.setIdDidiCredential(credentialDidiId);
+                        credentialCredit.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialCredit);
                         credentialCreditRepository.save(credentialCredit);
                         break;

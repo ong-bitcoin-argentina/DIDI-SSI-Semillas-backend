@@ -85,7 +85,6 @@ public class CredentialController {
     @ResponseStatus(HttpStatus.OK)
     public Map<Long, String> findRevocationReasons() {
         //todo this is not the best option to obtain the reasons able by the user.
-        Map<Long, String> revocationReasons = new HashMap<>();
         return credentialService.getRevocationReasonsForUser();
     }
 

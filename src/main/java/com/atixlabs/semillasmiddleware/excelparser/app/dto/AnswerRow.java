@@ -67,7 +67,7 @@ public class AnswerRow extends ExcelRow {
         return answer;
     }
     public Double getAnswerAsDouble() throws InvalidAnswerCastException {
-        if (answer == null)
+        if (answer == null || answer.isBlank())
             return null;
         try { return Double.valueOf(answer);}
         catch (NumberFormatException e){
@@ -75,7 +75,7 @@ public class AnswerRow extends ExcelRow {
         }
     }
     public Long getAnswerAsLong() throws InvalidAnswerCastException {
-        if (answer == null)
+        if (answer == null || answer.isBlank())
             return null;
         try {return Long.valueOf(answer);}
         catch (NumberFormatException e){
@@ -83,7 +83,7 @@ public class AnswerRow extends ExcelRow {
         }
     }
     public Integer getAnswerAsInteger() throws InvalidAnswerCastException {
-        if (answer == null)
+        if (answer == null || answer.isBlank())
             return null;
         try {return Integer.valueOf(answer);}
         catch (NumberFormatException e){
@@ -91,7 +91,7 @@ public class AnswerRow extends ExcelRow {
         }
     }
     public LocalDate getAnswerAsDate(String datePattern) throws InvalidAnswerCastException {
-        if (answer == null)
+        if (answer == null || answer.isBlank())
             return null;
         try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
         catch (Exception e){

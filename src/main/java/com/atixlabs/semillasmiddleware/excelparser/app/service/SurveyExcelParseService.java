@@ -81,7 +81,7 @@ public class SurveyExcelParseService extends ExcelParseService {
                     log.info("OK:" + answerRow.toString());
                 }
                 else{
-                    processExcelFileResult.addRowError("Categoria: Campos comunes", answerRow.getCellIndexName() + " is not OK");
+                    processExcelFileResult.addRowError("Categoria: Campos comunes", "Celda " +answerRow.getCellIndexName() + " is not OK");
                     //processExcelFileResult.addEmptyRow();
                 }
             }

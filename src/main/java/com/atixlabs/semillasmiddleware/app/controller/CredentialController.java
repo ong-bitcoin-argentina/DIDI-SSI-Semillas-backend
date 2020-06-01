@@ -96,6 +96,7 @@ public class CredentialController {
             Optional<Credential> credentialToRevoke = credentialService.getCredentialById(idCredential);
             if (credentialToRevoke.isPresent()) {
                 if (credentialToRevoke.get().isManuallyRevocable()) {
+                    //possibilities -> Emprendimiento, Vivienda, identididad familiar, identidad titular (only the last one have a business logic, the others only revoke itself)
                     boolean revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get());
                     if (revokeOk)
                         return ResponseEntity.status(HttpStatus.OK).body("Revoked successfully");

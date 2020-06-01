@@ -27,8 +27,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -184,10 +186,8 @@ public class DidiService {
         if (didiAppUsers.size() <= 0)
             return "didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi";
 
-        ArrayList<Long> dniList = new ArrayList<>();
-        for (DidiAppUser didiAppUser : didiAppUsers) {
-            dniList.add(didiAppUser.getDni());
-        }
+        List<Long> dniList;
+        dniList = didiAppUsers.stream().map(DidiAppUser::getDni).collect(Collectors.toList());
 
         //2-Busco credenciales que tengan el DNI como creditHolder - indica si es titular.
         ArrayList<Credential> creditHolders = credentialRepository.findByCreditHolderDniIn(dniList);
@@ -239,16 +239,21 @@ public class DidiService {
             break;
 
             case PENDING_DIDI:
+                boolean haveRevokeOk;
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
+                    //revoke on didi too. Because it has idDididCredential.
+                    haveRevokeOk = credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+                }
+                else {
+                    haveRevokeOk = credentialService.revokeCredentialOnlyOnSemillas(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+                }
 
-                    if (credentialService.revokeCredentialOnlyOnSemillas(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode())){
-
-                        log.info("didiSync: 2  doy de alta credenciales nuevas");
-                        //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
-                        credential.setIdDidiReceptor(receivedDid);//registro el did recibido
-                        createAndEmmitCertificateDidi(credential);
-                    }
+                if(haveRevokeOk) {
+                    log.info("didiSync: 2  doy de alta credenciales nuevas");
+                    //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
+                    credential.setIdDidiReceptor(receivedDid);//registro el did recibido
+                    createAndEmmitCertificateDidi(credential);
                 }
 
                 break;
@@ -366,7 +371,7 @@ public class DidiService {
     }
 
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId) {
-
+        log.info("Revoking certificate on didi");
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
 
         try {

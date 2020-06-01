@@ -59,8 +59,9 @@ public class AnswerRow extends ExcelRow {
         //return surveyFormCode == null || surveyDate == null || pdv == null;
     }
 
+    //we only need these fields for getting data, so we validate.
     public boolean hasFormKeyValues(){
-        return surveyFormCode != null && !surveyFormCode.isEmpty() && surveyDate != null && pdv != null && category != null && question != null;
+        return category != null && question != null;
     }
 
     public String getAnswerAsString(){

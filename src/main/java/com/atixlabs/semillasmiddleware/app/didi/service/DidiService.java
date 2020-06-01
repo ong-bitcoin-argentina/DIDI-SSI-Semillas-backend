@@ -27,8 +27,10 @@ import retrofit2.Retrofit;
 import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -184,10 +186,8 @@ public class DidiService {
         if (didiAppUsers.size() <= 0)
             return "didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi";
 
-        ArrayList<Long> dniList = new ArrayList<>();
-        for (DidiAppUser didiAppUser : didiAppUsers) {
-            dniList.add(didiAppUser.getDni());
-        }
+        List<Long> dniList;
+        dniList = didiAppUsers.stream().map(DidiAppUser::getDni).collect(Collectors.toList());
 
         //2-Busco credenciales que tengan el DNI como creditHolder - indica si es titular.
         ArrayList<Credential> creditHolders = credentialRepository.findByCreditHolderDniIn(dniList);

@@ -822,9 +822,8 @@ public class CredentialService {
      */
     public boolean revokeComplete(Credential credentialToRevoke , String reasonCode) {
         //here is important to manage the different actions, and need to be synchronize at the end.
-        boolean revokedOk;  //todo call revoke on didi
-        log.info("Starting revoking process for credential id: " + credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
-        log.info("Revoking on didi");
+        boolean revokedOk;
+        log.info("Starting complete revoking process for credential id: " + credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
         if (didiService.didiDeleteCertificate(credentialToRevoke.getIdDidiCredential())) {
             // if didi fail the credential need to know that is needed to be revoked (here think in the best resolution).
             // if this revoke came from the revocation business we will need to throw an error to rollback any change done before.

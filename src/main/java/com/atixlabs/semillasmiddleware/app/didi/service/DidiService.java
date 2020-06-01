@@ -239,16 +239,21 @@ public class DidiService {
             break;
 
             case PENDING_DIDI:
+                boolean haveRevokeOk;
                 if (credential.getIdDidiCredential() != null) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
+                    //revoke on didi too. Because it has idDididCredential.
+                    haveRevokeOk = credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+                }
+                else {
+                    haveRevokeOk = credentialService.revokeCredentialOnlyOnSemillas(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+                }
 
-                    if (credentialService.revokeCredentialOnlyOnSemillas(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode())){
-
-                        log.info("didiSync: 2  doy de alta credenciales nuevas");
-                        //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
-                        credential.setIdDidiReceptor(receivedDid);//registro el did recibido
-                        createAndEmmitCertificateDidi(credential);
-                    }
+                if(haveRevokeOk) {
+                    log.info("didiSync: 2  doy de alta credenciales nuevas");
+                    //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
+                    credential.setIdDidiReceptor(receivedDid);//registro el did recibido
+                    createAndEmmitCertificateDidi(credential);
                 }
 
                 break;
@@ -366,7 +371,7 @@ public class DidiService {
     }
 
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId) {
-
+        log.info("Revoking certificate on didi");
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
 
         try {

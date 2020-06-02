@@ -241,7 +241,7 @@ public class DidiService {
             break;
 
             case PENDING_DIDI:
-                boolean haveRevokeOk;
+                boolean haveRevokeOk = true;
                 if (credential.isEmitted()) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
                     //revoke on didi too. Because it has idDididCredential.

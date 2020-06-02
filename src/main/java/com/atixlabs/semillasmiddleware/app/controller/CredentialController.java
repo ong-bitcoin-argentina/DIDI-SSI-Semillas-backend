@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDescriptionDto;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
@@ -17,7 +16,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import retrofit2.http.Path;
 
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -61,7 +59,7 @@ public class CredentialController {
             return Collections.emptyList();
         }
 
-        return credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
+        return credentials.stream().map(aCredential -> CredentialDto.constructBasedOnCredentialType(aCredential)).collect(Collectors.toList());
     }
 
     @GetMapping("/states")
@@ -87,18 +85,6 @@ public class CredentialController {
     public Map<Long, String> findRevocationReasons() {
         //todo this is not the best option to obtain the reasons able by the user.
         return credentialService.getRevocationReasonsForUser();
-    }
-
-    @GetMapping("/description/{id}")
-    @ResponseStatus(HttpStatus.OK)
-    public CredentialDescriptionDto getDescriptionFromCredential(@PathVariable @NotNull @Min(1) Long id) {
-        Optional<Credential> credential = credentialService.getCredentialById(id);
-        if (credential.isPresent()) {
-            CredentialDescriptionDto descriptionDto = new CredentialDescriptionDto();
-           return descriptionDto.constructBasedOnCredentialType(credential.get());
-
-        }
-        return null;
     }
 
 

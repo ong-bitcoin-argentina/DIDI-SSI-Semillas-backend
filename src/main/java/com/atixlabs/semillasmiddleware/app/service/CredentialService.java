@@ -4,7 +4,6 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDescriptionDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;

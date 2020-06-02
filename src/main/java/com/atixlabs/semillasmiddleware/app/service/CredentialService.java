@@ -40,6 +40,7 @@ import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
 import java.util.*;
+import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -436,6 +437,7 @@ public class CredentialService {
     }
 
 
+    //TODO revisar creacion de beneficios (para familiares tambien)
     public void createNewBenefitsCredential(Person beneficiary, PersonTypesCodes personType) {
         log.info("Creating Credential Benefits");
         List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
@@ -533,12 +535,20 @@ public class CredentialService {
                     // the loan has changed, return credit to be update
                     return credit;
                 } else {
-                    return null;
+                    // check if credit is revoke with default reason -> if it is, check if its ready to be active again
+                    if(opCredit.get().getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())) {
+                        if (opCredit.get().getRevocationReason().getReason().equals(RevocationReasonsCodes.DEFAULT.getCode())) {
+                            Person holder = opCredit.get().getCreditHolder();
+                            //if holder is no longer in default, credit will update.
+                            if (!holder.isInDefault())
+                                return credit;
+                        }
+                    }
                 }
             }
         } else {
             // the credit had been set that has a credential credit, but no credential credit exist with the bondarea id
-            // the next time loans are going to be check, a new credential credit would be create
+            // the next time loans are going to be check, a new credential credit would be created
             loan.setHasCredential(false);
             loanRepository.save(loan);
             return null;
@@ -568,7 +578,7 @@ public class CredentialService {
         if (opBeneficiary.isPresent()) {
             CredentialCredit updateCredit = this.buildCreditCredential(loan, opBeneficiary.get());
             updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
-            //set the amount expired cycles of thque  previous credential to accumulate the expired cycles
+            //set the amount expired cycles of the previous credential to accumulate the expired cycles
             updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
             updateCredit = credentialCreditRepository.save(updateCredit);
 
@@ -621,20 +631,24 @@ public class CredentialService {
                         if (config.isPresent()) {
                             BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
                             if (amountExpired.compareTo(maxAmount) > 0) {
-                                int cyclesExpired = updateCredit.getAmountExpiredCycles();
-                                cyclesExpired++;
+                                //increase +1 expired cycles
+                                int cyclesExpired = updateCredit.getAmountExpiredCycles() + 1;
                                 updateCredit.setAmountExpiredCycles(cyclesExpired);
                                 credentialCreditRepository.save(updateCredit);
                                 log.info("Credit is default. Count +1 cycles expired for credential credit id: " + updateCredit.getId());
+
+                                //set the credit in default for all of the group
+                                //setPersonAsDefaultInTheGroup(updateCredit, creditGroup);
 
                                 //revoke the whole group including the benefits of them and his familiars
                                 this.revokeCredential(updateCredit.getId(), RevocationReasonsCodes.DEFAULT.getCode());
 
                             } else {
-                                //if credit has no expired amount
+                                //if person is not in default
                                 // try to create credential benefits in case holder does not have
-                                //TODO here need to validate if its ok to generate again the benefits
-                                this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER);
+                                if(!opBeneficiary.get().isInDefault())
+                                  this.createNewBenefitsCredential(opBeneficiary.get(), PersonTypesCodes.HOLDER);
+                                //aca luego el chequeo de los familiares y creacion de beneficio familiares etc
                             }
 
 
@@ -672,10 +686,54 @@ public class CredentialService {
         return amountExpired;
     }
 
+
+    /*private void setPersonAsDefaultInTheGroup(CredentialCredit creditInDefault, List<CredentialCredit> creditGroup){
+        for (CredentialCredit credit: creditGroup) {
+            Person beneficiary = credit.getCreditHolder();
+            List<CredentialCredit> actualDefaultCredits = beneficiary.getDefaults();
+            actualDefaultCredits.add(creditInDefault);
+            beneficiary.setDefaults(actualDefaultCredits);
+            personRepository.save(beneficiary);
+
+            log.info("Holder dni: " + beneficiary.getDocumentNumber() + " have a new credit in default");
+        }
+    }*/
+
+
     public Optional<Credential> getCredentialById(Long id){
         //validate credential is in bd
         return credentialRepository.findById(id);
     }
+
+    public void revokeDefaultPerson(Person holderInDefault) {
+        boolean haveRevoke = true; // there has to be 1 boolean for each revocation. At the end if there was any revocation, it will result in true.
+        List<CredentialState> activePendingStates;
+        //get benefits with holder dni (holder benefits and familiar benefits)
+        activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+        List<CredentialBenefits> benefitsBeingHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(holderInDefault.getDocumentNumber(), activePendingStates);
+
+        //get benefit of the holder being a familiar in other credit
+        List<CredentialBenefits> benefitsBeingFamiliar = credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateIn(holderInDefault.getDocumentNumber(), activePendingStates);
+
+        for (CredentialBenefits benefit : benefitsBeingHolder) {
+            haveRevoke = this.revokeComplete(benefit, RevocationReasonsCodes.DEFAULT.getCode());
+        }
+
+        for (CredentialBenefits benefit : benefitsBeingFamiliar) {
+            haveRevoke = this.revokeComplete(benefit, RevocationReasonsCodes.DEFAULT.getCode());
+        }
+
+        //revoke his credential credit where holder is in default
+        List<String> creditGroups = holderInDefault.getDefaults().stream().map(Loan::getIdGroup).collect(Collectors.toList());
+        List<CredentialCredit> credentialCreditsInDefault = credentialCreditRepository.findByIdGroupInAndCreditHolderDniAndCredentialStateIn(creditGroups, holderInDefault.getDocumentNumber(), activePendingStates);
+
+        for (CredentialCredit credit : credentialCreditsInDefault) {
+            haveRevoke = this.revokeComplete(credit, RevocationReasonsCodes.DEFAULT.getCode());
+        }
+
+
+    }
+
 
     /**
      * Revocation with the business logic.
@@ -761,6 +819,7 @@ public class CredentialService {
                     }
 
                     break;
+
 
                 case CREDENTIAL_CREDIT:
                     //get the credit credential to get the group

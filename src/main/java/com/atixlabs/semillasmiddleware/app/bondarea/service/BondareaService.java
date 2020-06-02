@@ -6,6 +6,13 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
+import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -21,10 +28,12 @@ import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
+import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 @Service
 @Slf4j
@@ -32,10 +41,14 @@ public class BondareaService {
 
 
     private LoanRepository loanRepository;
+    private ParameterConfigurationRepository parameterConfigurationRepository;
+    private PersonRepository personRepository;
 
     @Autowired
-    public BondareaService (LoanRepository loanRepository){
+    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository){
         this.loanRepository = loanRepository;
+        this.parameterConfigurationRepository = parameterConfigurationRepository;
+        this.personRepository = personRepository;
     }
 
     @Value("${bondarea.base_url}")
@@ -366,13 +379,80 @@ public class BondareaService {
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     loanRepository.save(pendingLoan);
                 } else {
-                    // if there is no loan, is because has been cancelled
+                    // if there is no loan, is because it has been cancelled
                     pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
                     loanRepository.save(pendingLoan);
                 }
             } catch (Exception ex) {
                 log.error("Error determining pending loans " + ex.getMessage());
             }
+        }
+    }
+
+    public void checkCreditsForDefault() throws NoExpiredConfigurationExists {
+        List<Loan> activeLoans = loanRepository.findAllByStatus(LoanStatusCodes.ACTIVE.getCode());
+        List<String> processedGroupLoans = new ArrayList<>();
+        Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
+        if (config.isPresent()) {
+
+            for (Loan credit : activeLoans) {
+                //if the group was not processed..
+                if(!processedGroupLoans.contains(credit.getIdGroup())) {
+                    // get the group to check their expired money
+                    List<Loan> oneGroup = activeLoans.stream().filter(aLoan -> aLoan.getIdGroup().equals(credit.getIdGroup())).collect(Collectors.toList());
+                    BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
+
+                    BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
+                    if (amountExpiredOfGroup.compareTo(maxAmount) > 0) {
+                        //set beneficiaries with this credit in default
+                        addCreditInDefaultForBeneficiaries(oneGroup);
+                    }
+
+                    // with the group, delete this group from the actual list so it wont be repeated.
+                    if (!processedGroupLoans.contains(credit.getIdGroup())) {
+                        processedGroupLoans.add(credit.getIdGroup());
+                    }
+                }
+            }
+
+
+        } else {
+            log.error("There is no configuration for getting the maximum expired amount.");
+            throw new NoExpiredConfigurationExists("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
+        }
+    }
+
+    /**
+     * Accumulate the expired amount of the credit group.
+     * This able to check if the group is default.
+     *
+     * @param group
+     * @return BigDecimal (sum)
+     */
+    private BigDecimal sumExpiredAmount(List<Loan> group){
+        BigDecimal amountExpired = BigDecimal.ZERO;
+
+        for (Loan credit: group) {
+            amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
+        }
+
+        return amountExpired;
+    }
+    //todo add logs
+    private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup){
+        List<Long> dniHolders = loanGroup.stream().map(Loan::getDniPerson).collect(Collectors.toList());
+
+        List<Person> beneficiaries = personRepository.findByDocumentNumberIn(dniHolders);
+        if(beneficiaries.size() < loanGroup.size())
+            log.info("One of the persons in the credit group: " + loanGroup.get(0).getIdGroup() + " has not been loaded in the survey");
+
+        //for each beneficiary THE loan will be added to the default list
+        for (Person beneficiary: beneficiaries) {
+            List<Loan> newList = beneficiary.getDefaults();
+            // the important data is to have the group they share with the others parts.
+            newList.add(loanGroup.get(0));
+            beneficiary.setDefaults(newList);
+            personRepository.save(beneficiary);
         }
     }
 

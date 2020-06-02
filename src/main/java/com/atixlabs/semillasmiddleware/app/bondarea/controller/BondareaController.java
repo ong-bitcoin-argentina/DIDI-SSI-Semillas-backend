@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
+import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -77,6 +78,15 @@ public class BondareaController {
             log.error("Could not synchronized data from Bondarea !"+ ex.getMessage());
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
+
+        try {
+            // check credits
+            bondareaService.checkCreditsForDefault();
+        }
+        catch (NoExpiredConfigurationExists ex) {
+            log.error(ex.getMessage());
+        }
+
 
         return new ResponseEntity<>(loans, HttpStatus.OK);
     }

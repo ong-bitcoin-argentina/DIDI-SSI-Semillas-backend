@@ -1,8 +1,10 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.application.Application;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.*;
 
@@ -35,6 +37,9 @@ public class Person {
     @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
+    @OneToMany
+    private List<Loan> defaults;
+
 
     //TODO user this
     public boolean equalsIgnoreId(Person person1, Person person2) {
@@ -54,6 +59,8 @@ public class Person {
         person.setGender(personCategory.getGender());
         return person;
     }
+
+    public boolean isInDefault(){return defaults.size()>0;}
 
 
     /*

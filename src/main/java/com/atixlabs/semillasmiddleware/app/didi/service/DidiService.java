@@ -183,8 +183,10 @@ public class DidiService {
         didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
         ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
 
-        if (didiAppUsers.size() <= 0)
+        if (didiAppUsers.size() <= 0) {
+            log.info("didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi");
             return "didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi";
+        }
 
         List<Long> dniList;
         dniList = didiAppUsers.stream().map(DidiAppUser::getDni).collect(Collectors.toList());
@@ -240,7 +242,7 @@ public class DidiService {
 
             case PENDING_DIDI:
                 boolean haveRevokeOk;
-                if (credential.getIdDidiCredential() != null) {
+                if (credential.isEmitted()) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
                     //revoke on didi too. Because it has idDididCredential.
                     haveRevokeOk = credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());

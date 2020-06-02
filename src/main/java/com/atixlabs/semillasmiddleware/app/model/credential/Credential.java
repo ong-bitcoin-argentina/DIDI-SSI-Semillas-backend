@@ -64,6 +64,8 @@ public abstract class Credential extends AuditableEntity {
 
     public boolean isManuallyRevocable(){return true;}
 
+    public Boolean isEmitted(){ return idDidiCredential != null;}
+
     public Credential(Credential credential){
         //this.id = credential.id;//id is not copied to save as new Credential.
         this.id = null;

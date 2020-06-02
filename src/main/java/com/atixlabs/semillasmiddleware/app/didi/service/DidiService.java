@@ -197,8 +197,10 @@ public class DidiService {
         ArrayList<Credential> beneficiaries = credentialRepository.findByBeneficiaryDniIn(dniList);
         //todo ver pendientes -> borrar credenciales de los listados anteriores
 
-        if (creditHolders.size()<=0 && beneficiaries.size()<=0)
+        if (creditHolders.size()<=0 && beneficiaries.size()<=0) {
+            log.info("didiSync: No existen credenciales pendientes para enviar hacia didi");
             return "didiSync: No existen credenciales pendientes para enviar hacia didi";
+        }
 
         //3-Trabajo sobre cada credencial de beneficiario
         //  es beneficiario de algun credito - debo emitir solamente su credencial.

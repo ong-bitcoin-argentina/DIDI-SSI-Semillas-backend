@@ -43,14 +43,12 @@ public class BondareaService {
     private LoanRepository loanRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
     private PersonRepository personRepository;
-    private CredentialService credentialService;
 
     @Autowired
-    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, CredentialService credentialService) {
+    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository) {
         this.loanRepository = loanRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.personRepository = personRepository;
-        this.credentialService = credentialService;
     }
 
     @Value("${bondarea.base_url}")
@@ -463,9 +461,6 @@ public class BondareaService {
                 beneficiary.setDefaults(defaultList);
                 personRepository.save(beneficiary);
                 log.info("Credit has been saved in holder " + beneficiary.getDocumentNumber() + " as default");
-
-                //revoke his credential credit and his own benefits, and of his familiar
-               // credentialService.revokeDefaultPerson(beneficiary); -> process on all persons ?
             }
         }
     }
@@ -484,6 +479,7 @@ public class BondareaService {
                     //the credit was in default but now is ok. we take it out.
                     holder.getDefaults().remove(credit);
                     personRepository.save(holder);
+                    log.info("Credit is ok now, removing from default list for holder: " + holder.getDocumentNumber());
                     break;
                 }
             }

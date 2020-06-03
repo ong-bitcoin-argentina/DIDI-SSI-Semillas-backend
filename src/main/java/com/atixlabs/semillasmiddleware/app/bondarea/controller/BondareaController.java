@@ -80,7 +80,7 @@ public class BondareaController {
         }
 
         try {
-            // check credits
+            // check credits for defaults
             bondareaService.checkCreditsForDefault();
         }
         catch (NoExpiredConfigurationExists ex) {

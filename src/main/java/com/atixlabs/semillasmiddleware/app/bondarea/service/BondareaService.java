@@ -7,12 +7,12 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoan
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -43,12 +43,14 @@ public class BondareaService {
     private LoanRepository loanRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
     private PersonRepository personRepository;
+    private CredentialService credentialService;
 
     @Autowired
-    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository){
+    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, CredentialService credentialService) {
         this.loanRepository = loanRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.personRepository = personRepository;
+        this.credentialService = credentialService;
     }
 
     @Value("${bondarea.base_url}")
@@ -70,8 +72,7 @@ public class BondareaService {
     private String loanColumns;
 
     // Valores separados por "|" (pipe) de los estados de préstamos a listar.  (Ej. 55|60)
-   // private String loanstate;
-
+    // private String loanstate;
 
 
     //contains json converter and date format configuration
@@ -81,7 +82,6 @@ public class BondareaService {
     private Retrofit retrofit = null;
 
     private BondareaEndpoint bondareaEndpoint = null;
-
 
 
     public void initializeBondareaApi() {
@@ -111,9 +111,10 @@ public class BondareaService {
 
     /**
      * MOCK PURPOSE
+     *
      * @return BpndareaLoanDto
      */
-    private BondareaLoanDto getMockBondareaLoan(){
+    private BondareaLoanDto getMockBondareaLoan() {
         BondareaLoanDto loan = new BondareaLoanDto();
         loan.setIdBondareaLoan("1L");
         loan.setDni(24580963L); //dni from survey_ok
@@ -140,7 +141,7 @@ public class BondareaService {
      * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansMock(String loanState, String idBondareaLoan, String date){
+    public List<BondareaLoanDto> getLoansMock(String loanState, String idBondareaLoan, String date) {
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         BondareaLoanDto loan = getMockBondareaLoan();
@@ -170,7 +171,7 @@ public class BondareaService {
      * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansMockSecond(String loanState, String idBondareaLoan, String date){
+    public List<BondareaLoanDto> getLoansMockSecond(String loanState, String idBondareaLoan, String date) {
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         //id 1 is not with state 55
@@ -207,7 +208,7 @@ public class BondareaService {
      * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansOneInDefaultMock(String loanState, String idBondareaLoan, String date){
+    public List<BondareaLoanDto> getLoansOneInDefaultMock(String loanState, String idBondareaLoan, String date) {
 
         BondareaLoanDto loan = getMockBondareaLoan();
         List<BondareaLoanDto> loans = new ArrayList<>();
@@ -232,7 +233,7 @@ public class BondareaService {
     }
 
 
-    private List<BondareaLoanDto> getLoansFinalizedMock(String code, String idBondareaLoan, String date){
+    private List<BondareaLoanDto> getLoansFinalizedMock(String code, String idBondareaLoan, String date) {
         List<BondareaLoanDto> loans = new ArrayList<>();
         //loan 2 is finalize
         BondareaLoanDto loan2 = getMockBondareaLoan();
@@ -264,7 +265,7 @@ public class BondareaService {
         loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m";
 
 
-        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad","wspre", "prerepprestamos", access_key, access_token, idm, loanColumns, loanState, idBondareaLoan, date);
+        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad", "wspre", "prerepprestamos", access_key, access_token, idm, loanColumns, loanState, idBondareaLoan, date);
 
         BondareaLoanResponse bondareaLoanResponse;
         try {
@@ -273,22 +274,17 @@ public class BondareaService {
             if (response.code() == 200) {
                 bondareaLoanResponse = response.body();
                 log.info("Bondarea get loans has been successfully executed " + response.body());
-            }
-            else
-            {
+            } else {
                 return Collections.emptyList();
             }
 
-        }catch(JsonSyntaxException  ex){
+        } catch (JsonSyntaxException ex) {
             log.error(" Bondarea retrieved object does not match with model ", ex);
             throw new Exception("retrived object does not match with model ");
-        }
-        catch (SocketTimeoutException ex){
-                log.error(" Bondarea timeout ", ex);
-             throw new Exception("Tiemout, please try again");
-            }
-
-        catch(Exception ex){
+        } catch (SocketTimeoutException ex) {
+            log.error(" Bondarea timeout ", ex);
+            throw new Exception("Tiemout, please try again");
+        } catch (Exception ex) {
             log.error("Bondarea error ", ex);
             throw new Exception("Error, please try again");
         }
@@ -300,9 +296,10 @@ public class BondareaService {
 
     /**
      * Getting the new loans from synchronize, for each loan -> find if exists on DB:
-     *      if not -> create.
-     *      if exists -> merge with the new one.
+     * if not -> create.
+     * if exists -> merge with the new one.
      * 2nd step -> get from DB the ones that has not been modified -> set them to pending.
+     *
      * @param newLoans
      */
     public void updateExistingLoans(List<Loan> newLoans) {
@@ -340,7 +337,7 @@ public class BondareaService {
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
-    public void setPendingLoansFinalStatus(){
+    public void setPendingLoansFinalStatus() {
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {
@@ -366,7 +363,7 @@ public class BondareaService {
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
-    public void setPendingLoansFinalStatusMock(){
+    public void setPendingLoansFinalStatusMock() {
         log.info("Determinating the final state of the loans in pending state");
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
@@ -390,14 +387,17 @@ public class BondareaService {
     }
 
     public void checkCreditsForDefault() throws NoExpiredConfigurationExists {
-        List<Loan> activeLoans = loanRepository.findAllByStatus(LoanStatusCodes.ACTIVE.getCode());
+        log.info("Checking active credits for defaults");
         List<String> processedGroupLoans = new ArrayList<>();
+        //get all the active loans
+        List<Loan> activeLoans = loanRepository.findAllByStatus(LoanStatusCodes.ACTIVE.getCode());
+
         Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
         if (config.isPresent()) {
 
             for (Loan credit : activeLoans) {
                 //if the group was not processed..
-                if(!processedGroupLoans.contains(credit.getIdGroup())) {
+                if (!processedGroupLoans.contains(credit.getIdGroup())) {
                     // get the group to check their expired money
                     List<Loan> oneGroup = activeLoans.stream().filter(aLoan -> aLoan.getIdGroup().equals(credit.getIdGroup())).collect(Collectors.toList());
                     BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
@@ -406,6 +406,10 @@ public class BondareaService {
                     if (amountExpiredOfGroup.compareTo(maxAmount) > 0) {
                         //set beneficiaries with this credit in default
                         addCreditInDefaultForBeneficiaries(oneGroup);
+                    } else {
+                        //credit group is ok.
+                        // if this credit has been in default, is needed to delete this one.
+                        checkToDeleteCreditInDefault(oneGroup);
                     }
 
                     // with the group, delete this group from the actual list so it wont be repeated.
@@ -429,34 +433,65 @@ public class BondareaService {
      * @param group
      * @return BigDecimal (sum)
      */
-    private BigDecimal sumExpiredAmount(List<Loan> group){
+    private BigDecimal sumExpiredAmount(List<Loan> group) {
         BigDecimal amountExpired = BigDecimal.ZERO;
 
-        for (Loan credit: group) {
+        for (Loan credit : group) {
             amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
         }
 
         return amountExpired;
     }
+
     //todo add logs
-    private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup){
+    private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup) {
+        log.info("Credit with group: " + loanGroup.get(0).getIdGroup() + " is in default");
         List<Long> dniHolders = loanGroup.stream().map(Loan::getDniPerson).collect(Collectors.toList());
 
+        String actualGroup = loanGroup.get(0).getIdGroup();
+
         List<Person> beneficiaries = personRepository.findByDocumentNumberIn(dniHolders);
-        if(beneficiaries.size() < loanGroup.size())
+        if (beneficiaries.size() < loanGroup.size())
             log.info("One of the persons in the credit group: " + loanGroup.get(0).getIdGroup() + " has not been loaded in the survey");
 
         //for each beneficiary THE loan will be added to the default list
-        for (Person beneficiary: beneficiaries) {
-            List<Loan> newList = beneficiary.getDefaults();
-            // the important data is to have the group they share with the others parts.
-            newList.add(loanGroup.get(0));
-            beneficiary.setDefaults(newList);
-            personRepository.save(beneficiary);
+        for (Person beneficiary : beneficiaries) {
+            List<Loan> defaultList = beneficiary.getDefaults();
+            //check if the loan is already set
+            if(defaultList.stream().noneMatch(aLoan -> aLoan.getIdGroup().equals(actualGroup))) {
+                defaultList.add(loanGroup.get(0));
+                beneficiary.setDefaults(defaultList);
+                personRepository.save(beneficiary);
+                log.info("Credit has been saved in holder " + beneficiary.getDocumentNumber() + " as default");
+
+                //revoke his credential credit and his own benefits, and of his familiar
+               // credentialService.revokeDefaultPerson(beneficiary); -> process on all persons ?
+            }
         }
     }
 
+    private void checkToDeleteCreditInDefault(List<Loan> loanGroup) {
+        List<Long> dniHolders = loanGroup.stream().map(Loan::getDniPerson).collect(Collectors.toList());
+        String groupId = loanGroup.get(0).getIdGroup();
 
+        List<Person> beneficiaries = personRepository.findByDocumentNumberIn(dniHolders);
+
+        //check if the person has the group credit saved as default.
+        for (Person holder : beneficiaries) {
+
+            for (Loan credit: holder.getDefaults()) {
+                if(credit.getIdGroup().equals(groupId)){
+                    //the credit was in default but now is ok. we take it out.
+                    holder.getDefaults().remove(credit);
+                    personRepository.save(holder);
+                    break;
+                }
+            }
+        }
+
+    }
 
 
 }
+
+

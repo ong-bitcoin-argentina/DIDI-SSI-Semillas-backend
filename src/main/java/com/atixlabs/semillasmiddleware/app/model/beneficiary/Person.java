@@ -2,11 +2,11 @@ package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
-import com.atixlabs.semillasmiddleware.app.model.application.Application;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
-import lombok.*;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -37,8 +37,8 @@ public class Person {
     @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
-    @OneToMany
-    private List<Loan> defaults;
+    @ManyToMany
+    protected List<Loan> defaults;
 
 
     //TODO user this

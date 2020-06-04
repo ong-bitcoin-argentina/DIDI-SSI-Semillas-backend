@@ -52,6 +52,14 @@ public class BondareaController {
             return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
         }
 
+        try {
+            // check credits for defaults
+            bondareaService.checkCreditsForDefault();
+        }
+        catch (NoExpiredConfigurationExists ex) {
+            log.error(ex.getMessage());
+        }
+
         return new ResponseEntity<>(loans, HttpStatus.OK);
     }
 

@@ -55,7 +55,8 @@ public class CredentialController {
         try {
             credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
         } catch (Exception e) {
-            log.info("There has been an error searching for credentials " + e);
+            log.info("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
+                    credentialState.toString() + " " + e);
             return Collections.emptyList();
         }
 
@@ -118,17 +119,6 @@ public class CredentialController {
     @ResponseStatus(HttpStatus.CREATED)
     public void generateCredentialsCredit() {
 
-        //create credentials
-        List<Loan> newLoans = loanService.findLoansWithoutCredential();
-
-        for (Loan newLoan : newLoans) {
-            try {
-                credentialService.createNewCreditCredentials(newLoan);
-            } catch (PersonDoesNotExists ex) {
-                log.error(ex.getMessage());
-            }
-        }
-
         //check holders to validate if they are in default or not
         credentialService.checkHolders();
 
@@ -145,6 +135,17 @@ public class CredentialController {
                 } catch (Exception ex) {
                     log.error("Error ! " + ex.getMessage());
                 }
+            }
+        }
+
+        //create credentials
+        List<Loan> newLoans = loanService.findLoansWithoutCredential();
+
+        for (Loan newLoan : newLoans) {
+            try {
+                credentialService.createNewCreditCredentials(newLoan);
+            } catch (PersonDoesNotExists ex) {
+                log.error(ex.getMessage());
             }
         }
 

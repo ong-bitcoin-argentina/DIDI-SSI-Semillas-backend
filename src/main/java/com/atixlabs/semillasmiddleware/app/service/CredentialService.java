@@ -571,7 +571,6 @@ public class CredentialService {
             // if it does not have finish date... (finishDate indicate that the credit has finished or has been canceled)
             if (opCredit.get().getFinishDate() == null) {
                 CredentialCredit credit = opCredit.get();
-                //todo this validation need to consider the case when the credit group has been revoked
                 if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatus().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
                     // the loan has changed, return credit to be update
                     return credit;
@@ -807,7 +806,7 @@ public class CredentialService {
         }
     }
 
-
+    //TODO all of the methods of revocation, could be separated in a special service
     /**
      * Revocation with the business logic.
      * For particular revocations use, this.revokeComplete()

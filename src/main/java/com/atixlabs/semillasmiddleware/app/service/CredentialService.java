@@ -447,28 +447,56 @@ public class CredentialService {
 
 
     /**
-     * This will try to create a new benefit credential for the beneficiary (sacar la logica o separar una para titular y otra para familiar porque si validamos, necesitamos el dni del titular
-     * para saber si tiene el beneficio por el.
-     * en el parametro beneficiary tengo el holder .... asi que si pide un familiar, puedo ver si ya tiene su beneficio asi capooo
-     * @param beneficiary
-     * @param personType
+     * This will try to create a new benefit credential for the beneficiary.
+     * The benefits familiar depends on if he has his OWN credential credit (so he download the app)
+     *
+     * @param identity
      */
     public void createNewBenefitsCredential(CredentialIdentity identity) {
-        log.info("Creating Credential Benefits");
-        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-            Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(beneficiary.getDocumentNumber(), pendingAndActiveState, personType.getCode());
-            //create benefit if person does not have one or | do not have the type wanted to create. Or is not Active nor pending
-            if (opBenefits.isEmpty()) {
-                CredentialBenefits benefits = this.buildBenefitsCredential(beneficiary, personType);
+        //check if person is valid to create a benefit of the type required.
+        if(this.isValidPersonForNewBenefits(identity.getCreditHolder(), identity.getBeneficiary())){
 
-                //get the new id and save it on id historic
-                benefits = credentialBenefitsRepository.save(benefits);
-                benefits.setIdHistorical(benefits.getId());
+            log.info("Creating Credential Benefits");
+            CredentialBenefits benefits = null;
+            if(identity.getCreditHolderDni().equals(identity.getBeneficiaryDni()))
+                benefits = this.buildBenefitsCredential(identity.getBeneficiary(), PersonTypesCodes.HOLDER);
+            else
+                 benefits = this.buildBenefitsCredential(identity.getBeneficiary(), PersonTypesCodes.FAMILY);
+
+            if(benefits != null) {
                 credentialBenefitsRepository.save(benefits);
-                log.info("Credential Credit created for dni: " + beneficiary.getDocumentNumber());
-            } else {
-                log.info("Person with dni " + beneficiary.getDocumentNumber() + " had already a credential benefits");
+                log.info("Credential Credit created for dni: " + identity.getBeneficiary().getDocumentNumber());
             }
+        }
+    }
+
+    private boolean isValidPersonForNewBenefits(Person holder, Person beneficiary){
+        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+
+        Long holderDni = holder.getDocumentNumber();
+        Long beneficiaryDni = beneficiary.getDocumentNumber();
+        //is holder
+        if(holderDni.equals(beneficiaryDni)){
+            //get actual benefits of the holder
+            Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(beneficiaryDni, pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
+
+            //if he doesnt have a credential benefits, is valid to create
+            if(opBenefits.isEmpty())
+                return true;
+        }else{
+            //is familiar
+
+            List<CredentialIdentity> identitiesFamiliar = credentialIdentityRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
+            //this mean, the beneficiary familiar, have his own identity because he download the app, and the identity familiar created by the survey.
+            if(identitiesFamiliar.size() == 2){
+                //validate if he doesnt have a benefit with this holder dni
+                Optional<CredentialBenefits> opCredentialBenefit = credentialBenefitsRepository.findByCreditHolderDniAndBeneficiaryDniCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
+                if(opCredentialBenefit.isEmpty())
+                    return true;
+            }
+        }
+
+        return false;
     }
 
 

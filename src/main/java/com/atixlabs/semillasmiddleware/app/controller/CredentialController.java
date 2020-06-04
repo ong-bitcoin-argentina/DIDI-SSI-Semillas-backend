@@ -118,22 +118,6 @@ public class CredentialController {
     @ResponseStatus(HttpStatus.CREATED)
     public void generateCredentialsCredit() {
 
-        //update credentials
-        List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
-        //if loan has been modified after the credential credit
-        for (Loan loan : loansWithCredentials) {
-            CredentialCredit creditToUpdate = credentialService.validateCredentialCreditToUpdate(loan);
-            if (creditToUpdate != null) {
-                try {
-                    credentialService.updateCredentialCredit(loan, creditToUpdate);
-                } catch (NoExpiredConfigurationExists | PersonDoesNotExists ex) {
-                    log.error(ex.getMessage());
-                } catch (Exception ex) {
-                    log.error("Error ! " + ex.getMessage());
-                }
-            }
-        }
-
         //create credentials
         List<Loan> newLoans = loanService.findLoansWithoutCredential();
 
@@ -144,6 +128,27 @@ public class CredentialController {
                 log.error(ex.getMessage());
             }
         }
+
+        //check holders to validate if they are in default or not
+        credentialService.checkHolders();
+
+        //update credentials
+        List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
+        //if loan has been modified after the credential credit
+        for (Loan loan : loansWithCredentials) {
+            CredentialCredit creditToUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+            if (creditToUpdate != null) {
+                try {
+                    credentialService.updateCredentialCredit(loan, creditToUpdate);
+                } catch (PersonDoesNotExists ex) {
+                    log.error(ex.getMessage());
+                } catch (Exception ex) {
+                    log.error("Error ! " + ex.getMessage());
+                }
+            }
+        }
+
+
     }
 
 }

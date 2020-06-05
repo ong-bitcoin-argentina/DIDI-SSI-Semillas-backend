@@ -23,6 +23,7 @@ public class CredentialDto {
     private String idDidiCredential;
 
     private String name;
+    private String holderName;
 
     private Long creditHolderDni;
     private Long dniBeneficiary;
@@ -178,6 +179,7 @@ public class CredentialDto {
 
     public CredentialDto(CredentialIdentity identity) {
         this.baseConstructor(identity);
+        this.holderName = identity.getCreditHolderFirstName() + " " + identity.getCreditHolderLastName();
         this.relationWithCreditHolder = identity.getRelationWithCreditHolder();
         this.beneficiaryGender = identity.getBeneficiaryGender();
         this.beneficiaryBirthDate = identity.getBeneficiaryBirthDate();

@@ -34,12 +34,10 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -210,15 +208,14 @@ public class CredentialService {
 
     public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
             idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, Integer pageNumber) {
-        Page<Credential> credentials;
+        List<Credential> credentials;
         Pageable pageable = null;
         if(pageNumber != null && pageNumber > 0 && this.size != null)
-            pageable = PageRequest.of(pageNumber, Integer.parseInt(size));
+            pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC,"updated"));
 
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, pageable);
-        //order by update time asc
-        credentials.getContent().sort(Comparator.comparing(Credential::getUpdated).reversed());
-        return credentials;
+
+        return new PageImpl<>(credentials,pageable, credentials.size());
     }
 
     public Map<Long,String> getRevocationReasonsForUser(){

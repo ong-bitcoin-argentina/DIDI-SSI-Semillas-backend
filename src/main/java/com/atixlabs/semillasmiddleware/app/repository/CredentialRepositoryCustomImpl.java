@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -31,19 +32,10 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
-    public Page<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates, Pageable page) {
+    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates, Pageable page) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
-
-        Long count = null;
-        if(page != null) {
-            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
-
-            //pagination count
-            countQuery.select(cb.count(countQuery.from(Credential.class)));
-            count = em.createQuery(countQuery).getSingleResult();
-        }
 
         Root<Credential> credential = cq.from(Credential.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -83,13 +75,31 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
 
         cq.where(predicates.toArray(new Predicate[0]));
 
+        //order by updated field ASC
+        Order lastUpdateOrder = cb.desc(credential.get("updated"));
+        cq.orderBy(lastUpdateOrder);
+
         if(page != null) {
             TypedQuery<Credential> typedQuery = em.createQuery(cq);
-            typedQuery.setFirstResult(page.getPageNumber() - 1);
+            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber() -1) * page.getPageSize()));
             typedQuery.setMaxResults(page.getPageSize());
-            return new PageImpl<>(typedQuery.getResultList(), page, count);
+            return typedQuery.getResultList();
+
         }
         else
-            return new PageImpl<>(em.createQuery(cq).getResultList(), null, 0);
+            return em.createQuery(cq).getResultList();
+    }
+
+    private Long getTotalCount(CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
+        CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
+
+        Root<Credential> credential = criteriaQuery.from(Credential.class);
+        Join<Credential, Person> beneficiary = credential.join("beneficiary", JoinType.LEFT);
+        Join<Credential, CredentialState> credentialStateEntity = credential.join("credentialState", JoinType.LEFT);
+
+        criteriaQuery.select(criteriaBuilder.count(credential));
+        criteriaQuery.where(predicates.toArray(new Predicate[0]));
+
+        return em.createQuery(criteriaQuery).getSingleResult();
     }
 }

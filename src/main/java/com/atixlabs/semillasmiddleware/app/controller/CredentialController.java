@@ -11,7 +11,10 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.google.common.base.Converter;
+import com.google.common.base.Function;
 import lombok.extern.slf4j.Slf4j;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -45,7 +48,7 @@ public class CredentialController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<CredentialDto> findCredentials(@RequestParam(required = false) Integer page,
+    public Page<CredentialDto> findCredentials(@RequestParam Integer page,
                                                @RequestParam(required = false) String credentialType,
                                                @RequestParam(required = false) String name,
                                                @RequestParam(required = false) String dniBeneficiary,
@@ -61,9 +64,7 @@ public class CredentialController {
             log.info("There has been an error searching for credentials " + e);
             return Page.empty();
         }
-
-        List<CredentialDto> d = credentials.stream().map(aCredential -> CredentialDto.constructBasedOnCredentialType(aCredential)).collect(Collectors.toList());
-        return new PageImpl<>(d, credentials.getPageable(), d.size());
+        return credentials.map(CredentialDto::new);
     }
 
     @GetMapping("/states")

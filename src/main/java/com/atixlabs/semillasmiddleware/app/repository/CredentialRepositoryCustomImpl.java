@@ -24,10 +24,8 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     @PersistenceContext
     protected EntityManager em;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates) {
+    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialStates) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -53,15 +51,12 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
         }
 
         if (idDidiCredential != null) {
-            predicates.add(cb.equal(credential.get("idDidiCredential"), idDidiCredential));
+            //this has been changed the value of id didi credential for credentialDto but not changed the name because front have mapped this name
+            predicates.add(cb.equal(credential.get("idDidiReceptor"), idDidiCredential));
         }
 
-        if (dateOfExpiry != null) {
-            predicates.add(cb.like(credential.get("dateOfExpiry").as(String.class), dateOfExpiry+"%"));
-        }
-
-        if (dateOfIssue != null) {
-            predicates.add(cb.like(credential.get("dateOfIssue").as(String.class), dateOfIssue+"%"));
+        if (lastUpdate != null) {
+            predicates.add(cb.like(credential.get("updated").as(String.class), lastUpdate+"%"));
         }
 
         if (credentialStates != null) {

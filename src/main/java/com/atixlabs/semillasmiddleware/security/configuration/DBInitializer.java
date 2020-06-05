@@ -162,6 +162,32 @@ public class DBInitializer implements CommandLineRunner {
             userResponse.setLastName("Admin");
             userService.createOrEdit(userResponse);
         }
+
+        if (!userService.findByUsername("cronUser@atixlabs.com").isPresent()) {
+            UserEditRequest userResponse = new UserEditRequest();
+            userResponse.setUsername("cronUser@atixlabs.com");
+            userResponse.setEmail("cronUser@atixlabs.com");
+            userResponse.setPassword("admin");
+            userResponse.setNewPassword("admin");
+            userResponse.setConfirmNewPassword("admin");
+            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
+            userResponse.setName("cronUser");
+            userResponse.setLastName("cronUser");
+            userService.createOrEdit(userResponse);
+        }
+
+        if (!userService.findByUsername("didiUser@atixlabs.com").isPresent()) {
+            UserEditRequest userResponse = new UserEditRequest();
+            userResponse.setUsername("didiUser@atixlabs.com");
+            userResponse.setEmail("didiUser@atixlabs.com");
+            userResponse.setPassword("admin");
+            userResponse.setNewPassword("admin");
+            userResponse.setConfirmNewPassword("admin");
+            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
+            userResponse.setName("didiUser");
+            userResponse.setLastName("didiUser");
+            userService.createOrEdit(userResponse);
+        }
         if (!userService.findByUsername("viewer@atixlabs.com").isPresent()) {
             UserEditRequest userResponse = new UserEditRequest();
             userResponse.setUsername("viewer@atixlabs.com");

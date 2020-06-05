@@ -59,7 +59,7 @@ public class CredentialController {
             return Collections.emptyList();
         }
 
-        return credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
+        return credentials.stream().map(aCredential -> CredentialDto.constructBasedOnCredentialType(aCredential)).collect(Collectors.toList());
     }
 
     @GetMapping("/states")
@@ -86,6 +86,7 @@ public class CredentialController {
         //todo this is not the best option to obtain the reasons able by the user.
         return credentialService.getRevocationReasonsForUser();
     }
+
 
 
     @PatchMapping("/revoke/{idCredential}/reason/{idReason}")

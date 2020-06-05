@@ -80,8 +80,11 @@ public class SurveyExcelParseService extends ExcelParseService {
                     currentForm.setCategoryData(answerRow, processExcelFileResult);
                     log.info("OK:" + answerRow.toString());
                 }
-                else
-                    processExcelFileResult.addEmptyRow();
+                else{
+                    processExcelFileResult.addRowError("Categoria CAMPOS COMUNES", "Fila " +answerRow.getRowNum() + " no posee los campos comunes correctos : " +
+                            "Por favor, revisar los siguientes campos, categoria o pregunta");
+                    //processExcelFileResult.addEmptyRow();
+                }
             }
         }
         if(!hasNext)
@@ -111,7 +114,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
-                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
         }
         else

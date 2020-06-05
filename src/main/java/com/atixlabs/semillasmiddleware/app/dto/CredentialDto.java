@@ -38,7 +38,7 @@ public class CredentialDto {
 
     private String credentialType;
 
-    private boolean isRevocable;
+    private Boolean isRevocable;
 
     private LocalDateTime dateOfRevocation;
     private String revocationReason;
@@ -52,8 +52,8 @@ public class CredentialDto {
     private String creditType;
     private String idGroup;
     private String currentCycle;
-    private int totalCycles;
-    private int amountExpiredCycles;
+    private Integer totalCycles;
+    private Integer amountExpiredCycles;
     private String creditState;
     private LocalDate finishDate;
     private Float expiredAmount;

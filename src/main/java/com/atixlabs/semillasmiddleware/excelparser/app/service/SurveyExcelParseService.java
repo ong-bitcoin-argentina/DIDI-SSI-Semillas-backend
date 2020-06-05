@@ -81,9 +81,7 @@ public class SurveyExcelParseService extends ExcelParseService {
                     log.info("OK:" + answerRow.toString());
                 }
                 else{
-                    processExcelFileResult.addRowError("Categoria CAMPOS COMUNES", "Fila " +answerRow.getRowNum() + " no posee los campos comunes correctos : " +
-                            "Por favor, revisar los siguientes campos, categoria o pregunta");
-                    //processExcelFileResult.addEmptyRow();
+                    processExcelFileResult.addEmptyRow();
                 }
             }
         }

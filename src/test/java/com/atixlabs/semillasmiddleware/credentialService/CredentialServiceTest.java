@@ -476,11 +476,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getActiveCredentials() {
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"))).thenReturn((List<Credential>) credentialsFilteredActiveMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
 
-        List<Credential> credentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Vigente"));
+        List<Credential> credentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Vigente"), null);
 
-        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"));
+        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"), null);
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
         log.info("credenciales " + credentials.toString());
@@ -499,11 +499,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getRevokedCredentials() {
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"))).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
 
-        List<Credential> credentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Revocada"));
+        List<Credential> credentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Revocada"), null);
 
-        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"));
+        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"), null);
 
         log.info("credenciales " + credentials.toString());
 

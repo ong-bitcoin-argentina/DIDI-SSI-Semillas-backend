@@ -13,6 +13,8 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -43,7 +45,8 @@ public class CredentialController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<CredentialDto> findCredentials(@RequestParam(required = false) String credentialType,
+    public Page<CredentialDto> findCredentials(@RequestParam(required = false) Integer page,
+                                               @RequestParam(required = false) String credentialType,
                                                @RequestParam(required = false) String name,
                                                @RequestParam(required = false) String dniBeneficiary,
                                                @RequestParam(required = false) String idDidiCredential,
@@ -51,15 +54,16 @@ public class CredentialController {
                                                @RequestParam(required = false) String dateOfExpiry,
                                                @RequestParam(required = false) List<String> credentialState) {
 
-        List<Credential> credentials;
+        Page<Credential> credentials;
         try {
-            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, page);
         } catch (Exception e) {
             log.info("There has been an error searching for credentials " + e);
-            return Collections.emptyList();
+            return Page.empty();
         }
 
-        return credentials.stream().map(aCredential -> CredentialDto.constructBasedOnCredentialType(aCredential)).collect(Collectors.toList());
+        List<CredentialDto> d = credentials.stream().map(aCredential -> CredentialDto.constructBasedOnCredentialType(aCredential)).collect(Collectors.toList());
+        return new PageImpl<>(d, credentials.getPageable(), d.size());
     }
 
     @GetMapping("/states")

@@ -35,6 +35,11 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -58,6 +63,9 @@ public class CredentialService {
     private AnswerCategoryFactory answerCategoryFactory;
     private DidiService didiService;
     private RevocationReasonRepository revocationReasonRepository;
+
+    @Value("${credentials.pageSize}")
+    private String size;
 
 
     @Autowired
@@ -200,12 +208,16 @@ public class CredentialService {
         }
     }
 
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
-            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
-        List<Credential> credentials;
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, Integer pageNumber) {
+        Page<Credential> credentials;
+        Pageable pageable = null;
+        if(pageNumber != null && pageNumber > 0 && this.size != null)
+            pageable = PageRequest.of(pageNumber, Integer.parseInt(size));
+
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState, pageable);
         //order by update time asc
-        credentials.sort(Comparator.comparing(Credential::getUpdated).reversed());
+        credentials.getContent().sort(Comparator.comparing(Credential::getUpdated).reversed());
         return credentials;
     }
 

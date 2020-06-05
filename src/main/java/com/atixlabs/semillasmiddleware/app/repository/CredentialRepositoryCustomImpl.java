@@ -8,10 +8,14 @@ import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
+import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -27,10 +31,19 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
 
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates) {
+    public Page<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialStates, Pageable page) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
+
+        Long count = null;
+        if(page != null) {
+            CriteriaQuery<Long> countQuery = cb.createQuery(Long.class);
+
+            //pagination count
+            countQuery.select(cb.count(countQuery.from(Credential.class)));
+            count = em.createQuery(countQuery).getSingleResult();
+        }
 
         Root<Credential> credential = cq.from(Credential.class);
         List<Predicate> predicates = new ArrayList<>();
@@ -70,6 +83,13 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
 
         cq.where(predicates.toArray(new Predicate[0]));
 
-        return em.createQuery(cq).getResultList();
+        if(page != null) {
+            TypedQuery<Credential> typedQuery = em.createQuery(cq);
+            typedQuery.setFirstResult(page.getPageNumber() - 1);
+            typedQuery.setMaxResults(page.getPageSize());
+            return new PageImpl<>(typedQuery.getResultList(), page, count);
+        }
+        else
+            return new PageImpl<>(em.createQuery(cq).getResultList(), null, 0);
     }
 }

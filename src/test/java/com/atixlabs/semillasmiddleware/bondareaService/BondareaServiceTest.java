@@ -157,7 +157,7 @@ public class BondareaServiceTest {
         when(loanRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<Loan> loans = firstLoansData();
-        bondareaService.updateExistingLoans(loans);
+        bondareaService.createAndUpdateLoans(loans);
 
         verify(loanRepository,times(4)).save(captor.capture());
 
@@ -183,7 +183,7 @@ public class BondareaServiceTest {
         when(loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(any())).thenReturn(List.of(firstLoansData().get(0)));
 
         List<Loan> loans = secondLoansData();
-        bondareaService.updateExistingLoans(loans);
+        bondareaService.createAndUpdateLoans(loans);
 
         verify(loanRepository,times(5)).save(captor.capture());
 
@@ -207,7 +207,7 @@ public class BondareaServiceTest {
         when(loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(any())).thenReturn(firstLoansData());
 
         List<Loan> loans = secondLoansDataAllNew();
-        bondareaService.updateExistingLoans(loans);
+        bondareaService.createAndUpdateLoans(loans);
 
         verify(loanRepository,times(7)).save(captor.capture());
 
@@ -239,7 +239,7 @@ public class BondareaServiceTest {
         when(loanRepository.findAll()).thenReturn(firstLoansData());
 
         List<Loan> loans = secondLoansDataAllExpired();
-        bondareaService.updateExistingLoans(loans);
+        bondareaService.createAndUpdateLoans(loans);
 
         verify(loanRepository,times(4)).save(captor.capture());
 

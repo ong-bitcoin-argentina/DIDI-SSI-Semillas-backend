@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
+import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
@@ -37,19 +38,19 @@ public class BondareaController {
     @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<List<Loan>> synchronizeBondareaLoans()  {
-        log.info("BONDAREA - GET LOANS");
+        log.info("BONDAREA - GET LOANS -- " + DateUtil.getLocalDateTimeNow());
         List<BondareaLoanDto> loansDto;
         List<Loan> loans;
         try {
             LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
             loansDto = bondareaService.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
             loans = loansDto.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
-            bondareaService.updateExistingLoans(loans);
+            bondareaService.createAndUpdateLoans(loans);
             bondareaService.setPendingLoansFinalStatus();
         }
-        catch (Exception ex){
+        catch (BondareaSyncroException ex){
             log.error("Could not synchronized data from Bondarea !"+ ex.getMessage());
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.NOT_FOUND);
+            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         try {
@@ -58,6 +59,7 @@ public class BondareaController {
         }
         catch (NoExpiredConfigurationExists ex) {
             log.error(ex.getMessage());
+            return new ResponseEntity<>(loans, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(loans, HttpStatus.OK);
@@ -79,7 +81,7 @@ public class BondareaController {
           //  LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
             //loansDto = bondareaService.getLoansMock("","", todayPlusOne.toString());
             loans = loansJson.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
-            bondareaService.updateExistingLoans(loans);
+            bondareaService.createAndUpdateLoans(loans);
             bondareaService.setPendingLoansFinalStatusMock();
         }
         catch (Exception ex){

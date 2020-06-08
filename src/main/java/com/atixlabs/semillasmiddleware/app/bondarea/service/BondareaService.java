@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
+import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
@@ -21,6 +22,7 @@ import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 //import retrofit2.GsonConverterFactory;
@@ -254,7 +256,7 @@ public class BondareaService {
      * @return List<BondareaLoanDto>
      * @throws Exception
      */
-    public List<BondareaLoanDto> getLoans(String loanState, String idBondareaLoan, String date) throws Exception {
+    public List<BondareaLoanDto> getLoans(String loanState, String idBondareaLoan, String date) throws BondareaSyncroException {
 
         initializeBondareaApi();
         log.info("getBondareaLoans:");
@@ -269,22 +271,22 @@ public class BondareaService {
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
 
-            if (response.code() == 200) {
+            if (response.code() == HttpStatus.OK.value()) {
                 bondareaLoanResponse = response.body();
-                log.info("Bondarea get loans has been successfully executed " + response.body());
+                log.debug("Bondarea get loans has been successfully executed " + response.body());
             } else {
                 return Collections.emptyList();
             }
 
         } catch (JsonSyntaxException ex) {
             log.error(" Bondarea retrieved object does not match with model ", ex);
-            throw new Exception("retrived object does not match with model ");
+            throw new BondareaSyncroException("retrived object does not match with model ");
         } catch (SocketTimeoutException ex) {
             log.error(" Bondarea timeout ", ex);
-            throw new Exception("Tiemout, please try again");
+            throw new BondareaSyncroException("Tiemout, please try again");
         } catch (Exception ex) {
             log.error("Bondarea error ", ex);
-            throw new Exception("Error, please try again");
+            throw new BondareaSyncroException("Error, please try again");
         }
 
         return bondareaLoanResponse.getLoans();
@@ -300,11 +302,12 @@ public class BondareaService {
      *
      * @param newLoans
      */
-    public void updateExistingLoans(List<Loan> newLoans) {
+    public void createAndUpdateLoans(List<Loan> newLoans) {
         LocalDateTime updateTime = DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm");
 
         //update or create loans
         for (Loan loanToSave : newLoans) {
+            log.debug("Updating credit "+ loanToSave.getIdBondareaLoan());
             loanToSave.setModifiedTime(updateTime);
             //set the loan on active, whether is a new one or not. The one that not came would be set on pending
             loanToSave.setStatus(LoanStatusCodes.ACTIVE.getCode());

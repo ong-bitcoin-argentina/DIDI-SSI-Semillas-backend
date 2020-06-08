@@ -43,6 +43,7 @@ import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringRunner;
+import retrofit2.http.HEAD;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -477,11 +478,13 @@ public class CredentialServiceTest {
 
     @Test
     public void getActiveCredentials() {
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
 
-        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Vigente"), null);
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
 
-        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"), null);
+        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
+
+        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null);
+
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
 
@@ -501,11 +504,12 @@ public class CredentialServiceTest {
 
     @Test
     public void getRevokedCredentials() {
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
 
-        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Revocada"), null);
+        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null,  null, Arrays.asList("Revocada"), null);
 
-        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"), null);
+        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null);
+
 
         List<Credential> credentials = pageCredentials.getContent();
         log.info("credenciales " + credentials.toString());

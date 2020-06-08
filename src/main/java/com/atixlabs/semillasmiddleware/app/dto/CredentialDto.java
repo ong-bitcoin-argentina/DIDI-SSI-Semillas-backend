@@ -20,7 +20,7 @@ public class CredentialDto {
 
     private Long id;
 
-    private String idDidiCredential;
+    private String idDidiCredential; //this is the didi of the person
 
     private String name;
     private String holderName;
@@ -88,7 +88,7 @@ public class CredentialDto {
 
     public CredentialDto(Credential credential) {
         this.id = credential.getId();
-        this.idDidiCredential = credential.getIdDidiCredential();
+        this.idDidiCredential = credential.getIdDidiReceptor();
         //this.dateOfExpiry = credential.getDateOfRevocation();
         this.name = credential.getBeneficiaryFirstName() +" "+ credential.getBeneficiaryLastName();
         this.dniBeneficiary = credential.getBeneficiaryDni();

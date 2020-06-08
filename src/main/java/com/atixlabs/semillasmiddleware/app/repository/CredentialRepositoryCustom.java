@@ -8,6 +8,6 @@ import java.util.List;
 
 public interface CredentialRepositoryCustom {
 
-    List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState, Pageable page);
+    List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialState, Pageable page);
 
 }

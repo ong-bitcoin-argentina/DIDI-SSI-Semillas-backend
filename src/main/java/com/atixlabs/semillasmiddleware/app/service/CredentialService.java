@@ -201,9 +201,9 @@ public class CredentialService {
     }
 
     public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
-            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+            idDidiCredential, String lastUpdate, List<String> credentialState) {
         List<Credential> credentials;
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState);
         //order by update time asc
         credentials.sort(Comparator.comparing(Credential::getUpdated).reversed());
         return credentials;

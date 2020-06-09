@@ -48,14 +48,12 @@ public abstract class ExcelRow {
     protected String getCellWithType(Row row, int cellIndex, String description){
         this.saveCellData(cellIndex, description);
         Row validRow = this.validateCellToRead(row, cellIndex);
-        if(validRow == null)
-            return null;
-        if (validRow.getCell(cellIndex).getCellType().equals(CellType.STRING))
-            return this.getCellStringValue(validRow, cellIndex, description);
-        else if (validRow.getCell(cellIndex).getCellType().equals(CellType.NUMERIC))
-            return this.getCellLongValue(validRow, cellIndex, description).toString();
-        else
-            return null;
+        if(validRow != null)
+            if (validRow.getCell(cellIndex).getCellType().equals(CellType.STRING))
+                return this.getCellStringValue(validRow, cellIndex, description);
+            else if (validRow.getCell(cellIndex).getCellType().equals(CellType.NUMERIC))
+                return this.getCellLongValue(validRow, cellIndex, description).toString();
+        return null;
     }
 
     protected String getCellStringValue(Row row, int cellIndex, String description) {

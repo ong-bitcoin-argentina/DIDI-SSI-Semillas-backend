@@ -9,6 +9,7 @@ import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
 import javax.persistence.*;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -53,11 +54,12 @@ public class Loan extends AuditableEntity {
 
     private String userId; // ID del solicitante del tramo (Ej. B26F5FKZ)
 
-    private Float amount; // Monto del crédito del tramo (Ej. 10000)
+    private BigDecimal amount; // Monto del crédito del tramo (Ej. 10000)
 
     private LocalDate dateFirstInstalment; // Fecha de primera cuota
 
-    private Float expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
+    //todo check if in db the type is numeric with 2 decimals and x long
+    private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
     private LocalDateTime modifiedTime;

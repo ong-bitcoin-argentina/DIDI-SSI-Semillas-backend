@@ -315,6 +315,7 @@ public class BondareaService {
             //There is a previous loan
             if (opLoanToUpdate.isPresent()) {
                 //update
+                //todo se modifica solo cuando tales campos cambiaron (override equals en Loan)
                 Loan loanToUpdate = opLoanToUpdate.get();
                 loanToUpdate.merge(loanToSave);
                 loanRepository.save(loanToUpdate);

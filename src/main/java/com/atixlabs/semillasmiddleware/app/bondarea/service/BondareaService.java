@@ -13,7 +13,6 @@ import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfigur
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -325,15 +324,12 @@ public class BondareaService {
             }
         }
 
-        List<Loan> loansToReview = loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(updateTime);
-        for (Loan existingLoan : loansToReview) {
-            //this loan has been deleted on the new list, so this loan needs to be checked (is eliminated or has finished)
-            existingLoan.setStatus(LoanStatusCodes.PENDING.getCode());
-            loanRepository.save(existingLoan);
-        }
+        int modifiedRows = loanRepository.updateStateByModifiedTimeLessThanAndActive(updateTime, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
+        log.debug(modifiedRows + " Loans have been updated to pending state");
 
         log.info("Synchronize Ended Successfully");
     }
+
 
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
@@ -348,12 +344,12 @@ public class BondareaService {
                 if (loansDto.size() > 0) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
-                    loanRepository.save(pendingLoan);
                 } else {
-                    // if there is no loan, is because has been cancelled
+                    // if there is no loan, is because it has been cancelled
                     pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
-                    loanRepository.save(pendingLoan);
                 }
+                loanRepository.save(pendingLoan);
+
             } catch (Exception ex) {
                 log.error("Error determining pending loans " + ex.getMessage());
             }
@@ -444,7 +440,7 @@ public class BondareaService {
         return amountExpired;
     }
 
-    //todo add logs
+
     private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup) {
         log.info("Credit with group: " + loanGroup.get(0).getIdGroup() + " is in default");
         List<Long> dniHolders = loanGroup.stream().map(Loan::getDniPerson).collect(Collectors.toList());

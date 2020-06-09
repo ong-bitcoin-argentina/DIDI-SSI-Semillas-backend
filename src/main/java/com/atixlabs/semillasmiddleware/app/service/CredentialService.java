@@ -4,7 +4,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
@@ -31,7 +31,6 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
@@ -363,9 +362,9 @@ public class CredentialService {
      * Create a new credential credit if the id bondarea of the credit does not exist.
      * Then it creates the benefits credential to the holder
      * @param loan
-     * @throws PersonDoesNotExists
+     * @throws PersonDoesNotExistsException
      */
-    public void createNewCreditCredentials(Loan loan) throws PersonDoesNotExists {
+    public void createNewCreditCredentials(Loan loan) throws PersonDoesNotExistsException {
         //beneficiarieSSSS -> the credit group will be created by separate (not together)
         log.info("Creating Credential Credit ");
         Optional<CredentialCredit> opCreditExistence = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
@@ -392,7 +391,7 @@ public class CredentialService {
 
             } else {
                 log.error("Person with dni "+ loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
-                throw new PersonDoesNotExists("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
+                throw new PersonDoesNotExistsException("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
                 //this error is important, have to be shown in front
             }
         } else {
@@ -605,9 +604,9 @@ public class CredentialService {
      *
      * @param loan
      * @param credit
-     * @throws PersonDoesNotExists
+     * @throws PersonDoesNotExistsException
      */
-    public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws PersonDoesNotExists{
+    public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws PersonDoesNotExistsException {
         CredentialState previousState = null;
         log.info("Updating credential credit " + credit.getIdHistorical()); //the id historical is the same even if the credential is going to be revoke (the log is more clear)
         // revoke credit -> save id historic
@@ -682,7 +681,7 @@ public class CredentialService {
         }
         else {
             log.error("Person had been created and credential credit too, but person has been deleted eventually");
-            throw new PersonDoesNotExists("Person had been created and credential credit too, but person has been deleted eventually");
+            throw new PersonDoesNotExistsException("Person had been created and credential credit too, but person has been deleted eventually");
         }
     }
 

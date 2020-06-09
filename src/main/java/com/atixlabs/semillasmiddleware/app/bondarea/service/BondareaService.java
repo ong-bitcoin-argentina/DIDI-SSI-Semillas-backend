@@ -7,10 +7,14 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
+import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfigurationException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -31,6 +35,7 @@ import retrofit2.Retrofit;
 
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
@@ -44,12 +49,14 @@ public class BondareaService {
     private LoanRepository loanRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
     private PersonRepository personRepository;
+    private ProcessControlService processControlService;
 
     @Autowired
-    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository) {
+    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, ProcessControlService processControlService) {
         this.loanRepository = loanRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.personRepository = personRepository;
+        this.processControlService = processControlService;
     }
 
     @Value("${bondarea.base_url}")
@@ -119,8 +126,8 @@ public class BondareaService {
         loan.setDni(24580963L); //dni from survey_ok
         loan.setStatusFullDescription("Activo");
         loan.setIdGroup("group1");
-        loan.setAmount((float) 1000);
-        loan.setExpiredAmount((float) 0);
+        loan.setAmount(BigDecimal.valueOf(1000));
+        loan.setExpiredAmount(BigDecimal.valueOf(0));
         loan.setCycle("Ciclo 1");
         loan.setCreationDate("27/04/2020");
         loan.setStatusDescription("");
@@ -186,7 +193,7 @@ public class BondareaService {
         //loan 4 is in default
         BondareaLoanDto loan4 = getMockBondareaLoan();
         loan4.setIdBondareaLoan("4L");
-        loan4.setExpiredAmount((float) 10500);
+        loan4.setExpiredAmount(BigDecimal.valueOf(10500));
         loans.add(loan4);
 
         //new loan
@@ -225,7 +232,7 @@ public class BondareaService {
         //loan 4 is in default
         BondareaLoanDto loan4 = getMockBondareaLoan();
         loan4.setIdBondareaLoan("4L");
-        loan4.setExpiredAmount((float) 10500);
+        loan4.setExpiredAmount(BigDecimal.valueOf(10500));
         loans.add(loan4);
 
         return loans;
@@ -292,6 +299,27 @@ public class BondareaService {
 
     }
 
+    public void synchronizeLoans() throws BondareaSyncroException, InvalidProcessException, InvalidExpiredConfigurationException {
+        //check if process in credentials is not running
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode())) {
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+            List<BondareaLoanDto> loansDto;
+
+            LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+            log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
+            loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+            this.createAndUpdateLoans(loansDto);
+            this.setPendingLoansFinalStatus();
+
+            // check credits for defaults
+            this.checkCreditsForDefault();
+
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+        }else{
+            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " is still running");
+        }
+    }
+
 
     /**
      * Getting the new loans from synchronize, for each loan -> find if exists on DB:
@@ -301,13 +329,13 @@ public class BondareaService {
      *
      * @param newLoans
      */
-    public void createAndUpdateLoans(List<Loan> newLoans) {
+    public void createAndUpdateLoans(List<BondareaLoanDto> newLoans) {
         LocalDateTime updateTime = DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm");
 
+        //todo ADD 2 dates, this update time is the synchro time and create another that set the update time
         //update or create loans
-        for (Loan loanToSave : newLoans) {
+        for (BondareaLoanDto loanToSave : newLoans) {
             log.debug("Updating credit "+ loanToSave.getIdBondareaLoan());
-            loanToSave.setModifiedTime(updateTime);
             //set the loan on active, whether is a new one or not. The one that not came would be set on pending
             loanToSave.setStatus(LoanStatusCodes.ACTIVE.getCode());
             //if the newLoan existed previously -> update. Else create.
@@ -321,7 +349,9 @@ public class BondareaService {
                 loanRepository.save(loanToUpdate);
             } else {
                 //create
-                loanRepository.save(loanToSave);
+                Loan newLoan = new Loan(loanToSave);
+                newLoan.setModifiedTime(updateTime);
+                loanRepository.save(newLoan);
             }
         }
 
@@ -384,7 +414,7 @@ public class BondareaService {
         }
     }
 
-    public void checkCreditsForDefault() throws NoExpiredConfigurationExists {
+    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException {
         log.info("Checking active credits for defaults");
         List<String> processedGroupLoans = new ArrayList<>();
         //get all the active loans
@@ -420,7 +450,7 @@ public class BondareaService {
 
         } else {
             log.error("There is no configuration for getting the maximum expired amount.");
-            throw new NoExpiredConfigurationExists("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
+            throw new InvalidExpiredConfigurationException("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
         }
     }
 

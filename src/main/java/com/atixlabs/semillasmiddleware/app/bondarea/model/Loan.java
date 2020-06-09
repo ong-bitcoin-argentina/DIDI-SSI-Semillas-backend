@@ -107,7 +107,7 @@ public class Loan extends AuditableEntity {
 
     }
 
-    public void merge(Loan loanToUpdate){
+    public void merge(LoanDto loanToUpdate){
 
         this.dniPerson = loanToUpdate.getDniPerson();
 
@@ -127,7 +127,19 @@ public class Loan extends AuditableEntity {
 
         this.cycleDescription = loanToUpdate.getCycleDescription();
 
-        this.creationDate = loanToUpdate.getCreationDate();
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+            if (loanToUpdate.getDateFirstInstalment() != null) {
+                this.dateFirstInstalment = LocalDate.parse(loanToUpdate.getDateFirstInstalment(), formatter);
+            }
+
+            if (loanToUpdate.getCreationDate() != null) {
+                this.creationDate = LocalDate.parse(loanToUpdate.getCreationDate(), formatter);
+            }
+        }
+        catch (Exception ex){
+            log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanToUpdate.getCreationDate());
+        }
 
         this.personName = loanToUpdate.getPersonName();
 
@@ -135,11 +147,9 @@ public class Loan extends AuditableEntity {
 
         this.amount = loanToUpdate.getAmount();
 
-        this.dateFirstInstalment = loanToUpdate.getDateFirstInstalment();
-
         this.expiredAmount = loanToUpdate.getExpiredAmount();
 
-        this.modifiedTime = loanToUpdate.getModifiedTime();
+        //this.modifiedTime = loanToUpdate.getModifiedTime();
 
     }
 

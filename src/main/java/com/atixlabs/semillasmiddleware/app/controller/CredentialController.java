@@ -3,21 +3,16 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
-import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.google.common.base.Converter;
-import com.google.common.base.Function;
 import lombok.extern.slf4j.Slf4j;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageImpl;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -121,7 +116,7 @@ public class CredentialController {
 
 
     @PostMapping("/generate")
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     public void generateCredentialsCredit() {
 
         //check holders to validate if they are in default or not
@@ -135,7 +130,7 @@ public class CredentialController {
             if (creditToUpdate != null) {
                 try {
                     credentialService.updateCredentialCredit(loan, creditToUpdate);
-                } catch (PersonDoesNotExists ex) {
+                } catch (PersonDoesNotExistsException ex) {
                     log.error(ex.getMessage());
                 } catch (Exception ex) {
                     log.error("Error ! " + ex.getMessage());
@@ -149,7 +144,7 @@ public class CredentialController {
         for (Loan newLoan : newLoans) {
             try {
                 credentialService.createNewCreditCredentials(newLoan);
-            } catch (PersonDoesNotExists ex) {
+            } catch (PersonDoesNotExistsException ex) {
                 log.error(ex.getMessage());
             }
         }

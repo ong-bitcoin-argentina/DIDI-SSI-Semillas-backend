@@ -6,6 +6,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 
 @Getter
@@ -51,11 +52,11 @@ public class BondareaLoanDto {
     private Long dni; // Nro. de documento del solicitante del tramo (Ej. 99999999)
 
     @SerializedName("m")
-    private Float amount; // Monto del crédito del tramo (Ej. 10000)
+    private BigDecimal amount; // Monto del crédito del tramo (Ej. 10000)
 
     @SerializedName("fPri")
     private String dateFirstInstalment; // Fecha de primera cuota
 
     @SerializedName("sv")
-    private Float expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
+    private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 }

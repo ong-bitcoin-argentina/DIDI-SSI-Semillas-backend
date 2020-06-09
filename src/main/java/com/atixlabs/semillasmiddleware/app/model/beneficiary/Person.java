@@ -52,7 +52,7 @@ public class Person {
     //TODO review (delete static and use this)
     public static Person getPersonFromPersonCategory(PersonCategory personCategory) {
         Person person = new Person();
-        person.setDocumentNumber(personCategory.getIdNumber());
+        person.setDocumentNumber(personCategory.getDocumentNumber());
         person.setFirstName(personCategory.getName());
         person.setLastName(personCategory.getSurname());
         person.setBirthDate(personCategory.getBirthDate());

@@ -31,7 +31,10 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.hibernate.criterion.Order;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.util.*;
@@ -55,6 +58,9 @@ public class CredentialService {
     private AnswerCategoryFactory answerCategoryFactory;
     private DidiService didiService;
     private RevocationReasonRepository revocationReasonRepository;
+
+    @Value("${credentials.pageSize}")
+    private String size;
 
 
     @Autowired
@@ -95,13 +101,16 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public List<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
-            idDidiCredential, String dateOfExpiry, String dateOfIssue, List<String> credentialState) {
+    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+            idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         List<Credential> credentials;
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, dateOfExpiry, dateOfIssue, credentialState);
-        //order by update time asc
-        credentials.sort(Comparator.comparing(Credential::getUpdated).reversed());
-        return credentials;
+        Pageable pageable = null;
+        if (pageNumber != null && pageNumber > 0 && this.size != null)
+            pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
+
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
+
+        return new PageImpl<>(credentials, pageable, credentials.size());
     }
 
     public Map<Long,String> getRevocationReasonsForUser(){
@@ -133,6 +142,8 @@ public class CredentialService {
         }
         return Optional.empty();
     }
+
+
 
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
@@ -241,6 +252,7 @@ public class CredentialService {
                 break;
         }
     }
+
 
     private Person savePersonIfNew(Person person) {
         Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
@@ -806,6 +818,7 @@ public class CredentialService {
         }
     }
 
+
     //TODO all of the methods of revocation, could be separated in a special service
     /**
      * Revocation with the business logic.
@@ -952,8 +965,8 @@ public class CredentialService {
         //here is important to manage the different actions, and need to be synchronize at the end.
         boolean revokedOk;
         log.info("Starting complete revoking process for credential id: " + credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription());
-        //revoke on didi if credential have idDidiCredential
-        if(credentialToRevoke.getIdDidiCredential() !=null) {
+        //revoke on didi if credential was emitted
+        if(credentialToRevoke.isEmitted()) {
             if (didiService.didiDeleteCertificate(credentialToRevoke.getIdDidiCredential())) {
                 // if didi fail the credential need to know that is needed to be revoked (here think in the best resolution).
                 // if this revoke came from the revocation business we will need to throw an error to rollback any change done before.

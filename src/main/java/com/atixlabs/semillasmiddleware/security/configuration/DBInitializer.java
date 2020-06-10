@@ -21,6 +21,7 @@ import com.atixlabs.semillasmiddleware.security.repository.MenuRepository;
 import com.atixlabs.semillasmiddleware.security.model.Menu;
 import com.atixlabs.semillasmiddleware.security.service.RoleService;
 import com.atixlabs.semillasmiddleware.security.service.UserService;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.common.collect.Sets;
 
 import java.util.Optional;
@@ -268,6 +269,8 @@ public class DBInitializer implements CommandLineRunner {
             ProcessControl process = new ProcessControl();
             process.setProcessName(ProcessNamesCodes.CREDENTIALS.getCode());
             process.setStatus(ProcessControlStatusCodes.OK.getCode());
+            //set an initial time (then is use to compare)
+            process.setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
             processControlRepository.save(process);
         }
 

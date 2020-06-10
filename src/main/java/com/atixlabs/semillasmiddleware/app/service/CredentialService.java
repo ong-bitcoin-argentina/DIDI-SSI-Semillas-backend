@@ -41,6 +41,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -158,26 +160,24 @@ public class CredentialService {
     public void generateCredentials() throws InvalidProcessException {
         //check if process in credentials is not running
         if (!processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+            LocalDateTime lastTimeProcessRun = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CREDENTIALS.getCode());
+            processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
 
-            //check holders to validate if they are in default or not
-            this.checkHolders();
+            List<Loan> loansModified = loanService.findLastLoansModified(lastTimeProcessRun);
+            //check holders to validate if they are in default or not, given the last modified credits
+            this.checkHolders(loansModified);
 
-            //update credentials
-            List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
-            //if loan has been modified after the credential credit
-            for (Loan loan : loansWithCredentials) {
-                CredentialCredit creditToUpdate = this.validateCredentialCreditToUpdate(loan);
-                if (creditToUpdate != null) {
-                    try {
-                        this.updateCredentialCredit(loan, creditToUpdate);
-                    } catch (PersonDoesNotExistsException ex) {
-                        log.error(ex.getMessage());
-                    } catch (Exception ex) {
-                        log.error("Error updating credentials credit ! " + ex.getMessage());
-                    }
+            //update credentials credit
+            for (Loan loan : loansModified) {
+                try {
+                    this.updateCredentialCredit(loan);
+                } catch (PersonDoesNotExistsException ex) {
+                    log.error(ex.getMessage());
+                } catch (Exception ex) {
+                    log.error("Error updating credentials credit ! " + ex.getMessage());
                 }
             }
+
 
             //create credentials
             List<Loan> newLoans = loanService.findLoansWithoutCredential();
@@ -189,6 +189,7 @@ public class CredentialService {
                     log.error(ex.getMessage());
                 }
             }
+
             //finish process
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
         } else {
@@ -622,34 +623,6 @@ public class CredentialService {
             return benefits;
         }
 
-    /**
-     * Validate if the credential needs to be updated.
-     * The credential could be in state active | pending | revoke. In each case the credential can be update, as long as the loan has the same id.
-     *
-     * @param loan
-     * @return Credential Credit or null
-     */
-    public CredentialCredit validateCredentialCreditToUpdate(Loan loan) {
-        //get the credit credential by idBondarea and get the last created for this credential credit
-        Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
-        if (opCredit.isPresent()) {
-            // if it does not have finish date... (finishDate indicate that the credit has finished or has been canceled)
-            if (opCredit.get().getFinishDate() == null) {
-                CredentialCredit credit = opCredit.get();
-                if ((loan.getExpiredAmount().compareTo(credit.getExpiredAmount()) != 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatus().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
-                    // the loan has changed, return credit to be update
-                    return credit;
-                }
-            }
-        } else {
-            // the credit had been set that has a credential credit, but no credential credit exist with the bondarea id
-            // the next time loans are going to be check, a new credential credit would be created
-            loan.setHasCredential(false);
-            loanRepository.save(loan);
-        }
-        return null;
-    }
-
 
     /**
      * 2nd Step in the process "Generate", after create the new credits.
@@ -657,96 +630,106 @@ public class CredentialService {
      * If there has been a change, credential will be revoke, then generate a new one.
      *
      * @param loan
-     * @param credit
      * @throws PersonDoesNotExistsException
      */
-    public void updateCredentialCredit(Loan loan, CredentialCredit credit) throws PersonDoesNotExistsException {
-        CredentialState previousState = null;
-        log.info("Updating credential credit " + credit.getIdHistorical()); //the id historical is the same even if the credential is going to be revoke (the log is more clear)
-        // revoke credit -> save id historic
-        Long idHistoricCredit = credit.getIdHistorical();
-        //if credential was revoked before, after update the credential should have the same state.
-        if(credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()))
-            previousState = credit.getCredentialState();
-        else
-            //if credential is not revoked already, revoke
-            this.revokeCredentialOnlyOnSemillas(credit, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+    public void updateCredentialCredit(Loan loan) throws PersonDoesNotExistsException {
+        Optional<CredentialCredit> opCredit = credentialCreditRepository.findByIdBondareaCredit(loan.getIdBondareaLoan());
+        if (opCredit.isPresent()) {
+            CredentialCredit credit = opCredit.get();
+
+            CredentialState previousState = null;
+            log.info("Updating credential credit " + credit.getIdHistorical()); //the id historical is the same even if the credential is going to be revoke (the log is more clear)
+            // save id historic (before revoking)
+            Long idHistoricCredit = credit.getIdHistorical();
+            //if credential was revoked before, after update the credential should have the same state.
+            if (credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()))
+                previousState = credit.getCredentialState();
+            else
+                //revoke credential to create the new one ("update")
+                this.revokeComplete(credit, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+
+            Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
+            if (opBeneficiary.isPresent()) {
+                CredentialCredit updateCredit = this.buildCreditCredential(loan, opBeneficiary.get());
+                updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
+                //set the amount expired cycles of the previous credential to accumulate the expired cycles
+                updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
+                //save if it was in revoke state again
+                if (previousState != null)
+                    updateCredit.setCredentialState(previousState);
+                updateCredit = credentialCreditRepository.save(updateCredit);
 
 
-
-        Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
-        if (opBeneficiary.isPresent()) {
-            CredentialCredit updateCredit = this.buildCreditCredential(loan, opBeneficiary.get());
-            updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
-            //set the amount expired cycles of the previous credential to accumulate the expired cycles
-            updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
-            //save if it was in revoke state again
-            if(previousState != null)
-                updateCredit.setCredentialState(previousState);
-            updateCredit = credentialCreditRepository.save(updateCredit);
-
-
-            // if credit is finalized the credential credit wont be revoke
-            if (loan.getStatus().equals(LoanStatusCodes.FINALIZED.getCode())){
-                updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
-                credentialCreditRepository.save(updateCredit);
-                log.info("Credential Credit is set to FINALIZE, for credential id " + updateCredit.getId());
-
-                List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
-                //there have to be only 1. The holder only have at max 1 holder benefits.
-                if(benefitsHolder.size() > 0)
-                    //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
-                    this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode());
-                else {
-                    log.info("There is no active or pending benefits of the holder to be revoked");
-                }
-            }
-            else {
-                if (loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())) {
+                // if credit is finalized the credential credit wont be revoke
+                if (loan.getStatus().equals(LoanStatusCodes.FINALIZED.getCode())) {
                     updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
                     credentialCreditRepository.save(updateCredit);
-                    log.info("Credential Credit is set to CANCEL, for credential id " + updateCredit.getId());
-
-                    //todo la revocacion no es como la mora. Ver especificaciones
-                    boolean haveRevokeOk;
-                    //Revoke each credential credit of the credit group
-                    List<CredentialCredit> creditGroup = this.getCreditGroup(loan.getIdGroup());
-                    for (CredentialCredit creditOfGroup : creditGroup) {
-                        haveRevokeOk = this.revokeComplete(creditOfGroup, RevocationReasonsCodes.CANCELLED.getCode());
-                    }
+                    log.info("Credential Credit is set to FINALIZE, for credential id " + updateCredit.getId());
 
                     List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
                     List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
                     //there have to be only 1. The holder only have at max 1 holder benefits.
-                    if (benefitsHolder.size() > 0)
+                    if (benefitsHolder.size() > 0) {
                         //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
-                        haveRevokeOk = this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode());
-                    else
+                        boolean haveRevoke = this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode());
+
+                        if(haveRevoke)
+                            log.info("The credential has been set to finish successfully");
+                        else
+                            log.error("The credential was not set to finish");
+                    }
+                    else {
                         log.info("There is no active or pending benefits of the holder to be revoked");
-                }
-                else{
-                    //credential is ok. do here whatever
+                    }
+                } else {
+                    if (loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())) {
+                        updateCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
+                        credentialCreditRepository.save(updateCredit);
+                        log.info("Credential Credit is set to CANCEL, for credential id " + updateCredit.getId());
 
+                        boolean haveRevokeOk;
+                        //Revoke credential credit
+                        haveRevokeOk = this.revokeComplete(updateCredit, RevocationReasonsCodes.CANCELLED.getCode());
+
+                        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                        List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
+
+                        //there have to be only 1. The holder only have at max 1 holder benefits.
+                        if (benefitsHolder.size() > 0) {
+                            //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
+                           boolean result = this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode());
+                            haveRevokeOk = haveRevokeOk && result;
+                        }
+                        else
+                            log.info("There is no active or pending benefits of the holder to be revoked");
+
+                        //check results
+                        if(haveRevokeOk)
+                            log.info("The credential has been set to cancel successfully");
+                        else
+                            log.error("The credential was not set to cancel");
+
+                    } else {
+                        //credential is ok. do here whatever
+
+                    }
                 }
+
+                log.info("Update process finished for credential credit id: " + updateCredit.getIdHistorical());
+            } else {
+                log.error("Person had been created and credential credit too, but person has been deleted eventually !");
+                throw new PersonDoesNotExistsException("Error: Person had been created and credential credit too, but person has been deleted eventually");
             }
-
-            log.info("Update process finished for credential credit id: " + updateCredit.getIdHistorical());
-        }
-        else {
-            log.error("Person had been created and credential credit too, but person has been deleted eventually");
-            throw new PersonDoesNotExistsException("Person had been created and credential credit too, but person has been deleted eventually");
         }
     }
 
     /**
      * Check holders status, to search for default and revoke or to reactive credentials.
      */
-    public void checkHolders(){
-        //get the credits, with them get the persons (holders)
-        List<Loan> activeCredits = loanRepository.findAllByStatus(LoanStatusCodes.ACTIVE.getCode());
-        List<Long> dniHolders = activeCredits.stream().map(Loan::getDniPerson).collect(Collectors.toList());
+    public void checkHolders(List<Loan> modifiedLoans) {
+        List<Long> dniHolders = modifiedLoans.stream().map(Loan::getDniPerson).collect(Collectors.toList());
 
+        //get the holders of that credits
         List<Person> holders = personRepository.findByDocumentNumberIn(dniHolders);
 
        for (Person holder: holders) {
@@ -1002,7 +985,7 @@ public class CredentialService {
      */
     private List<CredentialCredit> getCreditGroup(String idGroup){
         List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-        //get the group that is not revoked
+        //get the group if it is not revoked
         List<CredentialCredit> creditsGroup = credentialCreditRepository.findByIdGroupAndCredentialStateIn(idGroup, activePendingStates);
 
         return creditsGroup;

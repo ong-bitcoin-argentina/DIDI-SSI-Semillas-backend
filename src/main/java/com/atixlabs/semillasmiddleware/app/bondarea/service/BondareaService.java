@@ -311,16 +311,15 @@ public class BondareaService {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
             List<BondareaLoanDto> loansDto;
 
-            if(bondareaMock == null) {
+            if (bondareaMock == null) {
                 LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
                 log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
                 loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
 
                 this.createAndUpdateLoans(loansDto);
                 this.setPendingLoansFinalStatus();
-            }
-            else{
-                //for mock
+            } else {
+                //for mock process
                 loansDto = bondareaMock;
                 this.createAndUpdateLoans(loansDto);
                 this.setPendingLoansFinalStatusMock();
@@ -331,7 +330,7 @@ public class BondareaService {
 
             //finish process
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
-        }else{
+        } else {
             log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " is still running");
         }
     }
@@ -392,20 +391,25 @@ public class BondareaService {
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
-    public void setPendingLoansFinalStatus() {
+    public void setPendingLoansFinalStatus() throws InvalidProcessException {
+        LocalDateTime startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {
+            log.info("Determining the final state for dni person: "+ pendingLoan.getDniPerson());
             try {
                 List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
 
                 if (loansDto.size() > 0) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
+                    log.info("loan has FINALIZED");
                 } else {
                     // if there is no loan, is because it has been cancelled
                     pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
+                    log.info("loan was CANCELLED");
                 }
+                pendingLoan.setUpdateTime(startTime);
                 loanRepository.save(pendingLoan);
 
             } catch (Exception ex) {
@@ -418,23 +422,24 @@ public class BondareaService {
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
-    public void setPendingLoansFinalStatusMock() {
+    public void setPendingLoansFinalStatusMock() throws InvalidProcessException {
+        LocalDateTime startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
         log.info("Determining the final state of the loans in pending state");
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {
             try {
-
                 List<BondareaLoanDto> loansDto = this.getLoansFinalizedMock(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
+
                 if (loansDto.size() > 0) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
-                    loanRepository.save(pendingLoan);
                 } else {
                     // if there is no loan, is because it has been cancelled
                     pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
-                    loanRepository.save(pendingLoan);
                 }
+                pendingLoan.setUpdateTime(startTime);
+                loanRepository.save(pendingLoan);
             } catch (Exception ex) {
                 log.error("Error determining pending loans " + ex.getMessage());
             }
@@ -446,8 +451,8 @@ public class BondareaService {
         List<String> processedGroupLoans = new ArrayList<>();
 
         LocalDateTime processTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
-        //get the modified loans
-        List<Loan> modifiedLoans = loanRepository.findAllByUpdateTime(processTime);
+        //get the modified loans (actives)
+        List<Loan> modifiedLoans = loanRepository.findAllByUpdateTimeAndStatus(processTime, LoanStatusCodes.ACTIVE.getCode());
 
         if(modifiedLoans.size() == 0)
             return;
@@ -459,7 +464,7 @@ public class BondareaService {
                 //if the group was not processed..
                 if (!processedGroupLoans.contains(credit.getIdGroup())) {
                     // get the group to check their expired money
-                    List<Loan> oneGroup = modifiedLoans.stream().filter(aLoan -> aLoan.getIdGroup().equals(credit.getIdGroup())).collect(Collectors.toList());
+                    List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
                     BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
                     BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
@@ -543,7 +548,7 @@ public class BondareaService {
                     //the credit was in default but now is ok. we take it out.
                     holder.getDefaults().remove(credit);
                     personRepository.save(holder);
-                    log.info("Credit is ok now, removing from default list for holder: " + holder.getDocumentNumber());
+                    log.info("Credit for group + " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
                     break;
                 }
             }

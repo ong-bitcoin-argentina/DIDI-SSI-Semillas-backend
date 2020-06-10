@@ -1,15 +1,18 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @Slf4j
@@ -17,10 +20,12 @@ public class LoanService {
 
 
     private LoanRepository loanRepository;
+    private ProcessControlService processControlService;
 
     @Autowired
-    public LoanService(LoanRepository loanRepository, PersonRepository personRepository){
+    public LoanService(LoanRepository loanRepository, PersonRepository personRepository, ProcessControlService processControlService){
         this.loanRepository = loanRepository;
+        this.processControlService = processControlService;
     }
 
 
@@ -34,6 +39,14 @@ public class LoanService {
         List<Loan> newLoans = loanRepository.findAllByHasCredentialTrue();
 
         return newLoans;
+    }
+
+    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime) throws InvalidProcessException {
+        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
+
+        LocalDateTime syncBondareaProcessTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
+        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeAndStatusAndUpdateTimeGreaterThan(syncBondareaProcessTime, LoanStatusCodes.ACTIVE.getCode(), credentialProcessLastTime);
+        return modifiedCredits;
     }
 
 

@@ -23,7 +23,10 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     //List<Loan> findAllByModifiedTimeNotAndModifiedTimeNotNull(LocalDateTime updateTime);
 
-    List<Loan> findAllByUpdateTime(LocalDateTime updateTime);
+    List<Loan> findAllByUpdateTimeAndStatus(LocalDateTime updateTime, String status);
+
+    //get all loans that his updateTime = :updateTime AND status = :status AND updateTime > :dateToCompare (dateToCompare means last time generate process run)
+    List<Loan> findAllByUpdateTimeAndStatusAndUpdateTimeGreaterThan(LocalDateTime updateTime, String status, LocalDateTime dateToCompare);
 
     @Modifying()
     @Transactional
@@ -35,6 +38,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findAllByHasCredentialFalse();
 
     List<Loan> findAllByHasCredentialTrue();
+
+    List<Loan> findAllByIdGroup(String idGroup);
 
     //query to select the group and return: the sum of the expired amount
 

@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
@@ -70,13 +71,13 @@ public class BondareaController {
      */
     @PostMapping("/synchronizeMock")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<Loan>> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson)  {
+    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson)  {
         log.info("BONDAREA - GET LOANS MOCK");
-        List<Loan> loans;
+        List<BondareaLoanDto> loans;
         try {
           //  LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
             //loansDto = bondareaService.getLoansMock("","", todayPlusOne.toString());
-            loans = loansJson.stream().map(loanDto -> new Loan(loanDto)).collect(Collectors.toList());
+            loans = loansJson.stream().map(loanDto -> new BondareaLoanDto(loanDto)).collect(Collectors.toList());
             bondareaService.createAndUpdateLoans(loans);
             bondareaService.setPendingLoansFinalStatusMock();
         }
@@ -93,7 +94,6 @@ public class BondareaController {
             log.error(ex.getMessage());
             return new ResponseEntity<>(loans, HttpStatus.INTERNAL_SERVER_ERROR);
         }
-
 
         return new ResponseEntity<>(loans, HttpStatus.OK);
     }

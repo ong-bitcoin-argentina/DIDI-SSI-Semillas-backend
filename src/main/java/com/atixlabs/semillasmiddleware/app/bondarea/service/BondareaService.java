@@ -299,6 +299,12 @@ public class BondareaService {
 
     }
 
+    /**
+     * Synchronize loans process from Bondarea
+     * @throws BondareaSyncroException
+     * @throws InvalidProcessException
+     * @throws InvalidExpiredConfigurationException
+     */
     public void synchronizeLoans() throws BondareaSyncroException, InvalidProcessException, InvalidExpiredConfigurationException {
         //check if process in credentials is not running
         if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode())) {
@@ -314,6 +320,7 @@ public class BondareaService {
             // check credits for defaults
             this.checkCreditsForDefault();
 
+            //finish process
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
         }else{
             log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " is still running");
@@ -328,34 +335,44 @@ public class BondareaService {
      * 2nd step -> get from DB the ones that has not been modified -> set them to pending.
      *
      * @param newLoans
+     * @throws InvalidProcessException
      */
-    public void createAndUpdateLoans(List<BondareaLoanDto> newLoans) {
-        LocalDateTime updateTime = DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm");
+    public void createAndUpdateLoans(List<BondareaLoanDto> newLoans) throws InvalidProcessException {
+        LocalDateTime startTime = processControlService.findByProcessName(ProcessNamesCodes.CREDENTIALS.getCode()).getStartTime();
 
-        //todo ADD 2 dates, this update time is the synchro time and create another that set the update time
         //update or create loans
-        for (BondareaLoanDto loanToSave : newLoans) {
-            log.debug("Updating credit "+ loanToSave.getIdBondareaLoan());
-            //set the loan on active, whether is a new one or not. The one that not came would be set on pending
-            loanToSave.setStatus(LoanStatusCodes.ACTIVE.getCode());
+        for (BondareaLoanDto loanDtoToSave : newLoans) {
+            log.debug("Updating credit " + loanDtoToSave.getIdBondareaLoan());
+
             //if the newLoan existed previously -> update. Else create.
-            Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanToSave.getIdBondareaLoan());
+            Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanDtoToSave.getIdBondareaLoan());
             //There is a previous loan
             if (opLoanToUpdate.isPresent()) {
                 //update
-                //todo se modifica solo cuando tales campos cambiaron (override equals en Loan)
                 Loan loanToUpdate = opLoanToUpdate.get();
-                loanToUpdate.merge(loanToSave);
-                loanRepository.save(loanToUpdate);
+                Loan loanToSave = new Loan(loanDtoToSave);
+
+                if (!loanToUpdate.equals(loanToSave)) {
+                    loanToUpdate.merge(loanToSave);
+                    loanToUpdate.setUpdateTime(startTime);
+                    loanToUpdate.setSynchroTime(startTime);
+                    loanRepository.save(loanToUpdate);
+                }else {
+                    //update the sync time to know the credit is still active
+                    loanToUpdate.setSynchroTime(startTime);
+                    loanRepository.save(loanToUpdate);
+                }
             } else {
                 //create
-                Loan newLoan = new Loan(loanToSave);
-                newLoan.setModifiedTime(updateTime);
+                Loan newLoan = new Loan(loanDtoToSave);
+                //set the loan on active
+                newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
+                newLoan.setSynchroTime(startTime);
                 loanRepository.save(newLoan);
             }
         }
 
-        int modifiedRows = loanRepository.updateStateByModifiedTimeLessThanAndActive(updateTime, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
+        int modifiedRows = loanRepository.updateStateByModifiedTimeLessThanAndActive(startTime, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
         log.debug(modifiedRows + " Loans have been updated to pending state");
 
         log.info("Synchronize Ended Successfully");
@@ -428,7 +445,7 @@ public class BondareaService {
                 if (!processedGroupLoans.contains(credit.getIdGroup())) {
                     // get the group to check their expired money
                     List<Loan> oneGroup = activeLoans.stream().filter(aLoan -> aLoan.getIdGroup().equals(credit.getIdGroup())).collect(Collectors.toList());
-                    BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
+                    BigDecimal amountExpiredOfGroup = null;//= sumExpiredAmount(oneGroup);
 
                     BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
                     if (amountExpiredOfGroup.compareTo(maxAmount) > 0) {
@@ -454,6 +471,7 @@ public class BondareaService {
         }
     }
 
+
     /**
      * Accumulate the expired amount of the credit group.
      * This able to check if the group is default.
@@ -461,6 +479,7 @@ public class BondareaService {
      * @param group
      * @return BigDecimal (sum)
      */
+    /*
     private BigDecimal sumExpiredAmount(List<Loan> group) {
         BigDecimal amountExpired = BigDecimal.ZERO;
 
@@ -469,7 +488,7 @@ public class BondareaService {
         }
 
         return amountExpired;
-    }
+    }*/
 
 
     private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup) {

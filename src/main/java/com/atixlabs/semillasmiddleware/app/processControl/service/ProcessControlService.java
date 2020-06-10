@@ -2,7 +2,9 @@ package com.atixlabs.semillasmiddleware.app.processControl.service;
 
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.repository.ProcessControlRepository;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -23,7 +25,12 @@ public class ProcessControlService {
     public void setStatusToProcess(String processName, String processStatus) throws InvalidProcessException {
         Optional<ProcessControl> processControl = processControlRepository.findByProcessName(processName);
         if(processControl.isPresent()) {
+            //set status
             processControl.get().setStatus(processStatus);
+            //the process is set to start: set start time
+            if(processStatus.equals(ProcessControlStatusCodes.RUNNING.getCode()))
+                processControl.get().setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
+
             processControlRepository.save(processControl.get());
             log.info("Process " + processName + "is now set to " + processStatus);
         }
@@ -32,9 +39,14 @@ public class ProcessControlService {
     }
 
     public boolean isProcessRunning(String processName) throws InvalidProcessException {
+        ProcessControl processControl = this.findByProcessName(processName);
+        return processControl.isRunning();
+    }
+
+    public ProcessControl findByProcessName(String processName) throws InvalidProcessException {
         Optional<ProcessControl> processControl = processControlRepository.findByProcessName(processName);
         if(processControl.isPresent())
-            return processControl.get().isRunning();
+            return processControl.get();
         else
             throw new InvalidProcessException("There is no process with name " + processName);
     }

@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.service;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
@@ -14,6 +15,10 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
@@ -25,10 +30,10 @@ import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -57,6 +62,8 @@ public class CredentialService {
     private AnswerCategoryFactory answerCategoryFactory;
     private DidiService didiService;
     private RevocationReasonRepository revocationReasonRepository;
+    private LoanService loanService;
+    private ProcessControlService processControlService;
 
     @Value("${credentials.pageSize}")
     private String size;
@@ -77,7 +84,7 @@ public class CredentialService {
             CredentialDwellingRepository credentialDwellingRepository,
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
-            RevocationReasonRepository revocationReasonRepository) {
+            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService) {
             this.credentialCreditRepository = credentialCreditRepository;
             this.credentialRepository = credentialRepository;
             this.personRepository = personRepository;
@@ -92,6 +99,8 @@ public class CredentialService {
             this.credentialDwellingRepository = credentialDwellingRepository;
             this.didiService = didiService;
             this.revocationReasonRepository = revocationReasonRepository;
+            this.loanService = loanService;
+            this.processControlService = processControlService;
     }
 
 
@@ -140,6 +149,51 @@ public class CredentialService {
             }
         }
         return Optional.empty();
+    }
+
+    /**
+     * Generate and update the credentials credit.
+     * Checking for defaulters, and revoking or active credentials (credit and benefit)
+     */
+    public void generateCredentials() throws InvalidProcessException {
+        //check if process in credentials is not running
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+
+            //check holders to validate if they are in default or not
+            this.checkHolders();
+
+            //update credentials
+            List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
+            //if loan has been modified after the credential credit
+            for (Loan loan : loansWithCredentials) {
+                CredentialCredit creditToUpdate = this.validateCredentialCreditToUpdate(loan);
+                if (creditToUpdate != null) {
+                    try {
+                        this.updateCredentialCredit(loan, creditToUpdate);
+                    } catch (PersonDoesNotExistsException ex) {
+                        log.error(ex.getMessage());
+                    } catch (Exception ex) {
+                        log.error("Error updating credentials credit ! " + ex.getMessage());
+                    }
+                }
+            }
+
+            //create credentials
+            List<Loan> newLoans = loanService.findLoansWithoutCredential();
+
+            for (Loan newLoan : newLoans) {
+                try {
+                    this.createNewCreditCredentials(newLoan);
+                } catch (PersonDoesNotExistsException ex) {
+                    log.error(ex.getMessage());
+                }
+            }
+            //finish process
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+        } else {
+            log.info("Generate credentials can't run ! Process " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+        }
     }
 
 
@@ -582,7 +636,7 @@ public class CredentialService {
             // if it does not have finish date... (finishDate indicate that the credit has finished or has been canceled)
             if (opCredit.get().getFinishDate() == null) {
                 CredentialCredit credit = opCredit.get();
-                if (!(Float.compare(loan.getExpiredAmount(), credit.getExpiredAmount()) == 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatus().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
+                if ((loan.getExpiredAmount().compareTo(credit.getExpiredAmount()) != 0) || !loan.getCycleDescription().equals(credit.getCurrentCycle()) || !(loan.getStatus().equals(credit.getCreditState())))/*||  loan.getTotalCuotas...*/ {
                     // the loan has changed, return credit to be update
                     return credit;
                 }

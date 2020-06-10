@@ -45,6 +45,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.test.context.junit4.SpringRunner;
 import retrofit2.http.HEAD;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -135,14 +136,14 @@ public class CredentialServiceTest {
         loan.setCycleDescription("Ciclo 1");
         loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
         loan.setHasCredential(true);
-        loan.setExpiredAmount((float) 0);
+        loan.setExpiredAmount(BigDecimal.valueOf(0));
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
         return loan;
     }
 
     private Loan getLoanWithExpiredAmount(){
         Loan loan = getMockLoan();
-        loan.setExpiredAmount((float) 10000);
+        loan.setExpiredAmount(BigDecimal.valueOf(10000));
 
         return loan;
     }

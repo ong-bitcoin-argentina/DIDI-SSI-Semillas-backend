@@ -34,4 +34,6 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByHasCredentialTrue();
 
+    //query to select the group and return: the sum of the expired amount
+
 }

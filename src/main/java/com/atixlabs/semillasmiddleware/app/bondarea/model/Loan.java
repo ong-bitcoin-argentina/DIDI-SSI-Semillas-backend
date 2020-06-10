@@ -1,6 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.model;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -61,8 +63,11 @@ public class Loan extends AuditableEntity {
     //todo check if in db the type is numeric with 2 decimals and x long
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm")
-    private LocalDateTime modifiedTime;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime updateTime;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
+    private LocalDateTime synchroTime;
 
     private Boolean hasCredential;
 
@@ -75,7 +80,8 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        //this.status =   loanDto.getStatus();
+        if(String.valueOf(loanDto.getStatus()).equals(BondareaLoanStatusCodes.ACTIVE.getCode()))
+            this.status = LoanStatusCodes.ACTIVE.getCode();
 
         this.idProductLoan =   loanDto.getIdProductLoan();
 
@@ -107,50 +113,19 @@ public class Loan extends AuditableEntity {
 
     }
 
-    public void merge(LoanDto loanToUpdate){
+    @Override
+    public boolean equals(Object object){
+        if(object == null)
+            return false;
+        Loan newLoan = (Loan) object;
 
-        this.dniPerson = loanToUpdate.getDniPerson();
+        return (this.status.equals(newLoan.getStatus()) && this.cycleDescription.equals(newLoan.getCycleDescription()) && (this.expiredAmount.compareTo(newLoan.getExpiredAmount()) == 0));
+    }
 
-        //this.isActive = loanToUpdate.getIsActive();
-        //this.isDeleted = loanToUpdate.getIsDeleted();
-        //this.pending = loanToUpdate.getPending();
-
-        this.idBondareaLoan = loanToUpdate.getIdBondareaLoan();
-
-        this.tagBondareaLoan = loanToUpdate.getTagBondareaLoan();
-
+    public void merge(Loan loanToUpdate){
         this.status = loanToUpdate.getStatus();
-
-        this.idProductLoan = loanToUpdate.getIdProductLoan();
-
-        this.idGroup = loanToUpdate.getIdGroup();
-
         this.cycleDescription = loanToUpdate.getCycleDescription();
-
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        try {
-            if (loanToUpdate.getDateFirstInstalment() != null) {
-                this.dateFirstInstalment = LocalDate.parse(loanToUpdate.getDateFirstInstalment(), formatter);
-            }
-
-            if (loanToUpdate.getCreationDate() != null) {
-                this.creationDate = LocalDate.parse(loanToUpdate.getCreationDate(), formatter);
-            }
-        }
-        catch (Exception ex){
-            log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanToUpdate.getCreationDate());
-        }
-
-        this.personName = loanToUpdate.getPersonName();
-
-        this.userId = loanToUpdate.getUserId();
-
-        this.amount = loanToUpdate.getAmount();
-
         this.expiredAmount = loanToUpdate.getExpiredAmount();
-
-        //this.modifiedTime = loanToUpdate.getModifiedTime();
-
     }
 
     public Loan(LoanDto loanDto) {

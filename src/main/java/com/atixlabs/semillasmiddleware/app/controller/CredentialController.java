@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
@@ -117,39 +118,17 @@ public class CredentialController {
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.OK)
-    public void generateCredentialsCredit() {
+    public ResponseEntity<String> generateCredentialsCredit() {
 
-        //check holders to validate if they are in default or not
-        credentialService.checkHolders();
-
-        //update credentials
-        List<Loan> loansWithCredentials = loanService.findLoansWithCredential();
-        //if loan has been modified after the credential credit
-        for (Loan loan : loansWithCredentials) {
-            CredentialCredit creditToUpdate = credentialService.validateCredentialCreditToUpdate(loan);
-            if (creditToUpdate != null) {
-                try {
-                    credentialService.updateCredentialCredit(loan, creditToUpdate);
-                } catch (PersonDoesNotExistsException ex) {
-                    log.error(ex.getMessage());
-                } catch (Exception ex) {
-                    log.error("Error ! " + ex.getMessage());
-                }
-            }
+        try {
+            credentialService.generateCredentials();
+        }
+        catch (InvalidProcessException ex){
+            log.error("Could not get the process ! "+ ex.getMessage());
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
-        //create credentials
-        List<Loan> newLoans = loanService.findLoansWithoutCredential();
-
-        for (Loan newLoan : newLoans) {
-            try {
-                credentialService.createNewCreditCredentials(newLoan);
-            } catch (PersonDoesNotExistsException ex) {
-                log.error(ex.getMessage());
-            }
-        }
-
-
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 }

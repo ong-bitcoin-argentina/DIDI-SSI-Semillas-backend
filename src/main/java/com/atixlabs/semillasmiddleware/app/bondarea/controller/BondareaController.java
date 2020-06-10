@@ -40,18 +40,18 @@ public class BondareaController {
 
     @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<Loan>> synchronizeBondareaLoans() throws InvalidProcessException {
+    public ResponseEntity<String> synchronizeBondareaLoans() throws InvalidProcessException {
         try {
-            bondareaService.synchronizeLoans();
+            bondareaService.synchronizeLoans(null);
         }
         catch (BondareaSyncroException ex){
             log.error("Could not synchronized data from Bondarea ! "+ ex.getMessage());
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Could not synchronized data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (InvalidProcessException ex){
             log.error("Could not get the process ! "+ ex.getMessage());
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);
         }
         catch (InvalidExpiredConfigurationException ex) {
             log.error(ex.getMessage());
@@ -71,31 +71,27 @@ public class BondareaController {
      */
     @PostMapping("/synchronizeMock")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<List<BondareaLoanDto>> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson)  {
+    public ResponseEntity<String> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson) throws InvalidProcessException {
         log.info("BONDAREA - GET LOANS MOCK");
         List<BondareaLoanDto> loans;
-        try {
-          //  LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            //loansDto = bondareaService.getLoansMock("","", todayPlusOne.toString());
+
             loans = loansJson.stream().map(loanDto -> new BondareaLoanDto(loanDto)).collect(Collectors.toList());
-            bondareaService.createAndUpdateLoans(loans);
-            bondareaService.setPendingLoansFinalStatusMock();
-        }
-        catch (Exception ex){
-            log.error("Could not synchronized data from Bondarea !"+ ex.getMessage());
-            return new ResponseEntity<>(Collections.emptyList(), HttpStatus.INTERNAL_SERVER_ERROR);
-        }
+            try {
+                bondareaService.synchronizeLoans(loans);
+            } catch (BondareaSyncroException ex) {
+                log.error("Could not synchronized data from Bondarea ! " + ex.getMessage());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                return new ResponseEntity<>("Could not synchronized data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (InvalidProcessException ex) {
+                log.error("Could not get the process ! " + ex.getMessage());
+                return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);
+            } catch (InvalidExpiredConfigurationException ex) {
+                log.error(ex.getMessage());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            }
 
-        try {
-            // check credits for defaults
-            bondareaService.checkCreditsForDefault();
-        }
-        catch (InvalidExpiredConfigurationException ex) {
-            log.error(ex.getMessage());
-            return new ResponseEntity<>(loans, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-
-        return new ResponseEntity<>(loans, HttpStatus.OK);
+        return new ResponseEntity<>(HttpStatus.OK);
     }
 
 

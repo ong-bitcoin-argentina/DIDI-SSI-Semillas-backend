@@ -215,7 +215,7 @@ public class BondareaServiceTest {
         when(loanRepository.findByIdBondareaLoan("4a")).thenReturn(Optional.of(firstLoansData().get(3)));
         when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.empty());
 
-        when(loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(any())).thenReturn(List.of(firstLoansData().get(0)));
+        when(loanRepository.updateStateBySynchroTimeLessThanAndActive(any(), LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode())).thenReturn(0);
 
         List<BondareaLoanDto> loans = secondLoansData();
         bondareaService.createAndUpdateLoans(loans);
@@ -239,7 +239,7 @@ public class BondareaServiceTest {
         when(loanRepository.findByIdBondareaLoan("6a")).thenReturn(Optional.empty());
         when(loanRepository.findByIdBondareaLoan("7a")).thenReturn(Optional.empty());
 
-        when(loanRepository.findAllByModifiedTimeNotAndModifiedTimeNotNull(any())).thenReturn(firstLoansData());
+        when(loanRepository.updateStateBySynchroTimeLessThanAndActive(any(), LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode())).thenReturn(0);
 
         List<BondareaLoanDto> loans = secondLoansDataAllNew();
         bondareaService.createAndUpdateLoans(loans);

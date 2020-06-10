@@ -305,17 +305,26 @@ public class BondareaService {
      * @throws InvalidProcessException
      * @throws InvalidExpiredConfigurationException
      */
-    public void synchronizeLoans() throws BondareaSyncroException, InvalidProcessException, InvalidExpiredConfigurationException {
+    public void synchronizeLoans(List<BondareaLoanDto> bondareaMock) throws BondareaSyncroException, InvalidProcessException, InvalidExpiredConfigurationException {
         //check if process in credentials is not running
         if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode())) {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
             List<BondareaLoanDto> loansDto;
 
-            LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
-            loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
-            this.createAndUpdateLoans(loansDto);
-            this.setPendingLoansFinalStatus();
+            if(bondareaMock == null) {
+                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+                log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
+                loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+
+                this.createAndUpdateLoans(loansDto);
+                this.setPendingLoansFinalStatus();
+            }
+            else{
+                //for mock
+                loansDto = bondareaMock;
+                this.createAndUpdateLoans(loansDto);
+                this.setPendingLoansFinalStatusMock();
+            }
 
             // check credits for defaults
             this.checkCreditsForDefault();
@@ -338,7 +347,7 @@ public class BondareaService {
      * @throws InvalidProcessException
      */
     public void createAndUpdateLoans(List<BondareaLoanDto> newLoans) throws InvalidProcessException {
-        LocalDateTime startTime = processControlService.findByProcessName(ProcessNamesCodes.CREDENTIALS.getCode()).getStartTime();
+        LocalDateTime startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
 
         //update or create loans
         for (BondareaLoanDto loanDtoToSave : newLoans) {
@@ -368,11 +377,12 @@ public class BondareaService {
                 //set the loan on active
                 newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
                 newLoan.setSynchroTime(startTime);
+                //newLoan.setUpdateTime(startTime);
                 loanRepository.save(newLoan);
             }
         }
 
-        int modifiedRows = loanRepository.updateStateByModifiedTimeLessThanAndActive(startTime, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
+        int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTime, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
         log.debug(modifiedRows + " Loans have been updated to pending state");
 
         log.info("Synchronize Ended Successfully");
@@ -409,7 +419,7 @@ public class BondareaService {
      * Determinate for each loan in pending state whether it has been canceled or has finished.
      */
     public void setPendingLoansFinalStatusMock() {
-        log.info("Determinating the final state of the loans in pending state");
+        log.info("Determining the final state of the loans in pending state");
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {
@@ -431,21 +441,26 @@ public class BondareaService {
         }
     }
 
-    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException {
+    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, InvalidProcessException {
         log.info("Checking active credits for defaults");
         List<String> processedGroupLoans = new ArrayList<>();
-        //get all the active loans
-        List<Loan> activeLoans = loanRepository.findAllByStatus(LoanStatusCodes.ACTIVE.getCode());
+
+        LocalDateTime processTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
+        //get the modified loans
+        List<Loan> modifiedLoans = loanRepository.findAllByUpdateTime(processTime);
+
+        if(modifiedLoans.size() == 0)
+            return;
 
         Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
         if (config.isPresent()) {
 
-            for (Loan credit : activeLoans) {
+            for (Loan credit : modifiedLoans) {
                 //if the group was not processed..
                 if (!processedGroupLoans.contains(credit.getIdGroup())) {
                     // get the group to check their expired money
-                    List<Loan> oneGroup = activeLoans.stream().filter(aLoan -> aLoan.getIdGroup().equals(credit.getIdGroup())).collect(Collectors.toList());
-                    BigDecimal amountExpiredOfGroup = null;//= sumExpiredAmount(oneGroup);
+                    List<Loan> oneGroup = modifiedLoans.stream().filter(aLoan -> aLoan.getIdGroup().equals(credit.getIdGroup())).collect(Collectors.toList());
+                    BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
                     BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
                     if (amountExpiredOfGroup.compareTo(maxAmount) > 0) {
@@ -479,16 +494,16 @@ public class BondareaService {
      * @param group
      * @return BigDecimal (sum)
      */
-    /*
+
     private BigDecimal sumExpiredAmount(List<Loan> group) {
         BigDecimal amountExpired = BigDecimal.ZERO;
 
         for (Loan credit : group) {
-            amountExpired = amountExpired.add(new BigDecimal(Float.toString(credit.getExpiredAmount())));
+            amountExpired = amountExpired.add(new BigDecimal(credit.getExpiredAmount().toString()));
         }
 
         return amountExpired;
-    }*/
+    }
 
 
     private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup) {

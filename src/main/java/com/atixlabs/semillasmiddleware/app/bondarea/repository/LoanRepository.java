@@ -21,12 +21,14 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByStatus(String status);
 
-    List<Loan> findAllByModifiedTimeNotAndModifiedTimeNotNull(LocalDateTime updateTime);
+    //List<Loan> findAllByModifiedTimeNotAndModifiedTimeNotNull(LocalDateTime updateTime);
+
+    List<Loan> findAllByUpdateTime(LocalDateTime updateTime);
 
     @Modifying()
     @Transactional
-    @Query("UPDATE Loan set status = :status " + "WHERE modifiedTime < :modifiedTime AND status = :activeState")
-    int updateStateByModifiedTimeLessThanAndActive(@Param("modifiedTime") LocalDateTime modifiedTime, @Param("status") String status, @Param("activeState") String activeState);
+    @Query("UPDATE Loan set status = :status " + "WHERE synchroTime < :synchroTime AND status = :activeState")
+    int updateStateBySynchroTimeLessThanAndActive(@Param("synchroTime") LocalDateTime synchroTime, @Param("status") String status, @Param("activeState") String activeState);
 
     Optional<Loan> findByIdBondareaLoan(String idBocs);
 

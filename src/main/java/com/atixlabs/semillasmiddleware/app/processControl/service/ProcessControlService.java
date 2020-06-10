@@ -9,6 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDateTime;
 import java.util.Optional;
 
 @Service
@@ -32,7 +33,7 @@ public class ProcessControlService {
                 processControl.get().setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
 
             processControlRepository.save(processControl.get());
-            log.info("Process " + processName + "is now set to " + processStatus);
+            log.info("Process " + processName + " is now set to " + processStatus);
         }
         else
             throw new InvalidProcessException("Error to set new status tu process: There is no process with name " + processName);
@@ -43,7 +44,11 @@ public class ProcessControlService {
         return processControl.isRunning();
     }
 
-    public ProcessControl findByProcessName(String processName) throws InvalidProcessException {
+    public LocalDateTime getProcessTimeByProcessCode(String processName) throws InvalidProcessException {
+        return this.findByProcessName(processName).getStartTime();
+    }
+
+    private ProcessControl findByProcessName(String processName) throws InvalidProcessException {
         Optional<ProcessControl> processControl = processControlRepository.findByProcessName(processName);
         if(processControl.isPresent())
             return processControl.get();

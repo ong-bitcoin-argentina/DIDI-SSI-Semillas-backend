@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.model;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -44,6 +45,8 @@ public class Loan extends AuditableEntity {
 
     private String status;
 
+    private String state; //ok OR default
+
     private String idProductLoan;  //ID de producto de préstamo (Ej.  B26F5FKZ)
 
     private String idGroup; // ID del   crédito grupal y su estado (Ej.55-B26F5FKZ)
@@ -82,6 +85,9 @@ public class Loan extends AuditableEntity {
 
         if(String.valueOf(loanDto.getStatus()).equals(BondareaLoanStatusCodes.ACTIVE.getCode()))
             this.status = LoanStatusCodes.ACTIVE.getCode();
+
+        //start in state ok
+        this.setState(LoanStateCodes.OK.getCode());
 
         this.idProductLoan =   loanDto.getIdProductLoan();
 

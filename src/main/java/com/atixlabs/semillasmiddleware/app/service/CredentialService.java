@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.NoExpiredConfigurationExists;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExists;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
@@ -100,7 +101,7 @@ public class CredentialService {
 
 
 
-    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+    public Page<CredentialDto> findCredentials(String credentialType, String name, String dniBeneficiary, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         List<Credential> credentials;
         Pageable pageable = null;
@@ -109,7 +110,8 @@ public class CredentialService {
 
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
 
-        return new PageImpl<>(credentials, pageable, credentials.size());
+        Page<Credential> credentialPage = new PageImpl<>(credentials, pageable, credentials.size());
+        return credentialPage.map(CredentialDto::constructBasedOnCredentialType);
     }
 
     public Map<Long,String> getRevocationReasonsForUser(){

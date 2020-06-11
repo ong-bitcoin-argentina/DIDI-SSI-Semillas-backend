@@ -25,8 +25,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByUpdateTimeAndStatus(LocalDateTime updateTime, String status);
 
-    //get all loans that his updateTime = :updateTime AND status = :status AND updateTime > :dateToCompare (dateToCompare means last time generate process run)
-    List<Loan> findAllByUpdateTimeAndStatusOrUpdateTimeGreaterThan(LocalDateTime updateTime, String status, LocalDateTime dateToCompare);
+    //get all loans that his updateTime > :dateToCompare AND status = :status (dateToCompare means last time generate process run)
+    List<Loan> findAllByUpdateTimeGreaterThanAndStatus(LocalDateTime dateToCompare, String status);
 
     @Modifying()
     @Transactional

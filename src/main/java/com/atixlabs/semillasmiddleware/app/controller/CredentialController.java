@@ -1,14 +1,14 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
@@ -35,10 +35,13 @@ public class CredentialController {
 
     private LoanService loanService;
 
+    private ProcessControlService processControlService;
+
     @Autowired
-    public CredentialController(CredentialService credentialService, LoanService loanService, DidiService didiService) {
+    public CredentialController(CredentialService credentialService, LoanService loanService, DidiService didiService, ProcessControlService processControlService) {
         this.credentialService = credentialService;
         this.loanService = loanService;
+        this.processControlService = processControlService;
     }
 
 
@@ -60,7 +63,7 @@ public class CredentialController {
                     credentialState.toString() + " " + e);
             return Page.empty();
         }
-        return credentials.map(CredentialDto::new);
+        return credentials.map(CredentialDto::constructBasedOnCredentialType);
     }
 
     @GetMapping("/states")
@@ -118,13 +121,14 @@ public class CredentialController {
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> generateCredentialsCredit() {
+    public ResponseEntity<String> generateCredentialsCredit() throws InvalidProcessException {
 
         try {
             credentialService.generateCredentials();
         }
         catch (InvalidProcessException ex){
             log.error("Could not get the process ! "+ ex.getMessage());
+            processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.OK.getCode());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 

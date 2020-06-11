@@ -41,11 +41,9 @@ public class LoanService {
         return newLoans;
     }
 
-    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime) throws InvalidProcessException {
+    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime) {
         //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
-
-        LocalDateTime syncBondareaProcessTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
-        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeAndStatusOrUpdateTimeGreaterThan(syncBondareaProcessTime, LoanStatusCodes.ACTIVE.getCode(), credentialProcessLastTime);
+        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatus(credentialProcessLastTime, LoanStatusCodes.ACTIVE.getCode());
         return modifiedCredits;
     }
 

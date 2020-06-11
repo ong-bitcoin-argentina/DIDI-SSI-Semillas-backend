@@ -5,9 +5,11 @@ import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfigurationException;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
@@ -446,6 +448,12 @@ public class BondareaService {
         }
     }
 
+    /**
+     * Given the modified credits:
+     *
+     * @throws InvalidExpiredConfigurationException
+     * @throws InvalidProcessException
+     */
     public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, InvalidProcessException {
         log.info("Checking active credits for defaults");
         List<String> processedGroupLoans = new ArrayList<>();
@@ -470,11 +478,15 @@ public class BondareaService {
                     BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
                     if (amountExpiredOfGroup.compareTo(maxAmount) > 0) {
                         //set beneficiaries with this credit in default
-                        addCreditInDefaultForBeneficiaries(oneGroup);
+                        for (Loan loan: oneGroup) {
+                            addCreditInDefaultForHolder(loan);
+                        }
                     } else {
                         //credit group is ok.
                         // if this credit has been in default, is needed to delete this one.
-                        checkToDeleteCreditInDefault(oneGroup);
+                        for (Loan loan: oneGroup) {
+                            checkToDeleteCreditInDefault(loan);
+                        }
                     }
 
                     // with the group, delete this group from the actual list so it wont be repeated.
@@ -499,7 +511,6 @@ public class BondareaService {
      * @param group
      * @return BigDecimal (sum)
      */
-
     private BigDecimal sumExpiredAmount(List<Loan> group) {
         BigDecimal amountExpired = BigDecimal.ZERO;
 
@@ -511,49 +522,76 @@ public class BondareaService {
     }
 
 
-    private void addCreditInDefaultForBeneficiaries(List<Loan> loanGroup) {
-        log.info("Credit with group: " + loanGroup.get(0).getIdGroup() + " is in default");
-        List<Long> dniHolders = loanGroup.stream().map(Loan::getDniPerson).collect(Collectors.toList());
+    private void addCreditInDefaultForHolder(Loan loan) throws InvalidProcessException {
+        log.info("Credit with group: " + loan.getIdGroup() + " is in default");
+        setDefaultStateToCredit(loan);
 
-        String actualGroup = loanGroup.get(0).getIdGroup();
+        String actualGroup = loan.getIdGroup();
 
-        List<Person> beneficiaries = personRepository.findByDocumentNumberIn(dniHolders);
-        if (beneficiaries.size() < loanGroup.size())
-            log.info("One of the persons in the credit group: " + loanGroup.get(0).getIdGroup() + " has not been loaded in the survey");
+        Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
+        if (opBeneficiary.isEmpty()) {
+            log.info("Person with dni " + loan.getDniPerson() + " has not been loaded in the survey yet");
+            return;
+        }
+        Person beneficiary = opBeneficiary.get();
 
-        //for each beneficiary THE loan will be added to the default list
-        for (Person beneficiary : beneficiaries) {
+         //for the beneficiary THE loan will be added to the default list
             List<Loan> defaultList = beneficiary.getDefaults();
             //check if the loan is already set
             if(defaultList.stream().noneMatch(aLoan -> aLoan.getIdGroup().equals(actualGroup))) {
-                defaultList.add(loanGroup.get(0));
+                defaultList.add(loan);
                 beneficiary.setDefaults(defaultList);
                 personRepository.save(beneficiary);
                 log.info("Credit has been saved in holder " + beneficiary.getDocumentNumber() + " as default");
             }
         }
+
+
+    private void setDefaultStateToCredit(Loan loanInDefault) throws InvalidProcessException {
+        if (!loanInDefault.getState().equals(LoanStateCodes.DEFAULT.getCode())) {
+            loanInDefault.setState(LoanStateCodes.DEFAULT.getCode());
+            //set the update time because the credit state change
+            loanInDefault.setUpdateTime(processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode()));
+            log.info("Set credit to DEFAULT for dni " + loanInDefault.getDniPerson());
+            loanRepository.save(loanInDefault);
+        }
     }
 
-    private void checkToDeleteCreditInDefault(List<Loan> loanGroup) {
-        List<Long> dniHolders = loanGroup.stream().map(Loan::getDniPerson).collect(Collectors.toList());
-        String groupId = loanGroup.get(0).getIdGroup();
 
-        List<Person> beneficiaries = personRepository.findByDocumentNumberIn(dniHolders);
 
-        //check if the person has the group credit saved as default.
-        for (Person holder : beneficiaries) {
+    private void checkToDeleteCreditInDefault(Loan loan) throws InvalidProcessException {
+        //set the credit as ok if it was not in it.
+        setOkStateToCreditGroup(loan);
+        String groupId = loan.getIdGroup();
 
-            for (Loan credit: holder.getDefaults()) {
-                if(credit.getIdGroup().equals(groupId)){
+        Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
+
+        if (opBeneficiary.isEmpty()) {
+            log.info("Person with dni " + loan.getDniPerson() + " has not been loaded in the survey yet");
+            return;
+        }
+
+        Person holder = opBeneficiary.get();
+            //check if the person has the group credit saved as default.
+            for (Loan credit : holder.getDefaults()) {
+                if (credit.getIdGroup().equals(groupId)) {
                     //the credit was in default but now is ok. we take it out.
                     holder.getDefaults().remove(credit);
                     personRepository.save(holder);
-                    log.info("Credit for group + " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
+                    log.info("Credit for group " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
                     break;
                 }
             }
         }
 
+    private void setOkStateToCreditGroup(Loan loanOK) throws InvalidProcessException {
+        if (!loanOK.getState().equals(LoanStateCodes.OK.getCode())) {
+            loanOK.setState(LoanStateCodes.OK.getCode());
+            //set the update time because the credit state change
+            loanOK.setUpdateTime(processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode()));
+            log.info("Credit is now in state OK for dni"+ loanOK.getDniPerson() );
+            loanRepository.save(loanOK);
+        }
     }
 
 

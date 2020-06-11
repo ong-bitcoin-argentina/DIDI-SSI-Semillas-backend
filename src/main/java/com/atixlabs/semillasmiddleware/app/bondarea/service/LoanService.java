@@ -45,7 +45,7 @@ public class LoanService {
         //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
 
         LocalDateTime syncBondareaProcessTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
-        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeAndStatusAndUpdateTimeGreaterThan(syncBondareaProcessTime, LoanStatusCodes.ACTIVE.getCode(), credentialProcessLastTime);
+        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeAndStatusOrUpdateTimeGreaterThan(syncBondareaProcessTime, LoanStatusCodes.ACTIVE.getCode(), credentialProcessLastTime);
         return modifiedCredits;
     }
 

@@ -63,7 +63,7 @@ public class CredentialController {
                     credentialState.toString() + " " + e);
             return Page.empty();
         }
-        return credentials.map(CredentialDto::constructBasedOnCredentialType);
+        return credentials.map(CredentialDto::new);
     }
 
     @GetMapping("/states")

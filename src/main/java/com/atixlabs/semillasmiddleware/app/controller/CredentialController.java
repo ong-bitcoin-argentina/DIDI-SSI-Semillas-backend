@@ -56,14 +56,14 @@ public class CredentialController {
                                                @RequestParam(required = false) String lastUpdate,
                                                @RequestParam(required = false) List<String> credentialState) {
 
-        Page<Credential> credentials;
+        Page<CredentialDto> credentials;
         try {
             credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, page);
         } catch (Exception e) {
             log.info("There has been an error searching for credentials " + e);
             return Page.empty();
         }
-        return credentials.map(CredentialDto::new);
+        return credentials;
     }
 
     @GetMapping("/states")

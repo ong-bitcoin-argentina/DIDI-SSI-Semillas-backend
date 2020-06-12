@@ -28,6 +28,7 @@ import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 //import retrofit2.GsonConverterFactory;
@@ -307,7 +308,7 @@ public class BondareaService {
      * @throws InvalidProcessException
      * @throws InvalidExpiredConfigurationException
      */
-    public void synchronizeLoans(List<BondareaLoanDto> bondareaMock) throws BondareaSyncroException, InvalidProcessException, InvalidExpiredConfigurationException {
+    public boolean synchronizeLoans(List<BondareaLoanDto> bondareaMock) throws InvalidProcessException {
         //check if process in credentials is not running
         if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode())) {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
@@ -316,10 +317,25 @@ public class BondareaService {
             if (bondareaMock == null) {
                 LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
                 log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
-                loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
 
-                this.createAndUpdateLoans(loansDto);
-                this.setPendingLoansFinalStatus();
+                try {
+                    loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+                }
+                catch (BondareaSyncroException ex){
+                    log.error("Could not synchronized data from Bondarea ! "+ ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                   return false;
+                }
+
+                try {
+                    this.createAndUpdateLoans(loansDto);
+                    this.setPendingLoansFinalStatus();
+                }
+                catch (InvalidProcessException ex){
+                    log.error("Could not get the process ! "+ ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    return false;
+                }
             } else {
                 //for mock process
                 loansDto = bondareaMock;
@@ -327,13 +343,22 @@ public class BondareaService {
                 this.setPendingLoansFinalStatusMock();
             }
 
-            // check credits for defaults
-            this.checkCreditsForDefault();
+            try {
+                // check credits for defaults
+                this.checkCreditsForDefault();
+            }
+            catch (InvalidExpiredConfigurationException ex) {
+                log.error(ex.getMessage());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                return false;
+            }
 
             //finish process
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+            return true;
         } else {
             log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " is still running");
+            return  false;
         }
     }
 
@@ -454,7 +479,7 @@ public class BondareaService {
      * @throws InvalidExpiredConfigurationException
      * @throws InvalidProcessException
      */
-    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, InvalidProcessException {
+    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException,  {
         log.info("Checking active credits for defaults");
         List<String> processedGroupLoans = new ArrayList<>();
 

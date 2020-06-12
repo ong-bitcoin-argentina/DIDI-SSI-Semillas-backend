@@ -29,37 +29,28 @@ public class BondareaController {
     public static final String URL_MAPPING_CREDENTIAL = "/bondarea";
 
     private BondareaService bondareaService;
-    private ProcessControlService processControlService;
 
     @Autowired
-    public BondareaController(BondareaService bondareaService, ProcessControlService processControlService) {
+    public BondareaController(BondareaService bondareaService) {
         this.bondareaService = bondareaService;
-        this.processControlService = processControlService;
     }
 
 
     @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> synchronizeBondareaLoans() throws InvalidProcessException {
+        boolean result = true;
         try {
-            bondareaService.synchronizeLoans(null);
-        }
-        catch (BondareaSyncroException ex){
-            log.error("Could not synchronized data from Bondarea ! "+ ex.getMessage());
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-            return new ResponseEntity<>("Could not synchronized data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-        catch (InvalidProcessException ex){
-            log.error("Could not get the process ! "+ ex.getMessage());
+            result = bondareaService.synchronizeLoans(null);
+        } catch (InvalidProcessException ex) {
+            log.error("Could not get the process ! " + ex.getMessage());
             return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);
         }
-        catch (InvalidExpiredConfigurationException ex) {
-            log.error(ex.getMessage());
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (result)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else
+            return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -74,24 +65,20 @@ public class BondareaController {
     public ResponseEntity<String> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson) throws InvalidProcessException {
         log.info("BONDAREA - GET LOANS MOCK");
         List<BondareaLoanDto> loans;
+        boolean result = true;
 
-            loans = loansJson.stream().map(loanDto -> new BondareaLoanDto(loanDto)).collect(Collectors.toList());
-            try {
-                bondareaService.synchronizeLoans(loans);
-            } catch (BondareaSyncroException ex) {
-                log.error("Could not synchronized data from Bondarea ! " + ex.getMessage());
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                return new ResponseEntity<>("Could not synchronized data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
-            } catch (InvalidProcessException ex) {
-                log.error("Could not get the process ! " + ex.getMessage());
-                return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);
-            } catch (InvalidExpiredConfigurationException ex) {
-                log.error(ex.getMessage());
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-            }
+        loans = loansJson.stream().map(loanDto -> new BondareaLoanDto(loanDto)).collect(Collectors.toList());
+        try {
+            result = bondareaService.synchronizeLoans(loans);
+        } catch (InvalidProcessException ex) {
+            log.error("Could not get the process ! " + ex.getMessage());
+            return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
 
-        return new ResponseEntity<>(HttpStatus.OK);
+        if (result)
+            return new ResponseEntity<>(HttpStatus.OK);
+        else
+            return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 

@@ -178,7 +178,6 @@ public class CredentialService {
                 }
             }
 
-
             //create credentials
             List<Loan> newLoans = loanService.findLoansWithoutCredential();
 
@@ -638,6 +637,12 @@ public class CredentialService {
         if (opCredit.isPresent()) {
             CredentialCredit credit = opCredit.get();
 
+            //If credential credit is revoked and default, return
+            if(credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()) && loan.getState().equals(LoanStateCodes.DEFAULT.getCode())){
+                log.info("Credential credit is revoked and in default, no need to update, dni: " + credit.getCreditHolderDni());
+                return;
+            }
+
             //if credit is in default, only revoke.
             if (loan.getState().equals(LoanStateCodes.DEFAULT.getCode())) {
                 //credit is in default. Revoke credential credit.
@@ -651,16 +656,11 @@ public class CredentialService {
                 return;
             }
 
-            CredentialState previousState = null;
             log.info("Updating credential credit historic " + credit.getIdHistorical()); //the id historical is the same even if the credential is going to be revoke (the log is more clear)
             // save id historic (before revoking)
             Long idHistoricCredit = credit.getIdHistorical();
-            //if credential was revoked before, after update the credential should have the same state.
-            if (credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()))
-                previousState = credit.getCredentialState();
-            else
-                //revoke credential to create the new one ("update")
-                this.revokeComplete(credit, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
+            //revoke credential to create the new one ("update")
+            this.revokeComplete(credit, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
 
             //create new credential given the loan and the old credential
                 Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
@@ -669,9 +669,7 @@ public class CredentialService {
                     updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
                     //set the amount expired cycles of the previous credential to accumulate the expired cycles
                     updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
-                    //save if it was in revoke state again
-                    if (previousState != null)
-                        updateCredit.setCredentialState(previousState);
+
                     updateCredit = credentialCreditRepository.save(updateCredit);
              //
 
@@ -723,17 +721,9 @@ public class CredentialService {
                             log.error("The credential was not set to cancel");
 
                     } else {
-                            //credit is ok. Check if credential credit was revoked
-                            if (loan.getState().equals(LoanStateCodes.OK.getCode())) {
-                                //if the old credential was in state revoke
-                                if (updateCredit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())) {
-                                    //finally set in pending state
-                                    Optional<CredentialState> pendingState = pendingAndActiveState.stream().filter(state -> state.getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())).findFirst();
-                                    updateCredit.setCredentialState(pendingState.get());
-
-                                    credentialCreditRepository.save(updateCredit);
+                            //credit is ok and the old credential was revoked. So now it has been reactivated.
+                            if (loan.getState().equals(LoanStateCodes.OK.getCode()) && credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())) {
                                     log.info("The credential credit of " + updateCredit.getCreditHolderDni() + " has been reactivated");
-                                }
                             }
                     }
                 }

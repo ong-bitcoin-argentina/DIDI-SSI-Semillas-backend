@@ -479,7 +479,7 @@ public class BondareaService {
      * @throws InvalidExpiredConfigurationException
      * @throws InvalidProcessException
      */
-    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException,  {
+    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, InvalidProcessException {
         log.info("Checking active credits for defaults");
         List<String> processedGroupLoans = new ArrayList<>();
 

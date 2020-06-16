@@ -38,7 +38,7 @@ public class CredentialController {
     private ProcessControlService processControlService;
 
     @Autowired
-    public CredentialController(CredentialService credentialService, LoanService loanService, DidiService didiService, ProcessControlService processControlService) {
+    public CredentialController(CredentialService credentialService, LoanService loanService, ProcessControlService processControlService) {
         this.credentialService = credentialService;
         this.loanService = loanService;
         this.processControlService = processControlService;
@@ -128,7 +128,6 @@ public class CredentialController {
         }
         catch (InvalidProcessException ex){
             log.error("Could not get the process ! "+ ex.getMessage());
-            processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.OK.getCode());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 

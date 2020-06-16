@@ -175,6 +175,7 @@ public class CredentialService {
                     log.error(ex.getMessage());
                 } catch (Exception ex) {
                     log.error("Error updating credentials credit ! " + ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.FAIL.getCode());
                 }
             }
 
@@ -186,6 +187,7 @@ public class CredentialService {
                     this.createNewCreditCredentials(newLoan);
                 } catch (PersonDoesNotExistsException ex) {
                     log.error(ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.OK.getCode()); //TODO este caso tiene sentido marcarlo como fail ?
                 }
             }
 
@@ -755,17 +757,6 @@ public class CredentialService {
        }
    }
 
-  /* private List<Person> getAllHoldersInGroupDistinct(List<Loan> modifiedLoans){
-        List<Person> holdersInDefaultDistinct = new ArrayList<>();
-        //TODO this could be improved with a custom query!
-       for (Loan credit: modifiedLoans) {
-           //get ALL the holders in default for the modified loans
-            List<Long> dnisOfGroup = loanRepository.findAllByIdGroup(credit.getIdGroup()).stream().map(Loan::getDniPerson).collect(Collectors.toList());
-           List<Person> holdersOfTheGroup = personRepository.findByDocumentNumberIn(dnisOfGroup);
-           holdersInDefaultDistinct.addAll(holdersOfTheGroup);
-       }
-       return holdersInDefaultDistinct.stream().distinct().collect(Collectors.toList());
-   }*/
 
     /**
      * Revoke given the holder. Try to Revoke credential credits in state active or pending. Revoke cred benefits with holder dni.
@@ -785,25 +776,9 @@ public class CredentialService {
             haveRevokeBenefits.add(result);
         }
 
-      /* //get the credits active or pending state to revoke
-        List<String> creditGroups = holderInDefault.getDefaults().stream().map(Loan::getIdGroup).collect(Collectors.toList());
-        List<CredentialCredit> credentialCreditsInDefault = credentialCreditRepository.findByIdGroupInAndCreditHolderDniAndCredentialStateIn(creditGroups, holderInDefault.getDocumentNumber(), activePendingStates);
-
-        //revoke his credential credit where holder is in default
-        for (CredentialCredit credit : credentialCreditsInDefault) {
-            //sum +1 on expired cycle and then revoke credential credit
-            boolean result = this.revokeDefaultCredentialCredit(credit);
-            haveRevokeCredits.add(result);
-        }*/
-
         if(haveRevokeBenefits.contains(false))
             log.info("There was a problem revoking a/the credential benefits for person: " + holderInDefault.getDocumentNumber());
 
-      /*  //if the credentials were revoked before (so the holder is still in default), it doesnt revoke anything.
-        if(haveRevokeCredits.contains(false))
-            log.info("There was a problem revoking a/the credential credits for person: " + holderInDefault.getDocumentNumber());
-
-            */
     }
 
     /**

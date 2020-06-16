@@ -36,7 +36,7 @@ public class ProcessControlService {
             log.info("Process " + processName + " is now set to " + processStatus);
         }
         else
-            throw new InvalidProcessException("Error to set new status tu process: There is no process with name " + processName);
+            throw new InvalidProcessException("Error setting new status tu process: There is no process with name " + processName);
     }
 
     public boolean isProcessRunning(String processName) throws InvalidProcessException {

@@ -311,46 +311,54 @@ public class BondareaService {
         if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
 
-            LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-            log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
-
-            List<BondareaLoanDto> loansDto;
             try {
-                loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
-            }
-            catch (BondareaSyncroException ex){
-                log.error("Could not synchronized data from Bondarea ! "+ ex.getMessage());
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-               return false;
-            }
 
-            try {
-                this.createAndUpdateLoans(loansDto);
-                this.setPendingLoansFinalStatus();
+                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+                log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
+
+                List<BondareaLoanDto> loansDto;
+                try {
+                    loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+                } catch (BondareaSyncroException ex) {
+                    log.error("Could not synchronized data from Bondarea ! " + ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    return false;
+                }
+
+                LocalDateTime startTime;
+                try {
+                    startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
+                } catch (InvalidProcessException ex) {
+                    log.error("Could not get the process ! " + ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    return false;
+                }
+                    this.createAndUpdateLoans(loansDto, startTime);
+                    this.setPendingLoansFinalStatus(startTime);
+
+                try {
+                    // check credits for defaults
+                    this.checkCreditsForDefault();
+                } catch (InvalidExpiredConfigurationException ex) {
+                    log.error(ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    return false;
+                }
+
+                //finish process
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+                return true;
             }
-            catch (InvalidProcessException ex){
-                log.error("Could not get the process ! "+ ex.getMessage());
+            catch (Exception ex){
+                log.error("Exception unknown " + ex.getMessage());
                 processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
                 return false;
             }
 
-            try {
-                // check credits for defaults
-                this.checkCreditsForDefault();
-            }
-            catch (InvalidExpiredConfigurationException ex) {
-                log.error(ex.getMessage());
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+        } else{
+                log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+
                 return false;
-            }
-
-            //finish process
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
-            return true;
-        } else {
-            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() +" or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
-
-            return  false;
         }
     }
 
@@ -362,11 +370,9 @@ public class BondareaService {
      * 2nd step -> get from DB the ones that has not been modified -> set them to pending.
      *
      * @param newLoans
-     * @throws InvalidProcessException
+     * @param startTimeProcess
      */
-    public void createAndUpdateLoans(List<BondareaLoanDto> newLoans) throws InvalidProcessException {
-        LocalDateTime startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
-
+    public void createAndUpdateLoans(List<BondareaLoanDto> newLoans, LocalDateTime startTimeProcess) {
         //update or create loans
         for (BondareaLoanDto loanDtoToSave : newLoans) {
             log.debug("Updating credit " + loanDtoToSave.getIdBondareaLoan());
@@ -381,12 +387,12 @@ public class BondareaService {
 
                 if (!loanToUpdate.equals(loanToSave)) {
                     loanToUpdate.merge(loanToSave);
-                    loanToUpdate.setUpdateTime(startTime);
-                    loanToUpdate.setSynchroTime(startTime);
+                    loanToUpdate.setUpdateTime(startTimeProcess);
+                    loanToUpdate.setSynchroTime(startTimeProcess);
                     loanRepository.save(loanToUpdate);
                 }else {
                     //update the sync time to know the credit is still active
-                    loanToUpdate.setSynchroTime(startTime);
+                    loanToUpdate.setSynchroTime(startTimeProcess);
                     loanRepository.save(loanToUpdate);
                 }
             } else {
@@ -394,13 +400,13 @@ public class BondareaService {
                 Loan newLoan = new Loan(loanDtoToSave);
                 //set the loan on active
                 newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
-                newLoan.setSynchroTime(startTime);
+                newLoan.setSynchroTime(startTimeProcess);
                 //newLoan.setUpdateTime(startTime);
                 loanRepository.save(newLoan);
             }
         }
 
-        int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTime, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
+        int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTimeProcess, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
         log.debug(modifiedRows + " Loans have been updated to pending state");
 
         log.info("Synchronize Ended Successfully");
@@ -409,9 +415,9 @@ public class BondareaService {
 
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
+     * @param startTime
      */
-    public void setPendingLoansFinalStatus() throws InvalidProcessException {
-        LocalDateTime startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
+    public void setPendingLoansFinalStatus(LocalDateTime startTime) {
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
         for (Loan pendingLoan : pendingLoans) {
@@ -441,6 +447,8 @@ public class BondareaService {
 
     /**
      * Synchronize MOCK loans process from Bondarea
+     * @param bondareaMock
+     * @return boolean
      * @throws InvalidProcessException
      */
     public boolean synchronizeMockLoans(List<BondareaLoanDto> bondareaMock) throws InvalidProcessException {
@@ -449,43 +457,53 @@ public class BondareaService {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
             List<BondareaLoanDto> loansDto;
 
-            if (bondareaMock != null) {
-                try {
-                    loansDto = bondareaMock;
+            try {
 
-                    this.createAndUpdateLoans(loansDto);
-                    this.setPendingLoansFinalStatusMock();
-                } catch (InvalidProcessException ex) {
-                    log.error("Could not get the process ! " + ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                    return false;
+                if (bondareaMock != null) {
+                    LocalDateTime startTime;
+                    try {
+                        loansDto = bondareaMock;
+
+                        startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
+                    } catch (InvalidProcessException ex) {
+                        log.error("Could not get the process ! " + ex.getMessage());
+                        processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                        return false;
+                    }
+                    this.createAndUpdateLoans(loansDto, startTime);
+                    this.setPendingLoansFinalStatusMock(startTime);
+
+                    try {
+                        // check credits for defaults
+                        this.checkCreditsForDefault();
+                    } catch (InvalidExpiredConfigurationException ex) {
+                        log.error(ex.getMessage());
+                        processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                        return false;
+                    }
                 }
 
-                try {
-                    // check credits for defaults
-                    this.checkCreditsForDefault();
-                } catch (InvalidExpiredConfigurationException ex) {
-                    log.error(ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                    return false;
-                }
+                //finish process
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+                return true;
+
+            } catch (Exception ex) {
+                log.error("Exception unknown " + ex.getMessage());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                return false;
             }
 
-            //finish process
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
-            return true;
-
         } else {
-            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() +" or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
             return false;
         }
     }
 
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
+     * @param startTime
      */
-    public void setPendingLoansFinalStatusMock() throws InvalidProcessException {
-        LocalDateTime startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
+    public void setPendingLoansFinalStatusMock(LocalDateTime startTime) {
         log.info("Determining the final state of the loans in pending state");
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 

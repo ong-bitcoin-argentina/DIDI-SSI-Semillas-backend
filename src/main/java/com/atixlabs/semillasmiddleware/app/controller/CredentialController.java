@@ -121,8 +121,7 @@ public class CredentialController {
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> generateCredentialsCredit() throws InvalidProcessException {
-
+    public ResponseEntity<String> generateCredentialsCredit() {
         try {
             credentialService.generateCredentials();
         }

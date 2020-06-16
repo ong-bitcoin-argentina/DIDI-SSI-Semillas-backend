@@ -18,6 +18,8 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -192,7 +194,8 @@ public class BondareaServiceTest {
         when(loanRepository.findAll()).thenReturn(Collections.emptyList());
 
         List<BondareaLoanDto> loans = firstBondareaLoansData();
-        bondareaService.createAndUpdateLoans(loans);
+        LocalDateTime processStart = DateUtil.getLocalDateTimeNow();
+        bondareaService.createAndUpdateLoans(loans, processStart);
 
         verify(loanRepository,times(4)).save(captor.capture());
 
@@ -218,7 +221,8 @@ public class BondareaServiceTest {
         when(loanRepository.updateStateBySynchroTimeLessThanAndActive(any(), LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode())).thenReturn(0);
 
         List<BondareaLoanDto> loans = secondLoansData();
-        bondareaService.createAndUpdateLoans(loans);
+        LocalDateTime processStart = DateUtil.getLocalDateTimeNow();
+        bondareaService.createAndUpdateLoans(loans, processStart);
 
         verify(loanRepository,times(5)).save(captor.capture());
 
@@ -242,7 +246,8 @@ public class BondareaServiceTest {
         when(loanRepository.updateStateBySynchroTimeLessThanAndActive(any(), LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode())).thenReturn(0);
 
         List<BondareaLoanDto> loans = secondLoansDataAllNew();
-        bondareaService.createAndUpdateLoans(loans);
+        LocalDateTime processStart = DateUtil.getLocalDateTimeNow();
+        bondareaService.createAndUpdateLoans(loans, processStart);
 
         verify(loanRepository,times(7)).save(captor.capture());
 

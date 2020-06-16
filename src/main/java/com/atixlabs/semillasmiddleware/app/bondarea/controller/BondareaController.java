@@ -41,7 +41,7 @@ public class BondareaController {
     public ResponseEntity<String> synchronizeBondareaLoans() throws InvalidProcessException {
         boolean result = true;
         try {
-            result = bondareaService.synchronizeLoans(null);
+            result = bondareaService.synchronizeLoans();
         } catch (InvalidProcessException ex) {
             log.error("Could not get the process ! " + ex.getMessage());
             return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -69,7 +69,7 @@ public class BondareaController {
 
         loans = loansJson.stream().map(loanDto -> new BondareaLoanDto(loanDto)).collect(Collectors.toList());
         try {
-            result = bondareaService.synchronizeLoans(loans);
+            result = bondareaService.synchronizeMockLoans(loans);
         } catch (InvalidProcessException ex) {
             log.error("Could not get the process ! " + ex.getMessage());
             return new ResponseEntity<>("Could not get the process !", HttpStatus.INTERNAL_SERVER_ERROR);

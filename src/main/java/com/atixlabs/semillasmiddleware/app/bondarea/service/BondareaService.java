@@ -304,43 +304,34 @@ public class BondareaService {
 
     /**
      * Synchronize loans process from Bondarea
-     * @throws BondareaSyncroException
      * @throws InvalidProcessException
-     * @throws InvalidExpiredConfigurationException
      */
-    public boolean synchronizeLoans(List<BondareaLoanDto> bondareaMock) throws InvalidProcessException {
-        //check if process in credentials is not running
-        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode())) {
+    public boolean synchronizeLoans() throws InvalidProcessException {
+        //check if this process and credentials are not running
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+
+            LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+            log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
+
             List<BondareaLoanDto> loansDto;
+            try {
+                loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+            }
+            catch (BondareaSyncroException ex){
+                log.error("Could not synchronized data from Bondarea ! "+ ex.getMessage());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+               return false;
+            }
 
-            if (bondareaMock == null) {
-                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-                log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
-
-                try {
-                    loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
-                }
-                catch (BondareaSyncroException ex){
-                    log.error("Could not synchronized data from Bondarea ! "+ ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                   return false;
-                }
-
-                try {
-                    this.createAndUpdateLoans(loansDto);
-                    this.setPendingLoansFinalStatus();
-                }
-                catch (InvalidProcessException ex){
-                    log.error("Could not get the process ! "+ ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                    return false;
-                }
-            } else {
-                //for mock process
-                loansDto = bondareaMock;
+            try {
                 this.createAndUpdateLoans(loansDto);
-                this.setPendingLoansFinalStatusMock();
+                this.setPendingLoansFinalStatus();
+            }
+            catch (InvalidProcessException ex){
+                log.error("Could not get the process ! "+ ex.getMessage());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                return false;
             }
 
             try {
@@ -357,7 +348,8 @@ public class BondareaService {
             processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
             return true;
         } else {
-            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " is still running");
+            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() +" or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+
             return  false;
         }
     }
@@ -445,6 +437,49 @@ public class BondareaService {
         }
     }
 
+
+
+    /**
+     * Synchronize MOCK loans process from Bondarea
+     * @throws InvalidProcessException
+     */
+    public boolean synchronizeMockLoans(List<BondareaLoanDto> bondareaMock) throws InvalidProcessException {
+        //check if process in credentials is not running
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+            List<BondareaLoanDto> loansDto;
+
+            if (bondareaMock != null) {
+                try {
+                    loansDto = bondareaMock;
+
+                    this.createAndUpdateLoans(loansDto);
+                    this.setPendingLoansFinalStatusMock();
+                } catch (InvalidProcessException ex) {
+                    log.error("Could not get the process ! " + ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    return false;
+                }
+
+                try {
+                    // check credits for defaults
+                    this.checkCreditsForDefault();
+                } catch (InvalidExpiredConfigurationException ex) {
+                    log.error(ex.getMessage());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    return false;
+                }
+            }
+
+            //finish process
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+            return true;
+
+        } else {
+            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() +" or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+            return false;
+        }
+    }
 
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.

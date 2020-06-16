@@ -1,22 +1,16 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
-import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
-import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
-import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfigurationException;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
-import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
-import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
-import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
+import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -30,15 +24,18 @@ public class BondareaController {
 
     private BondareaService bondareaService;
 
+    private CredentialService credentialService;
+
     @Autowired
-    public BondareaController(BondareaService bondareaService) {
+    public BondareaController(BondareaService bondareaService, CredentialService credentialService) {
         this.bondareaService = bondareaService;
+        this.credentialService = credentialService;
     }
 
 
     @PostMapping("/synchronize")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> synchronizeBondareaLoans() throws InvalidProcessException {
+    public ResponseEntity<String> synchronizeBondareaLoans() {
         boolean result = true;
         try {
             result = bondareaService.synchronizeLoans();
@@ -58,11 +55,10 @@ public class BondareaController {
      * MOCK PURPOSE:
      * Synchronize new loans mock. It can be used to create loans for the 1st time.
      * Then to test the creation of credit credential and benefits credentials
-     *
      */
     @PostMapping("/synchronizeMock")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> synchronizeBondareaLoansMock1(@RequestBody List<LoanDto> loansJson) throws InvalidProcessException {
+    public ResponseEntity<String> synchronizeBondareaLoansMock(@RequestBody List<LoanDto> loansJson) {
         log.info("BONDAREA - GET LOANS MOCK");
         List<BondareaLoanDto> loans;
         boolean result = true;
@@ -82,4 +78,29 @@ public class BondareaController {
     }
 
 
+    @PostMapping("/force-sync-generate")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> forceSyncAndGenerate() {
+        boolean result = true;
+        try {
+            result = bondareaService.synchronizeLoans();
+        } catch (InvalidProcessException ex) {
+            log.error("Error getting or setting process Bondarea " + ex.getMessage());
+            return new ResponseEntity<>("Error getting or setting process Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        if (!result)
+            return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
+
+        try {
+            credentialService.generateCredentials();
+        } catch (InvalidProcessException ex) {
+            log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
+            return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
     }
+
+
+}

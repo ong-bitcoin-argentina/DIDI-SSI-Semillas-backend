@@ -627,7 +627,7 @@ public class BondareaService {
         return amountExpired;
     }
 
-    
+
     private void addCreditInDefaultForHolder(Loan loan, LocalDateTime processStartTime) {
         log.info("Credit with group: " + loan.getIdGroup() + " is in default");
         setDefaultStateToCredit(loan, processStartTime);

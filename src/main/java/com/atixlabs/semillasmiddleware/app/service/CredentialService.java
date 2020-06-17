@@ -763,7 +763,6 @@ public class CredentialService {
      */
     public void revokeDefaultPerson(Person holderInDefault) {
         log.info("Holder "+ holderInDefault.getDocumentNumber() + " is in default, checking if its needed to revoke benefits");
-        List<Boolean> haveRevokeBenefits = new ArrayList<>();
 
         List<CredentialState> activePendingStates;
         //get benefits with holder dni (holder benefits and familiar benefits)
@@ -772,11 +771,10 @@ public class CredentialService {
 
         for (CredentialBenefits benefit : benefitsBeingHolder) {
             boolean result = this.revokeComplete(benefit, RevocationReasonsCodes.DEFAULT.getCode());
-            haveRevokeBenefits.add(result);
+            if(!result)
+                log.error("There was a problem revoking a/the credential benefits " + benefit.toString());
         }
 
-        if(haveRevokeBenefits.contains(false))
-            log.info("There was a problem revoking a/the credential benefits for person: " + holderInDefault.getDocumentNumber());
 
     }
 

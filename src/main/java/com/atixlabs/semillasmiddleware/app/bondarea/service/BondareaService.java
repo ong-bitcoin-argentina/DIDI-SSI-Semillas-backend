@@ -428,11 +428,11 @@ public class BondareaService {
                 if (loansDto.size() > 0) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
-                    log.info("loan has FINALIZED");
+                    log.info("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "and dni " + pendingLoan.getDniPerson() + "is finalized");
                 } else {
                     // if there is no loan, is because it has been cancelled
                     pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
-                    log.info("loan was CANCELLED");
+                    log.info("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "and dni " + pendingLoan.getDniPerson() + "is cancelled");
                 }
                 pendingLoan.setUpdateTime(startTime);
                 loanRepository.save(pendingLoan);
@@ -476,7 +476,7 @@ public class BondareaService {
                     try {
                         // check credits for defaults
                         this.checkCreditsForDefault();
-                    } catch (InvalidExpiredConfigurationException ex) {
+                    } catch (Exception ex) {
                         log.error(ex.getMessage());
                         processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
                         return false;
@@ -514,11 +514,11 @@ public class BondareaService {
                 if (loansDto.size() > 0) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
-                    log.debug("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "is finalized");
+                    log.info("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "is finalized");
                 } else {
                     // if there is no loan, is because it has been cancelled
                     pendingLoan.setStatus(LoanStatusCodes.CANCELLED.getCode());
-                    log.debug("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "has been cancelled");
+                    log.info("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "has been cancelled");
                 }
                 pendingLoan.setUpdateTime(startTime);
                 loanRepository.save(pendingLoan);
@@ -536,7 +536,7 @@ public class BondareaService {
      * @throws InvalidExpiredConfigurationException
      * @throws InvalidProcessException
      */
-    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, Exception {
+    public void checkCreditsForDefault() throws Exception {
         log.info("Checking active credits for defaults");
 
         if (processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS.getCode())) {

@@ -24,21 +24,25 @@ public class ProcessControlService {
     }
 
     public void setStatusToProcess(String processName, String processStatus) throws InvalidProcessException {
-        Optional<ProcessControl> processControl = processControlRepository.findByProcessName(processName);
-        if(processControl.isPresent()) {
-            //set status
-            processControl.get().setStatus(processStatus);
-            //the process is set to start: set start time
-            if(processStatus.equals(ProcessControlStatusCodes.RUNNING.getCode()))
-                processControl.get().setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
+        ProcessControl processControl = this.findByProcessName(processName);
+        //set status
+        processControl.setStatus(processStatus);
+        //the process is set to start: set start time
+        if(processStatus.equals(ProcessControlStatusCodes.RUNNING.getCode()))
+            processControl.setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
 
-            processControlRepository.save(processControl.get());
-            log.info("Process " + processName + " is now set to " + processStatus);
-        }
-        else
-            throw new InvalidProcessException("Error setting new status tu process: There is no process with name " + processName);
+        processControlRepository.save(processControl);
+        log.info("Process " + processName + " is now set to " + processStatus);
     }
 
+
+    public void setProcessStartTimeManually(String processName, LocalDateTime time) throws InvalidProcessException{
+        ProcessControl process = this.findByProcessName(processName);
+        process.setStartTime(time);
+
+        processControlRepository.save(process);
+        log.info("Process " + processName + " is set the time manually to " + time);
+    }
     public boolean isProcessRunning(String processName) throws InvalidProcessException {
         ProcessControl processControl = this.findByProcessName(processName);
         return processControl.isRunning();

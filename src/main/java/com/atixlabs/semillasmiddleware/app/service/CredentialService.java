@@ -155,15 +155,17 @@ public class CredentialService {
 
     /**
      * Generate and update the credentials credit.
-     * Checking for defaulters, and revoking or active credentials (credit and benefit)
+     * Checking for defaulters, and revoking or activate credentials (credit and benefit)
      */
     public void generateCredentials() throws InvalidProcessException {
         //check if process in credentials is not running
-        if (!processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS.getCode())) {
             LocalDateTime lastTimeProcessRun = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CREDENTIALS.getCode());
             processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
 
-            List<Loan> loansModified = loanService.findLastLoansModified(lastTimeProcessRun);
+            //get the last loans modified after the date "lastTimeProcessRun" (with state active, finalized or cancelled)
+            List<Loan> loansModified = loanService.findLastLoansModified(lastTimeProcessRun, List.of(LoanStatusCodes.ACTIVE.getCode(), LoanStatusCodes.FINALIZED.getCode(), LoanStatusCodes.CANCELLED.getCode()));
+
             //check holders to validate if they are in default or not, given the last modified credits
             this.checkHolders(loansModified);
 
@@ -187,14 +189,13 @@ public class CredentialService {
                     this.createNewCreditCredentials(newLoan);
                 } catch (PersonDoesNotExistsException ex) {
                     log.error(ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.OK.getCode()); //TODO este caso tiene sentido marcarlo como fail ?
                 }
             }
 
             //finish process
             processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.OK.getCode());
         } else {
-            log.info("Generate credentials can't run ! Process " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+            log.info("Generate credentials can't run ! Process " + ProcessNamesCodes.BONDAREA.getCode() + " or " + ProcessNamesCodes.CHECK_DEFAULTERS.getCode() + " is still running");
         }
     }
 
@@ -446,7 +447,7 @@ public class CredentialService {
                   this.createNewBenefitsCredential(holderIdentities.get(0));
 
             } else {
-                log.error("Person with dni "+ loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
+                //log.error("Person with dni "+ loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded"); log will be show in catch
                 throw new PersonDoesNotExistsException("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
                 //this error is important, have to be shown in front
             }
@@ -558,8 +559,7 @@ public class CredentialService {
             if(identitiesFamiliar.size() == 2){
                 //validate if he doesnt have a benefit with this holder dni
                 Optional<CredentialBenefits> opCredentialBenefit = credentialBenefitsRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
-                if(opCredentialBenefit.isEmpty())
-                    return true;
+                return opCredentialBenefit.isEmpty();
             }
         }
         return false;
@@ -723,10 +723,8 @@ public class CredentialService {
                             log.error("The credential was not set to cancel");
 
                     } else {
-                            //credit is ok and the old credential was revoked. So now it has been reactivated.
-                            if (loan.getState().equals(LoanStateCodes.OK.getCode()) && credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())) {
-                                    log.info("The credential credit of " + updateCredit.getCreditHolderDni() + " has been reactivated");
-                            }
+                            //credit is ok
+
                     }
                 }
 
@@ -744,6 +742,7 @@ public class CredentialService {
      * @param modifiedLoans
      */
     public void checkHolders(List<Loan> modifiedLoans) {
+        log.info("Checking holder defaulters or not defaulters");
         //get the holders of the modified loans
         List<Long> dnisOfHolders = modifiedLoans.stream().map(Loan::getDniPerson).distinct().collect(Collectors.toList());
         List<Person> holdersOfModifiedLoans = personRepository.findByDocumentNumberIn(dnisOfHolders);
@@ -780,6 +779,7 @@ public class CredentialService {
             log.info("There was a problem revoking a/the credential benefits for person: " + holderInDefault.getDocumentNumber());
 
     }
+
 
     /**
      * Revoke de credential credit. Then create new one to update the cycle expired.
@@ -828,36 +828,6 @@ public class CredentialService {
                      this.createNewBenefitsCredential(aCredentialIdentity);
         });
 
-       /* //and check if the credential credit is not revoked
-        //get the last credential credit of the holder
-        List<CredentialCredit> credentialsCredits = credentialCreditRepository.findLastCreditsDistinctIdHistoricalOrderByDateOfIssueDesc(holder.getDocumentNumber());
-        List<CredentialCredit> credentialCreditsDistinct = new ArrayList<>();
-        //todo fix distict in query
-        for (CredentialCredit credit: credentialsCredits) {
-            //if the credit with id historical hasnt been added to the list, we add it
-            if(credentialCreditsDistinct.stream().noneMatch(credit1 -> credit1.getIdHistorical().equals(credit.getIdHistorical())))
-                credentialCreditsDistinct.add(credit);
-        }
-
-        for (CredentialCredit credit: credentialCreditsDistinct) {
-            if(credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())){
-                //build the credential with the same id historic
-                Long idHistoricCredit = credit.getIdHistorical();
-
-                CredentialCredit updateCredit = new CredentialCredit(credit);
-                updateCredit.setIdHistorical(idHistoricCredit); //assign the old historic.
-                //set the amount expired cycles of the previous credential to accumulate the expired cycles
-                updateCredit.setAmountExpiredCycles(credit.getAmountExpiredCycles());
-                //finally set in pending state
-                Optional<CredentialState> pendingState = activePendingStates.stream().filter(state -> state.getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())).findFirst();
-                updateCredit.setCredentialState(pendingState.get());
-
-                 credentialCreditRepository.save(updateCredit);
-                 log.info("The credential credit of "+ holder.getDocumentNumber() + " has been reactivated");
-            }
-        }
-
-        */
     }
 
 
@@ -954,7 +924,7 @@ public class CredentialService {
                         List<CredentialCredit> creditsGroup = this.getCreditGroup(credentialCredit.get().getIdGroup());
                         //for each holder credit -> revoke credit -> revoke benefits -> revoke familiar benefits
                         for (CredentialCredit credit : creditsGroup) {
-                            haveRevokeOk = this.revokeComplete(credit, reasonCode); //todo validate succesfull revocation to continue
+                            haveRevokeOk = this.revokeComplete(credit, reasonCode); //todo validate successful revocation to continue
 
                             //get benefits with holder dni (holder benefits and familiar benefits)
                             activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));

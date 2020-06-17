@@ -20,12 +20,10 @@ public class LoanService {
 
 
     private LoanRepository loanRepository;
-    private ProcessControlService processControlService;
 
     @Autowired
-    public LoanService(LoanRepository loanRepository, PersonRepository personRepository, ProcessControlService processControlService){
+    public LoanService(LoanRepository loanRepository){
         this.loanRepository = loanRepository;
-        this.processControlService = processControlService;
     }
 
 
@@ -35,15 +33,10 @@ public class LoanService {
         return newLoans;
     }
 
-    public List<Loan> findLoansWithCredential(){
-        List<Loan> newLoans = loanRepository.findAllByHasCredentialTrue();
 
-        return newLoans;
-    }
-
-    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime) {
+    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime, List<String> statuses) {
         //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
-        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatus(credentialProcessLastTime, LoanStatusCodes.ACTIVE.getCode());
+        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusIn(credentialProcessLastTime, statuses);
         return modifiedCredits;
     }
 

@@ -269,7 +269,15 @@ public class DBInitializer implements CommandLineRunner {
             ProcessControl process = new ProcessControl();
             process.setProcessName(ProcessNamesCodes.CREDENTIALS.getCode());
             process.setStatus(ProcessControlStatusCodes.OK.getCode());
-            //set an initial time (then is use to compare)
+            //set an initial time (then will be use to compare)
+            process.setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
+            processControlRepository.save(process);
+        }
+        if(processControlRepository.findByProcessName(ProcessNamesCodes.CHECK_DEFAULTERS.getCode()).isEmpty()){
+            ProcessControl process = new ProcessControl();
+            process.setProcessName(ProcessNamesCodes.CHECK_DEFAULTERS.getCode());
+            process.setStatus(ProcessControlStatusCodes.OK.getCode());
+            //set an initial time (then will be use to compare)
             process.setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
             processControlRepository.save(process);
         }

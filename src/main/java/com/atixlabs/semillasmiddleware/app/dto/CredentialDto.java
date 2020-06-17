@@ -18,6 +18,8 @@ import java.time.LocalDateTime;
 @ToString
 public class CredentialDto {
 
+    //If we change a field name here, we must change it also in front !!!
+
     private Long id;
 
     private String idDidiCredential; //this is the didi of the person
@@ -86,7 +88,7 @@ public class CredentialDto {
     }
 
 
-    public CredentialDto(Credential credential) {
+    public void baseCredentialDto(Credential credential) {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiReceptor();
         //this.dateOfExpiry = credential.getDateOfRevocation();
@@ -96,8 +98,12 @@ public class CredentialDto {
         this.credentialState = credential.getCredentialState().getStateName();
         this.lastUpdate = credential.getUpdated();
         this.credentialType = credential.getCredentialDescription();
+        this.dateOfRevocation = credential.getDateOfRevocation();
         this.isRevocable = credential.isManuallyRevocable();
-        this.dateOfIssue = credential.getDateOfIssue();
+       // this.dateOfIssue = credential.getDateOfIssue();
+
+        if(credential.getRevocationReason() !=null)
+            this.revocationReason = credential.getRevocationReason().getReason();
     }
 
     public static CredentialDto constructBasedOnCredentialType(Credential credential){
@@ -127,28 +133,13 @@ public class CredentialDto {
     }
 
 
-    private void baseConstructor(Credential credential) {
-        this.id = credential.getId();
-        this.idDidiCredential = credential.getIdDidiCredential();
-        this.name = credential.getBeneficiaryFirstName() + " " + credential.getBeneficiaryLastName();
-        this.creditHolderDni = credential.getCreditHolderDni();
-        this.dniBeneficiary = credential.getBeneficiaryDni();
-        this.credentialState = credential.getCredentialState().getStateName();
-        this.lastUpdate = credential.getUpdated();
-        this.credentialType = credential.getCredentialDescription();
-        this.dateOfRevocation = credential.getDateOfRevocation();
-        this.isRevocable = credential.isManuallyRevocable();
-        if(credential.getRevocationReason() !=null)
-            this.revocationReason = credential.getRevocationReason().getReason();
-    }
-
     public CredentialDto(CredentialBenefits benefits){
-        this.baseConstructor(benefits);
+        this.baseCredentialDto(benefits);
         this.beneficiaryType = benefits.getBeneficiaryType();
     }
 
     public CredentialDto(CredentialCredit credit){
-        this.baseConstructor(credit);
+        this.baseCredentialDto(credit);
         this.idBondareaCredit = credit.getIdBondareaCredit();
         this.creationDate = credit.getCreationDate();
         this.creditType = credit.getCreditType();
@@ -162,14 +153,14 @@ public class CredentialDto {
     }
 
     public CredentialDto(CredentialDwelling dwelling){
-        this.baseConstructor(dwelling);
+        this.baseCredentialDto(dwelling);
         this.dwellingType = dwelling.getDwellingType();
         this.dwellingAddress = dwelling.getDwellingAddress();
         this.possessionType = dwelling.getPossessionType();
     }
 
     public CredentialDto(CredentialEntrepreneurship entrepreneurship){
-        this.baseConstructor(entrepreneurship);
+        this.baseCredentialDto(entrepreneurship);
         this.entrepreneurshipType = entrepreneurship.getEntrepreneurshipType();
         this.startActivity = entrepreneurship.getStartActivity();
         this.mainActivity = entrepreneurship.getMainActivity();
@@ -179,7 +170,7 @@ public class CredentialDto {
     }
 
     public CredentialDto(CredentialIdentity identity) {
-        this.baseConstructor(identity);
+        this.baseCredentialDto(identity);
         this.holderName = identity.getCreditHolderFirstName() + " " + identity.getCreditHolderLastName();
         this.relationWithCreditHolder = identity.getRelationWithCreditHolder();
         this.beneficiaryGender = identity.getBeneficiaryGender();

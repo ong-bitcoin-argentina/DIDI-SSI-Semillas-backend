@@ -83,6 +83,7 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
+        //TODO if state is not active?
         if(String.valueOf(loanDto.getStatus()).equals(BondareaLoanStatusCodes.ACTIVE.getCode()))
             this.status = LoanStatusCodes.ACTIVE.getCode();
 
@@ -123,15 +124,39 @@ public class Loan extends AuditableEntity {
     public boolean equals(Object object){
         if(object == null)
             return false;
+
+        if(!object.getClass().equals(this.getClass()))
+            return super.equals(object);
+
         Loan newLoan = (Loan) object;
 
-        return (this.status.equals(newLoan.getStatus()) && this.cycleDescription.equals(newLoan.getCycleDescription()) && (this.expiredAmount.compareTo(newLoan.getExpiredAmount()) == 0));
+        return this.getHash().equals(newLoan.getHash());
+        //return (this.status.equals(newLoan.getStatus()) && this.cycleDescription.equals(newLoan.getCycleDescription()) && (this.expiredAmount.compareTo(newLoan.getExpiredAmount()) == 0));
+    }
+
+    public String getHash(){
+        StringBuilder hashBuilder = new StringBuilder();
+        //Fix part
+        hashBuilder.append(this.dniPerson);
+        hashBuilder.append(this.idBondareaLoan.trim());
+        hashBuilder.append(this.idProductLoan.trim());
+        hashBuilder.append(this.idGroup.trim());
+        hashBuilder.append(this.userId.trim());
+        //control change part
+        hashBuilder.append(this.status.trim());
+        hashBuilder.append(this.cycleDescription.trim());
+        hashBuilder.append(this.expiredAmount);
+
+        String hash =  hashBuilder.toString();
+
+        return hash !=null ? hash : "";
     }
 
     public void merge(Loan loanToUpdate){
         this.status = loanToUpdate.getStatus();
         this.cycleDescription = loanToUpdate.getCycleDescription();
         this.expiredAmount = loanToUpdate.getExpiredAmount();
+        this.personName =   loanToUpdate.getPersonName();
     }
 
     public Loan(LoanDto loanDto) {

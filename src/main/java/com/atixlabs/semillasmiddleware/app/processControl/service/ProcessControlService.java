@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.processControl.service;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.repository.ProcessControlRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -23,7 +24,11 @@ public class ProcessControlService {
         this.processControlRepository = processControlRepository;
     }
 
-    public void setStatusToProcess(String processName, String processStatus) throws InvalidProcessException {
+    public ProcessControl setStatusToProcess(ProcessNamesCodes process, ProcessControlStatusCodes processStatus) throws InvalidProcessException {
+        return this.setStatusToProcess(process.getCode(),processStatus.getCode() );
+    }
+
+    public ProcessControl setStatusToProcess(String processName, String processStatus) throws InvalidProcessException {
         ProcessControl processControl = this.findByProcessName(processName);
         //set status
         processControl.setStatus(processStatus);
@@ -33,6 +38,8 @@ public class ProcessControlService {
 
         processControlRepository.save(processControl);
         log.info("Process " + processName + " is now set to " + processStatus);
+
+        return processControl;
     }
 
 
@@ -43,9 +50,19 @@ public class ProcessControlService {
         processControlRepository.save(process);
         log.info("Process " + processName + " is set the time manually to " + time);
     }
+
+    public boolean isProcessRunning(ProcessNamesCodes process) throws InvalidProcessException {
+        ProcessControl processControl = this.findByProcessName(process.getCode());
+        return processControl.isRunning();
+    }
+
     public boolean isProcessRunning(String processName) throws InvalidProcessException {
         ProcessControl processControl = this.findByProcessName(processName);
         return processControl.isRunning();
+    }
+
+    public LocalDateTime getProcessTimeByProcessCode(ProcessNamesCodes process) throws InvalidProcessException {
+        return this.getProcessTimeByProcessCode(process.getCode());
     }
 
     public LocalDateTime getProcessTimeByProcessCode(String processName) throws InvalidProcessException {

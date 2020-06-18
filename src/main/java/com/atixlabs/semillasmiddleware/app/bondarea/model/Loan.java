@@ -53,7 +53,7 @@ public class Loan extends AuditableEntity {
 
     private String cycleDescription; // Nombre asignado al crédito (Ej. Ciclo 2)
 
-    private LocalDate creationDate; // Fecha de otorgamiento cuentas
+    private LocalDate creationDate; // Fecha de otorgamiento cuentas FIX
 
     private String personName; // Nombre del solicitante del tramo (Ej. Perez, Juan)
 
@@ -61,7 +61,7 @@ public class Loan extends AuditableEntity {
 
     private BigDecimal amount; // Monto del crédito del tramo (Ej. 10000)
 
-    private LocalDate dateFirstInstalment; // Fecha de primera cuota
+    private LocalDate dateFirstInstalment; // Fecha de primera cuota FIX
 
     //todo check if in db the type is numeric with 2 decimals and x long
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
@@ -83,8 +83,10 @@ public class Loan extends AuditableEntity {
 
         this.tagBondareaLoan = loanDto.getTagBondareaLoan();
 
-        //TODO if state is not active?
-        if(String.valueOf(loanDto.getStatus()).equals(BondareaLoanStatusCodes.ACTIVE.getCode()))
+        //Bondarea has only 2 states, FINALIZED or ACTIVE, If state is not FINALIZED SET ACTIVE COMO DEFAULT
+        if(String.valueOf(loanDto.getStatus()).equals(BondareaLoanStatusCodes.FINALIZED.getCode()))
+            this.status = LoanStatusCodes.FINALIZED.getCode();
+        else
             this.status = LoanStatusCodes.ACTIVE.getCode();
 
         //start in state ok

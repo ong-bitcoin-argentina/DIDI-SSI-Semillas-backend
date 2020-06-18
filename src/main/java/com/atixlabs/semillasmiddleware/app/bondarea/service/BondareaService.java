@@ -13,6 +13,7 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
@@ -302,63 +303,61 @@ public class BondareaService {
 
     }
 
+
+    //TODO set as syncronized method
+
     /**
      * Synchronize loans process from Bondarea
+     *
      * @throws InvalidProcessException
      */
     public boolean synchronizeLoans() throws InvalidProcessException {
         //check if this process and credentials are not running
-        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA)) {
+
+            ProcessControl process = processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.RUNNING);
+
+            LocalDateTime startTime = process.getStartTime();
 
             try {
 
                 LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-                log.info("BONDAREA - GET LOANS -- " + todayPlusOne.toString());
+                log.info("BONDAREA - GET LOANS -- from " + todayPlusOne.toString());
 
                 List<BondareaLoanDto> loansDto;
+
                 try {
                     loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+                    log.info("BONDAREA - GET LOANS -- " + (loansDto!=null ? loansDto.size():0) +" recieved");
                 } catch (BondareaSyncroException ex) {
-                    log.error("Could not synchronized data from Bondarea ! " + ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    log.error("Could not synchronized data from Bondarea ! ", ex);
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
                     return false;
                 }
 
-                LocalDateTime startTime;
-                try {
-                    startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
-                } catch (InvalidProcessException ex) {
-                    log.error("Could not get the process ! " + ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                    return false;
-                }
-                    this.createAndUpdateLoans(loansDto, startTime);
-                    this.setPendingLoansFinalStatus(startTime);
+                this.createAndUpdateLoans(loansDto, startTime);
+                this.handlePendingLoans(startTime);
 
                 try {
-                    // check credits for defaults
-                    this.checkCreditsForDefault();
-                }
-                catch (InvalidExpiredConfigurationException ex) {
-                    log.error(ex.getMessage());
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                       this.checkCreditsForDefault();
+                } catch (InvalidExpiredConfigurationException ex) {
+                    log.error("Error checking defaults loans ",ex);
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
                     return false;
                 }
 
                 //finish process
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.OK);
                 return true;
-            }
-            catch (Exception ex){
-                log.error("Exception unknown " + ex.getMessage());
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+            } catch (Exception ex) {
+                log.error("Exception unknown ", ex);
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
                 return false;
             }
 
-        } else{
-                log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
-                return false;
+        } else {
+            log.info("Synchronize bondarea can't run ! Process " + ProcessNamesCodes.CREDENTIALS.getCode() + " or " + ProcessNamesCodes.BONDAREA.getCode() + " is still running");
+            return false;
         }
     }
 
@@ -374,8 +373,9 @@ public class BondareaService {
      */
     public void createAndUpdateLoans(List<BondareaLoanDto> newLoans, LocalDateTime startTimeProcess) {
         //update or create loans
+        log.info("Synchronize Bondarea Credits");
         for (BondareaLoanDto loanDtoToSave : newLoans) {
-            log.debug("Updating credit " + loanDtoToSave.getIdBondareaLoan());
+
 
             //if the newLoan existed previously -> update. Else create.
             Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanDtoToSave.getIdBondareaLoan());
@@ -386,42 +386,51 @@ public class BondareaService {
                 Loan loanToSave = new Loan(loanDtoToSave);
 
                 if (!loanToUpdate.equals(loanToSave)) {
+                    log.info("Updating credit " + loanDtoToSave.getIdBondareaLoan());
                     loanToUpdate.merge(loanToSave);
                     loanToUpdate.setUpdateTime(startTimeProcess);
                     loanToUpdate.setSynchroTime(startTimeProcess);
                     loanRepository.save(loanToUpdate);
-                }else {
+                } else {
+                    log.info("credit recived with no changes " + loanDtoToSave.getIdBondareaLoan());
                     //update the sync time to know the credit is still active
                     loanToUpdate.setSynchroTime(startTimeProcess);
                     loanRepository.save(loanToUpdate);
                 }
             } else {
-                //create
+                log.info("new credit " + loanDtoToSave.getIdBondareaLoan());
                 Loan newLoan = new Loan(loanDtoToSave);
                 //set the loan on active
                 newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
                 newLoan.setSynchroTime(startTimeProcess);
+                //TODO no hay que actulizar esta fecha hora?
                 //newLoan.setUpdateTime(startTime);
                 loanRepository.save(newLoan);
             }
         }
 
         int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTimeProcess, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
-        log.debug(modifiedRows + " Loans have been updated to pending state");
+        log.info(modifiedRows + " Loans have been updated to pending state");
 
-        log.info("Synchronize Ended Successfully");
+        log.info("Synchronize Bondarea Credits Ended Successfully");
     }
 
 
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
+     *
      * @param startTime
      */
-    public void setPendingLoansFinalStatus(LocalDateTime startTime) {
+    public void handlePendingLoans(LocalDateTime startTime) {
+
         List<Loan> pendingLoans = loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode());
 
+        log.info("Pending Loans to verify " + (pendingLoans != null ? pendingLoans.size() : 0));
+
         for (Loan pendingLoan : pendingLoans) {
-            log.info("Determining the final state for dni person: "+ pendingLoan.getDniPerson());
+
+            log.info("Determining the final state for loan : " + pendingLoan.getIdBondareaLoan());
+
             try {
                 List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
 
@@ -438,15 +447,15 @@ public class BondareaService {
                 loanRepository.save(pendingLoan);
 
             } catch (Exception ex) {
-                log.error("Error determining pending loans " + ex.getMessage());
+                log.error("Error determining pending loans ", ex);
             }
         }
     }
 
 
-
     /**
      * Synchronize MOCK loans process from Bondarea
+     *
      * @param bondareaMock
      * @return boolean
      * @throws InvalidProcessException
@@ -501,6 +510,7 @@ public class BondareaService {
 
     /**
      * Determinate for each loan in pending state whether it has been canceled or has finished.
+     *
      * @param startTime
      */
     public void setPendingLoansFinalStatusMock(LocalDateTime startTime) {
@@ -537,30 +547,33 @@ public class BondareaService {
      * @throws InvalidProcessException
      */
     public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, Exception {
+
         log.info("Checking active credits for defaults");
 
-        if (processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS.getCode())) {
-            LocalDateTime lastTimeProcessRan = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CHECK_DEFAULTERS.getCode());
+        if (processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS)) {
+            LocalDateTime lastTimeProcessRan = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CHECK_DEFAULTERS);
 
             try {
-                processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
+                ProcessControl processCheckDefaultersControl = processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.RUNNING);
+
+                LocalDateTime startProcessTime = processCheckDefaultersControl.getStartTime();
 
                 List<String> processedGroupLoans = new ArrayList<>();
 
                 //get the modified loans (actives) -- to check default
                 List<Loan> modifiedLoans = loanService.findLastLoansModified(lastTimeProcessRan, List.of(LoanStatusCodes.ACTIVE.getCode()));
 
-                if (modifiedLoans.size() == 0) {
-                    //set process finish ok
-                    processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), ProcessControlStatusCodes.OK.getCode());
+                if ((modifiedLoans == null) || (modifiedLoans.size() == 0)) {
+                    log.info("no active credits to check");
+                    processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.OK);
                     return;
                 }
 
                 Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
                 if (config.isPresent()) {
-
-                    LocalDateTime startProcessTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CHECK_DEFAULTERS.getCode());
+                    log.info("loans to verify: "+modifiedLoans.size());
                     for (Loan credit : modifiedLoans) {
+
                         //if the group was not processed..
                         if (!processedGroupLoans.contains(credit.getIdGroup())) {
                             // get the group to check their expired money
@@ -568,7 +581,7 @@ public class BondareaService {
                             BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
                             BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
-                            if (amountExpiredOfGroup.compareTo(maxAmount) > 0) {
+                            if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
                                 //set beneficiaries with this credit in default
                                 for (Loan loan : oneGroup) {
                                     addCreditInDefaultForHolder(loan, startProcessTime);
@@ -589,11 +602,11 @@ public class BondareaService {
                     }
 
                     //set process finish ok
-                    processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), ProcessControlStatusCodes.OK.getCode());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.OK);
 
                 } else {
                     //log.error("There is no configuration for getting the maximum expired amount."); log will be show in catch
-                    processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                    processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.FAIL);
                     //set the process start time as the one before, to it would check again from that time
                     processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
                     throw new InvalidExpiredConfigurationException("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
@@ -602,7 +615,7 @@ public class BondareaService {
                 //exception unknown
                 //set the process start time as the one before, to it would check again from that time
                 processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
-                throw new Exception(ex.getMessage());
+                throw ex;
             }
         } else {
             log.info("Check Defaults can't run ! Process " + ProcessNamesCodes.CHECK_DEFAULTERS.getCode() + " is still running or " + ProcessNamesCodes.BONDAREA.getCode() + " is not running");
@@ -641,16 +654,16 @@ public class BondareaService {
         }
         Person beneficiary = opBeneficiary.get();
 
-         //for the beneficiary THE loan will be added to the default list
-            List<Loan> defaultList = beneficiary.getDefaults();
-            //check if the loan is already set
-            if(defaultList.stream().noneMatch(aLoan -> aLoan.getIdGroup().equals(actualGroup))) {
-                defaultList.add(loan);
-                beneficiary.setDefaults(defaultList);
-                personRepository.save(beneficiary);
-                log.info("Credit has been saved in holder " + beneficiary.getDocumentNumber() + " as default");
-            }
+        //for the beneficiary THE loan will be added to the default list
+        List<Loan> defaultList = beneficiary.getDefaults();
+        //check if the loan is already set
+        if (defaultList.stream().noneMatch(aLoan -> aLoan.getIdGroup().equals(actualGroup))) {
+            defaultList.add(loan);
+            beneficiary.setDefaults(defaultList);
+            personRepository.save(beneficiary);
+            log.info("Credit has been saved in holder " + beneficiary.getDocumentNumber() + " as default");
         }
+    }
 
 
     private void setDefaultStateToCredit(Loan loanInDefault, LocalDateTime processStartTime) {
@@ -662,7 +675,6 @@ public class BondareaService {
             loanRepository.save(loanInDefault);
         }
     }
-
 
 
     private void checkToDeleteCreditInDefault(Loan loan, LocalDateTime processStartTime) {
@@ -679,24 +691,24 @@ public class BondareaService {
         }
 
         Person holder = opBeneficiary.get();
-            //check if the person has the group credit saved as default.
-            for (Loan credit : holder.getDefaults()) {
-                if (credit.getIdGroup().equals(groupId)) {
-                    //the credit was in default but now is ok. we take it out.
-                    holder.getDefaults().remove(credit);
-                    personRepository.save(holder);
-                    log.info("Credit for group " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
-                    break;
-                }
+        //check if the person has the group credit saved as default.
+        for (Loan credit : holder.getDefaults()) {
+            if (credit.getIdGroup().equals(groupId)) {
+                //the credit was in default but now is ok. we take it out.
+                holder.getDefaults().remove(credit);
+                personRepository.save(holder);
+                log.info("Credit for group " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
+                break;
             }
         }
+    }
 
     private void setOkStateToCreditGroup(Loan loanOK, LocalDateTime processStartTime) {
         if (!loanOK.getState().equals(LoanStateCodes.OK.getCode())) {
             loanOK.setState(LoanStateCodes.OK.getCode());
             //set the update time because the credit state change
             loanOK.setUpdateTime(processStartTime);
-            log.info("Credit is now in state OK for dni"+ loanOK.getDniPerson() );
+            log.info("Credit is now in state OK for dni" + loanOK.getDniPerson());
             loanRepository.save(loanOK);
         }
     }

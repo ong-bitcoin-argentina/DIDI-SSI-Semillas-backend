@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
@@ -40,5 +41,28 @@ public class LoanService {
         return modifiedCredits;
     }
 
+    public List<Loan> findLastLoansModifiedInDefault(LocalDateTime credentialProcessLastTime) {
+        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
+        List<Loan> defaultCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusAndState(credentialProcessLastTime, LoanStatusCodes.ACTIVE.getCode(), LoanStateCodes.DEFAULT.getCode());
+        return defaultCredits;
+    }
+
+    public List<Loan> findLastLoansModifiedActive(LocalDateTime credentialProcessLastTime) {
+        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
+        List<Loan> defaultCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusAndState(credentialProcessLastTime, LoanStatusCodes.ACTIVE.getCode(), LoanStateCodes.OK.getCode());
+        return defaultCredits;
+    }
+
+    public List<Loan> findLastLoansModifiedFinalized(LocalDateTime credentialProcessLastTime) {
+        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
+        List<Loan> finalizedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusAndState(credentialProcessLastTime, LoanStatusCodes.FINALIZED.getCode(), LoanStateCodes.OK.getCode());
+        return finalizedCredits;
+    }
+
+    public List<Loan> findLastLoansModifiedCancelled(LocalDateTime credentialProcessLastTime) {
+        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
+        List<Loan> finalizedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusAndState(credentialProcessLastTime, LoanStatusCodes.CANCELLED.getCode(), LoanStateCodes.OK.getCode());
+        return finalizedCredits;
+    }
 
 }

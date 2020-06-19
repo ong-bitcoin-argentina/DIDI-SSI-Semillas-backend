@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
@@ -94,7 +95,7 @@ public class BondareaController {
 
         try {
             credentialService.generateCredentials();
-        } catch (InvalidProcessException ex) {
+        } catch (InvalidProcessException | PersonDoesNotExistsException ex) {
             log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
             return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
         }

@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
@@ -89,22 +90,22 @@ public class CredentialService {
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
             RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService) {
-        this.credentialCreditRepository = credentialCreditRepository;
-        this.credentialRepository = credentialRepository;
-        this.personRepository = personRepository;
-        this.loanRepository = loanRepository;
-        this.credentialBenefitsRepository = credentialBenefitsRepository;
-        this.didHistoricRepository = didHistoricRepository;
-        this.credentialStateRepository = credentialStateRepository;
-        this.parameterConfigurationRepository = parameterConfigurationRepository;
-        this.answerCategoryFactory = answerCategoryFactory;
-        this.credentialIdentityRepository = credentialIdentityRepository;
-        this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
-        this.credentialDwellingRepository = credentialDwellingRepository;
-        this.didiService = didiService;
-        this.revocationReasonRepository = revocationReasonRepository;
-        this.loanService = loanService;
-        this.processControlService = processControlService;
+            this.credentialCreditRepository = credentialCreditRepository;
+            this.credentialRepository = credentialRepository;
+            this.personRepository = personRepository;
+            this.loanRepository = loanRepository;
+            this.credentialBenefitsRepository = credentialBenefitsRepository;
+            this.didHistoricRepository = didHistoricRepository;
+            this.credentialStateRepository = credentialStateRepository;
+            this.parameterConfigurationRepository = parameterConfigurationRepository;
+            this.answerCategoryFactory = answerCategoryFactory;
+            this.credentialIdentityRepository = credentialIdentityRepository;
+            this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
+            this.credentialDwellingRepository = credentialDwellingRepository;
+            this.didiService = didiService;
+            this.revocationReasonRepository = revocationReasonRepository;
+            this.loanService = loanService;
+            this.processControlService = processControlService;
     }
 
 

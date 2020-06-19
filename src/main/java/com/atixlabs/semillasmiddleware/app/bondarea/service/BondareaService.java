@@ -453,6 +453,7 @@ public class BondareaService {
     }
 
 
+
     /**
      * Synchronize MOCK loans process from Bondarea
      *
@@ -677,6 +678,11 @@ public class BondareaService {
     }
 
 
+    /**
+     * Set credit to OK state if it was not, and remove the credit group from the holder default list
+     * @param loan
+     * @param processStartTime
+     */
     private void checkToDeleteCreditInDefault(Loan loan, LocalDateTime processStartTime) {
         log.info("Checking if necessary to remove credit from default list for dni " + loan.getDniPerson());
         //set the credit as ok if it was not in it.

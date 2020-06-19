@@ -3,7 +3,6 @@ package com.atixlabs.semillasmiddleware.credentialService;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
@@ -71,13 +70,13 @@ public class CredentialServiceTest {
 
     @Mock
     private CredentialRepository credentialRepository;
-    
+
     @Mock
     private CredentialStateRepository credentialStateRepository;
-    
+
     @Mock
     private CredentialIdentityRepository credentialIdentityRepository;
-    
+
     @Mock
     private CredentialDwellingRepository credentialDwellingRepository;
 
@@ -483,24 +482,24 @@ public class CredentialServiceTest {
 
         when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
 
-        Page<CredentialDto> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
+        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
 
         verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null);
 
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
 
-        List<CredentialDto> credentials = pageCredentials.getContent();
+        List<Credential> credentials = pageCredentials.getContent();
         log.info("credenciales " + credentials.toString());
 
         Assertions.assertTrue(credentials.size() == credentialsFilteredActiveMock().size()); // check if the amount of credentials filtered in the service is the correct one
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getId(), credentials.get(0).getId());
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState());
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getDocumentNumber() ,credentials.get(0).getCreditHolderDni());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState().getStateName());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getDocumentNumber() ,credentials.get(0).getCreditHolder().getDocumentNumber());
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getIdDidiCredential() ,credentials.get(0).getIdDidiCredential());
         Assertions.assertTrue(credentials.get(0).getDateOfRevocation() != null);
         Assertions.assertTrue(credentials.get(0).getDateOfIssue() != null);
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getFirstName() ,credentials.get(0).getHolderName());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getFirstName() ,credentials.get(0).getCreditHolder().getFirstName());
     }
 
 
@@ -508,18 +507,18 @@ public class CredentialServiceTest {
     public void getRevokedCredentials() {
         when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
 
-        Page<CredentialDto> pageCredentials = credentialService.findCredentials(null, null, null, null,  null, Arrays.asList("Revocada"), null);
+        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null,  null, Arrays.asList("Revocada"), null);
 
         verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null);
 
 
-        List<CredentialDto> credentials = pageCredentials.getContent();
+        List<Credential> credentials = pageCredentials.getContent();
         log.info("credenciales " + credentials.toString());
 
 
         Assertions.assertTrue(credentials.size() == credentialsFilteredRevokedMock().size()); // check if the amount of credentials filtered in the service is the correct one
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getId(), credentials.get(0).getId());
-        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState());
+        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState().getStateName());
         //Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCreditHolder().getDocumentNumber() ,credentials.get(0).getCreditHolder().getDocumentNumber());
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getIdDidiCredential() ,credentials.get(0).getIdDidiCredential());
         Assertions.assertTrue(credentials.get(0).getDateOfRevocation() != null);
@@ -719,43 +718,43 @@ public class CredentialServiceTest {
     }
 
 
-   /* @Test
-    public void validateCredentialCreditToBeUpdateLoanHasChanged() {
-        when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
+    /* @Test
+     public void validateCredentialCreditToBeUpdateLoanHasChanged() {
+         when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
 
-        //loan has a different expired amount comparing with credential credit
-        Loan loan = getLoanWithExpiredAmount();
-        CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+         //loan has a different expired amount comparing with credential credit
+         Loan loan = getLoanWithExpiredAmount();
+         CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
 
-        Assertions.assertNotNull(creditToBeUpdate);
-    }
+         Assertions.assertNotNull(creditToBeUpdate);
+     }
 
-    @Test
-    public void validateCredentialCreditToBeUpdateLoanIsTheSame() {
-        when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
+     @Test
+     public void validateCredentialCreditToBeUpdateLoanIsTheSame() {
+         when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.of(getPendingCreditMock(getMockLoan(),getBeneficiaryMockWithoutDID())));
 
-        //loan has not changed
-        Loan loan = getMockLoan();
-        CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+         //loan has not changed
+         Loan loan = getMockLoan();
+         CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
 
-        Assertions.assertNull(creditToBeUpdate);
-    }
+         Assertions.assertNull(creditToBeUpdate);
+     }
 
-    @Test
-    public void validateCredentialCreditButThereIsNOCredentialCreditCreated() {
-        when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.empty());
+     @Test
+     public void validateCredentialCreditButThereIsNOCredentialCreditCreated() {
+         when(credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(anyString())).thenReturn(Optional.empty());
 
-        //loan has not changed
-        Loan loan = getMockLoan();
-        CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
+         //loan has not changed
+         Loan loan = getMockLoan();
+         CredentialCredit creditToBeUpdate = credentialService.validateCredentialCreditToUpdate(loan);
 
-        verify(loanRepository, times(1)).save(loanCaptor.capture());
-        Loan loanUpdated = loanCaptor.getValue();
+         verify(loanRepository, times(1)).save(loanCaptor.capture());
+         Loan loanUpdated = loanCaptor.getValue();
 
-        Assertions.assertNull(creditToBeUpdate);
-        Assertions.assertTrue(loanUpdated.getHasCredential() != getMockLoan().getHasCredential()); // the loan is set to not having credential
-    }
-*/
+         Assertions.assertNull(creditToBeUpdate);
+         Assertions.assertTrue(loanUpdated.getHasCredential() != getMockLoan().getHasCredential()); // the loan is set to not having credential
+     }
+ */
     @Test
     public void updateCredentialCreditOK() throws Exception {
         CredentialCredit creditCreated = getPendingCreditMock(getMockLoan(), getBeneficiaryMockWithoutDID());
@@ -827,7 +826,7 @@ public class CredentialServiceTest {
         when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.of(benefits));
         when(credentialCreditRepository.findByCreditHolderDniAndCredentialStateIn(anyLong(),anyList())).thenReturn(Collections.emptyList()); // the holder dont have another credit
         when(credentialRepository.findById(anyLong())).thenReturn(Optional.of(getPendingCredentialHolderBenefitMock(getBeneficiaryMockWithoutDID())));
-       //todo here is returning the same object, and when the first is revoked the second too
+        //todo here is returning the same object, and when the first is revoked the second too
         when(credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(List.of(benefitFamiliar1,benefitFamiliar2));
         when(revocationReasonRepository.findByReason(anyString())).thenReturn(Optional.of(getRevocationReasonMock()));
 
@@ -951,8 +950,8 @@ public class CredentialServiceTest {
         Assertions.assertEquals(getRevocationReasonMock().getReason(), credentialBenefitsRevoked2.getRevocationReason().getReason());
 
     }
-    
-    
+
+
 
 
 }

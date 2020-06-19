@@ -11,6 +11,10 @@ services:
       - BONDAREA_URL=${BONDAREA_BASE_URL}
       - BONDAREA_TOKEN=${BONDAREA_ACCESS_TOKEN}
       - BONDAREA_IDM=${BONDAREA_IDM}
+      - DIDI_URL=${DIDI_URL}
+      - DIDI_USERNAME=${DIDI_USERNAME}
+      - DIDI_PASSWORD=${DIDI_PASSWORD}
+
     depends_on:
       - db
     labels:

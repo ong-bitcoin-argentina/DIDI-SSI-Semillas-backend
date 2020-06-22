@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoan
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
+import com.atixlabs.semillasmiddleware.util.StringUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -63,7 +64,7 @@ public class Loan extends AuditableEntity {
 
     private LocalDate dateFirstInstalment; // Fecha de primera cuota FIX
 
-    //todo check if in db the type is numeric with 2 decimals and x long
+    @Column(scale = 2)
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss")
@@ -104,7 +105,10 @@ public class Loan extends AuditableEntity {
 
         this.amount =  loanDto.getAmount();
 
-        this.expiredAmount =   loanDto.getExpiredAmount();
+        if(loanDto.getExpiredAmount() == null)
+            this.expiredAmount = BigDecimal.ZERO;
+        else
+            this.expiredAmount =   loanDto.getExpiredAmount();
 
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
         try {
@@ -147,7 +151,7 @@ public class Loan extends AuditableEntity {
         //control change part
         hashBuilder.append(this.status.trim());
         hashBuilder.append(this.cycleDescription.trim());
-        hashBuilder.append(this.expiredAmount);
+        hashBuilder.append(this.expiredAmount.stripTrailingZeros());
 
         String hash =  hashBuilder.toString();
 

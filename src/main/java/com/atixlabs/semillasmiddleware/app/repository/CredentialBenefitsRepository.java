@@ -12,15 +12,21 @@ import java.util.Optional;
 @Repository
 public interface CredentialBenefitsRepository extends JpaRepository<CredentialBenefits, Long> {
 
-    List<CredentialBenefits> findByBeneficiaryDniAndCredentialState(Long dni, CredentialState state);
+    //List<CredentialBenefits> findByBeneficiaryDniAndCredentialState(Long dni, CredentialState state);
 
-    Optional<CredentialBenefits> findByBeneficiaryDniAndCredentialStateAndBeneficiaryType(Long dni, CredentialState state, String beneficiaryType);
+    //Optional<CredentialBenefits> findByBeneficiaryDniAndCredentialStateAndBeneficiaryType(Long dni, CredentialState state, String beneficiaryType);
 
     Optional<CredentialBenefits> findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(Long dni, List<CredentialState> states, String beneficiaryType);
 
     List<CredentialBenefits> findByBeneficiaryDni(Long dni);
 
     List<CredentialBenefits> findByCreditHolderDniAndCredentialStateIn(Long dni, List<CredentialState> states);
+
+    List<CredentialBenefits> findByBeneficiaryDniAndCredentialStateIn(Long dni, List<CredentialState> states);
+
+    Optional<CredentialBenefits> findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(Long dniHolder, Long dniBeneficiary, List<CredentialState> states);
+
+    //List<CredentialBenefits> findByBeneficiaryDniAndCredentialStateIn(Long dni, List<CredentialState> states);
 
     List<CredentialBenefits> findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(Long dni, List<CredentialState> states, String beneficiaryType);
 }

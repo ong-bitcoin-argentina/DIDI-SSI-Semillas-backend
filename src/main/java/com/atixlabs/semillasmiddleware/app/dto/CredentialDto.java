@@ -58,7 +58,7 @@ public class CredentialDto {
     private Integer amountExpiredCycles;
     private String creditState;
     private LocalDate finishDate;
-    private Float expiredAmount;
+    private String expiredAmount;
 
     //dwelling
     private String dwellingType;
@@ -86,6 +86,21 @@ public class CredentialDto {
     public CredentialDto() {
 
     }
+
+    public CredentialDto(Credential credential) {
+        this.id = credential.getId();
+        this.idDidiCredential = credential.getIdDidiReceptor();
+        //this.dateOfExpiry = credential.getDateOfRevocation();
+        this.name = credential.getBeneficiaryFirstName() +" "+ credential.getBeneficiaryLastName();
+        this.dniBeneficiary = credential.getBeneficiaryDni();
+        this.creditHolderDni = credential.getCreditHolderDni();
+        this.credentialState = credential.getCredentialState().getStateName();
+        this.lastUpdate = credential.getUpdated();
+        this.credentialType = credential.getCredentialDescription();
+        this.isRevocable = credential.isManuallyRevocable();
+        this.dateOfIssue = credential.getDateOfIssue();
+    }
+
 
 
     public void baseCredentialDto(Credential credential) {
@@ -149,7 +164,7 @@ public class CredentialDto {
         this.amountExpiredCycles = credit.getAmountExpiredCycles();
         this.creditState = credit.getCreditState();
         this.finishDate = credit.getFinishDate();
-        this.expiredAmount = credit.getExpiredAmount();
+        this.expiredAmount = credit.getExpiredAmount().toString();
     }
 
     public CredentialDto(CredentialDwelling dwelling){

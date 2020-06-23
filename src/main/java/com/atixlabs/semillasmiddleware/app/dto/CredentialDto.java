@@ -68,8 +68,7 @@ public class CredentialDto {
     //entrepreneurship
     private String entrepreneurshipType;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate startActivity;
+    private Integer startActivity;
     private String mainActivity;
     private String entrepreneurshipName;
     private String entrepreneurshipAddress;

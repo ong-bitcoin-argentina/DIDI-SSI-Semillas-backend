@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidAnswerCa
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.row.ExcelRow;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -95,9 +96,18 @@ public class AnswerRow extends ExcelRow {
     public LocalDate getAnswerAsDate(String datePattern) throws InvalidAnswerCastException {
         if (answer == null || answer.isBlank())
             return null;
-        try {return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));}
-        catch (Exception e){
-            throw new InvalidAnswerCastException(getAnswerAsString(), "fecha");
+        if(this.answer.contains("/")) {
+            try {
+                return LocalDate.parse(answer, DateTimeFormatter.ofPattern(datePattern));
+            } catch (Exception e) {
+                throw new InvalidAnswerCastException(getAnswerAsString(), "fecha");
+            }
+        }else{
+            try {
+                return LocalDate.parse(answer, DateUtil.getYearFormatDate()); //"YYYY" format with day 1 and month 1, only maters the year then
+            } catch (Exception e) {
+                throw new InvalidAnswerCastException(getAnswerAsString(), "fecha");
+            }
         }
     }
 

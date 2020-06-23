@@ -555,7 +555,7 @@ public class CredentialService {
         CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
         buildCredential(creditHolder, credentialEntrepreneurship);
         credentialEntrepreneurship.setEntrepreneurshipType(entrepreneurshipCategory.getType());
-        credentialEntrepreneurship.setStartActivity(entrepreneurshipCategory.getActivityStartDate());
+        credentialEntrepreneurship.setStartActivity(entrepreneurshipCategory.getActivityStartDate().getYear());
         credentialEntrepreneurship.setMainActivity(entrepreneurshipCategory.getMainActivity());
         credentialEntrepreneurship.setEntrepreneurshipName(entrepreneurshipCategory.getName());
         credentialEntrepreneurship.setEntrepreneurshipAddress(entrepreneurshipCategory.getAddress());

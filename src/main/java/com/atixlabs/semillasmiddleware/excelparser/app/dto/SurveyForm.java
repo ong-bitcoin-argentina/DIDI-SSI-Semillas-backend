@@ -99,6 +99,7 @@ public class SurveyForm {
                 if (category.isRequired()) {
                     allValid = false;
                     msg = "Empty and Required";
+                    processExcelFileResult.addRowError(String.format("Categoría %s",category.getCategoryUniqueName()), "la categoria esta vacia o no completa y es obligatoria :"+ category.toString());
                 }
                 else
                     msg = "Empty but not Required";

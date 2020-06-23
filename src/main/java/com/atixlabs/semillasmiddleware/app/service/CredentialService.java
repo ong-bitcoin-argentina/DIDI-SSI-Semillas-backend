@@ -126,7 +126,7 @@ public class CredentialService {
         //total amount of elements using the same filters
         Long totalAmountOfItems = credentialRepository.getTotalCountWithFilters(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState);
 
-        Page<CredentialDto> pageDto = credentials.map(CredentialDto::new);
+        Page<CredentialDto> pageDto = credentials.map(CredentialDto::constructBasedOnCredentialType);
 
         CredentialPage credentialSet = new CredentialPage(pageDto, totalAmountOfItems);
 

@@ -3,6 +3,8 @@ package com.atixlabs.semillasmiddleware.credentialService;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
@@ -481,24 +483,24 @@ public class CredentialServiceTest {
 
         when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((Page<Credential>) credentialsFilteredActiveMock());
 
-        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
+        CredentialPage pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
 
         verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null);
 
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
 
-        List<Credential> credentials = pageCredentials.getContent();
+        List<CredentialDto> credentials = pageCredentials.getCredentialsDto().getContent();
         log.info("credenciales " + credentials.toString());
 
         Assertions.assertTrue(credentials.size() == credentialsFilteredActiveMock().size()); // check if the amount of credentials filtered in the service is the correct one
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getId(), credentials.get(0).getId());
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState().getStateName());
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getDocumentNumber(), credentials.get(0).getCreditHolder().getDocumentNumber());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getDocumentNumber(), credentials.get(0).getCreditHolderDni());
         Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getIdDidiCredential(), credentials.get(0).getIdDidiCredential());
         Assertions.assertTrue(credentials.get(0).getDateOfRevocation() != null);
         Assertions.assertTrue(credentials.get(0).getDateOfIssue() != null);
-        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getFirstName(), credentials.get(0).getCreditHolder().getFirstName());
+        Assertions.assertEquals(credentialsFilteredActiveMock().get(0).getCreditHolder().getFirstName() + " " + credentialsFilteredActiveMock().get(0).getCreditHolder().getLastName(), credentials.get(0).getHolderName());
     }
 
 
@@ -506,18 +508,18 @@ public class CredentialServiceTest {
     public void getRevokedCredentials() {
         when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((Page<Credential>) credentialsFilteredRevokedMock());
 
-        Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Revocada"), null);
+        CredentialPage pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Revocada"), null);
 
         verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null);
 
 
-        List<Credential> credentials = pageCredentials.getContent();
+        List<CredentialDto> credentials = pageCredentials.getCredentialsDto().getContent();
         log.info("credenciales " + credentials.toString());
 
 
         Assertions.assertTrue(credentials.size() == credentialsFilteredRevokedMock().size()); // check if the amount of credentials filtered in the service is the correct one
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getId(), credentials.get(0).getId());
-        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState().getStateName());
+        Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCredentialState().getStateName(), credentials.get(0).getCredentialState());
         //Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCreditHolder().getDocumentNumber() ,credentials.get(0).getCreditHolder().getDocumentNumber());
         Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getIdDidiCredential(), credentials.get(0).getIdDidiCredential());
         Assertions.assertTrue(credentials.get(0).getDateOfRevocation() != null);

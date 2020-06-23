@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCo
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
@@ -114,7 +115,7 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+    public CredentialPage findCredentials(String credentialType, String name, String dniBeneficiary, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         Page<Credential> credentials;
         Pageable pageable = null;
@@ -122,10 +123,14 @@ public class CredentialService {
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
-       //for testing
-        log.info(String.valueOf(credentials.getTotalElements()));
+        //total amount of elements using the same filters
+        Long totalAmountOfItems = credentialRepository.getTotalCountWithFilters(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState);
 
-        return credentials;
+        Page<CredentialDto> pageDto = credentials.map(CredentialDto::new);
+
+        CredentialPage credentialSet = new CredentialPage(pageDto, totalAmountOfItems);
+
+        return credentialSet;
     }
 
     public Map<Long, String> getRevocationReasonsForUser() {

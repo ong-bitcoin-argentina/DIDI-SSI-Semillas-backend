@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -49,23 +50,23 @@ public class CredentialController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<CredentialDto> findCredentials(@RequestParam @DefaultValue("1") Integer page,
-                                               @RequestParam(required = false) String credentialType,
-                                               @RequestParam(required = false) String name,
-                                               @RequestParam(required = false) String dniBeneficiary,
-                                               @RequestParam(required = false) String idDidiCredential,
-                                               @RequestParam(required = false) String lastUpdate,
-                                               @RequestParam(required = false) List<String> credentialState) {
+    public CredentialPage findCredentials(@RequestParam @DefaultValue("1") Integer page,
+                                          @RequestParam(required = false) String credentialType,
+                                          @RequestParam(required = false) String name,
+                                          @RequestParam(required = false) String dniBeneficiary,
+                                          @RequestParam(required = false) String idDidiCredential,
+                                          @RequestParam(required = false) String lastUpdate,
+                                          @RequestParam(required = false) List<String> credentialState) {
 
-        Page<Credential> credentials;
+        CredentialPage credentials;
         try {
             credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, page);
         } catch (Exception e) {
             log.info("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
                     credentialState.toString() + " " + e);
-            return Page.empty();
+            return new CredentialPage();
         }
-        return credentials.map(CredentialDto::new);
+        return credentials;
     }
 
     @GetMapping("/states")

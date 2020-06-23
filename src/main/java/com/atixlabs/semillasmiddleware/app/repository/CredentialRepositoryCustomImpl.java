@@ -30,7 +30,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     protected EntityManager em;
 
     @Override
-    public List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialStates,  Pageable page) {
+    public Page<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialStates,  Pageable page) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -78,14 +78,13 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
             TypedQuery<Credential> typedQuery = em.createQuery(cq);
             typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber() -1) * page.getPageSize()));
             typedQuery.setMaxResults(page.getPageSize());
-            return typedQuery.getResultList();
+            return new PageImpl<>(typedQuery.getResultList(), page,getTotalCount(cb, predicates));
+        }else
+            return Page.empty();
 
-        }
-        else
-            return em.createQuery(cq).getResultList();
     }
 
-    /**
+
     private Long getTotalCount(CriteriaBuilder criteriaBuilder, List<Predicate> predicates) {
         CriteriaQuery<Long> criteriaQuery = criteriaBuilder.createQuery(Long.class);
 
@@ -97,5 +96,5 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
         criteriaQuery.where(predicates.toArray(new Predicate[0]));
 
         return em.createQuery(criteriaQuery).getSingleResult();
-    }*/
+    }
 }

@@ -14,6 +14,7 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -48,7 +49,7 @@ public class CredentialController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<CredentialDto> findCredentials(@RequestParam Integer page,
+    public Page<CredentialDto> findCredentials(@RequestParam @DefaultValue("1") Integer page,
                                                @RequestParam(required = false) String credentialType,
                                                @RequestParam(required = false) String name,
                                                @RequestParam(required = false) String dniBeneficiary,

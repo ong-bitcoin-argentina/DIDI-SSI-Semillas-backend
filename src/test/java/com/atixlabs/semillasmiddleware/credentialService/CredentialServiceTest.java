@@ -479,7 +479,7 @@ public class CredentialServiceTest {
     @Test
     public void getActiveCredentials() {
 
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((List<Credential>) credentialsFilteredActiveMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((Page<Credential>) credentialsFilteredActiveMock());
 
         Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
 
@@ -504,7 +504,7 @@ public class CredentialServiceTest {
 
     @Test
     public void getRevokedCredentials() {
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((List<Credential>) credentialsFilteredRevokedMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((Page<Credential>) credentialsFilteredRevokedMock());
 
         Page<Credential> pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Revocada"), null);
 

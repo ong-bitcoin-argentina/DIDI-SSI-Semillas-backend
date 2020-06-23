@@ -116,14 +116,16 @@ public class CredentialService {
 
     public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
-        List<Credential> credentials;
+        Page<Credential> credentials;
         Pageable pageable = null;
         if (pageNumber != null && pageNumber > 0 && this.size != null)
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
+       //for testing
+        log.info(String.valueOf(credentials.getTotalElements()));
 
-        return new PageImpl<>(credentials, pageable, credentials.size());
+        return credentials;
     }
 
     public Map<Long, String> getRevocationReasonsForUser() {

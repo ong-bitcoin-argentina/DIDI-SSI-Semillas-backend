@@ -114,14 +114,14 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         List<Credential> credentials;
         Pageable pageable = null;
         if (pageNumber != null && pageNumber > 0 && this.size != null)
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
 
         return new PageImpl<>(credentials, pageable, credentials.size());
     }

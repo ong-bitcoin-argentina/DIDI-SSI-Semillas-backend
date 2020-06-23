@@ -52,13 +52,14 @@ public class CredentialController {
                                                @RequestParam(required = false) String credentialType,
                                                @RequestParam(required = false) String name,
                                                @RequestParam(required = false) String dniBeneficiary,
+                                               @RequestParam(required = false) String creditHolderDni,
                                                @RequestParam(required = false) String idDidiCredential,
                                                @RequestParam(required = false) String lastUpdate,
                                                @RequestParam(required = false) List<String> credentialState) {
 
         Page<Credential> credentials;
         try {
-            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, page);
+            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, creditHolderDni, idDidiCredential, lastUpdate, credentialState, page);
         } catch (Exception e) {
             log.info("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
                     credentialState.toString() + " " + e);

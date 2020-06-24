@@ -60,8 +60,18 @@ public class Person {
         return person;
     }
 
-    public boolean isInDefault(){return defaults.size()>0;}
+    public boolean isInDefault(){return (this.defaults!=null ?  defaults.size()>0 : false);}
 
+
+    public boolean removeLoanInDefault(Loan loan){
+        if(this.isInDefault()){
+            if(this.getDefaults().contains(loan)){
+                return this.getDefaults().remove(loan);
+            }
+        }
+
+        return false;
+    }
 
     /*
     @JoinColumn(name = "ID_CREDENTIAL")

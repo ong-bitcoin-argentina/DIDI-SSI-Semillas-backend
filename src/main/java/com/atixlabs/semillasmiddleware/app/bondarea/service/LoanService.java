@@ -28,8 +28,8 @@ public class LoanService {
     }
 
 
-    public List<Loan> findLoansWithoutCredential(){
-        List<Loan> newLoans = loanRepository.findAllByHasCredentialFalse();
+    public List<Loan> findActiveAndOkLoansWithoutCredential(){
+        List<Loan> newLoans = loanRepository.findAllByHasCredentialAndStatusAndState(false, LoanStatusCodes.ACTIVE.getCode(), LoanStateCodes.OK.getCode());
 
         return newLoans;
     }

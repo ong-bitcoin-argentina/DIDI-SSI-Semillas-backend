@@ -235,10 +235,18 @@ public class DBInitializer implements CommandLineRunner {
 
         if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
-            configuration.setExpiredAmountMax((float) 10250);
+            configuration.setValue("10250");
             configuration.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
             parameterConfigurationRepository.save(configuration);
         }
+
+        if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode()).isPresent()){
+            ParameterConfiguration configuration = new ParameterConfiguration();
+            configuration.setValue("1234567890");
+            configuration.setConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode());
+            parameterConfigurationRepository.save(configuration);
+        }
+
 
         //revocation reasons
         if(revocationReasonRepository.findAll().size() == 0){

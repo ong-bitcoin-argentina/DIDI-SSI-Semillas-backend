@@ -581,7 +581,7 @@ public class BondareaService {
                             List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
                             BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
-                            BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
+                            BigDecimal maxAmount = new BigDecimal(config.get().getValue());
                             if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
                                 //set beneficiaries with this credit in default
                                 for (Loan loan : oneGroup) {

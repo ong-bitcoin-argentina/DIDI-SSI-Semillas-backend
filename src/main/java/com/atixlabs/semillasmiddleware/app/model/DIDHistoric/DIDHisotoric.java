@@ -10,6 +10,7 @@ import javax.persistence.*;
 @Getter
 @Setter
 @Table
+@Deprecated
 public class DIDHisotoric extends AuditableEntity {
 
     @Id

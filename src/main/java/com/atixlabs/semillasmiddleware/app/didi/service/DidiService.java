@@ -376,7 +376,7 @@ public class DidiService {
     }
 
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId) {
-        log.info("Revoking certificate on didi");
+        log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi");
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
 
         try {

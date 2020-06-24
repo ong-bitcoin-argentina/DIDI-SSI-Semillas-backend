@@ -94,11 +94,11 @@ public class DidiService {
             @Value("${didi.base_url}") String didiBaseUrl,
             @Value("${didi.username}") String didiUsername,
             @Value("${didi.password}") String didiPassword,
-            @Value("${didi.template_code_identity}") String didiTemplateCodeIdentity,
-            @Value("${didi.template_code_entrepreneurship}") String didiTemplateCodeEntrepreneurship,
-            @Value("${didi.template_code_dwelling}") String didiTemplateCodeDwelling,
-            @Value("${didi.template_code_benefit}") String didiTemplateCodeBenefit,
-            @Value("${didi.template_code_credit}") String didiTemplateCodeCredit) {
+            @Value("${didi.semillas.template_code_identity}") String didiTemplateCodeIdentity,
+            @Value("${didi.semillas.template_code_entrepreneurship}") String didiTemplateCodeEntrepreneurship,
+            @Value("${didi.semillas.template_code_dwelling}") String didiTemplateCodeDwelling,
+            @Value("${didi.semillas.template_code_benefit}") String didiTemplateCodeBenefit,
+            @Value("${didi.semillas.template_code_credit}") String didiTemplateCodeCredit) {
 
         this.didiAppUserService = didiAppUserService;
         this.didiAppUserRepository = didiAppUserRepository;

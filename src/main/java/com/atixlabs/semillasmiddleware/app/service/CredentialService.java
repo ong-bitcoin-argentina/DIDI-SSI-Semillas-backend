@@ -7,7 +7,9 @@ import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
@@ -40,6 +42,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import lombok.extern.flogger.Flogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -115,16 +118,22 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String
+    public CredentialPage findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
-        List<Credential> credentials;
+        Page<Credential> credentials;
         Pageable pageable = null;
         if (pageNumber != null && pageNumber > 0 && this.size != null)
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
+        //total amount of elements using the same filters
+        Long totalAmountOfItems = credentialRepository.getTotalCountWithFilters(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState);
 
-        return new PageImpl<>(credentials, pageable, credentials.size());
+        Page<CredentialDto> pageDto = credentials.map(CredentialDto::constructBasedOnCredentialType);
+
+        CredentialPage credentialSet = new CredentialPage(pageDto, totalAmountOfItems);
+
+        return credentialSet;
     }
 
     public Map<Long, String> getRevocationReasonsForUser() {
@@ -647,7 +656,7 @@ public class CredentialService {
         CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
         buildCredential(creditHolder, credentialEntrepreneurship);
         credentialEntrepreneurship.setEntrepreneurshipType(entrepreneurshipCategory.getType());
-        credentialEntrepreneurship.setStartActivity(entrepreneurshipCategory.getActivityStartDate());
+        credentialEntrepreneurship.setStartActivity((entrepreneurshipCategory.getActivityStartDate()!=null ? entrepreneurshipCategory.getActivityStartDate().getYear():null));
         credentialEntrepreneurship.setMainActivity(entrepreneurshipCategory.getMainActivity());
         credentialEntrepreneurship.setEntrepreneurshipName(entrepreneurshipCategory.getName());
         credentialEntrepreneurship.setEntrepreneurshipAddress(entrepreneurshipCategory.getAddress());

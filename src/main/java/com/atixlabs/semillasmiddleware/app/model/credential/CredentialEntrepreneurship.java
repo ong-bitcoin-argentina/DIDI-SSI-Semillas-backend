@@ -19,8 +19,7 @@ public class CredentialEntrepreneurship extends Credential {
     // Comercio, Producción,Servicio
     private String entrepreneurshipType; //TODO enum or new class?
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
-    private LocalDate startActivity;
+    private Integer startActivity; //storing only the year
 
     private String mainActivity;
 

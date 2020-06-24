@@ -55,7 +55,9 @@ public class EntrepreneurshipCategory implements Category {
                 this.type.setAnswer(answerRow, processExcelFileResult);
                 break;
             case ACTIVITY_START_DATE:
+                //possible data: dd/mm/yyyy or only date: 2020
                 this.activityStartDate.setAnswer(answerRow, processExcelFileResult);
+               // this.activityStartDate.setAnswer();
                 break;
             case MAIN_ACTIVITY:
                 this.mainActivity.setAnswer(answerRow, processExcelFileResult);

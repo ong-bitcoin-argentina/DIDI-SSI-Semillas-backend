@@ -606,7 +606,6 @@ public class BondareaService {
                     processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.OK);
 
                 } else {
-                    //log.error("There is no configuration for getting the maximum expired amount."); log will be show in catch
                     processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.FAIL);
                     //set the process start time as the one before, to it would check again from that time
                     processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
@@ -616,6 +615,7 @@ public class BondareaService {
                 //exception unknown
                 //set the process start time as the one before, to it would check again from that time
                 processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
+                processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.FAIL);
                 throw ex;
             }
         } else {
@@ -684,7 +684,7 @@ public class BondareaService {
      * @param processStartTime
      */
     private void checkToDeleteCreditInDefault(Loan loan, LocalDateTime processStartTime) {
-        log.info("Checking if necessary to remove credit from default list for dni " + loan.getDniPerson());
+        log.info("Checking if necessary to remove credit from default list with group: " + loan.getIdGroup() + " and dni: " + loan.getDniPerson());
         //set the credit as ok if it was not in it.
         setOkStateToCreditGroup(loan, processStartTime);
         String groupId = loan.getIdGroup();

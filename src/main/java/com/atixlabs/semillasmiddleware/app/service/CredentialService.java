@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCo
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
@@ -114,16 +115,22 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public Page<Credential> findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
+    public CredentialPage findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
-        List<Credential> credentials;
+        Page<Credential> credentials;
         Pageable pageable = null;
         if (pageNumber != null && pageNumber > 0 && this.size != null)
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
+        //total amount of elements using the same filters
+        Long totalAmountOfItems = credentialRepository.getTotalCountWithFilters(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState);
 
-        return new PageImpl<>(credentials, pageable, credentials.size());
+        Page<CredentialDto> pageDto = credentials.map(CredentialDto::constructBasedOnCredentialType);
+
+        CredentialPage credentialSet = new CredentialPage(pageDto, totalAmountOfItems);
+
+        return credentialSet;
     }
 
     public Map<Long, String> getRevocationReasonsForUser() {

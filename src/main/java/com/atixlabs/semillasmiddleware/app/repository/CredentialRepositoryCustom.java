@@ -8,6 +8,7 @@ import java.util.List;
 
 public interface CredentialRepositoryCustom {
 
-    List<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String dniHolder, String idDidiCredential, String lastUpdate, List<String> credentialState, Pageable page);
+    Page<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String dniHolder, String idDidiCredential, String lastUpdate, List<String> credentialState, Pageable page);
 
+    Long getTotalCountWithFilters(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialState);
 }

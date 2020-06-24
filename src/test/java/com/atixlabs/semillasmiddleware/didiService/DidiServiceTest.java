@@ -34,7 +34,7 @@ import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
+//@RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
 public class DidiServiceTest {

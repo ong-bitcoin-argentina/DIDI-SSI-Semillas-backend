@@ -115,14 +115,14 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public CredentialPage findCredentials(String credentialType, String name, String dniBeneficiary, String
+    public CredentialPage findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         Page<Credential> credentials;
         Pageable pageable = null;
         if (pageNumber != null && pageNumber > 0 && this.size != null)
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState, pageable);
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
         //total amount of elements using the same filters
         Long totalAmountOfItems = credentialRepository.getTotalCountWithFilters(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialState);
 
@@ -562,7 +562,7 @@ public class CredentialService {
         CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
         buildCredential(creditHolder, credentialEntrepreneurship);
         credentialEntrepreneurship.setEntrepreneurshipType(entrepreneurshipCategory.getType());
-        credentialEntrepreneurship.setStartActivity(entrepreneurshipCategory.getActivityStartDate());
+        credentialEntrepreneurship.setStartActivity(entrepreneurshipCategory.getActivityStartDate().getYear());
         credentialEntrepreneurship.setMainActivity(entrepreneurshipCategory.getMainActivity());
         credentialEntrepreneurship.setEntrepreneurshipName(entrepreneurshipCategory.getName());
         credentialEntrepreneurship.setEntrepreneurshipAddress(entrepreneurshipCategory.getAddress());

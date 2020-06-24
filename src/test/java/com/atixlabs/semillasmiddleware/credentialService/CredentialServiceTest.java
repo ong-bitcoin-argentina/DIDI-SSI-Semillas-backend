@@ -481,11 +481,11 @@ public class CredentialServiceTest {
     @Test
     public void getActiveCredentials() {
 
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null)).thenReturn((Page<Credential>) credentialsFilteredActiveMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null,null, null, Arrays.asList("Vigente"), null)).thenReturn((Page<Credential>) credentialsFilteredActiveMock());
 
-        CredentialPage pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Vigente"), null);
+        CredentialPage pageCredentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Vigente"), null);
 
-        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Vigente"), null);
+        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Vigente"), null);
 
 
         //List<CredentialDto> credentialsDto = credentials.stream().map(aCredential -> new CredentialDto(aCredential)).collect(Collectors.toList());
@@ -506,11 +506,11 @@ public class CredentialServiceTest {
 
     @Test
     public void getRevokedCredentials() {
-        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((Page<Credential>) credentialsFilteredRevokedMock());
+        when(credentialRepository.findCredentialsWithFilter(null, null, null, null, null, null, Arrays.asList("Revocada"), null)).thenReturn((Page<Credential>) credentialsFilteredRevokedMock());
 
-        CredentialPage pageCredentials = credentialService.findCredentials(null, null, null, null, null, Arrays.asList("Revocada"), null);
+        CredentialPage pageCredentials = credentialService.findCredentials(null, null, null, null, null, null, Arrays.asList("Revocada"), null);
 
-        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null, Arrays.asList("Revocada"), null);
+        verify(credentialRepository).findCredentialsWithFilter(null, null, null, null, null,null, Arrays.asList("Revocada"), null);
 
 
         List<CredentialDto> credentials = pageCredentials.getCredentialsDto().getContent();

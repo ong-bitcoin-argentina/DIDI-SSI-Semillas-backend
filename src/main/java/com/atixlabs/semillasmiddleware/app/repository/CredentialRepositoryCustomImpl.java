@@ -30,7 +30,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
     protected EntityManager em;
 
     @Override
-    public Page<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialStates,  Pageable page) {
+    public Page<Credential> findCredentialsWithFilter(String credentialType, String name, String dniBeneficiary, String dniHolder, String idDidiCredential, String lastUpdate, List<String> credentialStates,  Pageable page) {
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Credential> cq = cb.createQuery(Credential.class);
@@ -52,7 +52,11 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
 
 
         if (dniBeneficiary != null) {
-            predicates.add(cb.like(beneficiary.get("documentNumber").as(String.class), dniBeneficiary+"%"));
+            predicates.add(cb.like(credential.get("beneficiaryDni").as(String.class), dniBeneficiary+"%"));
+        }
+
+        if (dniHolder != null) {
+            predicates.add(cb.like(credential.get("creditHolderDni").as(String.class), dniHolder+"%"));
         }
 
         if (idDidiCredential != null) {

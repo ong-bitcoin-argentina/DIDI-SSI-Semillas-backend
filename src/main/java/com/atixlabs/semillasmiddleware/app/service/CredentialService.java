@@ -118,12 +118,12 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public CredentialPage findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
+    public Page<CredentialDto> findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         Page<Credential> credentials;
         Pageable pageable = null;
-        if (pageNumber != null && pageNumber > 0 && this.size != null)
-            pageable = PageRequest.of(pageNumber-1, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
+        if (pageNumber != null && pageNumber >= 0 && this.size != null)
+            pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
         credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
         //total amount of elements using the same filters
@@ -133,7 +133,7 @@ public class CredentialService {
 
         CredentialPage credentialSet = new CredentialPage(pageDto, credentials.getNumberOfElements());
 
-        return credentialSet;
+        return pageDto;
     }
 
     public Map<Long, String> getRevocationReasonsForUser() {
@@ -363,7 +363,7 @@ public class CredentialService {
                 CredentialCredit credentialCredit = this.createNewCreditCredential(newLoan);
 
             } catch (PersonDoesNotExistsException | CredentialException ex) {
-                log.error("Error creating new credential credit for loan "+newLoan.getIdBondareaLoan(),ex);
+                log.error("Error creating new credential credit for loan "+newLoan.getIdBondareaLoan()+" "+ex.getMessage());
             }
 
             //TODO create benefits credential

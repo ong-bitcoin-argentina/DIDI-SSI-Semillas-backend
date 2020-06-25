@@ -48,20 +48,22 @@ public class CredentialController {
     }
 
 
+    //TODO fix
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public CredentialPage findCredentials(@RequestParam @DefaultValue("1") Integer page,
                                           @RequestParam(required = false) String credentialType,
                                           @RequestParam(required = false) String name,
                                           @RequestParam(required = false) String dniBeneficiary,
-                                               @RequestParam(required = false) String creditHolderDni,
+                                  //        @RequestParam(required = false) String creditHolderDni,
                                           @RequestParam(required = false) String idDidiCredential,
                                           @RequestParam(required = false) String lastUpdate,
                                           @RequestParam(required = false) List<String> credentialState) {
 
         CredentialPage credentials;
         try {
-            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, creditHolderDni, idDidiCredential, lastUpdate, credentialState, page);
+            log.info("find credentials "+credentialType+" "+name+dniBeneficiary+" "+idDidiCredential+" "+lastUpdate+" "+credentialState.get(0));
+            credentials = credentialService.findCredentials(credentialType, name, dniBeneficiary, null /*creditHolderDni*/, idDidiCredential, lastUpdate, credentialState, page);
         } catch (Exception e) {
             log.info("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
                     credentialState.toString() + " " + e);

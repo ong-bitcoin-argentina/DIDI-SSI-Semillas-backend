@@ -72,17 +72,24 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
             predicates.add(cb.in(credentialStateEntity.get("stateName")).value(credentialStates));
         }
 
+
+        Long quantityResults =  this.getTotalCountWithFilters(credentialType,name, dniBeneficiary, dniHolder,idDidiCredential,  lastUpdate, credentialStates);
+
+        log.info("cant result "+quantityResults);
+
         cq.where(predicates.toArray(new Predicate[0]));
 
         //order by updated field ASC
         Order lastUpdateOrder = cb.desc(credential.get("updated"));
         cq.orderBy(lastUpdateOrder);
 
+        log.info("cq armada ");
+
         if(page != null) {
             TypedQuery<Credential> typedQuery = em.createQuery(cq);
-            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber() -1) * page.getPageSize()));
+            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber()) * page.getPageSize()));
             typedQuery.setMaxResults(page.getPageSize());
-            return new PageImpl<>(typedQuery.getResultList(), page, getTotalCountWithFilters(credentialType, name, dniBeneficiary, idDidiCredential, lastUpdate, credentialStates));
+            return new PageImpl<>(typedQuery.getResultList(), page, quantityResults);
         }else
             return Page.empty();
 
@@ -90,7 +97,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
 
 
     @Override
-    public Long getTotalCountWithFilters(String credentialType, String name, String dniBeneficiary, String idDidiCredential, String lastUpdate, List<String> credentialStates) {
+    public Long getTotalCountWithFilters(String credentialType, String name, String dniBeneficiary, String dniHolder, String idDidiCredential, String lastUpdate, List<String> credentialStates) {
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<Long> cq = cb.createQuery(Long.class);
 
@@ -112,6 +119,10 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
 
         if (dniBeneficiary != null) {
             predicates.add(cb.like(beneficiary.get("documentNumber").as(String.class), dniBeneficiary+"%"));
+        }
+
+        if (dniHolder != null) {
+            predicates.add(cb.like(credential.get("creditHolderDni").as(String.class), dniHolder+"%"));
         }
 
         if (idDidiCredential != null) {

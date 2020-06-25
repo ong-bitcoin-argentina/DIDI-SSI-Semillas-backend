@@ -19,9 +19,9 @@ import java.time.LocalDateTime;
 public class CredentialPage {
 
    Page<CredentialDto> credentialsDto;
-   Long amountOfElements;
+   Integer amountOfElements;
 
-    public CredentialPage(Page<CredentialDto> pageDto, Long totalAmountOfItems) {
+    public CredentialPage(Page<CredentialDto> pageDto, Integer totalAmountOfItems) {
         this.credentialsDto = pageDto;
         this.amountOfElements = totalAmountOfItems;
     }

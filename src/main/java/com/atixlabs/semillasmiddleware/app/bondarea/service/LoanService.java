@@ -28,8 +28,8 @@ public class LoanService {
     }
 
 
-    public List<Loan> findLoansWithoutCredential(){
-        List<Loan> newLoans = loanRepository.findAllByHasCredentialFalse();
+    public List<Loan> findActiveAndOkLoansWithoutCredential(){
+        List<Loan> newLoans = loanRepository.findAllByHasCredentialAndStatusAndState(false, LoanStatusCodes.ACTIVE.getCode(), LoanStateCodes.OK.getCode());
 
         return newLoans;
     }
@@ -38,6 +38,12 @@ public class LoanService {
     public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime, List<String> statuses) {
         //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
         List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusIn(credentialProcessLastTime, statuses);
+        return modifiedCredits;
+    }
+
+    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime, String status) {
+        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
+        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatus(credentialProcessLastTime, status);
         return modifiedCredits;
     }
 

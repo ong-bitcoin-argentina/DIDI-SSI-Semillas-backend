@@ -335,7 +335,7 @@ public class BondareaService {
                     return false;
                 }
 
-                this.createAndUpdateLoans(loansDto, startTime);
+              this.createAndUpdateLoans(loansDto, startTime);
                 this.handlePendingLoans(startTime);
 
                 try {
@@ -403,8 +403,7 @@ public class BondareaService {
                 //set the loan on active
                 newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
                 newLoan.setSynchroTime(startTimeProcess);
-                //TODO no hay que actulizar esta fecha hora?
-                //newLoan.setUpdateTime(startTime);
+                newLoan.setUpdateTime(startTimeProcess);
                 loanRepository.save(newLoan);
             }
         }
@@ -562,6 +561,7 @@ public class BondareaService {
                 List<String> processedGroupLoans = new ArrayList<>();
 
                 //get the modified loans (actives) -- to check default
+                log.info("check modifed loans from "+lastTimeProcessRan);
                 List<Loan> modifiedLoans = loanService.findLastLoansModified(lastTimeProcessRan, List.of(LoanStatusCodes.ACTIVE.getCode()));
 
                 if ((modifiedLoans == null) || (modifiedLoans.size() == 0)) {
@@ -581,7 +581,7 @@ public class BondareaService {
                             List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
                             BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
-                            BigDecimal maxAmount = new BigDecimal(Float.toString(config.get().getExpiredAmountMax()));
+                            BigDecimal maxAmount = new BigDecimal(config.get().getValue());
                             if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
                                 //set beneficiaries with this credit in default
                                 for (Loan loan : oneGroup) {

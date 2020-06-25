@@ -20,7 +20,8 @@ public class ParameterConfiguration extends AuditableEntity {
 
     private String configurationName;
 
-    private Float expiredAmountMax;
+    private String value;
+//    private Float expiredAmountMax;
 
 
 }

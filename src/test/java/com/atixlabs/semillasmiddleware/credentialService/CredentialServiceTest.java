@@ -4,8 +4,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
@@ -14,6 +13,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
@@ -37,17 +37,17 @@ import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 
 import org.junit.Before;
 import org.mockito.*;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.Page;
-import org.springframework.test.context.junit4.SpringRunner;
-import retrofit2.http.HEAD;
 
+import javax.persistence.Column;
+import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -136,6 +136,8 @@ public class CredentialServiceTest {
         loan.setDniPerson(123456L);
         loan.setIdBondareaLoan("1a");
         loan.setIdGroup("group1");
+        loan.setIdProductLoan("idProduction");
+        loan.setUserId("userId");
         loan.setCycleDescription("Ciclo 1");
         loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
         loan.setState(LoanStateCodes.OK.getCode());
@@ -468,6 +470,13 @@ public class CredentialServiceTest {
         CredentialState credentialState = new CredentialState();
         credentialState.setId(1L);
         credentialState.setStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        return Optional.of(credentialState);
+    }
+
+    private Optional<CredentialState> createCredentialStatePendingDidiMock() {
+        CredentialState credentialState = new CredentialState();
+        credentialState.setId(2L);
+        credentialState.setStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         return Optional.of(credentialState);
     }
 
@@ -966,6 +975,134 @@ public class CredentialServiceTest {
 
     }*/
 
+   //CREDENTIAL BENEFITS
+    @Test
+    public void createNewCrendentialBenefitsForHolderWhenNotExists_LoanToReviewOk(){
+
+        when(personRepository.findByDocumentNumber(anyLong())).thenReturn(Optional.empty());
+
+        Loan loan = this.getMockLoan();
+        List<Loan> loansToReview = null;
+
+        try {
+            loansToReview = credentialService.createCredentialsBenefitsForNewLoan(loan);
+        }catch (Exception e){
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(1, loansToReview.size());
+        Assertions.assertEquals(loan, loansToReview.get(0));
+
+    }
+
+
+/*    If holder is not in default
+     *             Benefit Holder
+     *                 If credential not exists, create credential in state Pending Didi
+     *                 If exists and is active, do nothing
+     *                 If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
+*/
+
+    @Test
+    public void createNewCrendentialBenefitsForHolderWhenIsNotOnDefaultAndCredentialNotExist(){
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+       // CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+      //  credentialBenefitsSaved.setIdHistorical(1L);
+
+
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
+        when(personRepository.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber())).thenReturn(Optional.empty());
+        when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
+            @Override
+            public CredentialBenefits answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialBenefits) args[0];
+            }
+        });
+
+
+        List<Loan> loansToReview = null;
+
+        try {
+            loansToReview = credentialService.createCredentialsBenefitsForNewLoan(loan);
+        }catch (Exception e){
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(0, loansToReview.size());
+        verify(credentialBenefitsRepository, times(2)).save(credentialBenefitCaptor.capture());
+        CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
+
+        Assertions.assertEquals(holder, credentialBenefits.getCreditHolder());
+        Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getCreditHolderDni());
+        Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getCreditHolderFirstName());
+        Assertions.assertEquals(holder.getLastName(), credentialBenefits.getCreditHolderLastName());
+
+        Assertions.assertEquals(holder, credentialBenefits.getBeneficiary());
+        Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
+        Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
+        Assertions.assertEquals(holder.getLastName(), credentialBenefits.getBeneficiaryLastName());
+
+        Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+
+    }
+
+    //BUILDS
+    @Test
+    public void buildCredentialBenefitsForHolder(){
+
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
+
+        Loan loan = this.getMockLoan();
+
+        Person holder = this.createPersonMock();
+
+        try {
+            CredentialBenefits credentialBenefits =  credentialService.buildNewBenefitsCredential(holder,holder,PersonTypesCodes.HOLDER);
+
+            Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
+            Assertions.assertEquals(CredentialCategoriesCodes.BENEFIT.getCode(), credentialBenefits.getCredentialCategory());
+            Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+            Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode(), credentialBenefits.getCredentialDescription());
+
+            Assertions.assertEquals(getParameterConfigurationDidiIssuerMock().get().getValue(), credentialBenefits.getIdDidiIssuer());
+            Assertions.assertNull( credentialBenefits.getIdDidiReceptor());
+            Assertions.assertNull( credentialBenefits.getIdDidiCredential());
+
+            Assertions.assertNull( credentialBenefits.getIdHistorical());
+
+            Assertions.assertNull( credentialBenefits.getDateOfRevocation());
+            Assertions.assertNull( credentialBenefits.getRevocationReason());
+
+            Assertions.assertEquals(holder, credentialBenefits.getCreditHolder());
+            Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getCreditHolderDni());
+            Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getCreditHolderFirstName());
+            Assertions.assertEquals(holder.getLastName(), credentialBenefits.getCreditHolderLastName());
+
+            Assertions.assertEquals(holder, credentialBenefits.getBeneficiary());
+            Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
+            Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
+            Assertions.assertEquals(holder.getLastName(), credentialBenefits.getBeneficiaryLastName());
+
+//TODO            protected LocalDateTime dateOfIssue;
+
+
+
+        } catch (CredentialException e) {
+            Assertions.fail(e.getMessage());
+        }
+
+
+
+    }
 }
 
 

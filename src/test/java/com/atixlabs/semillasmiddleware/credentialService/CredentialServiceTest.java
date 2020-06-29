@@ -560,7 +560,7 @@ public class CredentialServiceTest {
         Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 0);
     }
 
-    @Test
+   /* @Test
     @Ignore
     public void buildAllCredentialsDetectDuplicatedCredential() throws InvalidRowException {
         log.info("buildAllCredentialsDetectDuplicatedCredential");
@@ -588,7 +588,7 @@ public class CredentialServiceTest {
         //Assertions.assertEquals(processExcelFileResult.getErrorRows().get(0).getErrorHeader(), "Warning CREDENCIAL DUPLICADA");
     }
 
-
+*/
     @Test
     public void createCredentialCreditAndBenefitWithActiveDID() throws Exception {
         when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());
@@ -983,22 +983,15 @@ public class CredentialServiceTest {
     }*/
 
    //CREDENTIAL BENEFITS
-    @Test
-    public void createNewCrendentialBenefitsForHolderWhenNotExists_LoanToReviewOk(){
+    @Test(expected = CredentialException.class)
+    public void createNewCrendentialBenefitsForHolderWhenNotExists_LoanToReviewOk() throws CredentialException {
 
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(Optional.empty());
 
         Loan loan = this.getMockLoan();
-        List<Loan> loansToReview = null;
 
-        try {
-            loansToReview = credentialService.createCredentialsBenefitsForNewLoan(loan);
-        }catch (Exception e){
-            Assertions.fail(e.getMessage());
-        }
+        credentialService.createCredentialsBenefitsForNewLoan(loan);
 
-        Assertions.assertEquals(1, loansToReview.size());
-        Assertions.assertEquals(loan, loansToReview.get(0));
 
     }
 
@@ -1024,6 +1017,7 @@ public class CredentialServiceTest {
         when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(any(Person.class))).thenReturn(Optional.empty());
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber())).thenReturn(Optional.empty());
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
             @Override
@@ -1034,15 +1028,12 @@ public class CredentialServiceTest {
         });
 
 
-        List<Loan> loansToReview = null;
-
         try {
-            loansToReview = credentialService.createCredentialsBenefitsForNewLoan(loan);
-        }catch (Exception e){
+            credentialService.createCredentialsBenefitsForNewLoan(loan);
+        } catch (CredentialException e) {
+            e.printStackTrace();
             Assertions.fail(e.getMessage());
         }
-
-        Assertions.assertEquals(0, loansToReview.size());
         verify(credentialBenefitsRepository, times(2)).save(credentialBenefitCaptor.capture());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
 
@@ -1087,15 +1078,13 @@ public class CredentialServiceTest {
         });
 
 
-        List<Loan> loansToReview = null;
-
         try {
-            loansToReview = credentialService.createCredentialsBenefitsForNewLoan(loan);
-        }catch (Exception e){
+             credentialService.createCredentialsBenefitsForNewLoan(loan);
+        } catch (CredentialException e) {
+            e.printStackTrace();
             Assertions.fail(e.getMessage());
         }
 
-        Assertions.assertEquals(0, loansToReview.size());
         verify(credentialBenefitsRepository, times(1)).save(credentialBenefitCaptor.capture());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
 

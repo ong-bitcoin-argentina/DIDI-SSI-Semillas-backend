@@ -91,5 +91,34 @@ public abstract class Credential extends AuditableEntity {
         this.credentialCategory = credential.credentialCategory;
     }
 
+    public void setCreditHolder(Person creditHolder){
+        if(creditHolder != null){
+            this.creditHolder = creditHolder;
+            this.creditHolderDni = creditHolder.getDocumentNumber();
+            this.creditHolderFirstName = creditHolder.getFirstName();
+            this.creditHolderLastName = creditHolder.getLastName();
+        }else{
+            this.creditHolder = null;
+            this.creditHolderDni = null;
+            this.creditHolderFirstName = null;
+            this.creditHolderLastName = null;
+        }
+    }
+
+    public void setBeneficiary(Person beneficiary){
+        if(beneficiary != null){
+            this.beneficiary = beneficiary;
+            this.beneficiaryDni = beneficiary.getDocumentNumber();
+            this.beneficiaryFirstName = beneficiary.getFirstName();
+            this.beneficiaryLastName = beneficiary.getLastName();
+        }else{
+            this.beneficiary = null;
+            this.beneficiaryDni = null;
+            this.beneficiaryFirstName = null;
+            this.beneficiaryLastName = null;
+        }
+    }
+
+
 
 }

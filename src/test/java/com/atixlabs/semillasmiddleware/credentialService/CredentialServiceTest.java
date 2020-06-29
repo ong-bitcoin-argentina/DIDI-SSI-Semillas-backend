@@ -480,6 +480,13 @@ public class CredentialServiceTest {
         return Optional.of(credentialState);
     }
 
+    private Optional<CredentialState> createCredentialStateRevokeMock() {
+        CredentialState credentialState = new CredentialState();
+        credentialState.setId(3L);
+        credentialState.setStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+        return Optional.of(credentialState);
+    }
+
     private Person createPersonMock() {
         Person person = new Person();
         person.setId(1L);
@@ -1050,6 +1057,65 @@ public class CredentialServiceTest {
         Assertions.assertEquals(holder.getLastName(), credentialBenefits.getBeneficiaryLastName());
 
         Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+
+    }
+
+    @Test
+    public void createNewCrendentialBenefitsForHolderWhenIsNotOnDefaultAndCredentialExistsAndIsRevoked(){
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
+        CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+        credentialBenefitsSaved.setCredentialState(StateRevoke.get());
+        credentialBenefitsSaved.setIdHistorical(99L);
+
+
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(StateRevoke);
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
+        when(personRepository.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
+            @Override
+            public CredentialBenefits answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialBenefits) args[0];
+            }
+        });
+
+
+        List<Loan> loansToReview = null;
+
+        try {
+            loansToReview = credentialService.createCredentialsBenefitsForNewLoan(loan);
+        }catch (Exception e){
+            Assertions.fail(e.getMessage());
+        }
+
+        Assertions.assertEquals(0, loansToReview.size());
+        verify(credentialBenefitsRepository, times(1)).save(credentialBenefitCaptor.capture());
+        CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
+
+        Assertions.assertEquals(holder, credentialBenefits.getCreditHolder());
+        Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getCreditHolderDni());
+        Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getCreditHolderFirstName());
+        Assertions.assertEquals(holder.getLastName(), credentialBenefits.getCreditHolderLastName());
+
+        Assertions.assertEquals(holder, credentialBenefits.getBeneficiary());
+        Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
+        Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
+        Assertions.assertEquals(holder.getLastName(), credentialBenefits.getBeneficiaryLastName());
+
+        Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+        Assertions.assertEquals(credentialBenefitsSaved.getIdHistorical(), credentialBenefits.getIdHistorical());
+
+        //Credential saved is not modified
+        Assertions.assertEquals(99L, credentialBenefitsSaved.getIdHistorical());
+        Assertions.assertEquals(StateRevoke.get(), credentialBenefitsSaved.getCredentialState());
+
 
     }
 

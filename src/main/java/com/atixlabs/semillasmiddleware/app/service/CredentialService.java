@@ -276,8 +276,9 @@ public class CredentialService {
                         if (credentialBenefitsHolder.getCredentialState().equals(opStateRevoke.get())) {
 
                             //Holder
-                            credentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
-                            this.saveCredentialBenefits(credentialBenefitsHolder);
+                            CredentialBenefits newCredentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
+                            newCredentialBenefitsHolder.setIdHistorical(credentialBenefitsHolder.getIdHistorical());
+                            this.saveCredentialBenefits(newCredentialBenefitsHolder);
 
                         } else { //credential is active or pending didi
                             log.info(String.format("Credential Benefit for holder %d of loan %s is in state %s, credential not created", holder.getDocumentNumber(), loan.getIdBondareaLoan(), credentialBenefitsHolder.getCredentialState().getStateName()));

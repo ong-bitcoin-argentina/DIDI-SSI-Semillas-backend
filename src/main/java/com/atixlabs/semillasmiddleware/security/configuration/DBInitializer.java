@@ -157,7 +157,7 @@ public class DBInitializer implements CommandLineRunner {
                                     .permissions(Sets.newHashSet(modifyUserPermission, viewProfilePermission))
                                     .build());
         }
-
+//TODO change pass
         if (!userService.findByUsername("admin@atixlabs.com").isPresent()) {
             UserEditRequest userResponse = new UserEditRequest();
             userResponse.setUsername("admin@atixlabs.com");
@@ -170,7 +170,7 @@ public class DBInitializer implements CommandLineRunner {
             userResponse.setLastName("Admin");
             userService.createOrEdit(userResponse);
         }
-
+//TODO users only for test, delete
         if (!userService.findByUsername("flor@atixlabs.com").isPresent()) {
             UserEditRequest userResponse = new UserEditRequest();
             userResponse.setUsername("flor@atixlabs.com");

@@ -116,13 +116,15 @@ public class CredentialService {
      * Generate and update the credentials credit.
      * Checking for defaulters, and revoking or activate credentials (credit and benefit)
      */
-    public void generateCredentials() throws InvalidProcessException, PersonDoesNotExistsException {
+    public void generateCreditAndBenefitsCredentialsByLoans() throws InvalidProcessException, PersonDoesNotExistsException {
         //check if process in credentials is not running
         if (!processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS)) {
 
             LocalDateTime lastTimeProcessRun = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CREDENTIALS.getCode());
 
             ProcessControl processCrendentialControl = processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS, ProcessControlStatusCodes.RUNNING);
+
+            log.info(String.format("Generate Credential and Benefits Credential form %s", lastTimeProcessRun.toString()));
 
             try {
                 List<Loan> loansDefaultToReview = this.handleDefaultCredits(lastTimeProcessRun);
@@ -134,7 +136,7 @@ public class CredentialService {
             } catch (PersonDoesNotExistsException ex) {
                 log.error(ex.getMessage());
             } catch (Exception ex) {
-                log.error("Error updating credentials credit ! " + ex.getMessage());
+                log.error("Error updating credentials credit ! " + ex.getMessage(),ex);
                 processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.FAIL.getCode());
             }
 
@@ -157,6 +159,8 @@ public class CredentialService {
     private List<Loan> handleNewCredits() {
         //create credentials
         List<Loan> newLoans = loanService.findActiveAndOkLoansWithoutCredential();
+
+        log.info(String.format("Generate Credential and Benefits Credential for %d new loans", newLoans.size()));
 
         List<Loan> loansForReview = new ArrayList<Loan>();
 
@@ -228,36 +232,36 @@ public class CredentialService {
 
     /**
      * If holder exists and loan is active and not in default
-     * <p>
-     * Create Benefit Credential for holder,  in state Pending Didi
-     * Create Benefits credentials for each kin, in Pending de Didi state
-     * <p>
-     * else
-     * <p>
-     * If holder exists as person, and  loan is active and not in default
-     * If holder is not in default
-     * Benefit Holder
-     * If credential not exists, create credential in state Pending Didi
-     * If exists and is active, do nothing
-     * If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
-     * Beneficio Familiar
-     * si no existe Creo credencial de beneficio en estado Pendiente de Didi
-     * si existe y está vigente no hago nada
-     * si existe y está revocada creó una nueva  la credencial como Pendiente de Didi
-     * Si el Titular está en mora (se supone que tiene la credencial por otro crédito activo en el que entró en mora)
-     * Por cada familiar
-     * Si tiene credencial de beneficio no la modifico
-     * <p>
+     *
+     ** Create Benefit Credential for holder,  in state Pending Didi
+     ** Create Benefits credentials for each kin, in Pending de Didi state
+     ** else
+     ** If holder exists as person, and loan is active and not in default
+     ** If holder is not in default
+     **** Benefit Holder
+     **** If credential not exists, create credential in state Pending Didi
+     **** If exists and is active, do nothing
+     **** If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
+     **** Benefit Family
+     **** If credential not exists, create credential in state Pending Didi
+     **** If exists and is active, do nothing
+     **** If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
+     ** If holder is in default
+     *** set credit for process in the next cycle
+     *
      * If holder not exists set credit for process in the next cycle
      *
      * @param loan
      */
     public void createCredentialsBenefitsForNewLoan(Loan loan) throws CredentialException {
 
+        log.info(String.format("creating Benefits Credential for Loan %s",loan.getIdBondareaLoan()));
+
         Optional<Person> opHolder = personRepository.findByDocumentNumber(loan.getDniPerson());
 
         if (opHolder.isPresent()) {
             Person holder = opHolder.get();
+
             Optional<List<Person>> opFamiliy = this.findFamilyForHolder(holder);
 
             if (!holder.isInDefault()) { // If holder is not in default
@@ -274,9 +278,7 @@ public class CredentialService {
                         throw new CredentialException("Cant't obtain Credential State 'REVOKE', can't evaluate credential benefit state ");
                     }
 
-
                     credentialBenefitsHolder = opCredentialBenefitsHolder.get();
-
 
                     if (credentialBenefitsHolder.getCredentialState().equals(opStateRevoke.get())) {
 
@@ -364,8 +366,8 @@ public class CredentialService {
 
     private Optional<List<Person>> findFamilyForHolder(Person holder) {
 
-        Optional<List<Person>> familiy = credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder);
-        return familiy;
+        List<Person> familiy = credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder);
+        return familiy!=null ? Optional.of(familiy) : Optional.empty();
 
     }
 
@@ -454,11 +456,13 @@ public class CredentialService {
 
         List<Loan> loansModifiedInDefault = loanService.findLastLoansModifiedInDefault(lastTimeProcessRun);
 
+        log.info(String.format(" %d Loans in default founded",(loansModifiedInDefault!=null ? loansModifiedInDefault.size():0)));
+
         List<Loan> loansToreview = new ArrayList<Loan>();
 
         List<Loan> loansToreviewCredits = this.revokeCredentialCredits(loansModifiedInDefault);
         //TODO revoke benefits ok
-        this.revokeCredentialBenefits(loansModifiedInDefault);
+       // this.revokeCredentialBenefits(loansModifiedInDefault);
 
         loansToreview.addAll(loansToreviewCredits);
 
@@ -481,7 +485,10 @@ public class CredentialService {
      */
     private List<Loan> handleActiveCredits(LocalDateTime lastTimeProcessRun) {
 
-        List<Loan> loansModifiedActive = loanService.findLastLoansModifiedActive(lastTimeProcessRun);
+        List<Loan> loansModifiedActive = loanService.findLastLoansModifiedActiveWithCredential(lastTimeProcessRun);
+
+        log.info(String.format(" %d active credits found for evaluate credentials ",(loansModifiedActive!=null ?  loansModifiedActive.size() : 0)));
+
         List<Loan> loansToreview = new ArrayList<Loan>();
 
         for (Loan loan : loansModifiedActive) {
@@ -1217,7 +1224,7 @@ public class CredentialService {
      * Check holders status, to search for default and revoke or to reactive credentials.
      * Given the modified credits check if they are
      *
-     * @param modifiedLoans
+     *
      */
     /*//TODO delete
     @Deprecated
@@ -1256,7 +1263,7 @@ public class CredentialService {
 
     public boolean revokeCredentialCredit(Loan loan) {
 
-        log.info("Revoke Credentials for Loan " + loan.getIdBondareaLoan());
+        log.info("Revoking Credentials credit for Loan " + loan.getIdBondareaLoan());
 
         Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
 
@@ -1281,6 +1288,9 @@ public class CredentialService {
                 return false;
             }
 
+        }else{
+            log.info(String.format("No revoke Credentials credit for Loan %s not exists", loan.getIdBondareaLoan()));
+
         }
 
         return false;
@@ -1294,7 +1304,7 @@ public class CredentialService {
             if (!this.revokeCredentialCredit(loan)) {
                 loansToReview.add(loan);
             }
-            ;
+
         }
 
         return loansToReview;

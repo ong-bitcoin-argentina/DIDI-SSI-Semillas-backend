@@ -19,8 +19,8 @@ public interface CredentialIdentityRepository extends JpaRepository<CredentialId
 
     List<CredentialIdentity> findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(Long holderDni, Long beneficiaryDni, List<CredentialState> credentialActivePending);
 
-    @Query("SELECT DISTINCT beneficiary WHERE creditHolder = :holder  and beneficiary <> :holder")
-    Optional<List<Person>> findDistinctBeneficiaryFamilyByHolder(@Param("holder") Person holder);
+    @Query("SELECT DISTINCT ci.beneficiary FROM  CredentialIdentity ci WHERE ci.creditHolder = :holder and ci.beneficiary <> :holder")
+    List<Person> findDistinctBeneficiaryFamilyByHolder(@Param("holder") Person holder);
 
 
 }

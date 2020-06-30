@@ -94,7 +94,7 @@ public class BondareaController {
             return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
 
         try {
-            credentialService.generateCredentials();
+            credentialService.generateCreditAndBenefitsCredentialsByLoans();
         } catch (InvalidProcessException | PersonDoesNotExistsException ex) {
             log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
             return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
@@ -103,5 +103,19 @@ public class BondareaController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @GetMapping("/force-generate-create-credit-benefit")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<String> forceGenerateCreditBenefit() {
+        boolean result = true;
+
+        try {
+            credentialService.generateCreditAndBenefitsCredentialsByLoans();
+        } catch (InvalidProcessException | PersonDoesNotExistsException ex) {
+            log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
+            return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 
 }

@@ -992,7 +992,6 @@ public class CredentialServiceTest {
 
         credentialService.createCredentialsBenefitsForNewLoan(loan);
 
-
     }
 
 
@@ -1017,7 +1016,7 @@ public class CredentialServiceTest {
         when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         when(personRepository.findByDocumentNumber(anyLong())).thenReturn(opHolder);
-        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(any(Person.class))).thenReturn(Optional.empty());
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(any(Person.class))).thenReturn(null);
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber())).thenReturn(Optional.empty());
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
             @Override
@@ -1146,6 +1145,61 @@ public class CredentialServiceTest {
             Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
             Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
             Assertions.assertEquals(holder.getLastName(), credentialBenefits.getBeneficiaryLastName());
+
+//TODO            protected LocalDateTime dateOfIssue;
+
+
+
+        } catch (CredentialException e) {
+            Assertions.fail(e.getMessage());
+        }
+
+
+
+    }
+
+    @Test
+    public void buildCredentialBenefitsForFamily(){
+
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
+
+        Loan loan = this.getMockLoan();
+
+        Person holder = this.createPersonMock();
+        holder.setDocumentNumber(1111111L);
+        Person beneficiary = this.createPersonMock();
+        beneficiary.setDocumentNumber(222222L);
+        beneficiary.setFirstName("Beneficiary Name");
+        beneficiary.setLastName("Beneficiary Last Name");
+
+        try {
+            CredentialBenefits credentialBenefits =  credentialService.buildNewBenefitsCredential(holder,beneficiary,PersonTypesCodes.FAMILY);
+
+            Assertions.assertEquals(PersonTypesCodes.FAMILY.getCode(), credentialBenefits.getBeneficiaryType());
+            Assertions.assertEquals(CredentialCategoriesCodes.BENEFIT.getCode(), credentialBenefits.getCredentialCategory());
+            Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+            Assertions.assertEquals(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode(), credentialBenefits.getCredentialDescription());
+
+            Assertions.assertEquals(getParameterConfigurationDidiIssuerMock().get().getValue(), credentialBenefits.getIdDidiIssuer());
+            Assertions.assertNull( credentialBenefits.getIdDidiReceptor());
+            Assertions.assertNull( credentialBenefits.getIdDidiCredential());
+
+            Assertions.assertNull( credentialBenefits.getIdHistorical());
+
+            Assertions.assertNull( credentialBenefits.getDateOfRevocation());
+            Assertions.assertNull( credentialBenefits.getRevocationReason());
+
+            Assertions.assertEquals(holder, credentialBenefits.getCreditHolder());
+            Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getCreditHolderDni());
+            Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getCreditHolderFirstName());
+            Assertions.assertEquals(holder.getLastName(), credentialBenefits.getCreditHolderLastName());
+
+            Assertions.assertEquals(beneficiary, credentialBenefits.getBeneficiary());
+            Assertions.assertEquals(beneficiary.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
+            Assertions.assertEquals(beneficiary.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
+            Assertions.assertEquals(beneficiary.getLastName(), credentialBenefits.getBeneficiaryLastName());
 
 //TODO            protected LocalDateTime dateOfIssue;
 

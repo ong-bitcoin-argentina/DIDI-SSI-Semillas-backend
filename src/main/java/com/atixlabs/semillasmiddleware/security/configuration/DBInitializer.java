@@ -171,6 +171,45 @@ public class DBInitializer implements CommandLineRunner {
             userService.createOrEdit(userResponse);
         }
 
+        if (!userService.findByUsername("flor@atixlabs.com").isPresent()) {
+            UserEditRequest userResponse = new UserEditRequest();
+            userResponse.setUsername("flor@atixlabs.com");
+            userResponse.setEmail("flor@atixlabs.com");
+            userResponse.setPassword("flor");
+            userResponse.setNewPassword("flor");
+            userResponse.setConfirmNewPassword("flor");
+            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
+            userResponse.setName("Florencia");
+            userResponse.setLastName("Atix");
+            userService.createOrEdit(userResponse);
+        }
+
+        if (!userService.findByUsername("facu@atixlabs.com").isPresent()) {
+            UserEditRequest userResponse = new UserEditRequest();
+            userResponse.setUsername("facu@atixlabs.com");
+            userResponse.setEmail("facu@atixlabs.com");
+            userResponse.setPassword("facu");
+            userResponse.setNewPassword("facu");
+            userResponse.setConfirmNewPassword("facu");
+            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
+            userResponse.setName("Facundo");
+            userResponse.setLastName("Atix");
+            userService.createOrEdit(userResponse);
+        }
+
+        if (!userService.findByUsername("tamara@semillas.com").isPresent()) {
+            UserEditRequest userResponse = new UserEditRequest();
+            userResponse.setUsername("tamara@semillas.com");
+            userResponse.setEmail("tamara@semillas.com");
+            userResponse.setPassword("tamara");
+            userResponse.setNewPassword("tamara");
+            userResponse.setConfirmNewPassword("tamara");
+            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
+            userResponse.setName("Tamara");
+            userResponse.setLastName("Semillas");
+            userService.createOrEdit(userResponse);
+        }
+
         if (!userService.findByUsername("cronUser@atixlabs.com").isPresent()) {
             UserEditRequest userResponse = new UserEditRequest();
             userResponse.setUsername("cronUser@atixlabs.com");

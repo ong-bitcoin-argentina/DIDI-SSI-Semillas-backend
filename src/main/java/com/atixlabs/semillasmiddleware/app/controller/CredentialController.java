@@ -2,17 +2,13 @@ package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
-import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
-import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -129,7 +125,7 @@ public class CredentialController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> generateCredentialsCredit() {
         try {
-            credentialService.generateCredentials();
+            credentialService.generateCreditAndBenefitsCredentialsByLoans();
         }
         catch (InvalidProcessException | PersonDoesNotExistsException ex){
             log.error("Could not get the process ! "+ ex.getMessage());

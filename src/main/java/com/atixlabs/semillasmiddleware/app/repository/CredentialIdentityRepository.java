@@ -5,6 +5,8 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
@@ -16,4 +18,9 @@ public interface CredentialIdentityRepository extends JpaRepository<CredentialId
     List<CredentialIdentity> findByCreditHolderDniAndCredentialStateIn(Long holderDni, List<CredentialState> credentialActivePending);
 
     List<CredentialIdentity> findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(Long holderDni, Long beneficiaryDni, List<CredentialState> credentialActivePending);
+
+    @Query("SELECT DISTINCT ci.beneficiary FROM  CredentialIdentity ci WHERE ci.creditHolder = :holder and ci.beneficiary <> :holder")
+    List<Person> findDistinctBeneficiaryFamilyByHolder(@Param("holder") Person holder);
+
+
 }

@@ -79,6 +79,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             "/**/*.html",
             "/**/*.css",
             "/**/*.js"
+            ,"/bondarea//force-generate-create-credit-benefit" //TODO delete only test
             // other public endpoints of your API may be appended to this array
     };
 

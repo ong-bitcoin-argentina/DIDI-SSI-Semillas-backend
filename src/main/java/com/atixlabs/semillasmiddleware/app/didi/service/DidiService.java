@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.*;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -212,7 +213,11 @@ public class DidiService {
             log.info(credential.toString());
             if (!credential.getCreditHolderDni().equals(credential.getBeneficiaryDni())) {
                 String receivedDid = didiAppUserRepository.findByDni(credential.getBeneficiaryDni()).getDid();
-                updateCredentialDidAndDidiSync(credential, receivedDid);
+                try {
+                    updateCredentialDidAndDidiSync(credential, receivedDid);
+                } catch (CredentialException e) {
+                    log.error("Error on emmit ", e);
+                }
             }
         }
 
@@ -221,14 +226,18 @@ public class DidiService {
             log.info("CREDIT HOLDERS");
             log.info(credential.toString());
             String receivedDid = didiAppUserRepository.findByDni(credential.getCreditHolderDni()).getDid();
-            this.updateCredentialDidAndDidiSync(credential, receivedDid);
+            try {
+                this.updateCredentialDidAndDidiSync(credential, receivedDid);
+            } catch (CredentialException e) {
+                log.error("Error on emmit ", e);
+            }
         }
 
         log.info("didiSync: ended");
         return "didiSync: ended";
     }
 
-    private void updateCredentialDidAndDidiSync(Credential credential, String receivedDid){
+    private void updateCredentialDidAndDidiSync(Credential credential, String receivedDid) throws CredentialException {
         log.info("didiSync: credencial para evaluar:");
         log.info(credential.toString());
         switch (CredentialStatesCodes.getEnumByStringValue(credential.getCredentialState().getStateName())){

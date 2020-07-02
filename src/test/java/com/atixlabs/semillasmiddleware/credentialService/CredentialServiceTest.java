@@ -1007,6 +1007,180 @@ public class CredentialServiceTest {
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
 
+/*
+         * *                 If exists, is active and emmited, do revoke,
+     * *                */
+    @Test
+    public void revokeCrendentialBenefitsForFamilyWhenHolderHasNoFamiliy() {
+
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.empty());
+
+
+        try {
+            credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+
+        verify(credentialBenefitsRepository, times(0)).save(credentialBenefitCaptor.capture());
+        verify(credentialStateRepository, times(0)).findByStateName(anyString());
+    }
+
+
+    @Test
+    public void revokeCrendentialBenefitsForFamilyWhenBeneficiaryDontHasCredential() {
+
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        holder.setDocumentNumber(11111111L);
+
+        Optional<Person> opBeneficiary = this.getPersonMockWithDid();
+        Person beneficiary = opBeneficiary.get();
+        beneficiary.setDocumentNumber(22222222L);
+
+        List<Person> family = new ArrayList<Person>();
+        family.add(beneficiary);
+
+
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.empty());
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+
+        try {
+            credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+
+        verify(credentialBenefitsRepository, times(0)).save(credentialBenefitCaptor.capture());
+        verify(credentialStateRepository, times(0)).findByStateName(anyString());
+    }
+
+    @Test
+    public void revokeCrendentialBenefitsForFamiliyWhenCredentialIsAlreadyRevokeThenDoNothing() {
+
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
+
+        holder.setDocumentNumber(11111111L);
+
+        Optional<Person> opBeneficiary = this.getPersonMockWithDid();
+        Person beneficiary = opBeneficiary.get();
+        beneficiary.setDocumentNumber(22222222L);
+
+        List<Person> family = new ArrayList<Person>();
+        family.add(beneficiary);
+
+        CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+        credentialBenefitsSaved.setCredentialState(StateRevoke.get());
+        credentialBenefitsSaved.setIdHistorical(99L);
+
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(StateRevoke);
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
+
+
+        try {
+            credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+
+        verify(credentialBenefitsRepository, times(0)).save(credentialBenefitCaptor.capture());
+        verify(credentialStateRepository, times(1)).findByStateName(anyString());
+        Assertions.assertEquals(StateRevoke.get(), credentialBenefitsSaved.getCredentialState());
+
+    }
+
+    @Test
+    public void revokeCrendentialBenefitsForFamilyWhenCredentialIsPendingDidiThenRevokeOnlyLocaly() {
+
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        Optional<Person> opBeneficiary = this.getPersonMockWithDid();
+        Person beneficiary = opBeneficiary.get();
+        beneficiary.setDocumentNumber(22222222L);
+        List<Person> family = new ArrayList<Person>();
+        family.add(beneficiary);
+
+        Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+        credentialBenefitsSaved.setCredentialState(StatePendingDidi.get());
+        credentialBenefitsSaved.setIdHistorical(99L);
+
+        RevocationReason reasonDefault = this.getRevocationReasonDefaultMock();
+
+
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(StateRevoke);
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode())).thenReturn(StatePendingDidi);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
+        when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+
+        try {
+            credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+
+        verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
+        verify(didiService, times(0)).didiDeleteCertificate(anyString());
+        CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
+        Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
+    }
+
+
+    @Test
+    public void revokeCrendentialBenefitsForFamilyWhenCredentialIsActiveThenRevokeComplete() {
+
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        holder.setDocumentNumber(11111111L);
+        Optional<Person> opBeneficiary = this.getPersonMockWithDid();
+        Person beneficiary = opBeneficiary.get();
+        beneficiary.setDocumentNumber(22222222L);
+        List<Person> family = new ArrayList<Person>();
+        family.add(beneficiary);
+
+        Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
+        Optional<CredentialState>  StateActiveDidi = createCredentialStateActiveMock();
+        CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+        credentialBenefitsSaved.setCredentialState(StateActiveDidi.get());
+        credentialBenefitsSaved.setIdHistorical(99L);
+        credentialBenefitsSaved.setIdDidiCredential("iddidicred");
+        RevocationReason reasonDefault = this.getRevocationReasonDefaultMock();
+
+
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(StateRevoke);
+        when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode())).thenReturn(StateActiveDidi);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
+        when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+
+        try {
+            credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+
+        verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
+        verify(didiService, times(1)).didiDeleteCertificate(anyString());
+        CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
+        Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
+    }
+
     //BUILDS
     @Test
     public void buildCredentialBenefitsForHolder(){

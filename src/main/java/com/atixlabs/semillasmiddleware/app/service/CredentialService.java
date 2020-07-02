@@ -280,7 +280,6 @@ public class CredentialService {
     /**
      * *         Benefits Credential
      * *             Familiy
-     * *                 Credendial de Beneficio Familiar-Titular con Id Didi del Familiar
      * *                 If exists, is active and emmited, do revoke,
      * *                 If exists and is Pending Didi, revoke localy
      * *                 If exists and is revoked, do nothing
@@ -295,6 +294,8 @@ public class CredentialService {
         if(opFamily.isPresent() && (!opFamily.get().isEmpty())) {
 
             List<Person> family = opFamily.get();
+
+            log.info(String.format("Found %d people as family for holder %d", family.size(), holder.getDocumentNumber()));
 
             for (Person beneficiary : family) {
 

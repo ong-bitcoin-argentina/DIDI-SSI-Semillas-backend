@@ -10,6 +10,8 @@ import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
 
 @NoArgsConstructor
@@ -38,7 +40,7 @@ public class Person {
     private List<DIDHisotoric> DIDIsHisotoric;
 
     @ManyToMany
-    protected List<Loan> defaults;
+    protected List<Loan> defaults; //TODO must be a HashSet
 
 
     //TODO user this
@@ -71,6 +73,15 @@ public class Person {
         }
 
         return false;
+    }
+
+    public void addLoanInDefault(Loan loan){
+        if(this.getDefaults()==null){
+            this.setDefaults(new ArrayList<Loan>());
+        }
+        if(!this.getDefaults().contains(loan)){
+            this.getDefaults().add(loan);
+        }
     }
 
     /*

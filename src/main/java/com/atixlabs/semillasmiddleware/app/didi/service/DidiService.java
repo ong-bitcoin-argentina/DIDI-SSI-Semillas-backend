@@ -384,7 +384,7 @@ public class DidiService {
         return null;
     }
 
-    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId) {
+    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId)  {
         log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi");
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
 
@@ -396,7 +396,7 @@ public class DidiService {
             //return response.body();
             return true;
         } catch (Exception ex) {
-            log.error("didiSync: emmitCertificateDidi: Request error", ex);
+            log.error("didiSync: deleteCertificateDidi: Request error", ex);
         }
         return false;
     }

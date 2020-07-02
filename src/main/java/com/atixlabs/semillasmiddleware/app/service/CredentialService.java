@@ -10,7 +10,6 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
-import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
@@ -42,7 +41,6 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
-import lombok.extern.flogger.Flogger;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -51,7 +49,6 @@ import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Slf4j
 @Service
@@ -238,41 +235,76 @@ public class CredentialService {
      * *                 If exists and is Pending Didi, revoke localy
      * *                 If exists and is revoked, do nothing
      * *                 If not exists, do nothing
-     * *             Familiar
-     * *                 Credencial de Beneficio Familiar-Titular con Id Didi del Titular
-     * *                     Si existe y esta activa y emitida, revoco la crendencial en Didi y revoco la credencial localmente,
-     * *                     Si existe y esta pendiente de didi, revoco la credencial localmente
-     * *                     si existe y esta revocada, no hago nada
-     * *                     si no existe, no hago nada
-     * *                 Credendial de Beneficio Familiar-Titular con Id Didi del Familiar
-     * *                     Si existe y esta activa y emitida, revoco la crendencial en Didi y revoco la credencial localmente,
-     * *                     Si existe y esta pendiente de didi, revoco la credencial localmente
-     * *                     si existe y esta revocada, no hago nada
-     * *                     si no existe, no hago nada
      *
-     * @param loan
      * @throws CredentialException
      */
-    public void revokeCredentialsBenefitsForLoan(Loan loan, Person holder) throws CredentialException {
+    public void revokeHolderCredentialsBenefitsForLoan(Person holder) throws CredentialException {
 
-        Optional<CredentialBenefits>  opHolderCredentialBenefits =  this.getCredentialBenefits(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER);
+        this.revokeCredentialsBenefitsForLoanInDefault(holder, holder,PersonTypesCodes.HOLDER);
 
-        if(opHolderCredentialBenefits.isPresent()){
+    }
 
-            CredentialBenefits holderCredentialBenefits = opHolderCredentialBenefits.get();
+    /**
+     * *         Benefits Credential
+     * *                 If exists, is active and emmited, do revoke,
+     * *                 If exists and is Pending Didi, revoke localy
+     * *                 If exists and is revoked, do nothing
+     * *                 If not exists, do nothing
+     *
+     * @throws CredentialException
+     */
+    public void revokeCredentialsBenefitsForLoanInDefault(Person holder, Person beneficiary, PersonTypesCodes personTypesCodes) throws CredentialException {
 
-            if(!this.isCredentialRevoked(holderCredentialBenefits)){
+        log.info(String.format("Revoking Credential Benefits for Beneficiary %d and Holder %d credential type %s",beneficiary.getDocumentNumber(), holder.getDocumentNumber(), personTypesCodes.getCode()));
 
-                this.revokeComplete(holderCredentialBenefits,RevocationReasonsCodes.DEFAULT.getCode() );
+        Optional<CredentialBenefits>  opCredentialBenefits =  this.getCredentialBenefits(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), personTypesCodes);
+
+        if(opCredentialBenefits.isPresent()){
+
+            CredentialBenefits credentialBenefits = opCredentialBenefits.get();
+
+            if(!this.isCredentialRevoked(credentialBenefits)){
+
+                this.revokeComplete(credentialBenefits,RevocationReasonsCodes.DEFAULT.getCode() );
 
             }else{
                 log.info(String.format("Benefits Credential for holder %d its already Revoked", holder.getDocumentNumber()));
             }
 
         }else{
-            log.info(String.format("Benefits Credential for holder %d not exists", holder.getDocumentNumber()));
+            log.info(String.format("Credential Benefits for Beneficiary %d and Holder %d credential type %s not exists", beneficiary.getDocumentNumber(),holder.getDocumentNumber(),personTypesCodes.getCode()));
         }
 
+    }
+
+    /**
+     * *         Benefits Credential
+     * *             Familiy
+     * *                 Credendial de Beneficio Familiar-Titular con Id Didi del Familiar
+     * *                 If exists, is active and emmited, do revoke,
+     * *                 If exists and is Pending Didi, revoke localy
+     * *                 If exists and is revoked, do nothing
+     * *                 If not exists, do nothing
+     *
+     * @throws CredentialException
+     */
+    public void revokeFamilyCredentialsBenefitsForLoan(Person holder) throws CredentialException {
+
+        Optional<List<Person>> opFamily = this.findFamilyForHolder(holder);
+
+        if(opFamily.isPresent() && (!opFamily.get().isEmpty())) {
+
+            List<Person> family = opFamily.get();
+
+            for (Person beneficiary : family) {
+
+                this.revokeCredentialsBenefitsForLoanInDefault(holder,beneficiary,PersonTypesCodes.FAMILY);
+
+            }
+
+        }else{
+            log.info("Holder %d has no family, Beneficiaries Credential Benefits not created");
+        }
     }
 
     /**
@@ -536,7 +568,8 @@ public class CredentialService {
                         loansToReview.add(defaultLoan);
                     }
 
-                    this.revokeCredentialsBenefitsForLoan(defaultLoan, holder);
+                    this.revokeHolderCredentialsBenefitsForLoan(holder);
+                    this.revokeFamilyCredentialsBenefitsForLoan(holder);
 
                 } catch (CredentialException ex) {
                     log.error("Error creating new credential credit for loan " + defaultLoan.getIdBondareaLoan() + " " + ex.getMessage());
@@ -548,12 +581,6 @@ public class CredentialService {
                 loansToReview.add(defaultLoan);
             }
         }
-
-        //List<Loan> loansToreviewCredits = this.revokeCredentialCredits(loansModifiedInDefault);
-        //TODO revoke benefits ok
-        // this.revokeCredentialBenefits(loansModifiedInDefault);
-
-        //  loansToreview.addAll(loansToreviewCredits);
 
         return loansToReview;
     }
@@ -1719,8 +1746,9 @@ public class CredentialService {
                 // if this revoke came from the revocation business we will need to throw an error to rollback any change done before.
                 return this.revokeCredentialOnlyOnSemillas(credentialToRevoke, reasonCode);
             } else {
-                log.info("There was an error deleting credential id: " + credentialToRevoke.getId() + " on didi");
-                return false;
+                String message = String.format("Error to delete Certificate %d on Didi ", credentialToRevoke.getId());
+                log.error(message);
+                throw new CredentialException(message);
             }
         } else
             return this.revokeCredentialOnlyOnSemillas(credentialToRevoke, reasonCode);

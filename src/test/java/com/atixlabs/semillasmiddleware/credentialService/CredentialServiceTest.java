@@ -36,7 +36,6 @@ import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
-import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.InjectMocks;
@@ -48,8 +47,6 @@ import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.persistence.Column;
-import javax.persistence.ManyToOne;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -894,7 +891,6 @@ public class CredentialServiceTest {
     @Test
     public void revokeCrendentialBenefitsForHolderWhenCredentialNotExists() {
 
-        Loan loan = this.getMockLoan();
         Optional<Person> opHolder = this.getPersonMockWithDid();
         Person holder = opHolder.get();
 
@@ -902,7 +898,7 @@ public class CredentialServiceTest {
 
 
         try {
-            credentialService.revokeCredentialsBenefitsForLoan(loan, holder);
+            credentialService.revokeHolderCredentialsBenefitsForLoan(holder);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
@@ -912,13 +908,10 @@ public class CredentialServiceTest {
         verify(credentialStateRepository, times(0)).findByStateName(anyString());
     }
 
- //   If exists, is active and emmited, do revoke,
-   //         * *                 If exists and is Pending Didi, revoke localy
 
     @Test
     public void revokeCrendentialBenefitsForHolderWhenCredentialIsAlreadyRevoke() {
 
-        Loan loan = this.getMockLoan();
         Optional<Person> opHolder = this.getPersonMockWithDid();
         Person holder = opHolder.get();
         Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
@@ -934,7 +927,7 @@ public class CredentialServiceTest {
 
 
         try {
-            credentialService.revokeCredentialsBenefitsForLoan(loan, holder);
+            credentialService.revokeHolderCredentialsBenefitsForLoan(holder);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
@@ -949,7 +942,6 @@ public class CredentialServiceTest {
     @Test
     public void revokeCrendentialBenefitsForHolderWhenCredentialIsPendingDidiThenRevokeLocaly() {
 
-        Loan loan = this.getMockLoan();
         Optional<Person> opHolder = this.getPersonMockWithDid();
         Person holder = opHolder.get();
         Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
@@ -968,7 +960,7 @@ public class CredentialServiceTest {
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
 
         try {
-            credentialService.revokeCredentialsBenefitsForLoan(loan, holder);
+            credentialService.revokeHolderCredentialsBenefitsForLoan(holder);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
@@ -984,7 +976,6 @@ public class CredentialServiceTest {
     @Test
     public void revokeCrendentialBenefitsForHolderWhenCredentialIsActiveThenRevokeComplete() {
 
-        Loan loan = this.getMockLoan();
         Optional<Person> opHolder = this.getPersonMockWithDid();
         Person holder = opHolder.get();
         Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
@@ -1004,7 +995,7 @@ public class CredentialServiceTest {
         when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
 
         try {
-            credentialService.revokeCredentialsBenefitsForLoan(loan, holder);
+            credentialService.revokeHolderCredentialsBenefitsForLoan(holder);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());

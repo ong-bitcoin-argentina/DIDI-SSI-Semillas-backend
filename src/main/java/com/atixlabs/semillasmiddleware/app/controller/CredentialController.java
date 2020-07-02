@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -104,7 +105,12 @@ public class CredentialController {
             if (credentialToRevoke.isPresent()) {
                 if (credentialToRevoke.get().isManuallyRevocable()) {
                     //possibilities -> Emprendimiento, Vivienda, identididad familiar, identidad titular (only the last one have a business logic, the others only revoke itself)
-                    boolean revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get());
+                    boolean revokeOk = false;
+                    try {
+                        revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get());
+                    } catch (CredentialException e) {
+                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + idCredential);
+                    }
                     if (revokeOk)
                         return ResponseEntity.status(HttpStatus.OK).body("Revoked successfully");
                     else

@@ -23,6 +23,7 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReaso
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
+import com.atixlabs.semillasmiddleware.app.service.PersonService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
@@ -105,6 +106,9 @@ public class CredentialServiceTest {
 
     @Mock
     private DidiService didiService;
+
+    @Mock
+    private PersonService personService;
 
     @Captor
     private ArgumentCaptor<CredentialCredit> credentialCreditCaptor;
@@ -1081,7 +1085,7 @@ public class CredentialServiceTest {
         credentialBenefitsSaved.setIdHistorical(99L);
 
         when(credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())).thenReturn(StateRevoke);
-        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+        when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
 
 
@@ -1123,7 +1127,7 @@ public class CredentialServiceTest {
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
-        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+        when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
 
         try {
             credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);
@@ -1166,7 +1170,7 @@ public class CredentialServiceTest {
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
-        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(holder)).thenReturn(family);
+        when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
 
         try {
             credentialService.revokeFamilyCredentialsBenefitsForLoan(holder);

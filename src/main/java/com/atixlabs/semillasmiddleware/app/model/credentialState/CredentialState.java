@@ -12,6 +12,7 @@ import javax.persistence.*;
 @Setter
 @Table
 @ToString
+//From enum CredentialStatesCodes
 public class CredentialState extends AuditableEntity {
 
     @Id

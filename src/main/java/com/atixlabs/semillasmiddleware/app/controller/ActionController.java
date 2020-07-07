@@ -1,6 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.dto.ActionDto;
+import com.atixlabs.semillasmiddleware.app.model.action.ActionLevel;
+import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
 import com.atixlabs.semillasmiddleware.app.service.ActionsService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
@@ -40,8 +42,8 @@ public class ActionController {
      */
     public Page<ActionDto> findAuditLog(@RequestParam(required = false)  @DefaultValue("0") Integer page,
                                         @RequestParam(required = false) String username,
-                                        @RequestParam(required = false) String level,
-                                        @RequestParam(required = false) String actionType,
+                                        @RequestParam(required = false) Integer level,
+                                        @RequestParam(required = false) Integer actionType,
                                         @RequestParam(required = false) String message,
                                         @RequestParam(required = false) LocalDateTime dateFrom,
                                         @RequestParam(required = false) LocalDateTime dateTo
@@ -51,13 +53,23 @@ public class ActionController {
         try {
             log.info(String.format("find actions user &s, level %s, actiontType %s, message %s, dateFrom %s, dateTo %s", username, level, actionType, message, (dateFrom!=null ? dateFrom.toString():""), (dateTo!=null ? dateTo.toString():"")));
 
-            actions = this.actionsService.find(page, username, level, actionType, message, dateFrom, dateTo);
+            actions = this.actionsService.find(page, username, "", "", message, dateFrom, dateTo);
 
         } catch (Exception e) {
             log.error("There has been an error searching for action log with the filters ", e);
             return null;
         }
         return actions;
+    }
+
+    @GetMapping("/levels")
+    public ActionLevel[] getActionsLevel(){
+        return ActionLevel.values();
+    }
+
+    @GetMapping("/types")
+    public ActionTypeEnum[] getActionsTypes(){
+        return ActionTypeEnum.values();
     }
 
 }

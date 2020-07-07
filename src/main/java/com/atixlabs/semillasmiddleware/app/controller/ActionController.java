@@ -9,6 +9,7 @@ import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
@@ -46,8 +47,8 @@ public class ActionController {
                                         @RequestParam(required = false) Integer level,
                                         @RequestParam(required = false) Integer actionType,
                                         @RequestParam(required = false) String message,
-                                        @RequestParam(required = false) LocalDateTime dateFrom,
-                                        @RequestParam(required = false) LocalDateTime dateTo
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo
                                           ) {
 
         Page<ActionDto> actions;

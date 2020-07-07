@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.dto;
 
+import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -20,5 +21,15 @@ public class ActionDto {
     private String actionType;
 
     private String message;
+
+    public ActionDto(){};
+
+    public ActionDto(ActionLog actionLog){
+        this.texecutionDateTime = actionLog.getExecutionDateTime();
+        this.user = actionLog.getUserName();
+        this.level = actionLog.getLevel().getDescription();
+        this.actionType = actionLog.getActionType().getDescription();
+        this.message = actionLog.getMessage();
+    }
 
 }

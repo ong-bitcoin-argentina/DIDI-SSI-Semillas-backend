@@ -1,10 +1,11 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.dto.ActionDto;
-import com.atixlabs.semillasmiddleware.app.model.action.ActionLevel;
+import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
+import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
-import com.atixlabs.semillasmiddleware.app.service.ActionsService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialService;
+import com.atixlabs.semillasmiddleware.app.service.ActionLogService;
+import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
@@ -21,10 +22,10 @@ public class ActionController {
 
     public static final String URL_MAPPING = "/action";
 
-    private ActionsService actionsService;
+    private ActionLogService actionLogService;
 
-    public ActionController(ActionsService actionsService){
-        this.actionsService = actionsService;
+    public ActionController(ActionLogService actionLogService){
+        this.actionLogService = actionLogService;
     }
 
 
@@ -53,7 +54,7 @@ public class ActionController {
         try {
             log.info(String.format("find actions user &s, level %s, actiontType %s, message %s, dateFrom %s, dateTo %s", username, level, actionType, message, (dateFrom!=null ? dateFrom.toString():""), (dateTo!=null ? dateTo.toString():"")));
 
-            actions = this.actionsService.find(page, username, "", "", message, dateFrom, dateTo);
+            actions = this.actionLogService.find(page, username, level, actionType, message, dateFrom, dateTo);
 
         } catch (Exception e) {
             log.error("There has been an error searching for action log with the filters ", e);
@@ -63,13 +64,37 @@ public class ActionController {
     }
 
     @GetMapping("/levels")
-    public ActionLevel[] getActionsLevel(){
-        return ActionLevel.values();
+    public ActionLevelEnum[] getActionsLevel(){
+        return ActionLevelEnum.values();
     }
 
     @GetMapping("/types")
     public ActionTypeEnum[] getActionsTypes(){
         return ActionTypeEnum.values();
     }
+
+
+
+    //TODO delete
+    @GetMapping("/save")
+    public void save(){
+        ActionLog actionLog = new ActionLog();
+        actionLog.setActionType(ActionTypeEnum.DIDI_CREDENTIAL_REQUEST);
+        actionLog.setExecutionDateTime(DateUtil.getLocalDateTimeNow());
+        actionLog.setLevel(ActionLevelEnum.INFO);
+        actionLog.setMessage("messge");
+        actionLog.setUserName("username");
+        this.actionLogService.save(actionLog);
+
+        ActionLog actionLog2 = new ActionLog();
+        actionLog2.setActionType(ActionTypeEnum.BONDAREA_SYNC);
+        actionLog2.setExecutionDateTime(DateUtil.getLocalDateTimeNow().minusDays(8));
+        actionLog2.setLevel(ActionLevelEnum.ERROR);
+        actionLog2.setMessage("men sa je 2");
+        actionLog2.setUserName("aaaabbbb");
+        this.actionLogService.save(actionLog2);
+    }
+
+
 
 }

@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.model.constant.DidiAppUserOperationResult;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -27,7 +28,7 @@ import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
 
-//@RunWith(SpringRunner.class)
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
 public class DidiAppUserServiceTest {
@@ -49,8 +50,8 @@ public class DidiAppUserServiceTest {
         DidiAppUserDto didiAppUserDto = new DidiAppUserDto(40000000L,"did:ethr:0x73c47226d044af432829b60d0de38d657b0643dc" );
         DidiAppUser didiAppUser = new DidiAppUser(didiAppUserDto);
         when(didiAppUserRepository.save(any(DidiAppUser.class))).thenReturn(didiAppUser);
-        String response = didiAppUserService.registerNewAppUser(didiAppUserDto);
-        Assertions.assertEquals(response, "El nuevo usuario se registro correctamente.");
+        DidiAppUserOperationResult response = didiAppUserService.registerNewAppUser(didiAppUserDto);
+        Assertions.assertEquals(response, DidiAppUserOperationResult.NEW_USER_REGISTER_OK);
     }
 
     @Test
@@ -61,8 +62,8 @@ public class DidiAppUserServiceTest {
         when(didiAppUserRepository.findByDni(anyLong())).thenReturn(didiAppUserExisting);
 
         when(didiAppUserRepository.save(any(DidiAppUser.class))).thenReturn(didiAppUserExisting);
-        String response = didiAppUserService.registerNewAppUser(didiAppUserDtoUpdate);
-        Assertions.assertEquals(response, "Se ha modificado el DID para un usuario que posee credenciales, se generarán nuevas credenciales.");
+        DidiAppUserOperationResult response = didiAppUserService.registerNewAppUser(didiAppUserDtoUpdate);
+        Assertions.assertEquals(response, DidiAppUserOperationResult.NEW_DID_REGISTERED_FOR_USER);
         Assertions.assertEquals(didiAppUserExisting.getSyncStatus(), DidiSyncStatus.SYNC_MISSING.getCode());
     }
 

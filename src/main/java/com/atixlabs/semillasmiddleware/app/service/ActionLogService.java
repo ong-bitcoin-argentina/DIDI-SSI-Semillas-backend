@@ -110,7 +110,7 @@ public class ActionLogService {
         return  this.actionLogRepository.save(actionLog);
     }
 
-    //todo make async
+
     public ActionLog registerAction(ActionTypeEnum type, ActionLevelEnum level, String message){
         ActionLog actionLog = new ActionLog();
         String username = this.getCurrentUsername();
@@ -127,8 +127,7 @@ public class ActionLogService {
 
         actionLog = actionLogRepository.save(actionLog);
 
-        log.info("ID -- "+actionLog.getId());
-
+        log.debug(String.format("new action log register type: %s, level: %s, message: %s",type.getDescription(), level.getDescription(), message));
         return actionLog;
 
     }

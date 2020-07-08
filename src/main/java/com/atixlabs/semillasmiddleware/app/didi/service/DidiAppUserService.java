@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.didi.service;
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.*;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.model.constant.DidiAppUserOperationResult;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
@@ -18,49 +19,55 @@ import java.util.ArrayList;
 @Service
 public class DidiAppUserService {
 
+
+
     private DidiAppUserRepository didiAppUserRepository;
 
-    private ActionLogService actionLogService;
-
     @Autowired
-    public DidiAppUserService(DidiAppUserRepository didiAppUserRepository, ActionLogService actionLogService) {
+    public DidiAppUserService(DidiAppUserRepository didiAppUserRepository) {
         this.didiAppUserRepository = didiAppUserRepository;
-        this.actionLogService = actionLogService;
     }
 
-
+/*
     private void registerNewAppDidiUserAction(DidiAppUserDto didiAppUserDto){
 
         String message = String.format("Se registró el id Didi %s para el dni %d",didiAppUserDto.getDid(),didiAppUserDto.getDni());
         //TODO to aop
         this.actionLogService.registerAction(ActionTypeEnum.DIDI_CREDENTIAL_REQUEST, ActionLevelEnum.INFO,message);
+    }*/
+
+    public DidiAppUserOperationResult addNewDidiAppUser(DidiAppUserDto didiAppUserDto){
+
+        log.info("addNewDidiAppUser");
+
+        DidiAppUser didiAppUser = new DidiAppUser(didiAppUserDto);
+        didiAppUserRepository.save(didiAppUser);
+        //TODO to aop
+        // this.registerNewAppDidiUserAction(didiAppUserDto);
+        return DidiAppUserOperationResult.NEW_USER_REGISTER_OK;
     }
 
-    public String registerNewAppUser(DidiAppUserDto didiAppUserDto) {
+    public DidiAppUserOperationResult registerNewAppUser(DidiAppUserDto didiAppUserDto) {
 
         DidiAppUser didiAppUser  = didiAppUserRepository.findByDni(didiAppUserDto.getDni());
 
-        log.info("11111111");
+
         //if DNI is new.
         if (didiAppUser == null) {
-            didiAppUser = new DidiAppUser(didiAppUserDto);
-            didiAppUserRepository.save(didiAppUser);
-            //TODO to aop
-            this.registerNewAppDidiUserAction(didiAppUserDto);
-            return "El nuevo usuario se registro correctamente.";
+            return this.addNewDidiAppUser(didiAppUserDto);
         }
-        log.info("22222");
+
         if (didiAppUser.getDid().equals(didiAppUserDto.getDid())) {
             //if DID is the same:
             switch (DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus())) {
                 case SYNC_OK:
                 case SYNC_MISSING:
-                    return "El usuario con Dni: " + didiAppUser.getDni() + " ya posee sus credenciales validadas o en espera con Didi, no se realizó ninguna operación";
+                    return DidiAppUserOperationResult.USER_ALREADY_EXIST_NO_CHANGES;
 
                 case SYNC_ERROR:
                     didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
                     didiAppUserRepository.save(didiAppUser);
-                    return "Se ha registrado una nueva solucitud de vinculacion de usuario con DID";
+                    return DidiAppUserOperationResult.NEW_REQUEST_REGISTERED;
             }
         }
         else {
@@ -68,9 +75,9 @@ public class DidiAppUserService {
             didiAppUser.setDid(didiAppUserDto.getDid());
             didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
             didiAppUserRepository.save(didiAppUser);
-            return "Se ha modificado el DID para un usuario que posee credenciales, se generarán nuevas credenciales.";
+            return DidiAppUserOperationResult.NEW_DID_REGISTERED_FOR_USER;
         }
-    return "Ocurrio un error procesando la solicitud, intente nuevamente";
+    return DidiAppUserOperationResult.ERROR;
     }
 
 

@@ -1,5 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
+import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.dto.ActionDto;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
@@ -7,6 +10,7 @@ import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
 import com.atixlabs.semillasmiddleware.app.service.ActionLogService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -24,9 +28,12 @@ public class ActionController {
     public static final String URL_MAPPING = "/action";
 
     private ActionLogService actionLogService;
+    private DidiAppUserService didiAppUserService;
 
-    public ActionController(ActionLogService actionLogService){
+    @Autowired
+    public ActionController(ActionLogService actionLogService,DidiAppUserService didiAppUserService){
         this.actionLogService = actionLogService;
+        this.didiAppUserService = didiAppUserService;
     }
 
 
@@ -73,6 +80,25 @@ public class ActionController {
     public ActionTypeEnum[] getActionsTypes(){
         return ActionTypeEnum.values();
     }
+
+    @GetMapping("/test")
+    public void getActionsTest(){
+        log.info("--------------- test");
+        DidiAppUserDto didiAppUser = new DidiAppUserDto(12345678L,"123wer");
+
+        didiAppUserService.registerNewAppUser(didiAppUser);
+        log.info("--------------- FIN test");
+    }
+
+    @GetMapping("/test2")
+    public void getActionsTest2(){
+        log.info("--------------- test");
+        DidiAppUserDto didiAppUser = new DidiAppUserDto(12445678L,"1233wer");
+
+        didiAppUserService.registerNewAppUser(didiAppUser);
+        log.info("--------------- FIN test");
+    }
+
 
 
 

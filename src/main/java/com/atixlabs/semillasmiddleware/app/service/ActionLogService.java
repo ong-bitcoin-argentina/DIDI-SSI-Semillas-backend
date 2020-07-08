@@ -1,15 +1,19 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.dto.ActionDto;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
 import com.atixlabs.semillasmiddleware.app.repository.ActionLogRepository;
+import com.atixlabs.semillasmiddleware.security.util.AuthUtil;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -23,8 +27,12 @@ public class ActionLogService {
 
     private ActionLogRepository actionLogRepository;
 
-    public ActionLogService(ActionLogRepository actionLogRepository){
+    private AuthUtil authUtil;
+
+    @Autowired
+    public ActionLogService(ActionLogRepository actionLogRepository, AuthUtil authUtil){
         this.actionLogRepository = actionLogRepository;
+        this.authUtil = authUtil;
     }
 
 
@@ -100,6 +108,44 @@ public class ActionLogService {
     public ActionLog save(ActionLog actionLog){
 
         return  this.actionLogRepository.save(actionLog);
+    }
+
+    //todo make async
+    public ActionLog registerAction(ActionTypeEnum type, ActionLevelEnum level, String message){
+        ActionLog actionLog = new ActionLog();
+        String username = this.getCurrentUsername();
+        log.info(username);
+        if(username==null) {
+            username = this.getCurrentUsernameDefault();
+        }
+        actionLog.setUserName(username);
+        log.info(actionLog.getUserName());
+        actionLog.setActionType(type);
+        actionLog.setLevel(level);
+        actionLog.setMessage(message);
+        actionLog.setExecutionDateTime(DateUtil.getLocalDateTimeNow());
+
+        actionLog = actionLogRepository.save(actionLog);
+
+        log.info("ID -- "+actionLog.getId());
+
+        return actionLog;
+
+    }
+
+    private String getCurrentUsername(){
+        String currentUsername = null;
+        try{
+            currentUsername = authUtil.getCurrentUsername();
+        }catch (Exception e){
+            log.error("Can't get username logged ",e);
+        }
+
+        return currentUsername;
+    }
+
+    private String getCurrentUsernameDefault(){
+        return "desconocido"; //TODO unharcode
     }
 
 }

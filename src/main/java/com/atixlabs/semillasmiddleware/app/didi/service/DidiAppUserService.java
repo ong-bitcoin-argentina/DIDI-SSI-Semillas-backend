@@ -4,6 +4,9 @@ import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.*;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
+import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
+import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
+import com.atixlabs.semillasmiddleware.app.service.ActionLogService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -17,22 +20,36 @@ public class DidiAppUserService {
 
     private DidiAppUserRepository didiAppUserRepository;
 
+    private ActionLogService actionLogService;
+
     @Autowired
-    public DidiAppUserService(DidiAppUserRepository didiAppUserRepository) {
+    public DidiAppUserService(DidiAppUserRepository didiAppUserRepository, ActionLogService actionLogService) {
         this.didiAppUserRepository = didiAppUserRepository;
+        this.actionLogService = actionLogService;
+    }
+
+
+    private void registerNewAppDidiUserAction(DidiAppUserDto didiAppUserDto){
+
+        String message = String.format("Se registró el id Didi %s para el dni %d",didiAppUserDto.getDid(),didiAppUserDto.getDni());
+        //TODO to aop
+        this.actionLogService.registerAction(ActionTypeEnum.DIDI_CREDENTIAL_REQUEST, ActionLevelEnum.INFO,message);
     }
 
     public String registerNewAppUser(DidiAppUserDto didiAppUserDto) {
 
         DidiAppUser didiAppUser  = didiAppUserRepository.findByDni(didiAppUserDto.getDni());
 
+        log.info("11111111");
         //if DNI is new.
         if (didiAppUser == null) {
             didiAppUser = new DidiAppUser(didiAppUserDto);
             didiAppUserRepository.save(didiAppUser);
+            //TODO to aop
+            this.registerNewAppDidiUserAction(didiAppUserDto);
             return "El nuevo usuario se registro correctamente.";
         }
-
+        log.info("22222");
         if (didiAppUser.getDid().equals(didiAppUserDto.getDid())) {
             //if DID is the same:
             switch (DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus())) {

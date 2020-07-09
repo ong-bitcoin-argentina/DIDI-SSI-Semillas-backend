@@ -9,6 +9,7 @@ import com.atixlabs.semillasmiddleware.app.service.ActionLogService;
 import lombok.NoArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.aspectj.lang.JoinPoint;
+import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,12 +26,14 @@ public class ActionLogAspect {
     @Autowired
     public ActionLogAspect(ActionLogService actionLogService){
         this.actionLogService = actionLogService;
-        log.info("AOP addNewDidiAppUser");
     }
 
- 
+
     @Pointcut("execution(* com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService.registerNewAppUser(..))")
     public void registerNewAppUser() {}
+
+    @Pointcut("execution(* com.atixlabs.semillasmiddleware.app.bondarea.service.synchronizeLoans(..))")
+    public void syncBondarea() {}
 
 
 
@@ -53,6 +56,47 @@ public class ActionLogAspect {
             }
         }catch (Exception ex){
             log.error("AOP ERROR - registerNewAppUserAfter ",ex);
+        }
+
+    }
+
+    @Around(value = "syncBondarea()")
+    public Object syncBondareaAround(final ProceedingJoinPoint joinPoint) throws Throwable{
+        Object value;
+
+        try {
+            value = joinPoint.proceed();
+
+            if(((Boolean) value)){
+                this.registerSyncBondareaOk();
+            }else{
+                this.registerSyncBondareaError();
+            }
+
+        } catch (Throwable throwable) {
+            this.registerSyncBondareaError();
+            throw throwable;
+        }
+
+        return value;
+    }
+
+    private void registerSyncBondareaOk() {
+            String message = "Sincronización con Bondarea finalizada Correctamente";
+            this.saveActionLog(ActionTypeEnum.BONDAREA_SYNC, ActionLevelEnum.INFO, message);
+    }
+
+    private void registerSyncBondareaError() {
+        String message = "Sincronización con Bondarea finalizada con errores";
+        this.saveActionLog(ActionTypeEnum.BONDAREA_SYNC, ActionLevelEnum.ERROR, message);
+    }
+
+    private void saveActionLog(ActionTypeEnum actionType, ActionLevelEnum actionLevel, String message){
+
+        try {
+            this.actionLogService.registerAction(actionType, actionLevel, message);
+        } catch (Exception e) {
+            log.error("ERROR when save Action Log {} {} {} ", actionType, actionLevel, message, e);
         }
 
     }

@@ -145,9 +145,8 @@ public class Loan extends AuditableEntity {
         //Fix part
         hashBuilder.append(this.dniPerson);
         hashBuilder.append(this.idBondareaLoan.trim());
-        hashBuilder.append(this.idProductLoan.trim());
         hashBuilder.append(this.idGroup.trim());
-        hashBuilder.append(this.userId.trim());
+        hashBuilder.append(this.creationDate.hashCode());
         //control change part
         hashBuilder.append(this.status.trim());
         hashBuilder.append(this.cycleDescription.trim());

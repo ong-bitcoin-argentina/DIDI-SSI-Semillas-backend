@@ -9,6 +9,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 
 //@RunWith(SpringRunner.class)
 @SpringBootTest
@@ -24,6 +25,7 @@ public class LoanTest {
         baseLoan.setIdProductLoan("product01");
         baseLoan.setIdGroup("idGroup");
         baseLoan.setUserId("user01");
+        baseLoan.setCreationDate(LocalDate.of(2020, 6, 20));
 
         baseLoan.setStatus("ACTIVE");
         baseLoan.setCycleDescription("Cl01");
@@ -54,12 +56,12 @@ public class LoanTest {
     }
 
     @Test
-    public void loanNotEqualsIdProductLoanOk(){
+    public void loanNotEqualsCreationDAteLoanOk(){
 
         Loan baseLoan = this.getBaseLoan();
 
         Loan newLoan = this.getBaseLoan();
-        newLoan.setIdProductLoan("product02");
+        newLoan.setCreationDate(LocalDate.of(2020,6,19));
 
         Assertions.assertFalse(baseLoan.equals(newLoan));
     }

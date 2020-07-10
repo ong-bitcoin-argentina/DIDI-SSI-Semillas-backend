@@ -595,8 +595,8 @@ public class CredentialService {
 
             if (!holder.isInDefault()) {
                     this.updateCredentialCreditForActiveLoan(loan, holder);
-                    //TODO ok benefits for loan
-                    this.updateCredencialBenefitsForLoan(loan);
+
+                    credentialBenefitService.updateCredentialBenefitForActiveLoan(loan,holder);
 
             } else {
                 this.updateCredentialCreditForActiveLoan(loan, holder);
@@ -658,19 +658,6 @@ public class CredentialService {
     }
 
 
-    //TODO borrar
-    private void updateCredencialBenefitsForLoan(Loan loan) {
-        Optional<Person> opHolder = personRepository.findByDocumentNumber(loan.getDniPerson());
-        if (opHolder.isPresent()) {
-            log.info("updating benefit credential for holder" + opHolder.get().getDocumentNumber());
-
-            //TODO update benefits for holder and family
-            //List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-            //get All credential for holder, own and familiy
-            // List<CredentialBenefits> credentialBenefitHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(holderInDefault.getDocumentNumber(), activePendingStates);
-
-        }
-    }
 /*
     private void createCredentialCredit(Loan loan) throws PersonDoesNotExistsException {
         this.createNewCreditCredentials(loan);//TODO <-refactor this, one type of credential for method, and create de familiy benefits
@@ -962,17 +949,8 @@ public class CredentialService {
         areEquals = areEquals && credentialCredit.getCreditState().equals(loan.getStatus());
         areEquals = areEquals && credentialCredit.getExpiredAmount().equals(loan.getExpiredAmount());
         areEquals = areEquals && credentialCredit.getCreationDate().equals(loan.getCreationDate());
-/*
-        loan.getHash()
-        hashBuilder.append(this.dniPerson);
-        hashBuilder.append(this.idBondareaLoan.trim());
-        hashBuilder.append(this.idProductLoan.trim());
-        hashBuilder.append(this.idGroup.trim());
-        hashBuilder.append(this.userId.trim());
-        //control change part
-        hashBuilder.append(this.status.trim());
-        hashBuilder.append(this.cycleDescription.trim());
-        hashBuilder.append(this.expiredAmount.stripTrailingZeros());*/
+        areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
+
         return areEquals;
 
     }

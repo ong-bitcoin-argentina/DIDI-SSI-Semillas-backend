@@ -87,11 +87,9 @@ public class CredentialBenefitService extends CredentialCommonService {
 
                 if (opCredentialBenefitsHolder.isPresent()) {
 
-                    Optional<CredentialState> opStateRevoke = credentialStateService.getCredentialRevokeState();
-
                     credentialBenefitsHolder = opCredentialBenefitsHolder.get();
 
-                    if (credentialBenefitsHolder.getCredentialState().equals(opStateRevoke.get())) {
+                    if (this.isCredentialRevoked(credentialBenefitsHolder)) {
 
                         //Holder
                         CredentialBenefits newCredentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
@@ -132,18 +130,20 @@ public class CredentialBenefitService extends CredentialCommonService {
         }
     }
 
-
+ //TODO eliminar
     /**
      * If holder is not on default
      *      Holder
      *          If credential exists
-     *              If Credential is active and emmited, no nothing
-     *      *                     Si la Credencial esta Pendiende de Didi, no hago nada
-     *      *                     Si la Credencial esta revocada, creo una nueva credencial en estado pendiente de Didi
-     *      *                 Familiar
-     *      *                     Si la Crendencial desta Activa y Emitida, no hago nada
-     *      *                     Si la Credencial esta Pendiende de Didi, no hago nada
-     *      *                     Si la Credencial esta revocada, creo una nueva credencial en estado pendiente de Didi
+     *              If Credential is active and emmited, do nothing
+     *              If Credential is Pending DIDI, no nothing
+     *              If Credential is revoked Create new Credential
+     *      Kinsman
+     *      If credential exists
+     *      *              If Credential is active and emmited, do nothing
+     *      *              If Credential is Pending DIDI, no nothing
+     *      *              If Credential is revoked Create new Credential
+
      * @param loan
      * @param holder
      */
@@ -165,6 +165,7 @@ public class CredentialBenefitService extends CredentialCommonService {
 
         }
     }
+
 
     /**
      * If holder is not in default

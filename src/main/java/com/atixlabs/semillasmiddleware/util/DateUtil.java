@@ -39,6 +39,12 @@ public class DateUtil {
 
     }
 
+    public static String toString(LocalDate dateTime){
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        String date = dateTime.format(formatter);
+        return date;
+    }
+
 
 
 }

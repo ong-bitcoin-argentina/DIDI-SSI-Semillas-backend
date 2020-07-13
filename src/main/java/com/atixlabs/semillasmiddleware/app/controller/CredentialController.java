@@ -48,7 +48,7 @@ public class CredentialController {
     //TODO fix
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<CredentialDto> findCredentials(@RequestParam @DefaultValue("1") Integer page,
+    public Page<CredentialDto> findCredentials(@RequestParam @DefaultValue("0") Integer page,
                                           @RequestParam(required = false) String credentialType,
                                           @RequestParam(required = false) String name,
                                           @RequestParam(required = false) String dniBeneficiary,

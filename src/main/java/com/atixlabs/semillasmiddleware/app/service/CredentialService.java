@@ -257,8 +257,6 @@ public class CredentialService {
 
         Page<CredentialDto> pageDto = credentials.map(CredentialDto::constructBasedOnCredentialType);
 
-        CredentialPage credentialSet = new CredentialPage(pageDto, credentials.getNumberOfElements());
-
         return pageDto;
     }
 

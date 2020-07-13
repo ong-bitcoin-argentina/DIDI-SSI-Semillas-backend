@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.didi.service;
 
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
@@ -15,9 +16,12 @@ public class SyncDidiProcessService {
 
     private CredentialCreditService credentialCreditService;
 
+    private DidiAppUserService didiAppUserService;
+
     @Autowired
-    public SyncDidiProcessService(CredentialCreditService credentialCreditService){
+    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService){
         this.credentialCreditService = credentialCreditService;
+        this.didiAppUserService = didiAppUserService;
     }
 
     public void emmitCredentialCredits() throws CredentialException {
@@ -35,7 +39,23 @@ public class SyncDidiProcessService {
         }
     }
 
+
+    /**
+     * get current Did for holder and emmit credential
+     * @param credentialCredit
+     */
     public void emmitCredentialCredit(CredentialCredit credentialCredit){
+
+        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni());
+
+        if(didiAppUser!=null) {
+            credentialCredit.setIdDidiReceptor(didiAppUser.getDid());
+
+            //credentialCredit. save
+
+        }else{
+            log.info("Id Didi for Holder {} not exist, Credential Credit for loan {} not emmited", credentialCredit.getCreditHolderDni(), credentialCredit.getIdBondareaCredit());
+        }
 
     }
 

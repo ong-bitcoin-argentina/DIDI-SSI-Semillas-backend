@@ -147,6 +147,7 @@ public class BondareaServiceTest {
         loan2.setStatus(55);
         loan2.setCycle("cycle2");
         loan2.setExpiredAmount(new BigDecimal(0));
+        loan2.setCreationDate("20/06/2020");
         loans.add(loan2);
 
         //loan 3 modified tag
@@ -160,6 +161,7 @@ public class BondareaServiceTest {
         loan3.setStatus(55);
         loan3.setCycle("cycle3");
         loan3.setExpiredAmount(new BigDecimal(0));
+        loan3.setCreationDate("20/06/2020");
         loans.add(loan3);
 
         //loan 4 is in default
@@ -172,6 +174,7 @@ public class BondareaServiceTest {
         loan4.setStatus(55);
         loan4.setCycle("cycle4");
         loan4.setExpiredAmount(BigDecimal.valueOf(100));
+        loan4.setCreationDate("20/06/2020");
         loans.add(loan4);
 
         //new loan
@@ -183,6 +186,7 @@ public class BondareaServiceTest {
         loan5.setUserId("user5");
         loan5.setStatus(55);
         loan5.setCycle("cycle5");
+        loan5.setCreationDate("20/06/2020");
         loans.add(loan5);
 
         return loans;

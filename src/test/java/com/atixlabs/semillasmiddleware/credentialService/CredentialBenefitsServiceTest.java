@@ -85,7 +85,7 @@ public class CredentialBenefitsServiceTest {
 
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi);
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
 
         Loan loan = this.getMockLoan();
 
@@ -135,7 +135,7 @@ public class CredentialBenefitsServiceTest {
 
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         Optional<CredentialState> StatePendingDidi = createCredentialStatePendingDidiMock();
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi);
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
 
         Loan loan = this.getMockLoan();
 
@@ -206,7 +206,7 @@ public class CredentialBenefitsServiceTest {
 
 
         Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi);
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
         when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(any(Person.class))).thenReturn(null);
@@ -256,7 +256,7 @@ public class CredentialBenefitsServiceTest {
 
 
         Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi);
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
         when(credentialStateService.getCredentialRevokeState()).thenReturn(StateRevoke);
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
@@ -403,7 +403,7 @@ public class CredentialBenefitsServiceTest {
 
 
         when(credentialStateService.getCredentialRevokeState()).thenReturn(StateRevoke);
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi);
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
@@ -532,7 +532,7 @@ public class CredentialBenefitsServiceTest {
 
 
         when(credentialStateService.getCredentialRevokeState()).thenReturn(StateRevoke);
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi);
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));

@@ -617,7 +617,7 @@ public class CredentialServiceTest {
         when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(this.getCredentialPendingState());
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(this.getCredentialPendingState().get());
 
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()).get());
@@ -677,7 +677,7 @@ public class CredentialServiceTest {
         //credential benefits
         when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenReturn(getPendingCredentialHolderBenefitMock(getPersonMockWithDid().get()));
         when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(Optional.empty());
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(this.getCredentialPendingState());
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(this.getCredentialPendingState().get());
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         Loan loan = getMockLoan();
         credentialService.createNewCreditCredential(loan);
@@ -723,7 +723,7 @@ public class CredentialServiceTest {
         when(credentialStateRepository.findByStateNameIn(anyList())).thenReturn(getStateActivePending());
         when(credentialCreditRepository.save(any(CredentialCredit.class))).thenReturn(getActiveCreditMock(getMockLoan(), getPersonMockWithDid().get()));
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
-        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(this.getCredentialPendingState());
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(this.getCredentialPendingState().get());
 
         //credential benefits
         when(credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(anyLong(), anyList(), anyString())).thenReturn(getCredentialHolderBenefitMock(getPersonMockWithDid().get()));

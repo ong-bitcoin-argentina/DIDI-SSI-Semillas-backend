@@ -905,8 +905,8 @@ public class CredentialService {
         //The ID Didi Receptor leave blank for emmit step
 
         //Person do not have a DID yet -> set as pending didi
-        Optional<CredentialState> opStateActive = credentialStateService.getCredentialPendingDidiState();
-        credentialCredit.setCredentialState(opStateActive.get());
+        CredentialState statePendindDidi = credentialStateService.getCredentialPendingDidiState();
+        credentialCredit.setCredentialState(statePendindDidi);
 
 
         //This depends of the type of loan from bondarea
@@ -1305,9 +1305,9 @@ public class CredentialService {
     }
 
     public Boolean isCredentialPendingDidi(Credential credential) throws CredentialException {
-        Optional<CredentialState> opStatePendingDidi = credentialStateService.getCredentialPendingDidiState();
+        CredentialState statePendingDidi = credentialStateService.getCredentialPendingDidiState();
 
-        return (credential.getCredentialState().equals(opStatePendingDidi.get()));
+        return (credential.getCredentialState().equals(statePendingDidi));
     }
 }
 

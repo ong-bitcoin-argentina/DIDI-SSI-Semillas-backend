@@ -39,13 +39,13 @@ public class CredentialStateService {
         return opStateActive;
     }
 
-    public Optional<CredentialState> getCredentialPendingDidiState() throws CredentialException {
+    public CredentialState getCredentialPendingDidiState() throws CredentialException {
 
         Optional<CredentialState> opStateActive = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         if (!opStateActive.isPresent()) {
             throw new CredentialException(String.format("Cant't obtain Credential State 'PENDING_DIDI' (code:%s)", CredentialStatesCodes.PENDING_DIDI.getCode()));
         }
-        return opStateActive;
+        return opStateActive.get();
     }
 
 }

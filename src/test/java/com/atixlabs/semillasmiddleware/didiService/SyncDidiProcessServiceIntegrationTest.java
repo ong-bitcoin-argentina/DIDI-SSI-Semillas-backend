@@ -7,25 +7,29 @@ import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.mockito.Spy;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
 
-import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
 
+@RunWith(SpringRunner.class)
 @SpringBootTest
 @Slf4j
-public class SyncDidiProcessServiceTest {
+public class SyncDidiProcessServiceIntegrationTest {
 
     @Mock
     private CredentialCreditService credentialCreditService;
@@ -33,17 +37,17 @@ public class SyncDidiProcessServiceTest {
     @Mock
     private DidiAppUserService didiAppUserService;
 
-    @Mock
-    private DidiService didiService;
-
+    @Autowired
     @InjectMocks
     private SyncDidiProcessService syncDidiProcessService;
+
+    @Autowired
+    private DidiService didiService;
 
     @Before
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
     }
-
 
     @Test
     public void whenEmmitCredentialCreditsAndCredentialCreditsToEmmitIsEmpty_thenDoNothing() throws CredentialException {
@@ -52,23 +56,7 @@ public class SyncDidiProcessServiceTest {
 
         syncDidiProcessService.emmitCredentialCredits();
 
-
     }
-
-    @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialCreditNotEmmit(){
-
-        when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
-
-        CredentialCredit credentialCredit = this.getCredentialCreditMock();
-        credentialCredit.setIdDidiReceptor(null);
-
-        syncDidiProcessService.emmitCredentialCredit(credentialCredit);
-
-        Assert.assertNull(credentialCredit.getIdDidiReceptor());
-
-    }
-
 
     @Test
     public void whenHolderHaveDIDRegister_thenEmmitCredentialCredit(){
@@ -107,6 +95,7 @@ public class SyncDidiProcessServiceTest {
         credentialCredit.setBeneficiaryLastName("Tior");
         credentialCredit.setCreditHolderFirstName("Flor");
         credentialCredit.setCreditHolderLastName("Tiore");
+        credentialCredit.setCredentialCategory(CredentialCategoriesCodes.CREDIT.getCode());
 
         return credentialCredit;
     }
@@ -119,5 +108,4 @@ public class SyncDidiProcessServiceTest {
 
         return didiAppUser;
     }
-
 }

@@ -18,10 +18,13 @@ public class SyncDidiProcessService {
 
     private DidiAppUserService didiAppUserService;
 
+    private DidiService didiService;
+
     @Autowired
-    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService){
+    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService){
         this.credentialCreditService = credentialCreditService;
         this.didiAppUserService = didiAppUserService;
+        this.didiService = didiService;
     }
 
     public void emmitCredentialCredits() throws CredentialException {
@@ -50,8 +53,9 @@ public class SyncDidiProcessService {
 
         if(didiAppUser!=null) {
             credentialCredit.setIdDidiReceptor(didiAppUser.getDid());
+            credentialCreditService.save(credentialCredit);
 
-            //credentialCredit. save
+            didiService.createAndEmmitCertificateDidi(credentialCredit);
 
         }else{
             log.info("Id Didi for Holder {} not exist, Credential Credit for loan {} not emmited", credentialCredit.getCreditHolderDni(), credentialCredit.getIdBondareaCredit());

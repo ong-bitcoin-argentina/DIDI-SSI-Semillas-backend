@@ -34,6 +34,10 @@ public class CredentialCreditService extends CredentialCommonService {
         return  credentialCreditRepository.findByCredentialState(pendingDidiState);
     }
 
+    public CredentialCredit save(CredentialCredit credentialCredit){
+        return credentialCreditRepository.save(credentialCredit);
+    }
+
     @Override
     protected Logger getLog() {
         return log;

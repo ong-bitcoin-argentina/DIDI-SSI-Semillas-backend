@@ -35,6 +35,8 @@ public class SyncDidiProcessService {
             log.info("No credit credentials to emmit were found");
         }else{
 
+            log.info(" {} Credential Credits to emmit", credentialCreditsToEmmit.size());
+
             for(CredentialCredit credentialCredit : credentialCreditsToEmmit){
                 this.emmitCredentialCredit(credentialCredit);
             }
@@ -48,6 +50,8 @@ public class SyncDidiProcessService {
      * @param credentialCredit
      */
     public void emmitCredentialCredit(CredentialCredit credentialCredit){
+
+        log.info("Emmiting Credential Credit id {} idBondarea {} holder {}",credentialCredit.getId(), credentialCredit.getIdBondareaCredit(), credentialCredit.getCreditHolderDni());
 
         DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni());
 

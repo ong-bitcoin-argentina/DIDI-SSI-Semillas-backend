@@ -461,44 +461,41 @@ public class BondareaService {
      * @throws InvalidProcessException
      */
     public boolean synchronizeMockLoans(List<BondareaLoanDto> bondareaMock) throws InvalidProcessException {
-        //check if process in credentials is not running
-        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS.getCode()) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA.getCode())) {
-            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.RUNNING.getCode());
-            List<BondareaLoanDto> loansDto;
+        //check if this process and credentials are not running
+        if (!processControlService.isProcessRunning(ProcessNamesCodes.CREDENTIALS) && !processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA)) {
+
+            ProcessControl process = processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.RUNNING);
+
+            LocalDateTime startTime = process.getStartTime();
 
             try {
 
-                if (bondareaMock != null) {
-                    LocalDateTime startTime;
-                    try {
-                        loansDto = bondareaMock;
+                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
+                log.info("BONDAREA - GET LOANS -- from " + todayPlusOne.toString());
 
-                        startTime = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.BONDAREA.getCode());
-                    } catch (InvalidProcessException ex) {
-                        log.error("Could not get the process ! " + ex.getMessage());
-                        processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                        return false;
-                    }
-                    this.createAndUpdateLoans(loansDto, startTime);
-                    this.setPendingLoansFinalStatusMock(startTime);
+                List<BondareaLoanDto> loansDto;
 
-                    try {
-                        // check credits for defaults
-                        this.checkCreditsForDefault();
-                    } catch (InvalidExpiredConfigurationException ex) {
-                        log.error(ex.getMessage());
-                        processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
-                        return false;
-                    }
+                    loansDto = bondareaMock;
+                    log.info("BONDAREA - GET LOANS -- " + (loansDto!=null ? loansDto.size():0) +" recieved");
+
+
+                this.createAndUpdateLoans(loansDto, startTime);
+                this.handlePendingLoans(startTime);
+
+                try {
+                    this.checkCreditsForDefault();
+                } catch (InvalidExpiredConfigurationException ex) {
+                    log.error("Error checking defaults loans ",ex);
+                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
+                    return false;
                 }
 
                 //finish process
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.OK.getCode());
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.OK);
                 return true;
-
             } catch (Exception ex) {
-                log.error("Exception unknown " + ex.getMessage());
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA.getCode(), ProcessControlStatusCodes.FAIL.getCode());
+                log.error("Exception unknown ", ex);
+                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
                 return false;
             }
 

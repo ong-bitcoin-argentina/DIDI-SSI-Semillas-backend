@@ -433,7 +433,7 @@ public class BondareaService {
             try {
                 List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
 
-                if (loansDto.size() > 0) {
+                if ((loansDto!=null) && (!loansDto.isEmpty())) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     log.info("loan has FINALIZED");

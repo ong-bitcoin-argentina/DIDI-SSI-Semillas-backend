@@ -141,7 +141,7 @@ public class DidiServiceTest {
         when(credentialRepository.findByBeneficiaryDniIn(any(ArrayList.class))).thenReturn(beneficiaries);
 
         //tuve que hacer createCertificatyDidi public para poder mockear. (luego usaré spy)
-        when(didiService.createCertificateDidiCall(anyString(), any(DidiCredentialData.class))).thenReturn(createDidiCredentialResponseOkMock());
+        when(didiService.createCertificateDidiCall(anyString(), any(DidiCredentialData.class), anyBoolean())).thenReturn(createDidiCredentialResponseOkMock());
 
         String response = didiService.didiCredentialSync();
 

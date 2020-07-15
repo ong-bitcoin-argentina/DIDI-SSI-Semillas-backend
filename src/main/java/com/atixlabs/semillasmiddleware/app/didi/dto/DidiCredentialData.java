@@ -23,6 +23,19 @@ public class DidiCredentialData {
                 "}";
     }
 
+    public String getTemplateName(Credential credential){
+
+        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
+             case CREDIT:
+                return "Semillas Crediticia";
+
+            default:
+                return credential.getCredentialCategory();
+
+        }
+
+    }
+
     public DidiCredentialData(Credential credential){
         this.participant = new ArrayList<>();
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();
@@ -34,7 +47,7 @@ public class DidiCredentialData {
 
         this.others = new ArrayList<>();
         this.cert = new ArrayList<>();
-        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", credential.getCredentialCategory()));
+        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", this.getTemplateName(credential)));
 
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
             case IDENTITY:

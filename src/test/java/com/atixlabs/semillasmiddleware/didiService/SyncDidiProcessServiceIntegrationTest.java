@@ -11,6 +11,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
@@ -59,6 +60,7 @@ public class SyncDidiProcessServiceIntegrationTest {
     }
 
     @Test
+    @Ignore
     public void whenHolderHaveDIDRegister_thenEmmitCredentialCredit(){
 
 

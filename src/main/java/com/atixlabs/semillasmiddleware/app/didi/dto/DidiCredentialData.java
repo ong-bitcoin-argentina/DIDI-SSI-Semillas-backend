@@ -23,6 +23,19 @@ public class DidiCredentialData {
                 "}";
     }
 
+    public String getTemplateName(Credential credential){
+
+        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
+             case CREDIT:
+                return "Semillas Crediticia";
+
+            default:
+                return credential.getCredentialCategory();
+
+        }
+
+    }
+
     public DidiCredentialData(Credential credential){
         this.participant = new ArrayList<>();
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();
@@ -34,7 +47,7 @@ public class DidiCredentialData {
 
         this.others = new ArrayList<>();
         this.cert = new ArrayList<>();
-        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", credential.getCredentialCategory()));
+        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", this.getTemplateName(credential)));
 
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
             case IDENTITY:
@@ -91,12 +104,13 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Dni Titular", credential.getBeneficiaryDni().toString()));
         cert.add(new DidiCredentialDataElem("Id Credito", credential.getIdBondareaCredit()));
         cert.add(new DidiCredentialDataElem("Tipo de Credito", credential.getCreditType()));
-        //cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
+        cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
+        cert.add(new DidiCredentialDataElem("Ciclo", credential.getCurrentCycle()));
         cert.add(new DidiCredentialDataElem("Estado de Credito", credential.getCreditState()));
         cert.add(new DidiCredentialDataElem("Saldo Vencido", credential.getExpiredAmount().toString()));
         cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycle()));
         cert.add(new DidiCredentialDataElem("Cuotas Totales", String.valueOf(credential.getTotalCycles())));
-        cert.add(new DidiCredentialDataElem("Cuotas Vencidas", String.valueOf(credential.getAmountExpiredCycles())));
+     //   cert.add(new DidiCredentialDataElem("Cuotas Vencidas", String.valueOf(credential.getAmountExpiredCycles())));
     }
 
 }

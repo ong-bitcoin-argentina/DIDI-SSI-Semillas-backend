@@ -385,6 +385,8 @@ public class BondareaService {
                 Loan loanToUpdate = opLoanToUpdate.get();
                 Loan loanToSave = new Loan(loanDtoToSave);
 
+                log.info("--- loanToSave Creatriondate "+loanToSave.getCreationDate());
+
                 if (!loanToUpdate.equals(loanToSave)) {
                     log.info("Updating credit " + loanDtoToSave.getIdBondareaLoan());
                     loanToUpdate.merge(loanToSave);
@@ -478,6 +480,7 @@ public class BondareaService {
                     loansDto = bondareaMock;
                     log.info("BONDAREA - GET LOANS -- " + (loansDto!=null ? loansDto.size():0) +" recieved");
 
+                    log.info("Creatriondate "+loansDto.get(0).getCreationDate());
 
                 this.createAndUpdateLoans(loansDto, startTime);
                 this.handlePendingLoans(startTime);

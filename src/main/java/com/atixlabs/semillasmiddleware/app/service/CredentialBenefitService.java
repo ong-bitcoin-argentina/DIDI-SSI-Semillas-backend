@@ -318,8 +318,8 @@ public class CredentialBenefitService extends CredentialCommonService {
             throw new CredentialException("Id Didi Issuer Not exists, cant build credential");
         }
 
-        Optional<CredentialState> opStatePendingDidi = credentialStateService.getCredentialPendingDidiState();
-        credentialBenefits.setCredentialState(opStatePendingDidi.get());
+        CredentialState statePendingDidi = credentialStateService.getCredentialPendingDidiState();
+        credentialBenefits.setCredentialState(statePendingDidi);
 
         //Person is holder or family
         if (personType.equals(PersonTypesCodes.HOLDER)) {

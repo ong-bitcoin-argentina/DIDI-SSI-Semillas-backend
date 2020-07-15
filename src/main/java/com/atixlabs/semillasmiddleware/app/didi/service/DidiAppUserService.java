@@ -93,4 +93,8 @@ public class DidiAppUserService {
         return false;
     }
 
+    public DidiAppUser getDidiAppUserByDni(Long dni){
+        return didiAppUserRepository.findByDni(dni);
+    }
+
 }

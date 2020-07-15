@@ -279,7 +279,7 @@ public class DidiService {
 
 
 
-    private void createAndEmmitCertificateDidi(Credential credential) {
+    public void createAndEmmitCertificateDidi(Credential credential) {
 
         DidiCreateCredentialResponse didiCreateCredentialResponse = this.createCertificateDidi(credential);
 
@@ -321,6 +321,8 @@ public class DidiService {
     private DidiCreateCredentialResponse createCertificateDidi(Credential credential) {
         log.info("didiSync: createCertificateDidi");
 
+        boolean split = false;
+
         String didiTemplateCode = "";
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())) {
             case IDENTITY:
@@ -345,13 +347,13 @@ public class DidiService {
 
 
         DidiCredentialData didiCredentialData = new DidiCredentialData(credential);
-        return createCertificateDidiCall(didiTemplateCode, didiCredentialData);
+        return createCertificateDidiCall(didiTemplateCode, didiCredentialData, split);
     }
 
-    public DidiCreateCredentialResponse createCertificateDidiCall(String didiTemplateCode, DidiCredentialData didiCredentialData) {
+    public DidiCreateCredentialResponse createCertificateDidiCall(String didiTemplateCode, DidiCredentialData didiCredentialData, boolean split) {
         log.info("didiSync: createCertificateDidiCall");
 
-        Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(didiAuthToken,didiTemplateCode,true,didiCredentialData);
+        Call<DidiCreateCredentialResponse> callSync = endpointInterface.createCertificate(didiAuthToken,didiTemplateCode,split,didiCredentialData);
 
         log.info(didiCredentialData.toString());
         try {
@@ -487,5 +489,7 @@ public class DidiService {
         }
         return null;
     }
+
+
 
 }

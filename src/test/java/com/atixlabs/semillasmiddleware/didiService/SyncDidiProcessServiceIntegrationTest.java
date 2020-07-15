@@ -6,8 +6,13 @@ import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
@@ -34,6 +39,9 @@ public class SyncDidiProcessServiceIntegrationTest {
 
     @Mock
     private CredentialCreditService credentialCreditService;
+
+    @Mock
+    private CredentialBenefitService credentialBenefitService;
 
     @Mock
     private DidiAppUserService didiAppUserService;
@@ -78,6 +86,25 @@ public class SyncDidiProcessServiceIntegrationTest {
 
     }
 
+    @Test
+    @Ignore
+    public void whenHolderHaveDIDRegisterCredentialBenefitPendingDidi_thenEmmitCredentialBenefit(){
+
+        CredentialBenefits credentialBenefits = this.getCredentialBenefitsMock();
+        credentialBenefits.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
+
+        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
+
+        //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
+
+
+    }
+
 
     private CredentialCredit getCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();
@@ -100,6 +127,28 @@ public class SyncDidiProcessServiceIntegrationTest {
         credentialCredit.setCredentialCategory(CredentialCategoriesCodes.CREDIT.getCode());
 
         return credentialCredit;
+    }
+
+    private CredentialBenefits getCredentialBenefitsMock(){
+        CredentialBenefits credentialBenefits = new CredentialBenefits();
+        credentialBenefits.setCredentialState(this.getPendingDidiCredentialStateMock());
+        credentialBenefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
+        credentialBenefits.setBeneficiaryFirstName("Flor");
+        credentialBenefits.setBeneficiaryLastName("Tior");
+        credentialBenefits.setCreditHolderFirstName("Flor");
+        credentialBenefits.setCreditHolderLastName("Tiore");
+        credentialBenefits.setCreditHolderDni(36637842L);
+        credentialBenefits.setBeneficiaryDni(36637842L);
+        credentialBenefits.setIdDidiReceptor(null);
+        credentialBenefits.setId(1L);
+        credentialBenefits.setCreditHolder(null);
+        credentialBenefits.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
+
+        return credentialBenefits;
+    }
+
+    private CredentialState getPendingDidiCredentialStateMock(){
+        return new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode());
     }
 
     private DidiAppUser getDidiAppUserMock(){

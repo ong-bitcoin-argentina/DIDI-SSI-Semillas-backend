@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
@@ -349,6 +350,16 @@ public class CredentialBenefitService extends CredentialCommonService {
 
         }
         return credentialBenefits;
+    }
+
+    public List<CredentialBenefits> getCredentialBenefitsOnPendindDidiState() throws CredentialException {
+        CredentialState pendingDidiState = credentialStateService.getCredentialPendingDidiState();
+
+        return  credentialBenefitsRepository.findByCredentialState(pendingDidiState);
+    }
+
+    public CredentialBenefits save(CredentialBenefits credentialBenefits){
+        return credentialBenefitsRepository.save(credentialBenefits);
     }
 
     @Override

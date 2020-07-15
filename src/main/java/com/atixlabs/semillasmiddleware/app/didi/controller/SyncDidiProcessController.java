@@ -41,4 +41,20 @@ public class SyncDidiProcessController {
         jsonMessage.put("message", "Credentials Credit Emmited OK");
         return jsonMessage;
     }
+
+    @GetMapping("/emmitcredentialsbenefits")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, String> emmitCredentialsBenefits(){
+        Map<String, String> jsonMessage = new HashMap<>();
+
+        try {
+            this.syncDidiProcessService.emmitCredentialsBenefit();
+        } catch (CredentialException e) {
+            log.error("ERROR emmiting credentials benefits",e);
+            jsonMessage.put("message", "ERROR "+e.getMessage());
+        }
+
+        jsonMessage.put("message", "Credentials Benefits Emmited OK");
+        return jsonMessage;
+    }
 }

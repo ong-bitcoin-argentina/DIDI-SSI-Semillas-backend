@@ -278,7 +278,6 @@ public class DidiService {
     }
 
 
-
     public void createAndEmmitCertificateDidi(Credential credential) {
 
         DidiCreateCredentialResponse didiCreateCredentialResponse = this.createCertificateDidi(credential);

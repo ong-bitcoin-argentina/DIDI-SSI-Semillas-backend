@@ -28,6 +28,8 @@ public class DidiCredentialData {
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
              case CREDIT:
                 return "Semillas Crediticia";
+            case BENEFIT:
+                return "Semillas Beneficio";
 
             default:
                 return credential.getCredentialCategory();

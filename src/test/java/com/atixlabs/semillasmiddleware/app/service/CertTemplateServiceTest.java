@@ -6,15 +6,22 @@ import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
 import static org.mockito.Mockito.*;
 
 public class CertTemplateServiceTest {
+
+    private String didiTemplateCodeCredit = "code didiTemplateCodeCredit";
 
     @Mock
     private CertTemplateRepository certTemplateRepository;
@@ -24,7 +31,9 @@ public class CertTemplateServiceTest {
 
     @Before
     public void setupMocks(){
+
         MockitoAnnotations.initMocks(this);
+        ReflectionTestUtils.setField(certTemplateService, didiTemplateCodeCredit, didiTemplateCodeCredit);
     }
 
     @Test
@@ -57,9 +66,9 @@ public class CertTemplateServiceTest {
 
         when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
 
-        String result = certTemplateService.getCertTemplateDescription(CredentialCategoriesCodes.CREDIT);
+        String result = certTemplateService.getCertTemplateCode(CredentialCategoriesCodes.CREDIT);
 
-        Assert.assertEquals("Semillas Crediticia", result);
+        Assert.assertEquals(didiTemplateCodeCredit, result);
 
     }
 

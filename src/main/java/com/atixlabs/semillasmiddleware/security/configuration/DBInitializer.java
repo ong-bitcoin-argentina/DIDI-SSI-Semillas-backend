@@ -1,7 +1,9 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
+import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
@@ -10,6 +12,7 @@ import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.repository.ProcessControlRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
@@ -28,6 +31,7 @@ import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -51,8 +55,25 @@ public class DBInitializer implements CommandLineRunner {
 
     private ProcessControlRepository processControlRepository;
 
+    private CertTemplateRepository certTemplateRepository;
+
+    @Value("${didi.semillas.template_code_identity}")
+    private String didiTemplateCodeIdentity;
+
+    @Value("${didi.semillas.template_code_entrepreneurship}")
+    private String didiTemplateCodeEntrepreneurship;
+
+    @Value("${didi.semillas.template_code_dwelling}")
+    private String didiTemplateCodeDwelling;
+
+    @Value("${didi.semillas.template_code_benefit}")
+    private String didiTemplateCodeBenefit;
+
+    @Value("${didi.semillas.template_code_credit}")
+    private String didiTemplateCodeCredit;
+
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, CertTemplateRepository certTemplateRepository) {
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
@@ -61,6 +82,7 @@ public class DBInitializer implements CommandLineRunner {
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.revocationReasonRepository = revocationReasonRepository;
         this.processControlRepository = processControlRepository;
+        this.certTemplateRepository = certTemplateRepository;
     }
 
     @Override
@@ -329,5 +351,41 @@ public class DBInitializer implements CommandLineRunner {
             processControlRepository.save(process);
         }
 
+        this.loadCertTemplatesValues();
+    }
+
+    /**
+     *    IDENTITY("Identidad"),
+     *     DWELLING("Vivienda"),
+     *     ENTREPRENEURSHIP("Emprendimiento"),
+     *     BENEFIT("Beneficio Semillas"),
+     *     CREDIT("Crediticia");
+     */
+    private void loadCertTemplatesValues(){
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.IDENTITY)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.IDENTITY,didiTemplateCodeIdentity,"Semillas Identidad" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.DWELLING)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.DWELLING,didiTemplateCodeDwelling,"Semillas Vivienda" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.ENTREPRENEURSHIP)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.ENTREPRENEURSHIP,didiTemplateCodeEntrepreneurship,"Semillas Emprendimiento" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.CREDIT)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.CREDIT,didiTemplateCodeCredit,"Semillas Crediticia" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT,didiTemplateCodeBenefit,"Semillas Beneficio" );
+            certTemplateRepository.save(certTemplate);
+        }
+    }
+    private boolean isCertTemplateValueExists(CredentialCategoriesCodes credentialCategoriesCodes){
+
+        Optional<CertTemplate> certTemplate =  certTemplateRepository.findByCredentialCategoriesCodes(credentialCategoriesCodes);
+        return certTemplate.isPresent();
     }
 }

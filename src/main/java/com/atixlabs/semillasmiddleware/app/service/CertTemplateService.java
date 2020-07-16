@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -65,6 +66,7 @@ public class CertTemplateService {
     }
 
     public String getCertTemplateCode(CredentialCategoriesCodes credentialCategoriesCodes){
+        log.debug("Geting template code for credential {}",credentialCategoriesCodes.getCode());
         Optional<CertTemplate> certTemplate = certTemplateRepository.findByCredentialCategoriesCodes(credentialCategoriesCodes);
         if(certTemplate.isPresent()){
             return certTemplate.get().getTemplateCode();
@@ -92,5 +94,9 @@ public class CertTemplateService {
 
         }
 
+    }
+
+    public List<CertTemplate> getAllTemplates(){
+        return certTemplateRepository.findAll();
     }
 }

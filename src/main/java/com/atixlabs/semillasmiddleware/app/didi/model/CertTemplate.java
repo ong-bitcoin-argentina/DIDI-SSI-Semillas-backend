@@ -5,10 +5,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Getter
 @Setter
@@ -18,12 +15,20 @@ import javax.persistence.Table;
 public class CertTemplate {
 
     @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique=true, nullable=false)
     private CredentialCategoriesCodes credentialCategoriesCodes;
 
     private String templateCode;
 
     @Column(length = 80)
     private String templateDescription;
+
+    public CertTemplate(CredentialCategoriesCodes credentialCategoriesCodes, String templateCode, String templateDescription){
+        this.credentialCategoriesCodes = credentialCategoriesCodes;
+        this.templateCode = templateCode;
+        this.templateDescription = templateDescription;
+    }
 }

@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -39,7 +40,7 @@ public class ActionLogService {
     @Value("${app.pageSize}")
     private String size;
 
-    public Page<ActionDto>  find(Integer page, String username, Integer level, Integer actionType, String message, LocalDateTime dateFrom, LocalDateTime dateTo){
+    public Page<ActionDto>  find(Integer page, String username, Integer level, Integer actionType, String message, Instant dateFrom, Instant dateTo){
 
         Page<ActionLog> actions;
         Pageable pageable = null;
@@ -86,14 +87,14 @@ public class ActionLogService {
     private List<ActionDto> getListMockActions(){
         ActionDto actionDto = new ActionDto();
         actionDto.setActionType("DIDI");
-        actionDto.setTexecutionDateTime(DateUtil.getLocalDateTimeNow());
+        actionDto.setTexecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
         actionDto.setLevel("ERROR");
         actionDto.setMessage("Error de conexión con Didi");
         actionDto.setUser("admin");
 
         ActionDto actionDto2 = new ActionDto();
         actionDto2.setActionType("DIDI");
-        actionDto2.setTexecutionDateTime(DateUtil.getLocalDateTimeNow());
+        actionDto2.setTexecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
         actionDto2.setLevel("INFO");
         actionDto2.setMessage("Sincronización DIDI OK");
         actionDto2.setUser("admin");
@@ -123,7 +124,7 @@ public class ActionLogService {
         actionLog.setActionType(type);
         actionLog.setLevel(level);
         actionLog.setMessage(message);
-        actionLog.setExecutionDateTime(DateUtil.getLocalDateTimeNow());
+        actionLog.setExecutionDateTime(DateUtil.getInstantNow());//DateUtil.getLocalDateTimeNow());
 
         actionLog = actionLogRepository.save(actionLog);
 

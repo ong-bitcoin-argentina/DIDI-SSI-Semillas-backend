@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.format.annotation.DateTimeFormat;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Getter
@@ -15,7 +16,7 @@ public class ActionDto {
     private Long id;
 
    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    private LocalDateTime texecutionDateTime;
+    private Instant texecutionDateTime;
 
     private  String user;
 

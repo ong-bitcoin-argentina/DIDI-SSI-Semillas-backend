@@ -17,6 +17,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Slf4j
@@ -54,8 +55,8 @@ public class ActionController {
                                         @RequestParam(required = false) Integer level,
                                         @RequestParam(required = false) Integer actionType,
                                         @RequestParam(required = false) String message,
-                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateFrom,
-                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime dateTo
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dateFrom,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dateTo
                                           ) {
 
         Page<ActionDto> actions;
@@ -107,7 +108,7 @@ public class ActionController {
     public void save(){
         ActionLog actionLog = new ActionLog();
         actionLog.setActionType(ActionTypeEnum.DIDI_CREDENTIAL_REQUEST);
-        actionLog.setExecutionDateTime(DateUtil.getLocalDateTimeNow());
+        actionLog.setExecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
         actionLog.setLevel(ActionLevelEnum.INFO);
         actionLog.setMessage("messge");
         actionLog.setUserName("username");
@@ -115,7 +116,7 @@ public class ActionController {
 
         ActionLog actionLog2 = new ActionLog();
         actionLog2.setActionType(ActionTypeEnum.BONDAREA_SYNC);
-        actionLog2.setExecutionDateTime(DateUtil.getLocalDateTimeNow().minusDays(8));
+        actionLog2.setExecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow().minusDays(8));
         actionLog2.setLevel(ActionLevelEnum.ERROR);
         actionLog2.setMessage("men sa je 2");
         actionLog2.setUserName("aaaabbbb");

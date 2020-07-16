@@ -87,14 +87,14 @@ public class ActionLogService {
     private List<ActionDto> getListMockActions(){
         ActionDto actionDto = new ActionDto();
         actionDto.setActionType("DIDI");
-        actionDto.setTexecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
+        actionDto.setExecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
         actionDto.setLevel("ERROR");
         actionDto.setMessage("Error de conexión con Didi");
         actionDto.setUser("admin");
 
         ActionDto actionDto2 = new ActionDto();
         actionDto2.setActionType("DIDI");
-        actionDto2.setTexecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
+        actionDto2.setExecutionDateTime(Instant.now());//DateUtil.getLocalDateTimeNow());
         actionDto2.setLevel("INFO");
         actionDto2.setMessage("Sincronización DIDI OK");
         actionDto2.setUser("admin");

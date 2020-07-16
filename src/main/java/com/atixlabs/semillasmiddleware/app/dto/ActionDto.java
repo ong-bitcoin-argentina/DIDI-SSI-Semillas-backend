@@ -16,7 +16,7 @@ public class ActionDto {
     private Long id;
 
    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
-    private Instant texecutionDateTime;
+    private Instant executionDateTime;
 
     private  String user;
 
@@ -30,7 +30,7 @@ public class ActionDto {
 
     public ActionDto(ActionLog actionLog){
         this.id = actionLog.getId();
-        this.texecutionDateTime = actionLog.getExecutionDateTime();
+        this.executionDateTime = actionLog.getExecutionDateTime();
         this.user = actionLog.getUserName();
         this.level = actionLog.getLevel().getDescription();
         this.actionType = actionLog.getActionType().getDescription();

@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.LocalDateTime;
 
@@ -11,7 +12,9 @@ import java.time.LocalDateTime;
 @Setter
 public class ActionDto {
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "dd/MM/yyyy hh:mm:ss")
+    private Long id;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSZ")
     private LocalDateTime texecutionDateTime;
 
     private  String user;
@@ -25,6 +28,7 @@ public class ActionDto {
     public ActionDto(){};
 
     public ActionDto(ActionLog actionLog){
+        this.id = actionLog.getId();
         this.texecutionDateTime = actionLog.getExecutionDateTime();
         this.user = actionLog.getUserName();
         this.level = actionLog.getLevel().getDescription();

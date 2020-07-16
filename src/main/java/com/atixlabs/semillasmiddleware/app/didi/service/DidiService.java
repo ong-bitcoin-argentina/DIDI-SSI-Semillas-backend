@@ -11,6 +11,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
+import com.atixlabs.semillasmiddleware.app.service.CertTemplateService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -53,6 +54,7 @@ public class DidiService {
     private CredentialDwellingRepository credentialDwellingRepository;
     private CredentialBenefitsRepository credentialBenefitsRepository;
     private CredentialCreditRepository credentialCreditRepository;
+    private CertTemplateService certTemplateService;
 
     private String didiBaseUrl;
     private String didiUsername;
@@ -99,7 +101,8 @@ public class DidiService {
             @Value("${didi.semillas.template_code_entrepreneurship}") String didiTemplateCodeEntrepreneurship,
             @Value("${didi.semillas.template_code_dwelling}") String didiTemplateCodeDwelling,
             @Value("${didi.semillas.template_code_benefit}") String didiTemplateCodeBenefit,
-            @Value("${didi.semillas.template_code_credit}") String didiTemplateCodeCredit) {
+            @Value("${didi.semillas.template_code_credit}") String didiTemplateCodeCredit,
+            CertTemplateService certTemplateService) {
 
         this.didiAppUserService = didiAppUserService;
         this.didiAppUserRepository = didiAppUserRepository;
@@ -121,6 +124,7 @@ public class DidiService {
         this.didiTemplateCodeDwelling = didiTemplateCodeDwelling;
         this.didiTemplateCodeBenefit = didiTemplateCodeBenefit;
         this.didiTemplateCodeCredit = didiTemplateCodeCredit;
+        this.certTemplateService = certTemplateService;
 
         this.setUpRetrofitForDidiAndGetToken();
     }
@@ -322,7 +326,12 @@ public class DidiService {
 
         boolean split = false;
 
-        String didiTemplateCode = "";
+
+        CredentialCategoriesCodes credentialCategoriesCodes = CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory());
+
+        String didiTemplateCode = certTemplateService.getCertTemplateCode(credentialCategoriesCodes);
+        String didiTemplateDescription = certTemplateService.getCertTemplateDescription(credentialCategoriesCodes);
+        /*
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())) {
             case IDENTITY:
                 didiTemplateCode = didiTemplateCodeIdentity;
@@ -342,10 +351,9 @@ public class DidiService {
             default:
                 log.error("didiSync: La categoria de credencial no es valida");
                 return null;
-        }
+        }*/
 
-
-        DidiCredentialData didiCredentialData = new DidiCredentialData(credential);
+        DidiCredentialData didiCredentialData = new DidiCredentialData(credential, didiTemplateDescription);
         return createCertificateDidiCall(didiTemplateCode, didiCredentialData, split);
     }
 

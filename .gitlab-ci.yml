@@ -62,7 +62,7 @@ deploy-produccion:
     - cd ./ops/docker && bash ./deploy.sh "staging"
   only:
     refs:
-      - SEMI-135-setup-ci
+      - ADD-PRODUCTION-CONFIG
       # Only run on release/x.y.x and hotfix/xxxx
       - /^release.*$/
       - develop

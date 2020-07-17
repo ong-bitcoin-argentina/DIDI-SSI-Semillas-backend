@@ -39,13 +39,13 @@ deploy-staging:
       - develop
       - /^hotfix.*$/
 
-deploy-produccion:
+deploy-production:
   stage: deploy
   image: docker.atixlabs.com/docker:19.03.1-compose
   when: manual
   environment:
-    name: staging
-    url: https://frontend.staging.semillas.atixlabs.com
+    name: production
+    url: https://semillas.didi.org.ar
   services:
     - docker:19.03.1-dind
   script:
@@ -65,7 +65,6 @@ deploy-produccion:
       - ADD-PRODUCTION-CONFIG
       # Only run on release/x.y.x and hotfix/xxxx
       - /^release.*$/
-      - develop
       - /^hotfix.*$/
 
 

@@ -50,7 +50,7 @@ services:
       - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--certificatesResolvers.le.acme.email=info@atixlabs.com"
       - "--certificatesResolvers.le.acme.storage=/certs/acme.json"
-      - "--certificatesResolvers.le.acme.httpChallenge.entrypoint=web"
+      - "--certificatesresolvers.le.acme.tlschallenge=true"
     ports:
       - "80:80"
       - "443:443"

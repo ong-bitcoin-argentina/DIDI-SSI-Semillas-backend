@@ -23,9 +23,9 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
-      - "traefik.http.routers.backend.entrypoints=web-secure"
-      #- "traefik.http.routers.backend.tls=true"
-      #- "traefik.http.routers.backend.tls.certresolver=le"
+      - "traefik.http.routers.backend.entrypoints=web"
+      - "traefik.http.routers.backend.tls=false"
+     # - "traefik.http.routers.backend.tls.certresolver=le"
   #frontend:
    # image: docker.atixlabs.com/semillas/semillas/semillas-middleware-frontend:0.0.1-c93610ce
     #environment:
@@ -44,14 +44,14 @@ services:
       - "--api.insecure=true"
       - "--providers.docker=true"
       - "--providers.docker.exposedbydefault=false"
-      #- "--entrypoints.web-secure.address=:443"
+      # - "--entrypoints.web-secure.address=:443"
       - "--entrypoints.web.address=:80"
-      - "--certificatesResolvers.le.acme.email=info@atixlabs.com"
+      #- "--certificatesResolvers.le.acme.email=info@atixlabs.com"
       #- "--certificatesResolvers.le.acme.storage=/certs/acme.json"
       #- "--certificatesResolvers.le.acme.httpChallenge.entrypoint=web"
     ports:
       - "80:80"
-      #- "443:443"
+      - "443:443"
       - "127.0.0.1:8080:8080"
     volumes:
       # - ./trafeik-${ENVIRONMENT}.toml:/etc/traefik/traefik.toml

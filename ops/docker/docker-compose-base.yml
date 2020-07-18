@@ -23,21 +23,11 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
-      - "traefik.http.routers.frontend.entrypoints=web-secure"
+      - "traefik.http.routers.backend.entrypoints=web-secure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
-  #frontend:
-   # image: docker.atixlabs.com/semillas/semillas/semillas-middleware-frontend:0.0.1-c93610ce
-    #environment:
-     # - ENVIRONMENT=${ENVIRONMENT}
-    #depends_on:
-    #  - backend
-    #labels:
-     # - "traefik.enable=true"
-     # - "traefik.http.routers.frontend.rule=Host(`${FRONTEND_URL}`)"
-     # - "traefik.http.routers.frontend.entrypoints=web-secure"
-     # - "traefik.http.routers.frontend.tls=true"
-     # - "traefik.http.routers.frontend.tls.certresolver=le"
+  volumes:
+      - "/var/log/semillas:/var/log/semillas"
   proxy:
     image: traefik:v2.2.0
     command:

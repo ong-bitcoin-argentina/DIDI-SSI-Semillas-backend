@@ -45,7 +45,7 @@ deploy-production:
   when: manual
   environment:
     name: production
-    url: https://semillas.didi.org.ar
+    url: http://semillas.didi.org.ar
   services:
     - docker:19.03.1-dind
   script:

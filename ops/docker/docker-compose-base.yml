@@ -32,7 +32,7 @@ services:
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
-      #- "--providers.docker.exposedbydefault=false"
+      - "--providers.docker.exposedbydefault=false"
       #- "--entrypoints.web-secure.address=:443"
       - "--entrypoints.web.address=:80"
       #- "--entrypoints.web.http.redirections.entryPoint.to=web-secure"

@@ -4,26 +4,26 @@ services:
     image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-486b780b
     environment:
       - spring_profiles_active=${ENVIRONMENT}
-      - SEMILLAS_DB=${SEMILLAS_DB}
-      - SEMILLAS_DB_USER=${SEMILLAS_DB_USER}
-      - SEMILLAS_DB_PASSWORD=${SEMILLAS_DB_PASSWORD}
-      - BONDAREA_KEY=${BONDAREA_ACCESS_KEY}
-      - BONDAREA_URL=${BONDAREA_BASE_URL}
-      - BONDAREA_TOKEN=${BONDAREA_ACCESS_TOKEN}
-      - BONDAREA_IDM=${BONDAREA_IDM}
-      - DIDI_URL=${DIDI_URL}
-      - DIDI_USERNAME=${DIDI_USERNAME}
-      - DIDI_PASSWORD=${DIDI_PASSWORD}
-      - DIDI_URL_PROD=${DIDI_URL_PROD}
-      - DIDI_USERNAME_PROD=${DIDI_USERNAME_PROD}
-      - DIDI_PASSWORD_PROD=${DIDI_PASSWORD_PROD}
+    #  - SEMILLAS_DB=${SEMILLAS_DB}
+    #  - SEMILLAS_DB_USER=${SEMILLAS_DB_USER}
+    #  - SEMILLAS_DB_PASSWORD=${SEMILLAS_DB_PASSWORD}
+   #   - BONDAREA_KEY=${BONDAREA_ACCESS_KEY}
+   #   - BONDAREA_URL=${BONDAREA_BASE_URL}
+   #   - BONDAREA_TOKEN=${BONDAREA_ACCESS_TOKEN}
+   #   - BONDAREA_IDM=${BONDAREA_IDM}
+   #   - DIDI_URL=${DIDI_URL}
+   #   - DIDI_USERNAME=${DIDI_USERNAME}
+   #   - DIDI_PASSWORD=${DIDI_PASSWORD}
+   #   - DIDI_URL_PROD=${DIDI_URL_PROD}
+   #   - DIDI_USERNAME_PROD=${DIDI_USERNAME_PROD}
+   #   - DIDI_PASSWORD_PROD=${DIDI_PASSWORD_PROD}
 
     depends_on:
       - db
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
-      #- "traefik.http.routers.backend.entrypoints=web-secure"
+      - "traefik.http.routers.backend.entrypoints=web"
       #- "traefik.http.routers.backend.tls=true"
       #- "traefik.http.routers.backend.tls.certresolver=le"
 

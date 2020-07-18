@@ -23,26 +23,26 @@ services:
     labels:
       - "traefik.enable=true"
       - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
-      - "traefik.http.routers.backend.entrypoints=web-secure"
-      - "traefik.http.routers.backend.tls=true"
-      - "traefik.http.routers.backend.tls.certresolver=le"
+      #- "traefik.http.routers.backend.entrypoints=web-secure"
+      #- "traefik.http.routers.backend.tls=true"
+      #- "traefik.http.routers.backend.tls.certresolver=le"
 
   proxy:
     image: traefik:v2.2.0
     command:
       - "--api.insecure=true"
       - "--providers.docker=true"
-      - "--providers.docker.exposedbydefault=false"
-      - "--entrypoints.web-secure.address=:443"
+      #- "--providers.docker.exposedbydefault=false"
+      #- "--entrypoints.web-secure.address=:443"
       - "--entrypoints.web.address=:80"
-      - "--entrypoints.web.http.redirections.entryPoint.to=web-secure"
-      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
-      - "--certificatesResolvers.le.acme.email=info@atixlabs.com"
-      - "--certificatesResolvers.le.acme.storage=/certs/acme.json"
-      - "--certificatesresolvers.le.acme.tlschallenge=true"
+      #- "--entrypoints.web.http.redirections.entryPoint.to=web-secure"
+      #- "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      #- "--certificatesResolvers.le.acme.email=info@atixlabs.com"
+      #- "--certificatesResolvers.le.acme.storage=/certs/acme.json"
+      #- "--certificatesresolvers.le.acme.tlschallenge=true"
     ports:
       - "80:80"
-      - "443:443"
+      #- "443:443"
       - "127.0.0.1:8080:8080"
     volumes:
       # - ./trafeik-${ENVIRONMENT}.toml:/etc/traefik/traefik.toml

@@ -33,7 +33,7 @@ public class CertTemplateServiceTest {
     public void setupMocks(){
 
         MockitoAnnotations.initMocks(this);
-        ReflectionTestUtils.setField(certTemplateService, didiTemplateCodeCredit, didiTemplateCodeCredit);
+        ReflectionTestUtils.setField(certTemplateService, "didiTemplateCodeCredit", didiTemplateCodeCredit);
     }
 
     @Test

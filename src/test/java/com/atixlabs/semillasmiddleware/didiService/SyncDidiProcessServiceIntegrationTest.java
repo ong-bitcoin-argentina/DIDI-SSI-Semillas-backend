@@ -32,8 +32,8 @@ import java.util.ArrayList;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest
+//@RunWith(SpringRunner.class)
+//@SpringBootTest
 @Slf4j
 public class SyncDidiProcessServiceIntegrationTest {
 

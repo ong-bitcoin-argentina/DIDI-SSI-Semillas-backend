@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-04a2866e
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-1d7062a6
     environment:
       - spring_profiles_active=${ENVIRONMENT}
       - SEMILLAS_DB=${SEMILLAS_DB}
@@ -58,7 +58,7 @@ services:
       - POSTGRES_PASSWORD=${SEMILLAS_DB_PASSWORD}
       - POSTGRES_DB=${SEMILLAS_DB}
     volumes:
-      - "/db-data-pd:/var/lib/postgresql/data"
+      - "/db-data-prod:/var/lib/postgresql/data"
     ports:
       - "127.0.0.1:5432:5432"
   #monitoring:

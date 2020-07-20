@@ -38,7 +38,7 @@ public class DidiCredentialData {
 
     }
 
-    public DidiCredentialData(Credential credential){
+    public DidiCredentialData(Credential credential, String templateDescription){
         this.participant = new ArrayList<>();
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();
         //DID + NOMBRE + APELLIDO are mandatory fields
@@ -49,7 +49,7 @@ public class DidiCredentialData {
 
         this.others = new ArrayList<>();
         this.cert = new ArrayList<>();
-        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", this.getTemplateName(credential)));
+        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", templateDescription));
 
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
             case IDENTITY:

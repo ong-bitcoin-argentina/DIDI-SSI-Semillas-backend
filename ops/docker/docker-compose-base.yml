@@ -58,7 +58,7 @@ services:
       - POSTGRES_PASSWORD=${SEMILLAS_DB_PASSWORD}
       - POSTGRES_DB=${SEMILLAS_DB}
     volumes:
-      - "/db-data:/var/lib/postgresql/data"
+      - "/db-data-prod:/var/lib/postgresql/data"
     ports:
       - "127.0.0.1:5432:5432"
   #monitoring:

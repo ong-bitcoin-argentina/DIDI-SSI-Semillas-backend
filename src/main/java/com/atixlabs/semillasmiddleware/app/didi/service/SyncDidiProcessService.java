@@ -4,9 +4,11 @@ import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
+import com.atixlabs.semillasmiddleware.app.service.CredentialDwellingService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,17 +26,20 @@ public class SyncDidiProcessService {
 
     private CredentialIdentityService credentialIdentityService;
 
+    private CredentialDwellingService credentialDwellingService;
+
     private DidiAppUserService didiAppUserService;
 
     private DidiService didiService;
 
     @Autowired
-    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService){
+    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService, CredentialDwellingService credentialDwellingService){
         this.credentialCreditService = credentialCreditService;
         this.didiAppUserService = didiAppUserService;
         this.didiService = didiService;
         this.credentialBenefitService = credentialBenefitService;
         this.credentialIdentityService = credentialIdentityService;
+        this.credentialDwellingService = credentialDwellingService;
     }
 
     public void emmitCredentialCredits() throws CredentialException {
@@ -84,6 +89,23 @@ public class SyncDidiProcessService {
 
             for(CredentialIdentity credentialIdentity : credentialsIdentityToEmmit){
                 this.emmitCredentialIdentity(credentialIdentity);
+            }
+
+        }
+    }
+
+    public void emmitCredentialsDwelling() throws CredentialException {
+
+        List<CredentialDwelling> credentialDwellingToEmmit = this.credentialDwellingService.getCredentialDwellingOnPendindDidiState();
+
+        if(credentialDwellingToEmmit==null || credentialDwellingToEmmit.isEmpty()){
+            log.info("No Dwelling credentials to emmit were found");
+        }else{
+
+            log.info(" {} Credential IdenDwellingtity to emmit", credentialDwellingToEmmit.size());
+
+            for(CredentialDwelling credentialDwelling : credentialDwellingToEmmit){
+                this.emmitCredentialDwelling(credentialDwelling);
             }
 
         }
@@ -148,6 +170,23 @@ public class SyncDidiProcessService {
 
     }
 
+    public void emmitCredentialDwelling(CredentialDwelling credentialDwelling){
+
+        log.info("Emmiting Credential Dwelling id {} holder {} beneficiary {}",credentialDwelling.getId(), credentialDwelling.getCreditHolderDni(), credentialDwelling.getBeneficiaryDni());
+
+        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni());
+
+        if(didiAppUser!=null) {
+            credentialDwelling.setIdDidiReceptor(didiAppUser.getDid());
+            credentialDwelling = credentialDwellingService.save(credentialDwelling);
+
+            didiService.createAndEmmitCertificateDidi(credentialDwelling);
+
+        }else{
+            log.info("Id Didi for Beneficiary {} not exist, Credential Dwelling {} not emmited", credentialDwelling.getCreditHolderDni(), credentialDwelling.getId());
+        }
+
+    }
 
 
 

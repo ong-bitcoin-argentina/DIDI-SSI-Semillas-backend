@@ -8,6 +8,7 @@ import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -15,6 +16,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonType
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
+import com.atixlabs.semillasmiddleware.app.service.CredentialDwellingService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -44,6 +46,9 @@ public class SyncDidiProcessServiceTest {
 
     @Mock
     private CredentialIdentityService credentialIdentityService;
+
+    @Mock
+    private CredentialDwellingService credentialDwellingService;
 
     @Mock
     private DidiAppUserService didiAppUserService;
@@ -195,6 +200,54 @@ public class SyncDidiProcessServiceTest {
 
     }
 
+
+    //DWELLING
+    @Test
+    public void whenEmmitCredentialDWellingAndCredentialsDwellingToEmmitIsEmpty_thenDoNothing() throws CredentialException {
+
+        when(credentialDwellingService.getCredentialDwellingOnPendindDidiState()).thenReturn(new ArrayList<CredentialDwelling>());
+
+        syncDidiProcessService.emmitCredentialsDwelling();
+
+        verify(didiService, times(0)).createAndEmmitCertificateDidi(any());
+
+    }
+
+    @Test
+    public void whenHolderNotHaveDIDRegister_thenCredentialDwellingNotEmmit(){
+
+        when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
+
+        CredentialDwelling credentialDwelling = this.getCredentialDwellingMock();
+
+        credentialDwelling.setIdDidiReceptor(null);
+
+        syncDidiProcessService.emmitCredentialDwelling(credentialDwelling);
+
+        Assert.assertNull(credentialDwelling.getIdDidiReceptor());
+
+    }
+
+
+    @Test
+    public void whenHolderHaveDIDRegisterAndCredentialDwellingPendindDidi_thenEmmitCredentialDwelling(){
+
+
+        CredentialDwelling credentialDwelling = this.getCredentialDwellingMock();
+        credentialDwelling.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(credentialDwellingService.save(credentialDwelling)).thenReturn(credentialDwelling);
+
+        syncDidiProcessService.emmitCredentialDwelling(credentialDwelling);
+
+        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialDwelling);
+
+
+    }
+
     private CredentialCredit getCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();
         credentialCredit.setCreditHolderDni(36637842L);
@@ -253,6 +306,26 @@ public class SyncDidiProcessServiceTest {
         credentialIdentity.setBeneficiaryBirthDate(LocalDate.of(1990,12,12));
 
         return credentialIdentity;
+    }
+
+    private CredentialDwelling getCredentialDwellingMock(){
+        CredentialDwelling credentialDwelling = new CredentialDwelling();
+        credentialDwelling.setCredentialState(this.getPendingDidiCredentialStateMock());
+        credentialDwelling.setBeneficiaryFirstName("Flor");
+        credentialDwelling.setBeneficiaryLastName("Tior");
+        credentialDwelling.setCreditHolderFirstName("Flor");
+        credentialDwelling.setCreditHolderLastName("Tiore");
+        credentialDwelling.setCreditHolderDni(36637842L);
+        credentialDwelling.setBeneficiaryDni(36637842L);
+        credentialDwelling.setIdDidiReceptor(null);
+        credentialDwelling.setId(1L);
+        credentialDwelling.setCreditHolder(null);
+        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
+        credentialDwelling.setDwellingType("casa");
+        credentialDwelling.setDwellingAddress("Direccion 123");
+        credentialDwelling.setPossessionType("Dueño");
+
+        return credentialDwelling;
     }
 
     private CredentialState getPendingDidiCredentialStateMock(){

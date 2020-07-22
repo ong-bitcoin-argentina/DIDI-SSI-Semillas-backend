@@ -6,6 +6,7 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor
@@ -19,7 +20,7 @@ public class ActionLog {
     private Long id;
 
     @Column(nullable = false)
-    private LocalDateTime executionDateTime;
+    private Instant executionDateTime;
 
     @Column(length = 50)
     private  String userName;
@@ -47,11 +48,11 @@ public class ActionLog {
         this.id = id;
     }
 
-    public LocalDateTime getExecutionDateTime() {
+    public Instant getExecutionDateTime() {
         return executionDateTime;
     }
 
-    public void setExecutionDateTime(LocalDateTime executionDateTime) {
+    public void setExecutionDateTime(Instant executionDateTime) {
         this.executionDateTime = executionDateTime;
     }
 

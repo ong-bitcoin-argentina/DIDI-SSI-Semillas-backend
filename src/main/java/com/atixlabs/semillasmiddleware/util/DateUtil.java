@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.util;
 
 import org.springframework.stereotype.Component;
 
+import java.time.Instant;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -45,6 +46,9 @@ public class DateUtil {
         return date;
     }
 
+    public static Instant getInstantNow(){
+        return Instant.now();
+    }
 
 
 }

@@ -11,6 +11,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -21,7 +22,7 @@ public class ActionLogRepositoryImpl implements  ActionLogRepositoryCustom {
     protected EntityManager em;
 
     @Override
-    public Page<ActionLog> find(Pageable page, String username, ActionLevelEnum level, ActionTypeEnum actionType, String message, LocalDateTime dateFrom, LocalDateTime dateTo){
+    public Page<ActionLog> find(Pageable page, String username, ActionLevelEnum level, ActionTypeEnum actionType, String message, Instant dateFrom, Instant dateTo){
 
         CriteriaBuilder cb = em.getCriteriaBuilder();
         CriteriaQuery<ActionLog> cq = cb.createQuery(ActionLog.class);

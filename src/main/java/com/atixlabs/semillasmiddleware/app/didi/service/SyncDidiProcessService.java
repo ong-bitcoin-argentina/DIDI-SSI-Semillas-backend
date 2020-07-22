@@ -4,8 +4,10 @@ import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
+import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -20,16 +22,19 @@ public class SyncDidiProcessService {
 
     private CredentialBenefitService credentialBenefitService;
 
+    private CredentialIdentityService credentialIdentityService;
+
     private DidiAppUserService didiAppUserService;
 
     private DidiService didiService;
 
     @Autowired
-    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService){
+    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService){
         this.credentialCreditService = credentialCreditService;
         this.didiAppUserService = didiAppUserService;
         this.didiService = didiService;
         this.credentialBenefitService = credentialBenefitService;
+        this.credentialIdentityService = credentialIdentityService;
     }
 
     public void emmitCredentialCredits() throws CredentialException {
@@ -44,6 +49,41 @@ public class SyncDidiProcessService {
 
             for(CredentialCredit credentialCredit : credentialCreditsToEmmit){
                 this.emmitCredentialCredit(credentialCredit);
+            }
+
+        }
+    }
+
+    public void emmitCredentialsBenefit() throws CredentialException {
+
+        List<CredentialBenefits> credentialBenefitsToEmmit = this.credentialBenefitService.getCredentialBenefitsOnPendindDidiState();
+
+        if(credentialBenefitsToEmmit==null || credentialBenefitsToEmmit.isEmpty()){
+            log.info("No benefits credentials to emmit were found");
+        }else{
+
+            log.info(" {} Credential Benefits to emmit", credentialBenefitsToEmmit.size());
+
+            for(CredentialBenefits credentialBenefits : credentialBenefitsToEmmit){
+                this.emmitCredentialBenefit(credentialBenefits);
+            }
+
+        }
+    }
+
+
+    public void emmitCredentialsIdentity() throws CredentialException {
+
+        List<CredentialIdentity> credentialsIdentityToEmmit = this.credentialIdentityService.getCredentialIdentityOnPendindDidiState();
+
+        if(credentialsIdentityToEmmit==null || credentialsIdentityToEmmit.isEmpty()){
+            log.info("No Identity credentials to emmit were found");
+        }else{
+
+            log.info(" {} Credential Identity to emmit", credentialsIdentityToEmmit.size());
+
+            for(CredentialIdentity credentialIdentity : credentialsIdentityToEmmit){
+                this.emmitCredentialIdentity(credentialIdentity);
             }
 
         }
@@ -90,23 +130,26 @@ public class SyncDidiProcessService {
 
     }
 
+    public void emmitCredentialIdentity(CredentialIdentity credentialIdentity){
 
-    public void emmitCredentialsBenefit() throws CredentialException {
+        log.info("Emmiting Credential identity id {} holder {} beneficiary {}",credentialIdentity.getId(), credentialIdentity.getCreditHolderDni(), credentialIdentity.getBeneficiaryDni());
 
-        List<CredentialBenefits> credentialBenefitsToEmmit = this.credentialBenefitService.getCredentialBenefitsOnPendindDidiState();
+        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
 
-        if(credentialBenefitsToEmmit==null || credentialBenefitsToEmmit.isEmpty()){
-            log.info("No benefits credentials to emmit were found");
+        if(didiAppUser!=null) {
+            credentialIdentity.setIdDidiReceptor(didiAppUser.getDid());
+            credentialIdentity = credentialIdentityService.save(credentialIdentity);
+
+            didiService.createAndEmmitCertificateDidi(credentialIdentity);
+
         }else{
-
-            log.info(" {} Credential Benefits to emmit", credentialBenefitsToEmmit.size());
-
-            for(CredentialBenefits credentialBenefits : credentialBenefitsToEmmit){
-                this.emmitCredentialBenefit(credentialBenefits);
-            }
-
+            log.info("Id Didi for Beneficiary {} not exist, Credential Identity {} not emmited", credentialIdentity.getCreditHolderDni(), credentialIdentity.getId());
         }
+
     }
+
+
+
 
 
 

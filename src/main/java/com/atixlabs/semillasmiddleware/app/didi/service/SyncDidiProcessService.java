@@ -3,12 +3,15 @@ package com.atixlabs.semillasmiddleware.app.didi.service;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Slf4j
 @Service
@@ -39,7 +42,50 @@ public class SyncDidiProcessService {
         this.credentialEntrepreneurshipService = credentialEntrepreneurshipService;
     }
 
-    public void emmitCredentialCredits() throws CredentialException {
+
+    public Map<CredentialCategoriesCodes, String> emmitAllCredentialsOnPendindDidiState(){
+
+        Map<CredentialCategoriesCodes, String> response = new HashMap<CredentialCategoriesCodes, String>();
+
+        try {
+            this.emmitCredentialsIdentity();
+        } catch (CredentialException e) {
+            log.error("Error emmiting Identity credentials : {} ",e.getMessage(), e);
+            response.put(CredentialCategoriesCodes.IDENTITY,e.getMessage());
+        }
+
+        try {
+            this.emmitCredentialsDwelling();
+        } catch (CredentialException e) {
+            log.error("Error emmiting Dwelling credentials : {} ",e.getMessage(), e);
+            response.put(CredentialCategoriesCodes.DWELLING,e.getMessage());
+        }
+
+        try {
+            this.emmitCredentialsEntrepreneurship();
+        } catch (CredentialException e) {
+            log.error("Error emmiting Entrepreneurship credentials : {} ",e.getMessage(), e);
+            response.put(CredentialCategoriesCodes.ENTREPRENEURSHIP,e.getMessage());
+        }
+
+        try {
+            this.emmitCredentialsCredit();
+        } catch (CredentialException e) {
+            log.error("Error emmiting Credit credentials : {} ",e.getMessage(), e);
+            response.put(CredentialCategoriesCodes.CREDIT,e.getMessage());
+        }
+
+        try {
+            this.emmitCredentialsBenefit();
+        } catch (CredentialException e) {
+            log.error("Error emmiting Benefit credentials : {} ",e.getMessage(), e);
+            response.put(CredentialCategoriesCodes.BENEFIT,e.getMessage());
+        }
+
+        return response;
+    }
+
+    public void emmitCredentialsCredit() throws CredentialException {
 
         List<CredentialCredit> credentialCreditsToEmmit = this.credentialCreditService.getCredentialCreditsOnPendindDidiState();
 

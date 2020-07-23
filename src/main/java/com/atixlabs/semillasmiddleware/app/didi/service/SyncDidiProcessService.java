@@ -2,14 +2,8 @@ package com.atixlabs.semillasmiddleware.app.didi.service;
 
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialDwellingService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
+import com.atixlabs.semillasmiddleware.app.model.credential.*;
+import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,18 +22,21 @@ public class SyncDidiProcessService {
 
     private CredentialDwellingService credentialDwellingService;
 
+    private CredentialEntrepreneurshipService credentialEntrepreneurshipService;
+
     private DidiAppUserService didiAppUserService;
 
     private DidiService didiService;
 
     @Autowired
-    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService, CredentialDwellingService credentialDwellingService){
+    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService, CredentialDwellingService credentialDwellingService, CredentialEntrepreneurshipService credentialEntrepreneurshipService){
         this.credentialCreditService = credentialCreditService;
         this.didiAppUserService = didiAppUserService;
         this.didiService = didiService;
         this.credentialBenefitService = credentialBenefitService;
         this.credentialIdentityService = credentialIdentityService;
         this.credentialDwellingService = credentialDwellingService;
+        this.credentialEntrepreneurshipService = credentialEntrepreneurshipService;
     }
 
     public void emmitCredentialCredits() throws CredentialException {
@@ -102,10 +99,27 @@ public class SyncDidiProcessService {
             log.info("No Dwelling credentials to emmit were found");
         }else{
 
-            log.info(" {} Credential IdenDwellingtity to emmit", credentialDwellingToEmmit.size());
+            log.info(" {} Credential Dwellingtity to emmit", credentialDwellingToEmmit.size());
 
             for(CredentialDwelling credentialDwelling : credentialDwellingToEmmit){
                 this.emmitCredentialDwelling(credentialDwelling);
+            }
+
+        }
+    }
+
+    public void emmitCredentialsEntrepreneurship() throws CredentialException {
+
+        List<CredentialEntrepreneurship> credentialsEntrepreneurshipToEmmit = this.credentialEntrepreneurshipService.getCredentialEntrepreneurshipOnPendindDidiState();
+
+        if(credentialsEntrepreneurshipToEmmit==null || credentialsEntrepreneurshipToEmmit.isEmpty()){
+            log.info("No Entrepreneurship credentials to emmit were found");
+        }else{
+
+            log.info(" {} Credential Entrepreneurship to emmit", credentialsEntrepreneurshipToEmmit.size());
+
+            for(CredentialEntrepreneurship credentialEntrepreneurship : credentialsEntrepreneurshipToEmmit){
+                this.emmitCredentialEntrepreneurship(credentialEntrepreneurship);
             }
 
         }
@@ -189,7 +203,23 @@ public class SyncDidiProcessService {
     }
 
 
+    public void emmitCredentialEntrepreneurship(CredentialEntrepreneurship credentialEntrepreneurship){
 
+        log.info("Emmiting Credential Entrepreneurship id {} holder {} beneficiary {}",credentialEntrepreneurship.getId(), credentialEntrepreneurship.getCreditHolderDni(), credentialEntrepreneurship.getBeneficiaryDni());
+
+        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni());
+
+        if(didiAppUser!=null) {
+            credentialEntrepreneurship.setIdDidiReceptor(didiAppUser.getDid());
+            credentialEntrepreneurship = credentialEntrepreneurshipService.save(credentialEntrepreneurship);
+
+            didiService.createAndEmmitCertificateDidi(credentialEntrepreneurship);
+
+        }else{
+            log.info("Id Didi for Beneficiary {} not exist, Credential Entrepreneurship {} not emmited", credentialEntrepreneurship.getCreditHolderDni(), credentialEntrepreneurship.getId());
+        }
+
+    }
 
 
 }

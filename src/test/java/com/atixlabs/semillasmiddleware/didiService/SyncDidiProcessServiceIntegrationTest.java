@@ -6,16 +6,12 @@ import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
+import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
+import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Ignore;
@@ -48,6 +44,12 @@ public class SyncDidiProcessServiceIntegrationTest {
 
     @Mock
     private CredentialIdentityService credentialIdentityService;
+
+    @Mock
+    private CredentialDwellingService credentialDwellingService;
+
+    @Mock
+    private CredentialEntrepreneurshipService credentialEntrepreneurshipService;
 
     @Mock
     private DidiAppUserService didiAppUserService;
@@ -112,7 +114,6 @@ public class SyncDidiProcessServiceIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void whenHolderHaveDIDRegisterCredentialIdentityPendingDidi_thenEmmitCredentialIdentity(){
 
         CredentialIdentity credentialIdentity = this.getCredentialIdentityMock();
@@ -124,6 +125,25 @@ public class SyncDidiProcessServiceIntegrationTest {
         when(credentialIdentityService.save(credentialIdentity)).thenReturn(credentialIdentity);
 
         syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);
+
+        //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
+
+
+    }
+
+
+    @Test
+    public void whenHolderHaveDIDRegisterCredentialDwellingPendingDidi_thenEmmitCredentialDwelling(){
+
+        CredentialDwelling credentialDwelling = this.getCredentialDwellingMock();
+        credentialDwelling.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(credentialDwellingService.save(credentialDwelling)).thenReturn(credentialDwelling);
+
+        syncDidiProcessService.emmitCredentialDwelling(credentialDwelling);
 
         //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
 
@@ -182,13 +202,32 @@ public class SyncDidiProcessServiceIntegrationTest {
         credentialIdentity.setBeneficiaryDni(36637842L);
         credentialIdentity.setIdDidiReceptor(null);
         credentialIdentity.setId(1L);
-        credentialIdentity.setCreditHolder(null);
-        credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
+        credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
         credentialIdentity.setRelationWithCreditHolder("familiar");
         credentialIdentity.setBeneficiaryGender("Masculino");
         credentialIdentity.setBeneficiaryBirthDate(LocalDate.of(1990,12,12));
 
         return credentialIdentity;
+    }
+
+    private CredentialDwelling getCredentialDwellingMock(){
+        CredentialDwelling credentialDwelling = new CredentialDwelling();
+        credentialDwelling.setCredentialState(this.getPendingDidiCredentialStateMock());
+        credentialDwelling.setBeneficiaryFirstName("Flor");
+        credentialDwelling.setBeneficiaryLastName("Tior");
+        credentialDwelling.setCreditHolderFirstName("Flor");
+        credentialDwelling.setCreditHolderLastName("Tiore");
+        credentialDwelling.setCreditHolderDni(36637842L);
+        credentialDwelling.setBeneficiaryDni(36637842L);
+        credentialDwelling.setIdDidiReceptor(null);
+        credentialDwelling.setId(1L);
+        credentialDwelling.setCreditHolder(null);
+        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
+        credentialDwelling.setDwellingType("casa");
+        credentialDwelling.setDwellingAddress("Direccion 123");
+        credentialDwelling.setPossessionType("Dueño");
+
+        return credentialDwelling;
     }
 
     private CredentialState getPendingDidiCredentialStateMock(){

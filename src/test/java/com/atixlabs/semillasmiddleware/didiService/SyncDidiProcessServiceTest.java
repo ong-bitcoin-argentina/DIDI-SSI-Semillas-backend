@@ -6,18 +6,13 @@ import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
+import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialDwellingService;
-import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
+import com.atixlabs.semillasmiddleware.app.service.*;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
 import org.junit.Before;
@@ -49,6 +44,9 @@ public class SyncDidiProcessServiceTest {
 
     @Mock
     private CredentialDwellingService credentialDwellingService;
+
+    @Mock
+    private CredentialEntrepreneurshipService credentialEntrepreneurshipService;
 
     @Mock
     private DidiAppUserService didiAppUserService;
@@ -245,6 +243,51 @@ public class SyncDidiProcessServiceTest {
 
         verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialDwelling);
 
+    }
+
+
+    //Entrepreneurship
+    @Test
+    public void whenEmmitCredentialEntrepreneurshipAndCredentialsEntrepreneurshipToEmmitIsEmpty_thenDoNothing() throws CredentialException {
+
+        when(credentialEntrepreneurshipService.getCredentialEntrepreneurshipOnPendindDidiState()).thenReturn(new ArrayList<CredentialEntrepreneurship>());
+
+        syncDidiProcessService.emmitCredentialsEntrepreneurship();
+
+        verify(didiService, times(0)).createAndEmmitCertificateDidi(any());
+
+    }
+
+    @Test
+    public void whenHolderNotHaveDIDRegister_thenCredentialEntrepreneurshipNotEmmit(){
+
+        when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
+
+        CredentialEntrepreneurship credentialEntrepreneurship = this.getCredentialEntrepreneurshipMock();
+
+        credentialEntrepreneurship.setIdDidiReceptor(null);
+
+        syncDidiProcessService.emmitCredentialEntrepreneurship(credentialEntrepreneurship);
+
+        Assert.assertNull(credentialEntrepreneurship.getIdDidiReceptor());
+
+    }
+
+    @Test
+    public void whenHolderHaveDIDRegisterAndCredentialEntrepreneurshipPendindDidi_thenEmmitCredentialEntrepreneurship(){
+
+
+        CredentialEntrepreneurship credentialEntrepreneurship = this.getCredentialEntrepreneurshipMock();
+        credentialEntrepreneurship.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(credentialEntrepreneurshipService.save(credentialEntrepreneurship)).thenReturn(credentialEntrepreneurship);
+
+        syncDidiProcessService.emmitCredentialEntrepreneurship(credentialEntrepreneurship);
+
+        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialEntrepreneurship);
 
     }
 
@@ -300,7 +343,7 @@ public class SyncDidiProcessServiceTest {
         credentialIdentity.setIdDidiReceptor(null);
         credentialIdentity.setId(1L);
         credentialIdentity.setCreditHolder(null);
-        credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
+        credentialIdentity.setCredentialCategory(CredentialCategoriesCodes.IDENTITY.getCode());
         credentialIdentity.setRelationWithCreditHolder("familiar");
         credentialIdentity.setBeneficiaryGender("Masculino");
         credentialIdentity.setBeneficiaryBirthDate(LocalDate.of(1990,12,12));
@@ -320,12 +363,35 @@ public class SyncDidiProcessServiceTest {
         credentialDwelling.setIdDidiReceptor(null);
         credentialDwelling.setId(1L);
         credentialDwelling.setCreditHolder(null);
-        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.BENEFIT.getCode());
+        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
         credentialDwelling.setDwellingType("casa");
         credentialDwelling.setDwellingAddress("Direccion 123");
         credentialDwelling.setPossessionType("Dueño");
 
         return credentialDwelling;
+    }
+
+    private CredentialEntrepreneurship getCredentialEntrepreneurshipMock(){
+        CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
+        credentialEntrepreneurship.setCredentialState(this.getPendingDidiCredentialStateMock());
+        credentialEntrepreneurship.setBeneficiaryFirstName("Flor");
+        credentialEntrepreneurship.setBeneficiaryLastName("Tior");
+        credentialEntrepreneurship.setCreditHolderFirstName("Flor");
+        credentialEntrepreneurship.setCreditHolderLastName("Tiore");
+        credentialEntrepreneurship.setCreditHolderDni(36637842L);
+        credentialEntrepreneurship.setBeneficiaryDni(36637842L);
+        credentialEntrepreneurship.setIdDidiReceptor(null);
+        credentialEntrepreneurship.setId(1L);
+        credentialEntrepreneurship.setCreditHolder(null);
+        credentialEntrepreneurship.setCredentialCategory(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
+        credentialEntrepreneurship.setEntrepreneurshipAddress("Direccion 123");
+        credentialEntrepreneurship.setEntrepreneurshipType("Comercio");
+        credentialEntrepreneurship.setStartActivity(2018);
+        credentialEntrepreneurship.setMainActivity("Comercio");
+        credentialEntrepreneurship.setEntrepreneurshipName("el comercio");
+        credentialEntrepreneurship.setEndActivity(null);
+
+        return credentialEntrepreneurship;
     }
 
     private CredentialState getPendingDidiCredentialStateMock(){

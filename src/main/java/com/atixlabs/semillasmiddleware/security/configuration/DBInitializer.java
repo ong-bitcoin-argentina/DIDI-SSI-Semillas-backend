@@ -374,7 +374,7 @@ public class DBInitializer implements CommandLineRunner {
             userService.createOrEdit(userResponse);
         }
 
-        if (!userService.findByUsername("tamara").isPresent()) {
+        if (!userService.findByUsername("tamara@semillas.com").isPresent()) {
             UserEditRequest userResponse = new UserEditRequest();
             userResponse.setUsername("tamara@semillas.com");
             userResponse.setEmail("tamara@semillas.com");

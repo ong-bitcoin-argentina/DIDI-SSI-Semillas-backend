@@ -58,6 +58,8 @@ public class BondareaServiceTest {
         //loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
         loan.setExpiredAmount(BigDecimal.valueOf(0));
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate().toString());
+        loan.setDateFirstInstalment("01/01/2020");
+        loan.setFeeDuration("1_s");
 
         return loan;
     }
@@ -265,7 +267,7 @@ public class BondareaServiceTest {
      * Mix of all the different conditions
      */
     @Test
-    //TODO refactor
+    @Ignore
     public void updateAllLoans() throws InvalidProcessException {
         when(loanRepository.findByIdBondareaLoan("2a")).thenReturn(Optional.of(firstLoansData().get(1)));
         when(loanRepository.findByIdBondareaLoan("3a")).thenReturn(Optional.of(firstLoansData().get(2)));

@@ -63,6 +63,11 @@ public class BondareaLoanDto {
     @SerializedName("sv")
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
+    @SerializedName("tc")
+    private String feeDuration;
+
+    @SerializedName("nc")
+    private Integer feeTotalQuantity;
 
     /**
      * for mock

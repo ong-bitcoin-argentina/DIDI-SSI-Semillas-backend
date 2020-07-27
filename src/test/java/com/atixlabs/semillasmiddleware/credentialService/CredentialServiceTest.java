@@ -156,6 +156,8 @@ public class CredentialServiceTest {
         loan.setHasCredential(true);
         loan.setExpiredAmount(BigDecimal.valueOf(0));
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
+        loan.setInstalmentTotalQuantity(5);
+        loan.setCurrentInstalmentNumber(2);
         return loan;
     }
 

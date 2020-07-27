@@ -40,8 +40,12 @@ import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+
+import static java.time.temporal.ChronoUnit.DAYS;
 
 @Service
 @Slf4j
@@ -272,7 +276,7 @@ public class BondareaService {
         log.info("getBondareaLoans:");
 
         //Fill url params
-        loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m";
+        loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m|tc|nc";
 
 
         Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad", "wspre", "prerepprestamos", access_key, access_token, idm, loanColumns, loanState, idBondareaLoan, date);
@@ -376,37 +380,41 @@ public class BondareaService {
         log.info("Synchronize Bondarea Credits");
         for (BondareaLoanDto loanDtoToSave : newLoans) {
 
+            try {
+                //if the newLoan existed previously -> update. Else create.
+                Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanDtoToSave.getIdBondareaLoan());
+                //There is a previous loan
+                if (opLoanToUpdate.isPresent()) {
+                    //update
+                    Loan loanToUpdate = opLoanToUpdate.get();
+                    Loan loanToSave = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
 
-            //if the newLoan existed previously -> update. Else create.
-            Optional<Loan> opLoanToUpdate = loanRepository.findByIdBondareaLoan(loanDtoToSave.getIdBondareaLoan());
-            //There is a previous loan
-            if (opLoanToUpdate.isPresent()) {
-                //update
-                Loan loanToUpdate = opLoanToUpdate.get();
-                Loan loanToSave = new Loan(loanDtoToSave);
+                    log.info("--- loanToSave Creatriondate " + loanToSave.getCreationDate());
 
-                log.info("--- loanToSave Creatriondate "+loanToSave.getCreationDate());
-
-                if (!loanToUpdate.equals(loanToSave)) {
-                    log.info("Updating credit " + loanDtoToSave.getIdBondareaLoan());
-                    loanToUpdate.merge(loanToSave);
-                    loanToUpdate.setUpdateTime(startTimeProcess);
-                    loanToUpdate.setSynchroTime(startTimeProcess);
-                    loanRepository.save(loanToUpdate);
+                    if (!loanToUpdate.equals(loanToSave)) {
+                        log.info("Updating credit " + loanDtoToSave.getIdBondareaLoan());
+                        loanToUpdate.merge(loanToSave);
+                        loanToUpdate.setUpdateTime(startTimeProcess);
+                        loanToUpdate.setSynchroTime(startTimeProcess);
+                        loanRepository.save(loanToUpdate);
+                    } else {
+                        log.info("credit recived with no changes " + loanDtoToSave.getIdBondareaLoan());
+                        //update the sync time to know the credit is still active
+                        loanToUpdate.setSynchroTime(startTimeProcess);
+                        loanRepository.save(loanToUpdate);
+                    }
                 } else {
-                    log.info("credit recived with no changes " + loanDtoToSave.getIdBondareaLoan());
-                    //update the sync time to know the credit is still active
-                    loanToUpdate.setSynchroTime(startTimeProcess);
-                    loanRepository.save(loanToUpdate);
+                    log.info("new credit " + loanDtoToSave.getIdBondareaLoan());
+                    Loan newLoan = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
+                    //set the loan on active
+                    newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
+                    newLoan.setSynchroTime(startTimeProcess);
+                    newLoan.setUpdateTime(startTimeProcess);
+                    loanRepository.save(newLoan);
                 }
-            } else {
-                log.info("new credit " + loanDtoToSave.getIdBondareaLoan());
-                Loan newLoan = new Loan(loanDtoToSave);
-                //set the loan on active
-                newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
-                newLoan.setSynchroTime(startTimeProcess);
-                newLoan.setUpdateTime(startTimeProcess);
-                loanRepository.save(newLoan);
+            } catch (BondareaSyncroException e){
+                log.error("Error al importar credito {} ", loanDtoToSave.getIdBondareaLoan(), e);
+                //TODO add alarm
             }
         }
 
@@ -719,6 +727,81 @@ public class BondareaService {
         }
     }
 
+
+    /**
+     *
+     Cuánto dura la cuota (tc): s: semana / m: mes -( ej.: 1_m : 1 mes / 2_s : 2 semanas / 0.5_m : 0.5 meses)
+
+     fecha actual - fpri : Cantidad de días que pasaron.
+
+     Calcular cuántos días dura el ciclo en base al tc.
+
+     Cuota actual = redondear para abajo ( días que pasaron / días que dura el ciclo) +1
+
+     Fecha de primera cuota (fpri).
+
+     Cantidad de cuotas (nc).
+
+     * @param loanDto
+     * @return
+     */
+    public Integer calculateFeeNumber(BondareaLoanDto loanDto) throws BondareaSyncroException {
+
+        LocalDate today = DateUtil.getLocalDateNow();
+
+        LocalDate firstFeeDate = null;
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        try {
+
+            firstFeeDate = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+        }catch (Exception e){
+            log.error("Error on calculateFeeNumber {}", e.getMessage(), e);
+            throw  new BondareaSyncroException(e.getMessage());
+        }
+
+        Long daysOfFisrt = firstFeeDate.until(today, DAYS);
+        Double tcDays = this.getTcDays(loanDto.getFeeDuration());
+
+        if(tcDays==null || tcDays < 1){
+            throw  new BondareaSyncroException("Invalid tc number "+tcDays);
+        }
+
+        Double currentFee = Math.floor((daysOfFisrt/tcDays));
+
+        return currentFee.intValue() + 1;
+    }
+
+
+    public Double getTcDays(String tc) throws BondareaSyncroException {
+        if((tc!=null) && !tc.isEmpty()){
+            String[] tcParsed = tc.split("_");
+            if(tcParsed.length==2){
+                String quantityOfTypes = tcParsed[0];
+                String type = tcParsed[1];
+
+                Integer quantityForType = this.getQuantityDayForTypeFee(type.trim().toLowerCase());
+                Double quantity = Double.parseDouble(quantityOfTypes);
+
+                Double valueTcDays = quantity*quantityForType;
+                return  Math.floor(valueTcDays.doubleValue());
+
+            }
+        }
+
+        return  null;
+    }
+
+    public Integer getQuantityDayForTypeFee(String type) throws BondareaSyncroException {
+        switch (type){
+            case "s":
+                return 7;
+            case "m":
+                return 30;
+            default:
+                throw new BondareaSyncroException(" {} type for tc unknown");
+
+        }
+    }
 
 }
 

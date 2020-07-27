@@ -19,6 +19,8 @@ public class DateUtil {
 
     public static LocalDateTime getLocalDateTimeNow(){ return LocalDateTime.now();}
 
+    public static LocalDate getLocalDateNow(){ return LocalDate.now();}
+
     public static LocalDateTime getLocalDateTimeNowWithFormat(String pattern){
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern(pattern);
         String dateNow = LocalDateTime.now().format(formatter);

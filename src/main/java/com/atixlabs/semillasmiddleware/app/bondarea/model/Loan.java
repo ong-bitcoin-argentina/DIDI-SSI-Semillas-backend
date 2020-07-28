@@ -174,9 +174,12 @@ public class Loan extends AuditableEntity {
         this.cycleDescription = loanToUpdate.getCycleDescription();
         this.expiredAmount = loanToUpdate.getExpiredAmount();
         this.personName =   loanToUpdate.getPersonName();
+        this.currentInstalmentNumber = loanToUpdate.getCurrentInstalmentNumber();
+        this.InstalmentTotalQuantity = loanToUpdate.getInstalmentTotalQuantity();
+        this.InstalmentType = loanToUpdate.getInstalmentType();
     }
 
-    public Loan(LoanDto loanDto) {
+   /* public Loan(LoanDto loanDto) {
         this.dniPerson = loanDto.getDniPerson();
 
         this.idBondareaLoan = loanDto.getIdBondareaLoan();
@@ -212,7 +215,7 @@ public class Loan extends AuditableEntity {
         catch (Exception ex){
             log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanDto.getCreationDate());
         }
-    }
+    }*/
 
     public Loan() {}
 }

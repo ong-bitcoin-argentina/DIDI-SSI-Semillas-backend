@@ -924,6 +924,7 @@ public class CredentialService {
 
         credentialCredit.setIdBondareaCredit(loan.getIdBondareaLoan());
         // TODO we need the type from bondarea - credentialCredit.setCreditType();
+        credentialCredit.setCreditType(loan.getTagBondareaLoan());
         credentialCredit.setIdGroup(loan.getIdGroup());
         credentialCredit.setCurrentCycle(loan.getCycleDescription()); // si cambia, se tomara como cambio de ciclo
         credentialCredit.setCurrentCycleNumber(loan.getCurrentInstalmentNumber());

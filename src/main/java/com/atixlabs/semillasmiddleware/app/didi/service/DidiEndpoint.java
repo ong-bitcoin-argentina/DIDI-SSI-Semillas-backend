@@ -33,6 +33,12 @@ public interface DidiEndpoint {
     Call<DidiGetAllCredentialResponse> getAllCertificates(
             @Header("token") String token);
 
+    @GET("template/{template_id}")
+    Call<DidiGetTemplateResponse> getTemplate(
+            @Header("token") String token,
+            @Path("template_id") String templateId);
+
+
 /*
     @POST("banks/{bank_id}/accounts/{account_id}/{view_id}/wallet/cvu")
     Call<BindCVUResponse> createCVU(@Header("Authorization") String token,

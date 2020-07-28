@@ -1,7 +1,9 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
+import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
@@ -10,6 +12,7 @@ import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.repository.ProcessControlRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
@@ -55,8 +58,26 @@ public class DBInitializer implements CommandLineRunner {
 
     private String enviroment;
 
+private CertTemplateRepository certTemplateRepository;
+
+    @Value("${didi.semillas.template_code_identity}")
+    private String didiTemplateCodeIdentity;
+
+    @Value("${didi.semillas.template_code_entrepreneurship}")
+    private String didiTemplateCodeEntrepreneurship;
+
+    @Value("${didi.semillas.template_code_dwelling}")
+    private String didiTemplateCodeDwelling;
+
+    @Value("${didi.semillas.template_code_benefit}")
+    private String didiTemplateCodeBenefit;
+
+    @Value("${didi.semillas.template_code_credit}")
+    private String didiTemplateCodeCredit;
+
+
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment, CertTemplateRepository certTemplateRepository) {
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
@@ -66,9 +87,10 @@ public class DBInitializer implements CommandLineRunner {
         this.revocationReasonRepository = revocationReasonRepository;
         this.processControlRepository = processControlRepository;
         this.enviroment = enviroment;
+        this.certTemplateRepository = certTemplateRepository;
     }
 
-    @Override
+   @Override
     public void run(String... args) throws Exception {
         if (roleService.findByCode(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role()) == null) {
             menuRepository.deleteAll();
@@ -249,7 +271,8 @@ public class DBInitializer implements CommandLineRunner {
             process.setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
             processControlRepository.save(process);
         }
-
+	
+	this.loadCertTemplatesValues();
     }
 
     private void createUsers() throws ExistUserException {
@@ -424,5 +447,40 @@ public class DBInitializer implements CommandLineRunner {
             userResponse.setLastName("Viewer");
             userService.createOrEdit(userResponse);
         }
+    }
+
+/**
+     *    IDENTITY("Identidad"),
+     *     DWELLING("Vivienda"),
+     *     ENTREPRENEURSHIP("Emprendimiento"),
+     *     BENEFIT("Beneficio Semillas"),
+     *     CREDIT("Crediticia");
+     */
+    private void loadCertTemplatesValues(){
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.IDENTITY)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.IDENTITY,didiTemplateCodeIdentity,"Semillas Identidad" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.DWELLING)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.DWELLING,didiTemplateCodeDwelling,"Semillas Vivienda" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.ENTREPRENEURSHIP)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.ENTREPRENEURSHIP,didiTemplateCodeEntrepreneurship,"Semillas Emprendimiento" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.CREDIT)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.CREDIT,didiTemplateCodeCredit,"Semillas Crediticia" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT,didiTemplateCodeBenefit,"Semillas Beneficio" );
+            certTemplateRepository.save(certTemplate);
+        }
+    }
+    private boolean isCertTemplateValueExists(CredentialCategoriesCodes credentialCategoriesCodes){
+
+        Optional<CertTemplate> certTemplate =  certTemplateRepository.findByCredentialCategoriesCodes(credentialCategoriesCodes);
+        return certTemplate.isPresent();
     }
 }

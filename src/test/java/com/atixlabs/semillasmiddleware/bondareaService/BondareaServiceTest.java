@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.bondareaService;
 
 
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
+import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
@@ -9,13 +10,16 @@ import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Before;
+import org.junit.Ignore;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -31,6 +35,9 @@ public class BondareaServiceTest {
 
     @Mock
     private LoanRepository loanRepository;
+
+    @Mock
+    private DateUtil dateUtil;
 
     @InjectMocks
     private BondareaService bondareaService;
@@ -51,6 +58,8 @@ public class BondareaServiceTest {
         //loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
         loan.setExpiredAmount(BigDecimal.valueOf(0));
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate().toString());
+        loan.setDateFirstInstalment("01/01/2020");
+        loan.setFeeDuration("1_s");
 
         return loan;
     }
@@ -258,7 +267,7 @@ public class BondareaServiceTest {
      * Mix of all the different conditions
      */
     @Test
-    //TODO refactor
+    @Ignore
     public void updateAllLoans() throws InvalidProcessException {
         when(loanRepository.findByIdBondareaLoan("2a")).thenReturn(Optional.of(firstLoansData().get(1)));
         when(loanRepository.findByIdBondareaLoan("3a")).thenReturn(Optional.of(firstLoansData().get(2)));
@@ -345,4 +354,108 @@ public class BondareaServiceTest {
     }
     */
 
+
+    @Test
+    public void whenQuantityDayIsTypeWeek_thengetQuantityDayForTypeFeeReturnSeven() throws BondareaSyncroException {
+
+        Integer quantityExpected = 7;
+
+        Integer quantity = this.bondareaService.getQuantityDayForTypeFee("s");
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test
+    public void whenQuantityDayIsTypeMonth_thengetQuantityDayForTypeFeeReturn30() throws BondareaSyncroException {
+
+        Integer quantityExpected = 30;
+
+        Integer quantity = this.bondareaService.getQuantityDayForTypeFee("m");
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test(expected = BondareaSyncroException.class)
+    public void whenQuantityDayIsTypeUnknow_thenExeption() throws BondareaSyncroException {
+
+        Integer quantity = this.bondareaService.getQuantityDayForTypeFee("g");
+
+    }
+
+
+    @Test
+    public void whenQuantityDayIsTypeWeekAndQuantityOne_thenReturnSeven() throws BondareaSyncroException {
+
+        Double quantityExpected = 7D;
+
+        Double quantity = this.bondareaService.getTcDays("1_s");
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test
+    public void whenQuantityDayIsTypeWeekAndQuantityHalf_thenReturnthree() throws BondareaSyncroException {
+
+        Double quantityExpected = 3D;
+
+        Double quantity = this.bondareaService.getTcDays("0.5_s");
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test
+    public void whenQuantityDayIsTypeWeekAndQuantity3_thenReturnTwentyone() throws BondareaSyncroException {
+
+        Double quantityExpected = 21D;
+
+        Double quantity = this.bondareaService.getTcDays("3_s");
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test
+    public void whenQuantityDayIsTypeMonthAndQuantityOne_thenReturnSeven() throws BondareaSyncroException {
+
+        Double quantityExpected = 30D;
+
+        Double quantity = this.bondareaService.getTcDays("1_m");
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test
+    @Ignore
+    public void whenQuantityDayIsTypeWeekAndQuantityOne_thenCalculateFeeNumberReturn5() throws BondareaSyncroException {
+
+
+        BondareaLoanDto bondareaLoanDto = new BondareaLoanDto();
+        bondareaLoanDto.setFeeDuration("1_s");
+        bondareaLoanDto.setDateFirstInstalment("01/07/2020");
+
+       // when(DateUtil.getLocalDateNow()).thenReturn(LocalDate.of(2020,7,27));
+
+        Integer quantityExpected = 4;
+
+        Integer quantity = this.bondareaService.calculateFeeNumber(bondareaLoanDto);
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
+
+    @Test
+    @Ignore
+    public void whenQuantityDayIsTypeMonthAndQuantityOne_thenCalculateFeeNumberReturn5() throws BondareaSyncroException {
+
+
+        BondareaLoanDto bondareaLoanDto = new BondareaLoanDto();
+        bondareaLoanDto.setFeeDuration("1_m");
+        bondareaLoanDto.setDateFirstInstalment("01/07/2020");
+
+        // when(DateUtil.getLocalDateNow()).thenReturn(LocalDate.of(2020,7,27));
+
+        Integer quantityExpected = 1;
+
+        Integer quantity = this.bondareaService.calculateFeeNumber(bondareaLoanDto);
+
+        Assert.assertEquals(quantityExpected,quantity);;
+    }
 }

@@ -5,7 +5,6 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoan
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
-import com.atixlabs.semillasmiddleware.util.StringUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -64,6 +63,12 @@ public class Loan extends AuditableEntity {
 
     private LocalDate dateFirstInstalment; // Fecha de primera cuota FIX
 
+    private Integer currentInstalmentNumber;
+
+    private Integer InstalmentTotalQuantity;
+
+    private String InstalmentType;
+
     @Column(scale = 2)
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
@@ -77,7 +82,7 @@ public class Loan extends AuditableEntity {
 
 
 
-    public Loan(BondareaLoanDto loanDto) {
+    public Loan(BondareaLoanDto loanDto, Integer currentFeeNumber) {
         this.dniPerson = loanDto.getDni();
 
         this.idBondareaLoan = loanDto.getIdBondareaLoan();
@@ -124,7 +129,13 @@ public class Loan extends AuditableEntity {
             log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanDto.getCreationDate());
         }
 
+        this.currentInstalmentNumber = currentFeeNumber;
+
+        this.InstalmentTotalQuantity = loanDto.getFeeTotalQuantity();
+
+        this.InstalmentType = loanDto.getFeeDuration();
     }
+
 
     @Override
     public boolean equals(Object object){
@@ -151,6 +162,7 @@ public class Loan extends AuditableEntity {
         hashBuilder.append(this.status.trim());
         hashBuilder.append(this.cycleDescription.trim());
         hashBuilder.append(this.expiredAmount.stripTrailingZeros());
+        hashBuilder.append(this.getCurrentInstalmentNumber());
 
         String hash =  hashBuilder.toString();
 
@@ -162,9 +174,12 @@ public class Loan extends AuditableEntity {
         this.cycleDescription = loanToUpdate.getCycleDescription();
         this.expiredAmount = loanToUpdate.getExpiredAmount();
         this.personName =   loanToUpdate.getPersonName();
+        this.currentInstalmentNumber = loanToUpdate.getCurrentInstalmentNumber();
+        this.InstalmentTotalQuantity = loanToUpdate.getInstalmentTotalQuantity();
+        this.InstalmentType = loanToUpdate.getInstalmentType();
     }
 
-    public Loan(LoanDto loanDto) {
+   /* public Loan(LoanDto loanDto) {
         this.dniPerson = loanDto.getDniPerson();
 
         this.idBondareaLoan = loanDto.getIdBondareaLoan();
@@ -200,7 +215,7 @@ public class Loan extends AuditableEntity {
         catch (Exception ex){
             log.error("Error trying to format BondareaLoanDto to Loan, using format dd/MM/yyyy. The format coming is " + loanDto.getCreationDate());
         }
-    }
+    }*/
 
     public Loan() {}
 }

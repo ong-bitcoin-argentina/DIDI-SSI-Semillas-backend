@@ -34,6 +34,8 @@ public class CredentialCredit extends Credential {
 
     private int totalCycles;
 
+    private Integer currentCycleNumber;
+
     private int amountExpiredCycles;
 
     private String creditState;
@@ -57,6 +59,7 @@ public class CredentialCredit extends Credential {
         this.creditState = credentialCredit.creditState;
         this.finishDate = credentialCredit.finishDate;
         this.expiredAmount = credentialCredit.expiredAmount;
+        this.currentCycleNumber = credentialCredit.currentCycleNumber;
     }
 
 }

@@ -924,9 +924,11 @@ public class CredentialService {
 
         credentialCredit.setIdBondareaCredit(loan.getIdBondareaLoan());
         // TODO we need the type from bondarea - credentialCredit.setCreditType();
+        credentialCredit.setCreditType(loan.getTagBondareaLoan());
         credentialCredit.setIdGroup(loan.getIdGroup());
         credentialCredit.setCurrentCycle(loan.getCycleDescription()); // si cambia, se tomara como cambio de ciclo
-        //TODO data for checking - credentialCredit.totalCycles;
+        credentialCredit.setCurrentCycleNumber(loan.getCurrentInstalmentNumber());
+        credentialCredit.setTotalCycles(loan.getInstalmentTotalQuantity());
 
         credentialCredit.setAmountExpiredCycles(0);
         credentialCredit.setCreditState(loan.getStatus());
@@ -948,6 +950,7 @@ public class CredentialService {
         areEquals = areEquals && credentialCredit.getExpiredAmount().equals(loan.getExpiredAmount());
         areEquals = areEquals && credentialCredit.getCreationDate().equals(loan.getCreationDate());
         areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
+        areEquals = areEquals && credentialCredit.getCurrentCycleNumber().equals(loan.getCurrentInstalmentNumber());
 
         return areEquals;
 

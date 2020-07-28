@@ -38,7 +38,7 @@ public class DidiCredentialData {
 
     }
 
-    public DidiCredentialData(Credential credential){
+    public DidiCredentialData(Credential credential, String templateDescription){
         this.participant = new ArrayList<>();
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();
         //DID + NOMBRE + APELLIDO are mandatory fields
@@ -49,7 +49,7 @@ public class DidiCredentialData {
 
         this.others = new ArrayList<>();
         this.cert = new ArrayList<>();
-        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", this.getTemplateName(credential)));
+        cert.add(new DidiCredentialDataElem("CERTIFICADO O CURSO", templateDescription));
 
         switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
             case IDENTITY:
@@ -110,7 +110,7 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Ciclo", credential.getCurrentCycle()));
         cert.add(new DidiCredentialDataElem("Estado de Credito", credential.getCreditState()));
         cert.add(new DidiCredentialDataElem("Saldo Vencido", credential.getExpiredAmount().toString()));
-        cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycle()));
+        cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycleNumber().toString()));
         cert.add(new DidiCredentialDataElem("Cuotas Totales", String.valueOf(credential.getTotalCycles())));
      //   cert.add(new DidiCredentialDataElem("Cuotas Vencidas", String.valueOf(credential.getAmountExpiredCycles())));
     }

@@ -219,7 +219,7 @@ public class DidiService {
             log.info("BENEFICIARIES");
             log.info(credential.toString());
             if (!credential.getCreditHolderDni().equals(credential.getBeneficiaryDni())) {
-                String receivedDid = didiAppUserRepository.findByDni(credential.getBeneficiaryDni()).getDid();
+                String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getBeneficiaryDni()).get().getDid();
                 try {
                     updateCredentialDidAndDidiSync(credential, receivedDid);
                 } catch (CredentialException e) {
@@ -232,7 +232,7 @@ public class DidiService {
         for (Credential credential : creditHolders) {
             log.info("CREDIT HOLDERS");
             log.info(credential.toString());
-            String receivedDid = didiAppUserRepository.findByDni(credential.getCreditHolderDni()).getDid();
+            String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getCreditHolderDni()).get().getDid();
             try {
                 this.updateCredentialDidAndDidiSync(credential, receivedDid);
             } catch (CredentialException e) {

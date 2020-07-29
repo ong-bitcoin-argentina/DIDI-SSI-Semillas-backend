@@ -12,6 +12,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -180,10 +181,10 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Credit id {} idBondarea {} holder {}",credentialCredit.getId(), credentialCredit.getIdBondareaCredit(), credentialCredit.getCreditHolderDni());
 
-        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni());
 
-        if(didiAppUser!=null) {
-            credentialCredit.setIdDidiReceptor(didiAppUser.getDid());
+        if(didiAppUser.isPresent()) {
+            credentialCredit.setIdDidiReceptor(didiAppUser.get().getDid());
             credentialCredit = credentialCreditService.save(credentialCredit);
 
             didiService.createAndEmmitCertificateDidi(credentialCredit);
@@ -198,10 +199,10 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Benefit id {} holder {} beneficiary {}",credentialBenefit.getId(), credentialBenefit.getCreditHolderDni(), credentialBenefit.getBeneficiaryDni());
 
-        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getBeneficiaryDni());
 
-        if(didiAppUser!=null) {
-            credentialBenefit.setIdDidiReceptor(didiAppUser.getDid());
+        if(didiAppUser.isPresent()) {
+            credentialBenefit.setIdDidiReceptor(didiAppUser.get().getDid());
             credentialBenefit = credentialBenefitService.save(credentialBenefit);
 
             didiService.createAndEmmitCertificateDidi(credentialBenefit);
@@ -216,10 +217,10 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential identity id {} holder {} beneficiary {}",credentialIdentity.getId(), credentialIdentity.getCreditHolderDni(), credentialIdentity.getBeneficiaryDni());
 
-        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
 
-        if(didiAppUser!=null) {
-            credentialIdentity.setIdDidiReceptor(didiAppUser.getDid());
+        if(didiAppUser.isPresent()) {
+            credentialIdentity.setIdDidiReceptor(didiAppUser.get().getDid());
             credentialIdentity = credentialIdentityService.save(credentialIdentity);
 
             didiService.createAndEmmitCertificateDidi(credentialIdentity);
@@ -234,10 +235,10 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Dwelling id {} holder {} beneficiary {}",credentialDwelling.getId(), credentialDwelling.getCreditHolderDni(), credentialDwelling.getBeneficiaryDni());
 
-        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser  = this.didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni());
 
-        if(didiAppUser!=null) {
-            credentialDwelling.setIdDidiReceptor(didiAppUser.getDid());
+        if(didiAppUser.isPresent()) {
+            credentialDwelling.setIdDidiReceptor(didiAppUser.get().getDid());
             credentialDwelling = credentialDwellingService.save(credentialDwelling);
 
             didiService.createAndEmmitCertificateDidi(credentialDwelling);
@@ -253,10 +254,10 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Entrepreneurship id {} holder {} beneficiary {}",credentialEntrepreneurship.getId(), credentialEntrepreneurship.getCreditHolderDni(), credentialEntrepreneurship.getBeneficiaryDni());
 
-        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni());
 
-        if(didiAppUser!=null) {
-            credentialEntrepreneurship.setIdDidiReceptor(didiAppUser.getDid());
+        if(didiAppUser.isPresent()) {
+            credentialEntrepreneurship.setIdDidiReceptor(didiAppUser.get().getDid());
             credentialEntrepreneurship = credentialEntrepreneurshipService.save(credentialEntrepreneurship);
 
             didiService.createAndEmmitCertificateDidi(credentialEntrepreneurship);
@@ -267,5 +268,24 @@ public class SyncDidiProcessService {
 
     }
 
+    public void processNewsAppDidiUsers(){
+
+        List<DidiAppUser> didiAppUsersToProcces = didiAppUserService.getDidiAppUsersNeedProcess();
+
+        if(didiAppUsersToProcces!=null && !didiAppUsersToProcces.isEmpty()){
+
+
+
+        }else{
+            log.info("No new didi app user to process");
+        }
+
+    }
+
+    public void verifyCredentialIdentityForDidiAppUseri(DidiAppUser didiAppUser) {
+
+        List<CredentialIdentity> credentialsIdentityToVerify = this.credentialIdentityService.getCredentialIdentityOnPendindDidiState()
+
+    }
 
 }

@@ -24,6 +24,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -96,7 +97,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni())).thenReturn(didiAppUser);
+        when(didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialCreditService.save(credentialCredit)).thenReturn(credentialCredit);
 
         syncDidiProcessService.emmitCredentialCredit(credentialCredit);
@@ -141,7 +142,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
 
         syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
@@ -187,7 +188,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialIdentityService.save(credentialIdentity)).thenReturn(credentialIdentity);
 
         syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);
@@ -235,7 +236,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialDwellingService.save(credentialDwelling)).thenReturn(credentialDwelling);
 
         syncDidiProcessService.emmitCredentialDwelling(credentialDwelling);
@@ -281,7 +282,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialEntrepreneurshipService.save(credentialEntrepreneurship)).thenReturn(credentialEntrepreneurship);
 
         syncDidiProcessService.emmitCredentialEntrepreneurship(credentialEntrepreneurship);

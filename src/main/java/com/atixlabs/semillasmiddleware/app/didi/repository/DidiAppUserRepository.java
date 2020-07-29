@@ -13,7 +13,9 @@ import java.util.Optional;
 @Repository
 public interface DidiAppUserRepository extends JpaRepository<DidiAppUser, Long> {
 
-    DidiAppUser findByDni(Long dni);
+    //DidiAppUser findByDni(Long dni);
+    Optional<DidiAppUser> findByDniAndActiveTrue(Long dni);
 
-    ArrayList<DidiAppUser> findBySyncStatusIn(ArrayList<String> didiSyncStatus);
+
+    ArrayList<DidiAppUser> findByActiveAndSyncStatusIn(boolean active, ArrayList<String> didiSyncStatus);
 }

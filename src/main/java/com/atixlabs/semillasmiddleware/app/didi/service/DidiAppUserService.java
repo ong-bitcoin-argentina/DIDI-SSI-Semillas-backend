@@ -13,12 +13,13 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
 @Service
 public class DidiAppUserService {
-
 
 
     private DidiAppUserRepository didiAppUserRepository;
@@ -28,15 +29,7 @@ public class DidiAppUserService {
         this.didiAppUserRepository = didiAppUserRepository;
     }
 
-/*
-    private void registerNewAppDidiUserAction(DidiAppUserDto didiAppUserDto){
-
-        String message = String.format("Se registró el id Didi %s para el dni %d",didiAppUserDto.getDid(),didiAppUserDto.getDni());
-        //TODO to aop
-        this.actionLogService.registerAction(ActionTypeEnum.DIDI_CREDENTIAL_REQUEST, ActionLevelEnum.INFO,message);
-    }*/
-
-    public DidiAppUserOperationResult addNewDidiAppUser(DidiAppUserDto didiAppUserDto){
+    public DidiAppUserOperationResult addNewDidiAppUser(DidiAppUserDto didiAppUserDto) {
 
         log.info("addNewDidiAppUser");
 
@@ -49,52 +42,71 @@ public class DidiAppUserService {
 
     public DidiAppUserOperationResult registerNewAppUser(DidiAppUserDto didiAppUserDto) {
 
-        DidiAppUser didiAppUser  = didiAppUserRepository.findByDni(didiAppUserDto.getDni());
+        Optional<DidiAppUser> opDidiAppUser = didiAppUserRepository.findByDniAndActiveTrue(didiAppUserDto.getDni());
 
 
         //if DNI is new.
-        if (didiAppUser == null) {
+        if (opDidiAppUser.isEmpty()) {
             return this.addNewDidiAppUser(didiAppUserDto);
-        }
+        } else {
+            DidiAppUser didiAppUser = new DidiAppUser(didiAppUserDto);
+            if (didiAppUser.getDid().equals(didiAppUserDto.getDid())) {
+                //if DID is the same:
+                switch (DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus())) {
+                    case SYNC_OK:
+                    case SYNC_MISSING:
+                        return DidiAppUserOperationResult.USER_ALREADY_EXIST_NO_CHANGES;
 
-        if (didiAppUser.getDid().equals(didiAppUserDto.getDid())) {
-            //if DID is the same:
-            switch (DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus())) {
-                case SYNC_OK:
-                case SYNC_MISSING:
-                    return DidiAppUserOperationResult.USER_ALREADY_EXIST_NO_CHANGES;
-
-                case SYNC_ERROR:
-                    didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
-                    didiAppUserRepository.save(didiAppUser);
-                    return DidiAppUserOperationResult.NEW_REQUEST_REGISTERED;
+                    case SYNC_ERROR:
+                        didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
+                        didiAppUserRepository.save(didiAppUser);
+                        return DidiAppUserOperationResult.NEW_REQUEST_REGISTERED;
+                }
+            } else {
+                //if DID is different requires sync:
+                didiAppUser.setDid(didiAppUserDto.getDid());
+                didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
+                didiAppUserRepository.save(didiAppUser);
+                return DidiAppUserOperationResult.NEW_DID_REGISTERED_FOR_USER;
             }
         }
-        else {
-            //if DID is different requires sync:
-            didiAppUser.setDid(didiAppUserDto.getDid());
-            didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
-            didiAppUserRepository.save(didiAppUser);
-            return DidiAppUserOperationResult.NEW_DID_REGISTERED_FOR_USER;
-        }
-    return DidiAppUserOperationResult.ERROR;
+        return DidiAppUserOperationResult.ERROR;
     }
 
 
     public boolean updateAppUserStatusByCode(Long creditHolderDni, String syncStatusCode) {
 
-        DidiAppUser didiAppUser = didiAppUserRepository.findByDni(creditHolderDni);
+        Optional<DidiAppUser> didiAppUser = didiAppUserRepository.findByDniAndActiveTrue(creditHolderDni);
 
-        if (didiAppUser != null){
-            didiAppUser.setSyncStatus(syncStatusCode);
-            didiAppUserRepository.save(didiAppUser);
+        if (didiAppUser.isPresent()) {
+            didiAppUser.get().setSyncStatus(syncStatusCode);
+            didiAppUserRepository.save(didiAppUser.get());
             return true;
         }
         return false;
     }
 
-    public DidiAppUser getDidiAppUserByDni(Long dni){
-        return didiAppUserRepository.findByDni(dni);
+    public Optional<DidiAppUser> getDidiAppUserByDni(Long dni) {
+        return didiAppUserRepository.findByDniAndActiveTrue(dni);
+
     }
 
+    /**
+     * return all didi app user news an with errors process
+     *
+     * @return
+     */
+    public List<DidiAppUser> getDidiAppUsersNeedProcess() {
+
+        return this.didiAppUserRepository.findByActiveAndSyncStatusIn(true,this.getDidiSyncStatusNeedProcess());
+    }
+
+    private ArrayList<String> getDidiSyncStatusNeedProcess() {
+
+    ArrayList<String> didiSyncStatus = new ArrayList<>();
+        didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
+        didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
+
+        return didiSyncStatus;
+    }
 }

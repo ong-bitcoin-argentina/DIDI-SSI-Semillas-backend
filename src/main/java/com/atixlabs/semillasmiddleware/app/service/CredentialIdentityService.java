@@ -32,6 +32,8 @@ public class CredentialIdentityService extends CredentialCommonService {
         return  credentialIdentityRepository.findByCredentialState(pendingDidiState);
     }
 
+    public List<CredentialIdentity> getCredentialIdentityActiveForDni() throws CredentialException {
+
     public CredentialIdentity save(CredentialIdentity credentialIdentity){
         return credentialIdentityRepository.save(credentialIdentity);
     }

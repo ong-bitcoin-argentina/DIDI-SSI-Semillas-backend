@@ -23,21 +23,6 @@ public class DidiCredentialData {
                 "}";
     }
 
-    public String getTemplateName(Credential credential){
-
-        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
-             case CREDIT:
-                return "Semillas Crediticia";
-            case BENEFIT:
-                return "Semillas Beneficio";
-
-            default:
-                return credential.getCredentialCategory();
-
-        }
-
-    }
-
     public DidiCredentialData(Credential credential, String templateDescription){
         this.participant = new ArrayList<>();
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();

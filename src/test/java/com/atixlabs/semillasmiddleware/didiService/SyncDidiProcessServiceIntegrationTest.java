@@ -66,6 +66,7 @@ public class SyncDidiProcessServiceIntegrationTest {
     }
 
     @Test
+    @Ignore
     public void whenEmmitCredentialCreditsAndCredentialCreditsToEmmitIsEmpty_thenDoNothing() throws CredentialException {
 
         when(credentialCreditService.getCredentialCreditsOnPendindDidiState()).thenReturn(new ArrayList<CredentialCredit>());

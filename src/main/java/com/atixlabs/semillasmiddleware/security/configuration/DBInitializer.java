@@ -72,6 +72,9 @@ public class DBInitializer implements CommandLineRunner {
     @Value("${didi.semillas.template_code_credit}")
     private String didiTemplateCodeCredit;
 
+    @Value("${didi.semillas.template_code_sancor_salud}")
+    private String didiTemplateCodeSancorSalud;
+
     @Autowired
     public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, CertTemplateRepository certTemplateRepository) {
         this.userService = userService;
@@ -359,7 +362,8 @@ public class DBInitializer implements CommandLineRunner {
      *     DWELLING("Vivienda"),
      *     ENTREPRENEURSHIP("Emprendimiento"),
      *     BENEFIT("Beneficio Semillas"),
-     *     CREDIT("Crediticia");
+     *     CREDIT("Crediticia"),
+     *     BENEFIT_SANCOR("Sancor Salud");;
      */
     private void loadCertTemplatesValues(){
         if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.IDENTITY)){
@@ -380,6 +384,10 @@ public class DBInitializer implements CommandLineRunner {
         }
         if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT)){
             CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT,didiTemplateCodeBenefit,"Semillas Beneficio" );
+            certTemplateRepository.save(certTemplate);
+        }
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT_SANCOR)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT_SANCOR,didiTemplateCodeBenefit,"Sancor Salud" );
             certTemplateRepository.save(certTemplate);
         }
     }

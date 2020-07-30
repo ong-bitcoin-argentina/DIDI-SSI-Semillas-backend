@@ -27,9 +27,9 @@ import java.util.Optional;
 
 @Slf4j
 @Service
-public class CredentialBenefitService extends CredentialCommonService {
+public class CredentialBenefitService extends CredentialBenefitCommonService<CredentialBenefits> {
 
-    private PersonService personService;
+    //private PersonService personService;
 
    // private CredentialStateService credentialStateService;
 
@@ -38,98 +38,14 @@ public class CredentialBenefitService extends CredentialCommonService {
     private ParameterConfigurationRepository parameterConfigurationRepository;
 
     public CredentialBenefitService(PersonService personService, CredentialStateService credentialStateService, CredentialBenefitsRepository credentialBenefitsRepository, ParameterConfigurationRepository parameterConfigurationRepository, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository){
-       super(credentialStateService, didiService, revocationReasonRepository, credentialRepository);
-        this.personService = personService;
+       super(personService, credentialStateService, didiService, revocationReasonRepository, credentialRepository);
+        //this.personService = personService;
         //this.credentialStateService = credentialStateService;
         this.credentialBenefitsRepository = credentialBenefitsRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
     }
 
 
-    /**
-     * If holder exists and loan is active and not in default
-     * <p>
-     * * Create Benefit Credential for holder,  in state Pending Didi
-     * * Create Benefits credentials for each kin, in Pending de Didi state
-     * * else
-     * * If holder exists as person, and loan is active and not in default
-     * * If holder is not in default
-     * *** Benefit Holder
-     * *** If credential not exists, create credential in state Pending Didi
-     * *** If exists and is active, do nothing
-     * *** If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
-     * *** Benefit Family
-     * *** If credential not exists, create credential in state Pending Didi
-     * *** If exists and is active, do nothing
-     * *** If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
-     * * If holder is in default
-     * ** set credit for process in the next cycle
-     * <p>
-     * If holder not exists set credit for process in the next cycle
-     *
-     * @param loan
-     */
-    public void createCredentialsBenefitsForNewLoan(Loan loan) throws CredentialException {
-
-        log.info(String.format("creating Benefits Credential for Loan %s", loan.getIdBondareaLoan()));
-
-        Optional<Person> opHolder = personService.findByDocumentNumber(loan.getDniPerson());
-
-        if (opHolder.isPresent()) {
-            Person holder = opHolder.get();
-
-            Optional<List<Person>> opFamiliy = personService.findFamilyForHolder(holder);
-
-            if (!holder.isInDefault()) { // If holder is not in default
-
-                Optional<CredentialBenefits> opCredentialBenefitsHolder = this.getCredentialBenefits(loan.getDniPerson(), loan.getDniPerson(), PersonTypesCodes.HOLDER );
-
-                CredentialBenefits credentialBenefitsHolder = null;
-
-                if (opCredentialBenefitsHolder.isPresent()) {
-
-                    credentialBenefitsHolder = opCredentialBenefitsHolder.get();
-
-                    if (this.isCredentialRevoked(credentialBenefitsHolder)) {
-
-                        //Holder
-                        CredentialBenefits newCredentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
-                        newCredentialBenefitsHolder.setIdHistorical(credentialBenefitsHolder.getIdHistorical());
-                        this.saveCredentialBenefits(newCredentialBenefitsHolder);
-
-                    } else { //credential is active or pending didi
-                        log.info(String.format("Credential Benefit for holder %d of loan %s is in state %s, credential not created", holder.getDocumentNumber(), loan.getIdBondareaLoan(), credentialBenefitsHolder.getCredentialState().getStateName()));
-                    }
-
-
-                } else { //If credential not exists, create credential in state Pending Didi
-                    //Holder
-                    credentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
-                    this.saveCredentialBenefits(credentialBenefitsHolder);
-                }
-
-                //Family
-                if ((opFamiliy.isPresent()) && (!opFamiliy.get().isEmpty())) {
-                    List<Person> family = opFamiliy.get();
-                    for (Person beneficiary : family) {
-                        this.handleCredentialBenefitsForBeneficiary(holder, beneficiary, loan);
-                    }
-                } else {
-                    log.info(String.format("The holder %d has no family ", holder.getDocumentNumber()));
-                }
-
-            } else { //holder is in default
-                String message = String.format("Credential Benefit for holder %d of loan %s is not created, holder is in default", holder.getDocumentNumber(), loan.getIdBondareaLoan());
-                log.error(message);
-                throw new CredentialException(message);
-            }
-
-        } else { //Holder not exists
-            String message = String.format("Can't create Benefit Credential, Holder dni %d not exists", loan.getDateFirstInstalment());
-            log.error(message);
-            throw new CredentialException(message);
-        }
-    }
 
  //TODO eliminar
     /**
@@ -167,49 +83,6 @@ public class CredentialBenefitService extends CredentialCommonService {
         }
     }
 
-
-    /**
-     * If holder is not in default
-     * *             Benefit Holder
-     * *                 If credential not exists, create credential in state Pending Didi
-     * *                 If exists and is active, do nothing
-     * *                 If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
-     * *             Beneficio Familiar
-     * *                 si no existe Creo credencial de beneficio en estado Pendiente de Didi
-     * *                 si existe y está vigente no hago nada
-     * *                 si existe y está revocada creó una nueva  la credencial como Pendiente de Didi
-     *
-     * @param holder
-     * @param beneficiary
-     * @throws CredentialException
-     */
-    private void handleCredentialBenefitsForBeneficiary(Person holder, Person beneficiary, Loan loan) throws CredentialException {
-
-        Optional<CredentialBenefits> opCredentialBenefitsBeneficiary = this.getCredentialBenefits(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY);
-        Optional<CredentialState> opStateRevoke = credentialStateService.getCredentialRevokeState();
-
-        if (!opCredentialBenefitsBeneficiary.isPresent()) { //si no existe Creo credencial de beneficio en estado Pendiente de Didi
-
-            CredentialBenefits credentialBenefits = this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.FAMILY);
-            this.saveCredentialBenefits(credentialBenefits);
-
-        } else {
-
-            CredentialBenefits credentialBenefitsBeneficiary = opCredentialBenefitsBeneficiary.get();
-
-            if (credentialBenefitsBeneficiary.getCredentialState().equals(opStateRevoke.get())) {
-
-                CredentialBenefits newCredentialBenefitsBeneficiary = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.FAMILY);
-                newCredentialBenefitsBeneficiary.setIdHistorical(credentialBenefitsBeneficiary.getIdHistorical());
-                this.saveCredentialBenefits(newCredentialBenefitsBeneficiary);
-
-            } else { //credential is active or pending didi
-
-                log.info(String.format("Credential Benefit for beneficiary %d and holder %d of loan %s is in state %s, credential not created", beneficiary.getDocumentNumber(), holder.getDocumentNumber(), loan.getIdBondareaLoan(), credentialBenefitsBeneficiary.getCredentialState().getStateName()));
-
-            }
-        }
-    }
 
     /**
      * *         Benefits Credential
@@ -293,8 +166,7 @@ public class CredentialBenefitService extends CredentialCommonService {
 
 
 
-
-
+    @Override
     public Optional<CredentialBenefits> getCredentialBenefits(Long holderDni, Long beneficiaryDni, PersonTypesCodes personTypesCodes) {
         Optional<CredentialBenefits> opCredentialBenefitsHolder = credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holderDni, beneficiaryDni, personTypesCodes.getCode());
         return opCredentialBenefitsHolder;
@@ -307,6 +179,7 @@ public class CredentialBenefitService extends CredentialCommonService {
      * @param personType
      * @return
      */
+    @Override
     public CredentialBenefits buildNewBenefitsCredential(Person holder, Person beneficiary, PersonTypesCodes personType) throws CredentialException {
         CredentialBenefits credentialBenefits = new CredentialBenefits();
 
@@ -342,7 +215,8 @@ public class CredentialBenefitService extends CredentialCommonService {
     }
 
 
-    public CredentialBenefits saveCredentialBenefits(CredentialBenefits credentialBenefits) {
+    @Override
+    public CredentialBenefits saveCredentialBenefit(CredentialBenefits credentialBenefits) {
         credentialBenefits = credentialBenefitsRepository.save(credentialBenefits);
         if (credentialBenefits.getIdHistorical() == null) {
             credentialBenefits.setIdHistorical(credentialBenefits.getId());

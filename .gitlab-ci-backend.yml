@@ -50,7 +50,7 @@ package-backend:
 
   only:
     refs:
-      - SEMI-135-setup-ci
+      - ADD-PRODUCTION-CONFIG
       # Only run on develop, release/x.y.x and hotfix/xxxx
       - develop
       - /^release.*$/

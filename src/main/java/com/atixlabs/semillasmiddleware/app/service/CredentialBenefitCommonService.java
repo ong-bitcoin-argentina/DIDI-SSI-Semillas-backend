@@ -4,12 +4,10 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
-
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -63,11 +61,9 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
         if (opHolder.isPresent()) {
             Person holder = opHolder.get();
 
-            Optional<List<Person>> opFamiliy = personService.findFamilyForHolder(holder);
-
             if (!holder.isInDefault()) { // If holder is not in default
 
-                Optional<T> opCredentialBenefitsHolder = this.getCredentialBenefits(loan.getDniPerson(), loan.getDniPerson(), PersonTypesCodes.HOLDER);
+                Optional<T> opCredentialBenefitsHolder = this.getCredentialBenefitsHolder(loan.getDniPerson());
 
                 T credentialBenefitsHolder = null;
 
@@ -78,7 +74,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
                     if (this.isCredentialRevoked(credentialBenefitsHolder)) {
 
                         //Holder
-                        T newCredentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
+                        T newCredentialBenefitsHolder = this.buildNewHolderBenefitsCredential(holder);
                         newCredentialBenefitsHolder.setIdHistorical(credentialBenefitsHolder.getIdHistorical());
                         this.saveCredentialBenefit(newCredentialBenefitsHolder);
 
@@ -89,19 +85,12 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
 
                 } else { //If credential not exists, create credential in state Pending Didi
                     //Holder
-                    credentialBenefitsHolder = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
+                    credentialBenefitsHolder = this.buildNewHolderBenefitsCredential(holder);
                     this.saveCredentialBenefit(credentialBenefitsHolder);
                 }
 
                 //Family
-                if ((opFamiliy.isPresent()) && (!opFamiliy.get().isEmpty())) {
-                    List<Person> family = opFamiliy.get();
-                    for (Person beneficiary : family) {
-                        this.handleCredentialBenefitsForBeneficiary(holder, beneficiary, loan);
-                    }
-                } else {
-                    this.getLog().info("The holder {} has no family ", holder.getDocumentNumber());
-                }
+                this.createCredentialsBenefitsFamilyForNewLoan(loan, holder);
 
             } else { //holder is in default
                 String message = String.format("Credential Benefit for holder %d of loan %s is not created, holder is in default", holder.getDocumentNumber(), loan.getIdBondareaLoan());
@@ -117,6 +106,18 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
 
     }
 
+    public void createCredentialsBenefitsFamilyForNewLoan(Loan loan, Person holder) throws CredentialException {
+        //Family
+        Optional<List<Person>> opFamiliy = personService.findFamilyForHolder(holder);
+        if ((opFamiliy.isPresent()) && (!opFamiliy.get().isEmpty())) {
+            List<Person> family = opFamiliy.get();
+            for (Person beneficiary : family) {
+                this.handleCredentialBenefitsForBeneficiary(holder, beneficiary, loan);
+            }
+        } else {
+            this.getLog().info("The holder {} has no family ", holder.getDocumentNumber());
+        }
+    }
 
     /**
      * If holder is not in default
@@ -133,15 +134,15 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
      * @param beneficiary
      * @throws CredentialException
      */
-    private void handleCredentialBenefitsForBeneficiary(Person holder, Person beneficiary, Loan loan) throws CredentialException {
+    protected void handleCredentialBenefitsForBeneficiary(Person holder, Person beneficiary, Loan loan) throws CredentialException {
 
-        Optional<T> opCredentialBenefitsBeneficiary = this.getCredentialBenefits(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY);
+        Optional<T> opCredentialBenefitsBeneficiary = this.getCredentialBenefitsFamiliy(holder.getDocumentNumber(), beneficiary.getDocumentNumber());
 
         Optional<CredentialState> opStateRevoke = credentialStateService.getCredentialRevokeState();
 
         if (!opCredentialBenefitsBeneficiary.isPresent()) { //si no existe Creo credencial de beneficio en estado Pendiente de Didi
 
-            T credentialBenefits = this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.FAMILY);
+            T credentialBenefits = this.buildNewFamiliyBenefitsCredential(holder, beneficiary);
             this.saveCredentialBenefit(credentialBenefits);
 
         } else {
@@ -149,8 +150,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
             T credentialBenefitsBeneficiary = opCredentialBenefitsBeneficiary.get();
 
             if (credentialBenefitsBeneficiary.getCredentialState().equals(opStateRevoke.get())) {
-
-                T newCredentialBenefitsBeneficiary = this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.FAMILY);
+                T newCredentialBenefitsBeneficiary = this.buildNewFamiliyBenefitsCredential(holder, beneficiary);
                 newCredentialBenefitsBeneficiary.setIdHistorical(credentialBenefitsBeneficiary.getIdHistorical());
                 this.saveCredentialBenefit(newCredentialBenefitsBeneficiary);
 
@@ -162,9 +162,65 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
         }
     }
 
-    abstract Optional<T> getCredentialBenefits(Long holderDni, Long beneficiaryDni, PersonTypesCodes personTypesCodes);
 
-    abstract T buildNewBenefitsCredential(Person holder, Person beneficiary, PersonTypesCodes personType) throws CredentialException;
+    /**
+     * *         Benefits Credential
+     * *             Holder
+     * *                 If exists, is active and emmited, do revoke,
+     * *                 If exists and is Pending Didi, revoke localy
+     * *                 If exists and is revoked, do nothing
+     * *                 If not exists, do nothing
+     *
+     * @throws CredentialException
+     */
+    public void revokeHolderCredentialsBenefitsForLoan(Person holder) throws CredentialException {
+
+        Optional<T>  opCredentialBenefits =  this.getHolderCredentialBenefit(holder);
+
+        this.revokeCredentialsBenefitsForLoanInDefault(holder, holder, opCredentialBenefits);
+
+    }
+
+    abstract Optional<T> getHolderCredentialBenefit(Person holder);
+
+    /**
+     * *         Benefits Credential
+     * *                 If exists, is active and emmited, do revoke,
+     * *                 If exists and is Pending Didi, revoke localy
+     * *                 If exists and is revoked, do nothing
+     * *                 If not exists, do nothing
+     *
+     * @throws CredentialException
+     */
+    public void revokeCredentialsBenefitsForLoanInDefault(Person holder, Person beneficiary,  Optional<T>  opCredentialBenefits) throws CredentialException {
+
+        this.getLog().info("Revoking Credential Benefits for Beneficiary {} and Holder {} ",beneficiary.getDocumentNumber(), holder.getDocumentNumber());
+
+        if(opCredentialBenefits.isPresent()){
+
+            T credentialBenefits = opCredentialBenefits.get();
+
+            if(!this.isCredentialRevoked(credentialBenefits)){
+
+                this.revokeComplete(credentialBenefits, RevocationReasonsCodes.DEFAULT.getCode() );
+
+            }else{
+                this.getLog().info("Benefits Credential for holder {} its already Revoked", holder.getDocumentNumber());
+            }
+
+        }else{
+            this.getLog().info("Credential Benefits for Beneficiary {} and Holder {} credential not exists", beneficiary.getDocumentNumber(),holder.getDocumentNumber());
+        }
+
+    }
+
+    abstract Optional<T> getCredentialBenefitsHolder(Long holderDni);
+
+    abstract Optional<T> getCredentialBenefitsFamiliy(Long holderDni, Long beneficiary);
+
+    abstract T buildNewHolderBenefitsCredential(Person holder) throws CredentialException;
+
+    abstract T buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException;
 
     abstract T saveCredentialBenefit(T credential);
 

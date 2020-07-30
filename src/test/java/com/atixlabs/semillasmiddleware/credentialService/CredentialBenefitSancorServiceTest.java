@@ -88,7 +88,7 @@ public class CredentialBenefitSancorServiceTest {
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
         when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(any(Person.class))).thenReturn(null);
-        when(credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.empty());
+        when(credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber())).thenReturn(Optional.empty());
         when(credentialBenefitSancorRepository.save(any(CredentialBenefitSancor.class))).thenAnswer(new Answer<CredentialBenefitSancor>() {
             @Override
             public CredentialBenefitSancor answer(InvocationOnMock invocation) throws Throwable {
@@ -138,7 +138,7 @@ public class CredentialBenefitSancorServiceTest {
         when(credentialStateService.getCredentialRevokeState()).thenReturn(StateRevoke);
         when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
         when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
-        when(credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(credentialBenefitSancorRepository.save(any(CredentialBenefitSancor.class))).thenAnswer(new Answer<CredentialBenefitSancor>() {
             @Override
             public CredentialBenefitSancor answer(InvocationOnMock invocation) throws Throwable {

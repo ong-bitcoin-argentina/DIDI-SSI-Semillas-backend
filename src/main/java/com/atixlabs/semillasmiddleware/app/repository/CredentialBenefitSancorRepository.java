@@ -10,6 +10,6 @@ import java.util.Optional;
 @Repository
 public interface CredentialBenefitSancorRepository extends JpaRepository<CredentialBenefitSancor, Long> {
 
-    Optional<CredentialBenefitSancor> findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(Long holderDni, Long beneficiaryDni, String beneficiaryType);
+    Optional<CredentialBenefitSancor> findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(Long holderDni, Long beneficiaryDni);
 
 }

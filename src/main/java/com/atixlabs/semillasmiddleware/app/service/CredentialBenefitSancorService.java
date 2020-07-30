@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
@@ -8,7 +9,6 @@ import com.atixlabs.semillasmiddleware.app.model.configuration.constants.Configu
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitSancorRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
@@ -41,20 +41,46 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
 
     @Override
-    public Optional<CredentialBenefitSancor> getCredentialBenefits(Long holderDni, Long beneficiaryDni, PersonTypesCodes personTypesCodes) {
-        return credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holderDni, beneficiaryDni, personTypesCodes.getCode());
+    public void createCredentialsBenefitsFamilyForNewLoan(Loan loan, Person holder) throws CredentialException {
+        //Do nothing,
+        this.getLog().debug("Dont Create Credential Sancor benefit Family, not exist this type or credendential");
+    }
+
+    @Override
+    Optional<CredentialBenefitSancor> getHolderCredentialBenefit(Person holder) {
+        return this.getCredentialBenefits(holder.getDocumentNumber(), holder.getDocumentNumber());
+    }
+
+    public Optional<CredentialBenefitSancor> getCredentialBenefits(Long holderDni, Long beneficiaryDni) {
+        return credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holderDni, beneficiaryDni);
+    }
+
+    /**
+     * Not avaiable  Sacor Salud Credential for familiy
+     * @param holderDni
+     * @param beneficiary
+     * @return
+     */
+    @Override
+    public Optional<CredentialBenefitSancor> getCredentialBenefitsFamiliy(Long holderDni, Long beneficiary){
+        return Optional.empty();
+    }
+
+    @Override
+    public Optional<CredentialBenefitSancor> getCredentialBenefitsHolder(Long holderDni){
+        return this.getCredentialBenefits(holderDni, holderDni);
     }
 
 
     /**
      * Create Benefit Sancor credential without Id Didi and pending didi
      *
-     * @param beneficiary
-     * @param personType
+     * @param holder
+     *
      * @return
      */
     @Override
-    public CredentialBenefitSancor buildNewBenefitsCredential(Person holder, Person beneficiary, PersonTypesCodes personType) throws CredentialException {
+    public CredentialBenefitSancor buildNewHolderBenefitsCredential(Person holder) throws CredentialException {
         CredentialBenefitSancor credentialBenefitSancor = new CredentialBenefitSancor();
 
         Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode());
@@ -84,9 +110,15 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
         credentialBenefitSancor.setCreditHolder(holder);
 
-        credentialBenefitSancor.setBeneficiary(beneficiary);
+        credentialBenefitSancor.setBeneficiary(holder);
 
         return credentialBenefitSancor;
+    }
+
+    @Override
+    CredentialBenefitSancor buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException {
+        throw new CredentialException("Credential Sancor Family is not avaiable for family");
+
     }
 
     @Override

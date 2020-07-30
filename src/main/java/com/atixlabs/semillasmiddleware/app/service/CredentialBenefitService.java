@@ -47,8 +47,80 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
     }
 
 
+    public void createCredentialsBenefitsFamilyForNewLoan(Loan loan) throws CredentialException {
 
- //TODO eliminar
+        this.getLog().info("creating Credentials Benefits family for loan {}",loan.getIdBondareaLoan());
+        Optional<Person> opHolder = personService.findByDocumentNumber(loan.getDniPerson());
+
+        if (opHolder.isPresent()) {
+            Person holder = opHolder.get();
+
+            if (!holder.isInDefault()) { // If holder is not in default
+                //Family
+                Optional<List<Person>> opFamiliy = personService.findFamilyForHolder(holder);
+                if ((opFamiliy.isPresent()) && (!opFamiliy.get().isEmpty())) {
+                    List<Person> family = opFamiliy.get();
+                    for (Person beneficiary : family) {
+                        this.handleCredentialBenefitsForBeneficiary(holder, beneficiary, loan);
+                    }
+                } else {
+                    this.getLog().info("The holder {} has no family ", holder.getDocumentNumber());
+                }
+            } else { //holder is in default
+                String message = String.format("Credential Benefit for holder %d of loan %s is not created, holder is in default", holder.getDocumentNumber(), loan.getIdBondareaLoan());
+                this.getLog().error(message);
+                throw new CredentialException(message);
+            }
+        } else { //Holder not exists
+            String message = String.format("Can't create Benefit Credential, Holder dni %d not exists", loan.getDateFirstInstalment());
+            this.getLog().error(message);
+            throw new CredentialException(message);
+        }
+    }
+
+    /**
+     * If holder is not in default
+     * *             Benefit Holder
+     * *                 If credential not exists, create credential in state Pending Didi
+     * *                 If exists and is active, do nothing
+     * *                 If exists and it is revoked, create a new one in Pending Didi status (is for finalize/cancelled loans)
+     * *             Beneficio Familiar
+     * *                 si no existe Creo credencial de beneficio en estado Pendiente de Didi
+     * *                 si existe y está vigente no hago nada
+     * *                 si existe y está revocada creó una nueva  la credencial como Pendiente de Didi
+     *
+     * @param holder
+     * @param beneficiary
+     * @throws CredentialException
+     */
+    protected void handleCredentialBenefitsForBeneficiary(Person holder, Person beneficiary, Loan loan) throws CredentialException {
+
+        Optional<CredentialBenefits> opCredentialBenefitsBeneficiary = this.getCredentialBenefitsFamiliy(holder.getDocumentNumber(), beneficiary.getDocumentNumber());
+
+        Optional<CredentialState> opStateRevoke = credentialStateService.getCredentialRevokeState();
+
+        if (!opCredentialBenefitsBeneficiary.isPresent()) { //si no existe Creo credencial de beneficio en estado Pendiente de Didi
+
+            CredentialBenefits credentialBenefits = this.buildNewFamiliyBenefitsCredential(holder, beneficiary);
+            this.saveCredentialBenefit(credentialBenefits);
+
+        } else {
+
+            CredentialBenefits credentialBenefitsBeneficiary = opCredentialBenefitsBeneficiary.get();
+
+            if (credentialBenefitsBeneficiary.getCredentialState().equals(opStateRevoke.get())) {
+                CredentialBenefits newCredentialBenefitsBeneficiary = this.buildNewFamiliyBenefitsCredential(holder, beneficiary);
+                newCredentialBenefitsBeneficiary.setIdHistorical(credentialBenefitsBeneficiary.getIdHistorical());
+                this.saveCredentialBenefit(newCredentialBenefitsBeneficiary);
+
+            } else { //credential is active or pending didi
+
+                this.getLog().info(String.format("Credential Benefit for beneficiary %d and holder %d of loan %s is in state %s, credential not created", beneficiary.getDocumentNumber(), holder.getDocumentNumber(), loan.getIdBondareaLoan(), credentialBenefitsBeneficiary.getCredentialState().getStateName()));
+
+            }
+        }
+    }
+
     /**
      * If holder is not on default
      *      Holder
@@ -65,23 +137,11 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
      * @param loan
      * @param holder
      */
+    @Override
     public void updateCredentialBenefitForActiveLoan(Loan loan, Person holder) throws CredentialException {
 
-        if(!holder.isInDefault()){
-
-            Optional<CredentialBenefits> opCredentialBenefitsHolder = this.getCredentialBenefits(loan.getDniPerson(), loan.getDniPerson(), PersonTypesCodes.HOLDER );
-
-            if(opCredentialBenefitsHolder.isPresent()){
-
-                CredentialBenefits credentialBenefits = opCredentialBenefitsHolder.get();
-
-                if(this.isCredentialRevoked(credentialBenefits)){
-                    this.createCredentialsBenefitsForNewLoan(loan);
-                }
-
-            }
-
-        }
+        super.updateCredentialBenefitForActiveLoan(loan, holder);
+        this.createCredentialsBenefitsFamilyForNewLoan(loan);
     }
 
 
@@ -134,7 +194,6 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
         return this.getCredentialBenefits(holderDni , holderDni, PersonTypesCodes.HOLDER);
     }
 
-    @Override
     public Optional<CredentialBenefits> getCredentialBenefitsFamiliy(Long holderDni, Long beneficiary){
         return this.getCredentialBenefits(holderDni , beneficiary, PersonTypesCodes.FAMILY);
     }
@@ -151,7 +210,6 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
          return this.buildNewBenefitsCredential(holder, holder, PersonTypesCodes.HOLDER);
     }
 
-    @Override
     public CredentialBenefits buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException{
         return this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.HOLDER);
     }

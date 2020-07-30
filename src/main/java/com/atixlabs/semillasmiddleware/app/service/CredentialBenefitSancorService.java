@@ -41,12 +41,6 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
 
     @Override
-    public void createCredentialsBenefitsFamilyForNewLoan(Loan loan, Person holder) throws CredentialException {
-        //Do nothing,
-        this.getLog().debug("Dont Create Credential Sancor benefit Family, not exist this type or credendential");
-    }
-
-    @Override
     Optional<CredentialBenefitSancor> getHolderCredentialBenefit(Person holder) {
         return this.getCredentialBenefits(holder.getDocumentNumber(), holder.getDocumentNumber());
     }
@@ -55,16 +49,6 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
         return credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(holderDni, beneficiaryDni);
     }
 
-    /**
-     * Not avaiable  Sacor Salud Credential for familiy
-     * @param holderDni
-     * @param beneficiary
-     * @return
-     */
-    @Override
-    public Optional<CredentialBenefitSancor> getCredentialBenefitsFamiliy(Long holderDni, Long beneficiary){
-        return Optional.empty();
-    }
 
     @Override
     public Optional<CredentialBenefitSancor> getCredentialBenefitsHolder(Long holderDni){
@@ -115,11 +99,6 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
         return credentialBenefitSancor;
     }
 
-    @Override
-    CredentialBenefitSancor buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException {
-        throw new CredentialException("Credential Sancor Family is not avaiable for family");
-
-    }
 
     @Override
     public CredentialBenefitSancor saveCredentialBenefit(CredentialBenefitSancor credential) {

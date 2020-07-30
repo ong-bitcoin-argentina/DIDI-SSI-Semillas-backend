@@ -191,7 +191,7 @@ public class CredentialBenefitsServiceTest {
 
         Loan loan = this.getMockLoan();
 
-        credentialBenefitsService.createCredentialsBenefitsForNewLoan(loan);
+        credentialBenefitsService.createCredentialsBenefitsHolderForNewLoan(loan);
 
     }
 
@@ -221,7 +221,7 @@ public class CredentialBenefitsServiceTest {
 
 
         try {
-            credentialBenefitsService.createCredentialsBenefitsForNewLoan(loan);
+            credentialBenefitsService.createCredentialsBenefitsHolderForNewLoan(loan);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
@@ -271,7 +271,7 @@ public class CredentialBenefitsServiceTest {
 
 
         try {
-            credentialBenefitsService.createCredentialsBenefitsForNewLoan(loan);
+            credentialBenefitsService.createCredentialsBenefitsHolderForNewLoan(loan);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
@@ -595,6 +595,132 @@ public class CredentialBenefitsServiceTest {
     }
 
 
+    @Test
+    public void createNewCrendentialBenefitsForFamilyWhenIsNotOnDefaultAndCredentialNotExist() throws CredentialException {
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        // CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+        //  credentialBenefitsSaved.setIdHistorical(1L);
+        Person kinsman =  getPersonFamiliyMock();
+        List<Person> family = new ArrayList<Person>();
+        family.add(kinsman);
+
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
+        when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+        when(credentialIdentityRepository.findDistinctBeneficiaryFamilyByHolder(any(Person.class))).thenReturn(null);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), kinsman.getDocumentNumber(),PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.empty());
+        when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
+        when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
+            @Override
+            public CredentialBenefits answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialBenefits) args[0];
+            }
+        });
+
+
+        try {
+            credentialBenefitsService.createCredentialsBenefitsFamilyForNewLoan(loan);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+        verify(credentialBenefitsRepository, times(2)).save(credentialBenefitCaptor.capture());
+        CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
+
+        Assertions.assertEquals(holder, credentialBenefits.getCreditHolder());
+        Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getCreditHolderDni());
+        Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getCreditHolderFirstName());
+        Assertions.assertEquals(holder.getLastName(), credentialBenefits.getCreditHolderLastName());
+
+        Assertions.assertEquals(kinsman, credentialBenefits.getBeneficiary());
+        Assertions.assertEquals(kinsman.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
+        Assertions.assertEquals(kinsman.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
+        Assertions.assertEquals(kinsman.getLastName(), credentialBenefits.getBeneficiaryLastName());
+
+        Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+
+    }
+
+
+    @Test(expected = CredentialException.class)
+    public void createNewCrendentialBenefitsForFamilyWhenNotExists_LoanToReviewOk() throws CredentialException {
+
+        when(personService.findByDocumentNumber(anyLong())).thenReturn(Optional.empty());
+
+        Loan loan = this.getMockLoan();
+
+        credentialBenefitsService.createCredentialsBenefitsFamilyForNewLoan(loan);
+
+    }
+
+
+    @Test
+    public void createNewCrendentialBenefitsForFamilyWhenIsNotOnDefaultAndCredentialExistsAndIsRevoked() throws CredentialException {
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+        Person holder = opHolder.get();
+        Optional<CredentialState>  StateRevoke = createCredentialStateRevokeMock();
+        CredentialBenefits credentialBenefitsSaved = new CredentialBenefits();
+        credentialBenefitsSaved.setCredentialState(StateRevoke.get());
+        credentialBenefitsSaved.setIdHistorical(99L);
+        Person kinsman =  getPersonFamiliyMock();
+        List<Person> family = new ArrayList<Person>();
+        family.add(kinsman);
+
+
+        Optional<CredentialState>  StatePendingDidi = createCredentialStatePendingDidiMock();
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(StatePendingDidi.get());
+        when(credentialStateService.getCredentialRevokeState()).thenReturn(StateRevoke);
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())).thenReturn(getParameterConfigurationDidiIssuerMock());
+        when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+        when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), kinsman.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
+        when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
+
+        when(credentialBenefitsRepository.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
+            @Override
+            public CredentialBenefits answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialBenefits) args[0];
+            }
+        });
+
+
+        try {
+            credentialBenefitsService.createCredentialsBenefitsFamilyForNewLoan(loan);
+        } catch (CredentialException e) {
+            e.printStackTrace();
+            Assertions.fail(e.getMessage());
+        }
+
+        verify(credentialBenefitsRepository, times(1)).save(credentialBenefitCaptor.capture());
+        CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
+
+        Assertions.assertEquals(holder, credentialBenefits.getCreditHolder());
+        Assertions.assertEquals(holder.getDocumentNumber(), credentialBenefits.getCreditHolderDni());
+        Assertions.assertEquals(holder.getFirstName(), credentialBenefits.getCreditHolderFirstName());
+        Assertions.assertEquals(holder.getLastName(), credentialBenefits.getCreditHolderLastName());
+
+        Assertions.assertEquals(kinsman, credentialBenefits.getBeneficiary());
+        Assertions.assertEquals(kinsman.getDocumentNumber(), credentialBenefits.getBeneficiaryDni());
+        Assertions.assertEquals(kinsman.getFirstName(), credentialBenefits.getBeneficiaryFirstName());
+        Assertions.assertEquals(kinsman.getLastName(), credentialBenefits.getBeneficiaryLastName());
+
+        Assertions.assertEquals(StatePendingDidi.get(), credentialBenefits.getCredentialState());
+        Assertions.assertEquals(credentialBenefitsSaved.getIdHistorical(), credentialBenefits.getIdHistorical());
+
+        //Credential saved is not modified
+        Assertions.assertEquals(99L, credentialBenefitsSaved.getIdHistorical());
+        Assertions.assertEquals(StateRevoke.get(), credentialBenefitsSaved.getCredentialState());
+
+
+    }
+
     private Optional<ParameterConfiguration> getParameterConfigurationDidiIssuerMock(){
         ParameterConfiguration parameterConfiguration = new ParameterConfiguration();
         parameterConfiguration.setConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode());
@@ -641,6 +767,15 @@ public class CredentialBenefitsServiceTest {
         person.setFirstName("Pepito");
         //person.setDIDIsHisotoric(List.of(getDIDHistoricMock()));
         return Optional.of(person);
+    }
+
+    private Person getPersonFamiliyMock() {
+        Person person = new Person();
+        person.setId(2L);
+        person.setDocumentNumber((long) 234567);
+        person.setFirstName("Pepito hijo");
+        //person.setDIDIsHisotoric(List.of(getDIDHistoricMock()));
+        return person;
     }
 
     private Optional<CredentialState> createCredentialStateRevokeMock() {

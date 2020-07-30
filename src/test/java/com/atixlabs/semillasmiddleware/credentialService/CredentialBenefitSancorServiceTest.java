@@ -69,7 +69,7 @@ public class CredentialBenefitSancorServiceTest {
 
         Loan loan = this.getMockLoan();
 
-        credentialBenefitSancorService.createCredentialsBenefitsForNewLoan(loan);
+        credentialBenefitSancorService.createCredentialsBenefitsHolderForNewLoan(loan);
 
     }
 
@@ -99,7 +99,7 @@ public class CredentialBenefitSancorServiceTest {
 
 
         try {
-            credentialBenefitSancorService.createCredentialsBenefitsForNewLoan(loan);
+            credentialBenefitSancorService.createCredentialsBenefitsHolderForNewLoan(loan);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());
@@ -149,7 +149,7 @@ public class CredentialBenefitSancorServiceTest {
 
 
         try {
-            credentialBenefitSancorService.createCredentialsBenefitsForNewLoan(loan);
+            credentialBenefitSancorService.createCredentialsBenefitsHolderForNewLoan(loan);
         } catch (CredentialException e) {
             e.printStackTrace();
             Assertions.fail(e.getMessage());

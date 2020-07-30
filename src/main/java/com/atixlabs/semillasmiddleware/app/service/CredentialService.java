@@ -135,8 +135,8 @@ public class CredentialService {
             try {
                 List<Loan> loansDefaultToReview = this.handleDefaultCredits(lastTimeProcessRun);
                 List<Loan> loansActiveToReview = this.handleActiveCredits(lastTimeProcessRun);
-                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun);
-                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);
+                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun); //TODO add sancor
+                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);//TODO add sancor
                 List<Loan> loansNewToReview = this.handleNewCredits();
 
             } catch (PersonDoesNotExistsException ex) {
@@ -173,8 +173,9 @@ public class CredentialService {
         for (Loan newLoan : newLoans) {
             try {
                 CredentialCredit credentialCredit = this.createNewCreditCredential(newLoan);
-                credentialBenefitService.createCredentialsBenefitsForNewLoan(newLoan);
-                credentialBenefitSancorService.createCredentialsBenefitsForNewLoan(newLoan);
+                credentialBenefitService.createCredentialsBenefitsHolderForNewLoan(newLoan);
+                credentialBenefitService.createCredentialsBenefitsFamilyForNewLoan(newLoan);
+                credentialBenefitSancorService.createCredentialsBenefitsHolderForNewLoan(newLoan);
             } catch (PersonDoesNotExistsException | CredentialException ex) {
                 log.error("Error creating new credential credit for loan " + newLoan.getIdBondareaLoan() + " " + ex.getMessage());
                 loansForReview.add(newLoan);
@@ -599,6 +600,7 @@ public class CredentialService {
                     this.updateCredentialCreditForActiveLoan(loan, holder);
 
                     credentialBenefitService.updateCredentialBenefitForActiveLoan(loan,holder);
+                    credentialBenefitSancorService.updateCredentialBenefitForActiveLoan(loan, holder);
 
             } else {
                 this.updateCredentialCreditForActiveLoan(loan, holder);

@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
@@ -20,6 +19,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Slf4j
@@ -109,6 +109,16 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
         }
         return credential;
+    }
+
+    public List<CredentialBenefitSancor> getCredentialBenefitSancorsOnPendindDidiState() throws CredentialException {
+        CredentialState pendingDidiState = credentialStateService.getCredentialPendingDidiState();
+
+        return  credentialBenefitSancorRepository.findByCredentialState(pendingDidiState);
+    }
+
+    public CredentialBenefitSancor save(CredentialBenefitSancor credentialBenefitSancor){
+        return credentialBenefitSancorRepository.save(credentialBenefitSancor);
     }
 
     @Override

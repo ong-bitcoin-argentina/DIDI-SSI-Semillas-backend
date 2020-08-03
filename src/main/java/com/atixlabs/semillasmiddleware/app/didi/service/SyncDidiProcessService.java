@@ -4,6 +4,8 @@ import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
+import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,6 +14,7 @@ import org.springframework.stereotype.Service;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 @Slf4j
 @Service
@@ -27,12 +30,16 @@ public class SyncDidiProcessService {
 
     private CredentialEntrepreneurshipService credentialEntrepreneurshipService;
 
+    private CredentialBenefitSancorService credentialBenefitSancorService;
+
     private DidiAppUserService didiAppUserService;
 
     private DidiService didiService;
 
+    private SancorPolicyService sancorPolicyService;
+
     @Autowired
-    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService, CredentialDwellingService credentialDwellingService, CredentialEntrepreneurshipService credentialEntrepreneurshipService){
+    public SyncDidiProcessService(CredentialCreditService credentialCreditService, DidiAppUserService didiAppUserService, DidiService didiService, CredentialBenefitService credentialBenefitService, CredentialIdentityService credentialIdentityService, CredentialDwellingService credentialDwellingService, CredentialEntrepreneurshipService credentialEntrepreneurshipService, CredentialBenefitSancorService credentialBenefitSancorService, SancorPolicyService sancorPolicyService){
         this.credentialCreditService = credentialCreditService;
         this.didiAppUserService = didiAppUserService;
         this.didiService = didiService;
@@ -40,6 +47,8 @@ public class SyncDidiProcessService {
         this.credentialIdentityService = credentialIdentityService;
         this.credentialDwellingService = credentialDwellingService;
         this.credentialEntrepreneurshipService = credentialEntrepreneurshipService;
+        this.credentialBenefitSancorService = credentialBenefitSancorService;
+        this.sancorPolicyService = sancorPolicyService;
     }
 
 
@@ -171,6 +180,23 @@ public class SyncDidiProcessService {
         }
     }
 
+    public void emmitCredentialsBenefitSancor() throws CredentialException {
+
+        List<CredentialBenefitSancor> credentialsBenefitSancorToEmmit = this.credentialBenefitSancorService.getCredentialBenefitSancorsOnPendindDidiState();
+
+        if(credentialsBenefitSancorToEmmit==null || credentialsBenefitSancorToEmmit.isEmpty()){
+            log.info("No Benefit Sancor credentials to emmit were found");
+        }else{
+
+            log.info(" {} Benefit Sancor to emmit", credentialsBenefitSancorToEmmit.size());
+
+            for(CredentialBenefitSancor credentialBenefitSancorToEmmit : credentialsBenefitSancorToEmmit){
+                this.emmitCredentialBenefitSancor(credentialBenefitSancorToEmmit);
+            }
+
+        }
+    }
+
 
     /**
      * get current Did for holder and emmit credential
@@ -267,5 +293,33 @@ public class SyncDidiProcessService {
 
     }
 
+    public void emmitCredentialBenefitSancor(CredentialBenefitSancor credentialBenefitSancor){
+
+        log.info("Emmiting Credential Benefit Sancor id {} holder {} beneficiary {}",credentialBenefitSancor.getId(), credentialBenefitSancor.getCreditHolderDni(), credentialBenefitSancor.getBeneficiaryDni());
+
+        DidiAppUser didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni());
+
+
+        if(didiAppUser!=null) {
+
+            Optional<SancorPolicy>  opSancorPolicy = this.sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni());
+
+            if(opSancorPolicy.isPresent()) {
+                credentialBenefitSancor.setIdDidiReceptor(didiAppUser.getDid());
+
+                credentialBenefitSancor.addPolicyData(opSancorPolicy.get());
+
+                credentialBenefitSancor = credentialBenefitSancorService.save(credentialBenefitSancor);
+
+                didiService.createAndEmmitCertificateDidi(credentialBenefitSancor);
+            }else{
+                log.info("Sancor policy for Beneficiary {} i not avaiable, Credential Benefit Sancor {} not emmited", credentialBenefitSancor.getCreditHolderDni(), credentialBenefitSancor.getId());
+
+            }
+
+        }else{
+            log.info("Id Didi for Beneficiary {} not exist, Credential Benefit Sancor {} not emmited", credentialBenefitSancor.getCreditHolderDni(), credentialBenefitSancor.getId());
+        }
+    }
 
 }

@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -15,9 +16,9 @@ import java.math.BigDecimal;
 @PrimaryKeyJoinColumn(referencedColumnName="id")
 public class CredentialBenefitSancor extends Credential{
 
-    private String certificateNumber;
-    private String ref;
-    private String policyNumber;
+    private Long certificateNumber;//certificate number
+    private Long ref; //Pollicynumber
+    private Long policyNumber;
 
     public CredentialBenefitSancor(CredentialBenefitSancor credentialBenefitSancor) {
         super(credentialBenefitSancor);
@@ -28,4 +29,10 @@ public class CredentialBenefitSancor extends Credential{
 
     @Override
     public boolean isManuallyRevocable(){return false;}
+
+    public void addPolicyData(SancorPolicy sancorPolicy){
+        this.certificateNumber = sancorPolicy.getCertificateNumber();
+        this.ref = sancorPolicy.getPolicyNumber();
+        this.policyNumber = sancorPolicy.getPolicyNumber();
+    }
 }

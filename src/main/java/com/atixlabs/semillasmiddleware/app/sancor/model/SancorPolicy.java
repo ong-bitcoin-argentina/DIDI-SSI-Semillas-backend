@@ -1,6 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.sancor.model;
 
 
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
+import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import com.atixlabs.semillasmiddleware.security.model.User;
 import lombok.Getter;
 import lombok.Setter;
@@ -21,37 +23,37 @@ import java.time.LocalDate;
 @ToString
 @Slf4j
 //  Descripción Ramo  Producto	Póliza	Cliente Poliza	Nombre Cliente Póliza	Certificado	Cliente Certificado	Ini. Vigencia Cert. Ori.	Fin Vigencia Cert.	Nombre Cliente Cert.	Domicilio
-public class SancorPolicy {
+public class SancorPolicy extends AuditableEntity {
 
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @CreatedBy
-    private User user;
+   // @CreatedBy
+    //private User user;
 
-    @CreatedDate
-    private Instant createdDate;
+  //  @CreatedDate
+   // private Instant createdDate;
 
-    @LastModifiedDate
-    private Instant updateDate;
+    //@LastModifiedDate
+    //private Instant updateDate;
 
     private Long certificateClientDni;
 
-    @Column(length = 50)
+    @Column(length = 150)
     private String branchDescription; //Descripción Ramo
 
-    private String idProduct;//Producto
+    private Long idProduct;//Producto
 
-    private String policyNumber;// Póliza
+    private Long policyNumber;// Póliza
 
-    private String policyId;// Cliente Poliza
+    private String policyClient;// Cliente Poliza
 
-    private String policyClientname;// Nombre Cliente Póliza
+    private String policyClientName;// Nombre Cliente Póliza
 
-    private String certificateNumber;// Certificado
+    private Long certificateNumber;// Certificado
 
-    private String certificateId; //Cliente Certificado
+    private String certificateClient; //Cliente Certificado
 
     private LocalDate validityFrom;// 	Ini. Vigencia Cert. Ori.
 
@@ -60,5 +62,8 @@ public class SancorPolicy {
     private String certificateClientName;// Nombre Cliente Cert.
 
     private String certificateClientAddress;// Domicilio
+
+
+
 
 }

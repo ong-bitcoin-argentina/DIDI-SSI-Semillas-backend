@@ -1,12 +1,21 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
+import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
+import com.atixlabs.semillasmiddleware.excelparser.validatorfactory.ExcelRowValidatorFactory;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.mockito.InjectMocks;
+import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 
-public class SancorSaludExcelParseSerciceTest {
+public class SancorSaludExcelParseServiceTest {
+
+    @Mock
+    private SancorPolicyService sancorPolicyService;
+
+    @Mock
+    private ExcelRowValidatorFactory excelRowValidatorFactory;
 
     @InjectMocks
     private SancorSaludExcelParseService sancorSaludExcelParseService;

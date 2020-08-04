@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -62,6 +63,13 @@ public class SancorSaludExcelParseService extends ExcelParseService {
         log.info("Sancor policies to save {}",(sancorPolicys!=null ? sancorPolicys.size() : 0));
 
         for(SancorPolicy sancorPolicy : sancorPolicys){
+            Optional<SancorPolicy> opSancorPolicy = this.sancorPolicyService.findByCertificateClientDni(sancorPolicy.getCertificateClientDni());
+
+            if(opSancorPolicy.isPresent()){
+                log.debug("updatig sancor policy for dni {}",opSancorPolicy.get().getCertificateClientDni());
+                sancorPolicy = opSancorPolicy.get().merge(sancorPolicy);
+            }
+
             this.sancorPolicyService.save(sancorPolicy);
         }
 

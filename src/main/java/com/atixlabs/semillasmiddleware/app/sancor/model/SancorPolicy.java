@@ -64,6 +64,20 @@ public class SancorPolicy extends AuditableEntity {
     private String certificateClientAddress;// Domicilio
 
 
+    public SancorPolicy merge(SancorPolicy sancorPolicyNewInfo){
+        this.branchDescription = sancorPolicyNewInfo.branchDescription;
+        this.idProduct = sancorPolicyNewInfo.getIdProduct();
+        this.policyNumber = sancorPolicyNewInfo.getPolicyNumber();
+        this.policyClient = sancorPolicyNewInfo.getPolicyClient();
+        this.policyClientName = sancorPolicyNewInfo.getPolicyClientName();
+        this.certificateNumber = sancorPolicyNewInfo.getCertificateNumber();
+        this.certificateClient = sancorPolicyNewInfo.getCertificateClient();
+        this.validityFrom = sancorPolicyNewInfo.getValidityFrom();
+        this.validityTo = sancorPolicyNewInfo.getValidityTo();
+        this.certificateClientName = sancorPolicyNewInfo.getCertificateClientName();
+        this.certificateClientAddress = sancorPolicyNewInfo.getCertificateClientAddress();
 
+        return this;
+    }
 
 }

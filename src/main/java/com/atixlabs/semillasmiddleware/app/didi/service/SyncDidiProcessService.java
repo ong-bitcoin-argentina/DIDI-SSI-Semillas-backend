@@ -91,6 +91,13 @@ public class SyncDidiProcessService {
             response.put(CredentialCategoriesCodes.BENEFIT,e.getMessage());
         }
 
+        try {
+            this.emmitCredentialsBenefitSancor();
+        } catch (CredentialException e) {
+            log.error("Error emmiting Benefit Sancor credentials : {} ",e.getMessage(), e);
+            response.put(CredentialCategoriesCodes.BENEFIT_SANCOR,e.getMessage());
+        }
+
         return response;
     }
 

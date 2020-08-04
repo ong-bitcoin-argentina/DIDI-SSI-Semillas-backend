@@ -13,6 +13,8 @@ import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitSancorRep
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
+import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -31,11 +33,14 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
     private ParameterConfigurationRepository parameterConfigurationRepository;
 
+    private SancorPolicyService sancorPolicyService;
+
     @Autowired
-    public CredentialBenefitSancorService(PersonService personService, ParameterConfigurationRepository parameterConfigurationRepository, CredentialStateService credentialStateService, CredentialBenefitSancorRepository credentialBenefitSancorRepository, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository){
+    public CredentialBenefitSancorService(PersonService personService, ParameterConfigurationRepository parameterConfigurationRepository, CredentialStateService credentialStateService, CredentialBenefitSancorRepository credentialBenefitSancorRepository, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository, SancorPolicyService sancorPolicyService){
         super(personService,credentialStateService, didiService, revocationReasonRepository, credentialRepository);
         this.credentialBenefitSancorRepository = credentialBenefitSancorRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
+        this.sancorPolicyService = sancorPolicyService;
 
     }
 
@@ -80,14 +85,6 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
         credentialBenefitSancor.setCredentialState(statePendingDidi);
 
         credentialBenefitSancor.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_SANCOR.getCode());
-        //Person is holder or family
-        /*if (personType.equals(PersonTypesCodes.HOLDER)) {
-            credentialBenefits.setBeneficiaryType(PersonTypesCodes.HOLDER.getCode());
-            credentialBenefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS.getCode());
-        } else {
-            credentialBenefits.setBeneficiaryType(PersonTypesCodes.FAMILY.getCode());
-            credentialBenefits.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_BENEFITS_FAMILY.getCode());
-        }*/
 
         credentialBenefitSancor.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credentialBenefitSancor.setCredentialCategory(CredentialCategoriesCodes.BENEFIT_SANCOR.getCode());
@@ -95,6 +92,13 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
         credentialBenefitSancor.setCreditHolder(holder);
 
         credentialBenefitSancor.setBeneficiary(holder);
+
+        Optional<SancorPolicy>  opSancorPolicy = this.sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni());
+
+        if(opSancorPolicy.isPresent()) {
+
+            credentialBenefitSancor.addPolicyData(opSancorPolicy.get());
+        }
 
         return credentialBenefitSancor;
     }

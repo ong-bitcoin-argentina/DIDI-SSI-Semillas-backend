@@ -6,6 +6,8 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
+import com.atixlabs.semillasmiddleware.excelparser.validator.RowValidator;
+import com.atixlabs.semillasmiddleware.excelparser.validatorfactory.ExcelRowValidatorFactory;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,9 +26,15 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
     private SancorPolicyService sancorPolicyService;
 
+    private ExcelRowValidatorFactory excelRowValidatorFactory;
+
+    private RowValidator<SancorPolicyRow> rowRowValidator;
+
     @Autowired
-    public SancorSaludExcelParseService(SancorPolicyService sancorPolicyService){
+    public SancorSaludExcelParseService(SancorPolicyService sancorPolicyService, ExcelRowValidatorFactory excelRowValidatorFactory){
         this.sancorPolicyService = sancorPolicyService;
+        this.excelRowValidatorFactory = excelRowValidatorFactory;
+        this.rowRowValidator = this.excelRowValidatorFactory.getSancorPolicyRowValidator();
     }
 
     @Override
@@ -35,9 +43,15 @@ public class SancorSaludExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalReadRow();
 
         try {
-            SancorPolicy sancorPolicy = this.parseRow(currentRow);
-            this.sancorPolicys.add(sancorPolicy);
-            processExcelFileResult.addTotalValidRows();
+            SancorPolicyRow sancorPolicyRow = this.parseRow(currentRow);
+            List<String> errors =  rowRowValidator.validate(sancorPolicyRow);
+            if(errors == null || errors.isEmpty()) {
+                SancorPolicy sancorPolicy = this.buildSancorPolicy(sancorPolicyRow);
+                this.sancorPolicys.add(sancorPolicy);
+                processExcelFileResult.addTotalValidRows();
+            }else{
+                this.addErrors(processExcelFileResult,errors,sancorPolicyRow);
+            }
 
         } catch (Exception e) {
             processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
@@ -46,11 +60,18 @@ public class SancorSaludExcelParseService extends ExcelParseService {
         return processExcelFileResult;
     }
 
-    public SancorPolicy parseRow(Row row) throws InvalidRowException {
-        SancorPolicyRow sancorPolicyRow = new SancorPolicyRow(row);
-        SancorPolicy sancorPolicy = this.buildSancorPolicy(sancorPolicyRow);
+    private void addErrors(ProcessExcelFileResult processExcelFileResult, List<String> errors, SancorPolicyRow sancorPolicyRow){
 
-        return  sancorPolicy;
+        for(String error : errors){
+            processExcelFileResult.addRowError(sancorPolicyRow.getRowNum(), error);
+        }
+    }
+
+    public SancorPolicyRow parseRow(Row row) throws InvalidRowException {
+        SancorPolicyRow sancorPolicyRow = new SancorPolicyRow(row);
+
+
+        return  sancorPolicyRow;
     }
 
 

@@ -22,6 +22,7 @@ public class SancorPolicy extends AuditableEntity {
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
 
+    @Column(unique = true)
     private Long certificateClientDni;
 
     @Column(length = 150)

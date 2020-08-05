@@ -38,8 +38,13 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult){
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) {
 
+        if (this.checkIfRowIsEmpty(currentRow)){
+            log.debug("row {} is empty",currentRow.getRowNum());
+            return processExcelFileResult;
+        }
+        
         processExcelFileResult.addTotalReadRow();
 
         try {
@@ -60,6 +65,14 @@ public class SancorSaludExcelParseService extends ExcelParseService {
         return processExcelFileResult;
     }
 
+    private boolean checkIfRowIsEmpty(Row row) {
+        if (row == null || row.getLastCellNum() <= 0) {
+            return true;
+        }
+        else
+            return false;
+    }
+
     private void addErrors(ProcessExcelFileResult processExcelFileResult, List<String> errors, SancorPolicyRow sancorPolicyRow){
 
         for(String error : errors){
@@ -75,25 +88,49 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
 
+    @Override
+    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception {
+        log.info("Sancor Salud processSingleSheetFile");
+        this.cleanSancorPolicies();
+        ProcessExcelFileResult processExcelFileResult = null;
+        try {
+            processExcelFileResult = super.processSingleSheetFile(filePath);
+        }finally {
+            this.cleanSancorPolicies();
+        }
+        return processExcelFileResult;
+
+    }
+
+    private void cleanSancorPolicies(){
+        this.sancorPolicys =  new ArrayList<SancorPolicy>();
+    }
+
+
     public ProcessExcelFileResult processAndSaveSingleSheetFile(String filePath) throws Exception {
 
         log.info("Import and save Sancor Policies form {} ", filePath);
+        this.cleanSancorPolicies();
 
-        ProcessExcelFileResult processExcelFileResult =this.processSingleSheetFile(filePath);
+        ProcessExcelFileResult processExcelFileResult = null;
+        try {
+            processExcelFileResult = super.processSingleSheetFile(filePath);
+            log.info("Sancor policies to save {}", (sancorPolicys != null ? sancorPolicys.size() : 0));
 
-        log.info("Sancor policies to save {}",(sancorPolicys!=null ? sancorPolicys.size() : 0));
+            for (SancorPolicy sancorPolicy : sancorPolicys) {
+                Optional<SancorPolicy> opSancorPolicy = this.sancorPolicyService.findByCertificateClientDni(sancorPolicy.getCertificateClientDni());
 
-        for(SancorPolicy sancorPolicy : sancorPolicys){
-            Optional<SancorPolicy> opSancorPolicy = this.sancorPolicyService.findByCertificateClientDni(sancorPolicy.getCertificateClientDni());
+                if (opSancorPolicy.isPresent()) {
 
-            if(opSancorPolicy.isPresent()){
+                    log.debug("updatig sancor policy for dni {}", opSancorPolicy.get().getCertificateClientDni());
 
-                log.debug("updatig sancor policy for dni {}",opSancorPolicy.get().getCertificateClientDni());
+                    sancorPolicy = opSancorPolicy.get().merge(sancorPolicy);
+                }
 
-                sancorPolicy = opSancorPolicy.get().merge(sancorPolicy);
+                this.sancorPolicyService.save(sancorPolicy);
             }
-
-            this.sancorPolicyService.save(sancorPolicy);
+        }finally {
+            this.cleanSancorPolicies();
         }
 
         return processExcelFileResult;

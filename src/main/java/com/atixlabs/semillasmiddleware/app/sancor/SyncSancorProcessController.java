@@ -12,12 +12,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 @RestController
-@RequestMapping(SyncDidiProcessController.URL_MAPPING_CREDENTIAL)
+@RequestMapping(SyncSancorProcessController.URL_MAPPING_SANCOR)
 @CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
 @Slf4j
 public class SyncSancorProcessController {
 
-    public static final String URL_MAPPING_CREDENTIAL = "/syncsancor";
+    public static final String URL_MAPPING_SANCOR = "/syncsancor";
 
     private SyncSancorProcessService syncSancorProcessService;
 
@@ -26,7 +26,7 @@ public class SyncSancorProcessController {
         this.syncSancorProcessService = syncSancorProcessService;
     }
 
-    @GetMapping("/processpoliciesupdated")
+    @GetMapping("/policy/update")
     @ResponseStatus(HttpStatus.OK)
     public ProcessResultDto processPoliciesUpdated(){
         Map<String, String> jsonMessage = new HashMap<>();

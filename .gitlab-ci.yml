@@ -34,6 +34,7 @@ deploy-staging:
   only:
     refs:
       - SEMI-135-setup-ci
+      - SEMI-350-Sancor-Credential
       # Only run on release/x.y.x and hotfix/xxxx
       - /^release.*$/
       - develop

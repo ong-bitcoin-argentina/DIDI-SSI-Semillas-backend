@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.filemanager.controller;
 
+import com.atixlabs.semillasmiddleware.excelparser.app.service.SancorSaludExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
@@ -25,6 +26,10 @@ public class FileManagerController {
     @Autowired
     private SurveyExcelParseService surveyExcelParseService;
 
+    @Autowired
+    private SancorSaludExcelParseService sancorSaludExcelParseService;
+
+
     @PostMapping("/upload")
     @ResponseBody
     public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file) throws Exception, InvalidCategoryException {
@@ -41,6 +46,43 @@ public class FileManagerController {
 
         return ResponseEntity.ok(processExcelFileResult);
         //return(ResponseEntity.ok().build());
+    }
+
+
+    @PostMapping("/sancorsalud/validate")
+    @ResponseBody
+    public ResponseEntity validateSancorSaludFile(@RequestParam("file") MultipartFile file) throws Exception, InvalidCategoryException {
+
+        log.info("sancorsalud uploadFile executed");
+
+        if (file.isEmpty()) {
+            throw new EmptyFileException("Empty file");
+        }
+
+        File receivedFile = fileManagerService.uploadFile(file);
+
+        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processSingleSheetFile(receivedFile.getPath());
+
+        return ResponseEntity.ok(processExcelFileResult);
+
+    }
+
+    @PostMapping("/sancorsalud/upload")
+    @ResponseBody
+    public ResponseEntity uploadSancorSaludFile(@RequestParam("file") MultipartFile file) throws Exception, InvalidCategoryException {
+
+        log.info("sancorsalud uploadFile executed");
+
+        if (file.isEmpty()) {
+            throw new EmptyFileException("Empty file");
+        }
+
+        File receivedFile = fileManagerService.uploadFile(file);
+
+        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processAndSaveSingleSheetFile(receivedFile.getPath());
+
+        return ResponseEntity.ok(processExcelFileResult);
+
     }
 
 

@@ -73,6 +73,11 @@ public class CredentialDto {
     private String entrepreneurshipName;
     private String entrepreneurshipAddress;
 
+    //Sancor
+    private Long certificateNumber;
+    private Long ref;
+    private Long policyNumber;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endActivity;
 
@@ -137,6 +142,9 @@ public class CredentialDto {
                             if (CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode().equals(credential.getCredentialCategory())) {
                                 return new CredentialDto((CredentialEntrepreneurship) credential);
                             } else
+                            if (CredentialCategoriesCodes.BENEFIT_SANCOR.getCode().equals(credential.getCredentialCategory())) {
+                                return new CredentialDto((CredentialBenefitSancor) credential);
+                            } else
                                 return new CredentialDto();
                         }
                     }
@@ -189,6 +197,14 @@ public class CredentialDto {
         this.relationWithCreditHolder = identity.getRelationWithCreditHolder();
         this.beneficiaryGender = identity.getBeneficiaryGender();
         this.beneficiaryBirthDate = identity.getBeneficiaryBirthDate();
+    }
+
+    public CredentialDto(CredentialBenefitSancor sancor) {
+        this.baseCredentialDto(sancor);
+        this.certificateNumber = sancor.getCertificateNumber();
+        this.ref = sancor.getRef();
+        this.policyNumber = sancor.getPolicyNumber();
+
     }
 
 }

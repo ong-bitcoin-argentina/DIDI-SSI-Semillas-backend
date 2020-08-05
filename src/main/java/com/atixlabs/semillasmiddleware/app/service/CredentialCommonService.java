@@ -112,6 +112,18 @@ public abstract class  CredentialCommonService {
         return (credential.getCredentialState().equals(opStateRevoke.get()));
     }
 
+    public Boolean isCredentialActive(Credential credential) throws CredentialException {
+        Optional<CredentialState> opStateActive = credentialStateService.getCredentialActiveState();
+
+        return (credential.getCredentialState().equals(opStateActive.get()));
+    }
+
+    public Boolean isCredentialPendingDidi(Credential credential) throws CredentialException {
+        CredentialState statePendingDidi = credentialStateService.getCredentialPendingDidiState();
+
+        return (credential.getCredentialState().equals(statePendingDidi));
+    }
+
     public Optional<Credential> getCredentialById(Long id) {
         //validate credential is in bd
         return credentialRepository.findById(id);

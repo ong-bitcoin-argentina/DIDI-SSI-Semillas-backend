@@ -29,6 +29,7 @@ public class FileManagerService {
         return workFolder;
     }
 
+    //TODO do unique name file
     public File uploadFile(MultipartFile file) throws FileManagerException {
         try {
             File workMainFolder = getWorkFolder();

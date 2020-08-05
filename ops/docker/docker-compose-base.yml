@@ -26,6 +26,8 @@ services:
       - "traefik.http.routers.backend.entrypoints=web-secure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
+    volumes:
+      - "/var/log/semillas:/var/log/semillas"
 
   proxy:
     image: traefik:v2.2.0

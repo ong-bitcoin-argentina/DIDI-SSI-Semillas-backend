@@ -161,10 +161,10 @@ public class ParserCategoriesTest {
 
     @Test
     public void invalidCategoryThrowsInvalidCategoryException(){
-        //answerCategoryFactory.get("non-existent category");
+        //answerCategoryFactory.get("non-existent providerCategory");
         SurveyForm surveyForm = new SurveyForm();
         surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
-        Assert.assertNull(surveyForm.getCategoryByUniqueName("non-existent-category", null));
+        Assert.assertNull(surveyForm.getCategoryByUniqueName("non-existent-providerCategory", null));
     }
 
     @Test

@@ -89,7 +89,7 @@ public class SurveyForm {
     }
 
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        //return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
+        //return categoryList.stream().allMatch(providerCategory -> providerCategory.isValid(processExcelFileResult));
 
         boolean allValid = true;
         String msg;

@@ -29,7 +29,7 @@ public class AnswerCategoryFactory {
     public ArrayList<Category> getCategoryList(){
 
 
-        //Keep all Category options.
+        //Keep all ProviderCategory options.
         ArrayList<Categories> categoryEnumList = new ArrayList<>(Categories.getCodeList());
         //Keep actual objects to return
         ArrayList<Category> categoryList = new ArrayList<>();
@@ -40,7 +40,7 @@ public class AnswerCategoryFactory {
             categoryMap.put(categoryEnum.getCode(), categoryEnum.getLinkedClass());
         }
 
-        //Filling category list with objects
+        //Filling providerCategory list with objects
         for (Categories categoryEnum : categoryEnumList) {
             addCategoryInstancesToList(categoryList, categoryEnum);
         }

@@ -144,7 +144,7 @@ public class AnswerRow extends ExcelRow {
                 "surveyDate=" + surveyDate +
                 ", surveyFormCode='" + surveyFormCode + '\'' +
                 ", pdv=" + pdv +
-                ", category='" + category + '\'' +
+                ", providerCategory='" + category + '\'' +
                 ", question='" + question + '\'' +
                 ", answer='" + answer + '\'' +
 //                ", errorMessage='" + errorMessage + '\'' +

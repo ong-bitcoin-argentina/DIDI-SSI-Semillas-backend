@@ -87,7 +87,9 @@ public class SancorSaludExcelParseService extends ExcelParseService {
             Optional<SancorPolicy> opSancorPolicy = this.sancorPolicyService.findByCertificateClientDni(sancorPolicy.getCertificateClientDni());
 
             if(opSancorPolicy.isPresent()){
+
                 log.debug("updatig sancor policy for dni {}",opSancorPolicy.get().getCertificateClientDni());
+
                 sancorPolicy = opSancorPolicy.get().merge(sancorPolicy);
             }
 

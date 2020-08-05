@@ -1,19 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.sancor.model;
 
 
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
-import com.atixlabs.semillasmiddleware.security.model.User;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.annotation.CreatedBy;
-import org.springframework.data.annotation.CreatedDate;
-import org.springframework.data.annotation.LastModifiedDate;
 
 import javax.persistence.*;
-import java.time.Instant;
 import java.time.LocalDate;
 
 @Getter
@@ -22,21 +16,11 @@ import java.time.LocalDate;
 @Table
 @ToString
 @Slf4j
-//  Descripción Ramo  Producto	Póliza	Cliente Poliza	Nombre Cliente Póliza	Certificado	Cliente Certificado	Ini. Vigencia Cert. Ori.	Fin Vigencia Cert.	Nombre Cliente Cert.	Domicilio
 public class SancorPolicy extends AuditableEntity {
 
     @Id
     @GeneratedValue( strategy = GenerationType.IDENTITY)
     private Long id;
-
-   // @CreatedBy
-    //private User user;
-
-  //  @CreatedDate
-   // private Instant createdDate;
-
-    //@LastModifiedDate
-    //private Instant updateDate;
 
     private Long certificateClientDni;
 
@@ -63,8 +47,11 @@ public class SancorPolicy extends AuditableEntity {
 
     private String certificateClientAddress;// Domicilio
 
+    private boolean needReview = false;
+
 
     public SancorPolicy merge(SancorPolicy sancorPolicyNewInfo){
+        this.needReview = !this.equals(sancorPolicyNewInfo);
         this.branchDescription = sancorPolicyNewInfo.branchDescription;
         this.idProduct = sancorPolicyNewInfo.getIdProduct();
         this.policyNumber = sancorPolicyNewInfo.getPolicyNumber();
@@ -77,7 +64,35 @@ public class SancorPolicy extends AuditableEntity {
         this.certificateClientName = sancorPolicyNewInfo.getCertificateClientName();
         this.certificateClientAddress = sancorPolicyNewInfo.getCertificateClientAddress();
 
+
+
         return this;
+    }
+
+    @Override
+    public boolean equals(Object object){
+        if(object == null)
+            return false;
+
+        if(!object.getClass().equals(this.getClass()))
+            return super.equals(object);
+
+        SancorPolicy newSancorPolicy = (SancorPolicy) object;
+
+        log.info(this.getHash()+" -- "+newSancorPolicy.getHash());
+        return this.getHash().equals(newSancorPolicy.getHash());
+        //return (this.status.equals(newLoan.getStatus()) && this.cycleDescription.equals(newLoan.getCycleDescription()) && (this.expiredAmount.compareTo(newLoan.getExpiredAmount()) == 0));
+    }
+
+    public String getHash(){
+        StringBuilder hashBuilder = new StringBuilder();
+        //Fix part
+        hashBuilder.append(this.policyNumber);
+        hashBuilder.append(this.certificateNumber);
+
+        String hash =  hashBuilder.toString();
+
+        return hash !=null ? hash : "";
     }
 
 }

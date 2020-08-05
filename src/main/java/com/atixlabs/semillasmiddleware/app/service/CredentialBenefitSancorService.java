@@ -103,6 +103,22 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
         return credentialBenefitSancor;
     }
 
+    public CredentialBenefitSancor buildHolderBenefitsCredential(CredentialBenefitSancor credentialBenefitSancor, Optional<SancorPolicy> opSancorPolicy) throws CredentialException {
+
+        CredentialBenefitSancor newCredentialBenefitSancor = new CredentialBenefitSancor(credentialBenefitSancor);
+
+        CredentialState statePendingDidi = credentialStateService.getCredentialPendingDidiState();
+        newCredentialBenefitSancor.setCredentialState(statePendingDidi);
+
+        newCredentialBenefitSancor.setDateOfIssue(DateUtil.getLocalDateTimeNow());
+
+        if(opSancorPolicy.isPresent()) {
+            newCredentialBenefitSancor.addPolicyData(opSancorPolicy.get());
+        }
+
+        return newCredentialBenefitSancor;
+    }
+
 
     @Override
     public CredentialBenefitSancor saveCredentialBenefit(CredentialBenefitSancor credential) {

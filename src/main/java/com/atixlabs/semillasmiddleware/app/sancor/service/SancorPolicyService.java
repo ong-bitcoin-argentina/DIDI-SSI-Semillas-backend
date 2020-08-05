@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -21,6 +22,10 @@ public class SancorPolicyService {
 
     public Optional<SancorPolicy> findByCertificateClientDni(Long certificateClientDni){
         return this.sancorPolicyRepository.findByCertificateClientDni(certificateClientDni);
+    }
+
+    public List<SancorPolicy> getSancorPoliciesThatNeedReview(){
+        return this.sancorPolicyRepository.findByNeedReview(true);
     }
 
     public SancorPolicy save(SancorPolicy sancorPolicy){

@@ -15,6 +15,7 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitSancorRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialIdentityRepository;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitSancorService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialStateService;
@@ -53,6 +54,9 @@ public class CredentialBenefitSancorServiceTest {
 
     @Mock
     private CredentialBenefitSancorRepository credentialBenefitSancorRepository;
+
+    @Mock
+    private SancorPolicyService sancorPolicyService;
 
     @Captor
     private ArgumentCaptor<CredentialBenefitSancor> credentialBenefitSancorCaptor;
@@ -96,6 +100,7 @@ public class CredentialBenefitSancorServiceTest {
                 return (CredentialBenefitSancor) args[0];
             }
         });
+        when(sancorPolicyService.findByCertificateClientDni(anyLong())).thenReturn(Optional.empty());
 
 
         try {

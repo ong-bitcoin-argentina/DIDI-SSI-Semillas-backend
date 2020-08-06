@@ -32,7 +32,7 @@ public abstract class ExcelParseService {
     FileUtil fileUtil;
 
 
-    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception, InvalidCategoryException {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception {
         log.info("Validation for file "+filePath+" begins");
 
         File xlsxFile = fileUtil.getFileByPath(filePath);
@@ -61,6 +61,6 @@ public abstract class ExcelParseService {
     }
 
 
-    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws Exception, InvalidCategoryException;
+    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws Exception;
 
 }

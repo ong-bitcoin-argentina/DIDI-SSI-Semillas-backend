@@ -71,7 +71,7 @@ public abstract class Credential extends AuditableEntity {
         this.id = null;
         this.idDidiIssuer = credential.idDidiIssuer;
         this.idDidiReceptor = credential.idDidiReceptor;
-        this.idDidiCredential = credential.idDidiCredential;
+        this.idDidiCredential = null; //idDidiCredential is unique
         this.idHistorical = credential.idHistorical;
         this.dateOfIssue = credential.dateOfIssue;
         this.dateOfRevocation = credential.dateOfRevocation;
@@ -118,6 +118,7 @@ public abstract class Credential extends AuditableEntity {
             this.beneficiaryLastName = null;
         }
     }
+
 
 
 

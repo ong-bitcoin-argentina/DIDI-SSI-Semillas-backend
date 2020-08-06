@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-8a5a976e
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-3e8a9206
     environment:
       - spring_profiles_active=${ENVIRONMENT}
       - SEMILLAS_DB=${SEMILLAS_DB}
@@ -14,6 +14,9 @@ services:
       - DIDI_URL=${DIDI_URL}
       - DIDI_USERNAME=${DIDI_USERNAME}
       - DIDI_PASSWORD=${DIDI_PASSWORD}
+      - DIDI_URL_PROD=${DIDI_URL_PROD}
+      - DIDI_USERNAME_PROD=${DIDI_USERNAME_PROD}
+      - DIDI_PASSWORD_PROD=${DIDI_PASSWORD_PROD}
 
     depends_on:
       - db
@@ -23,18 +26,9 @@ services:
       - "traefik.http.routers.backend.entrypoints=web-secure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
-  #frontend:
-   # image: docker.atixlabs.com/semillas/semillas/semillas-middleware-frontend:0.0.1-c93610ce
-    #environment:
-     # - ENVIRONMENT=${ENVIRONMENT}
-    #depends_on:
-    #  - backend
-    #labels:
-     # - "traefik.enable=true"
-     # - "traefik.http.routers.frontend.rule=Host(`${FRONTEND_URL}`)"
-     # - "traefik.http.routers.frontend.entrypoints=web-secure"
-     # - "traefik.http.routers.frontend.tls=true"
-     # - "traefik.http.routers.frontend.tls.certresolver=le"
+    volumes:
+      - "/var/log/semillas:/var/log/semillas"
+
   proxy:
     image: traefik:v2.2.0
     command:
@@ -43,6 +37,8 @@ services:
       - "--providers.docker.exposedbydefault=false"
       - "--entrypoints.web-secure.address=:443"
       - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
       - "--certificatesResolvers.le.acme.email=info@atixlabs.com"
       - "--certificatesResolvers.le.acme.storage=/certs/acme.json"
       - "--certificatesResolvers.le.acme.httpChallenge.entrypoint=web"

@@ -109,4 +109,8 @@ public class DidiAppUserService {
 
         return didiSyncStatus;
     }
+
+    public DidiAppUser save(DidiAppUser didiAppUser){
+        return didiAppUserRepository.save(didiAppUser);
+    }
 }

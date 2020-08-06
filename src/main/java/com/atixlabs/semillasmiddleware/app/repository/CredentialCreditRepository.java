@@ -20,6 +20,8 @@ public interface CredentialCreditRepository extends JpaRepository<CredentialCred
 
     List<CredentialCredit> findByCreditHolderDniAndCredentialStateIn(Long holderDni, List<CredentialState> credentialStates);
 
+    List<CredentialCredit> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
+
     //Optional<CredentialCredit>findFirstByCreditHolderDniOrderByDateOfIssueDesc(Long dniHolder);
 
     List<CredentialCredit> findByCreditHolderDniAndCredentialStateInAndFinishDateIsNull(Long holderDni, List<CredentialState> credentialStates);

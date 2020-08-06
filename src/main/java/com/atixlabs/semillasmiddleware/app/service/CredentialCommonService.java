@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -31,6 +32,11 @@ public abstract class  CredentialCommonService {
     }
 
     protected abstract Logger getLog();
+
+
+    public boolean revokeComplete(Credential credentialToRevok, RevocationReasonsCodes revocationReasonsCodes) throws CredentialException {
+        return this.revokeComplete(credentialToRevok, revocationReasonsCodes.getCode());
+    }
 
     /**
      * If exists and is emitted, revoke complete
@@ -112,9 +118,31 @@ public abstract class  CredentialCommonService {
         return (credential.getCredentialState().equals(opStateRevoke.get()));
     }
 
+    public Boolean isCredentialActive(Credential credential) throws CredentialException {
+        Optional<CredentialState> opStateActive = credentialStateService.getCredentialActiveState();
+
+        return (credential.getCredentialState().equals(opStateActive.get()));
+    }
+
+    public Boolean isCredentialPendingDidi(Credential credential) throws CredentialException {
+        CredentialState statePendingDidi = credentialStateService.getCredentialPendingDidiState();
+
+        return (credential.getCredentialState().equals(statePendingDidi));
+    }
+
     public Optional<Credential> getCredentialById(Long id) {
         //validate credential is in bd
         return credentialRepository.findById(id);
+    }
+
+    public Credential resetStateOnPendingDidi(Credential credential) throws CredentialException {
+        credential.setDateOfRevocation(null);
+        credential.setRevocationReason(null);
+        credential.setCredentialState(this.credentialStateService.getCredentialPendingDidiState());
+        credential.setDateOfIssue(DateUtil.getLocalDateTimeNow());
+
+        return credential;
+
     }
 
 }

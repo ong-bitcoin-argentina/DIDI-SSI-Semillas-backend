@@ -11,7 +11,8 @@ public enum CredentialCategoriesCodes {
     DWELLING("Vivienda"),
     ENTREPRENEURSHIP("Emprendimiento"),
     BENEFIT("Beneficio Semillas"),
-    CREDIT("Crediticia");
+    CREDIT("Crediticia"),
+    BENEFIT_SANCOR("Sancor Salud");
 
     private String code;
 

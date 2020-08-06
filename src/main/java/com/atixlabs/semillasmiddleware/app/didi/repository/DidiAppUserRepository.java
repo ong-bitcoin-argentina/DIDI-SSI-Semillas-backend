@@ -16,6 +16,5 @@ public interface DidiAppUserRepository extends JpaRepository<DidiAppUser, Long> 
     //DidiAppUser findByDni(Long dni);
     Optional<DidiAppUser> findByDniAndActiveTrue(Long dni);
 
-
     ArrayList<DidiAppUser> findByActiveAndSyncStatusIn(boolean active, ArrayList<String> didiSyncStatus);
 }

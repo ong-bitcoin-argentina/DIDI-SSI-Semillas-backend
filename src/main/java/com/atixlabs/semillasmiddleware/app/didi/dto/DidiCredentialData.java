@@ -23,21 +23,6 @@ public class DidiCredentialData {
                 "}";
     }
 
-    public String getTemplateName(Credential credential){
-
-        switch (CredentialCategoriesCodes.getEnumByStringValue(credential.getCredentialCategory())){
-             case CREDIT:
-                return "Semillas Crediticia";
-            case BENEFIT:
-                return "Semillas Beneficio";
-
-            default:
-                return credential.getCredentialCategory();
-
-        }
-
-    }
-
     public DidiCredentialData(Credential credential, String templateDescription){
         this.participant = new ArrayList<>();
         ArrayList<DidiCredentialDataElem> part = new ArrayList<>();
@@ -66,6 +51,9 @@ public class DidiCredentialData {
                 break;
             case CREDIT:
                 buildDidiCredentialDataFromCredit((CredentialCredit) credential);
+                break;
+            case BENEFIT_SANCOR:
+                buildDidiCredentialDataFromSancorBenefit((CredentialBenefitSancor) credential);
                 break;
             default:
                 log.error("NO EXISTE el tipo de credencial para enviar a didi");
@@ -100,6 +88,13 @@ public class DidiCredentialData {
     private void buildDidiCredentialDataFromBenefit(CredentialBenefits credential){
         cert.add(new DidiCredentialDataElem("Dni Beneficiario", credential.getBeneficiaryDni().toString()));
         cert.add(new DidiCredentialDataElem("Caracter", credential.getBeneficiaryType()));
+    }
+
+    private void buildDidiCredentialDataFromSancorBenefit(CredentialBenefitSancor credential){
+        cert.add(new DidiCredentialDataElem("POLIZA", credential.getPolicyNumber().toString()));
+        cert.add(new DidiCredentialDataElem("CERT", credential.getCertificateNumber().toString()));
+        cert.add(new DidiCredentialDataElem("REF", credential.getPolicyNumber().toString()));
+        cert.add(new DidiCredentialDataElem("DNI", credential.getBeneficiaryDni().toString()));
     }
 
     private void buildDidiCredentialDataFromCredit(CredentialCredit credential){

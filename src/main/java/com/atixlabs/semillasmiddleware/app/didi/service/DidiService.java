@@ -190,7 +190,7 @@ public class DidiService {
         ArrayList<String> didiSyncStatus = new ArrayList<>();
         didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
         didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
-        ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
+        ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findByActiveAndSyncStatusIn(true,didiSyncStatus);
 
         if (didiAppUsers.size() <= 0) {
             log.info("didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi");

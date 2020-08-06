@@ -59,6 +59,7 @@ public class CredentialDto {
     private String creditState;
     private LocalDate finishDate;
     private String expiredAmount;
+    private Integer currentCycleNumber;
 
     //dwelling
     private String dwellingType;
@@ -172,6 +173,7 @@ public class CredentialDto {
         this.creditState = credit.getCreditState();
         this.finishDate = credit.getFinishDate();
         this.expiredAmount = credit.getExpiredAmount().toString();
+        this.currentCycleNumber = credit.getCurrentCycleNumber();
     }
 
     public CredentialDto(CredentialDwelling dwelling){

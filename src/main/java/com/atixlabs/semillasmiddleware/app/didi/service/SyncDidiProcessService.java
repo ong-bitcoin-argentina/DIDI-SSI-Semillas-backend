@@ -342,6 +342,9 @@ public class SyncDidiProcessService {
                     this.verifyCredentialIdentityForDidiAppUser(didiAppUser);
                     this.verifyCredentialCreditForDidiAppUser(didiAppUser);
                     this.verifyCredentialBenefitForDidiAppUser(didiAppUser);
+                    this.verifyCredentialDwellingForDidiAppUser(didiAppUser);
+                    this.verifyCredentialEntrepreneurshipForDidiAppUser(didiAppUser);
+                    this.verifyCredentialBenefitSancorForDidiAppUser(didiAppUser);
 
                     didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
                     didiAppUserService.save(didiAppUser);
@@ -415,7 +418,7 @@ public class SyncDidiProcessService {
 
     }
 
-    public void verifycredentialDwellingForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
+    public void verifyCredentialDwellingForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
 
         List<CredentialDwelling> credentialsDwellingToVerify = this.credentialDwellingService.getCredentialDwellingActiveForDni(didiAppUser.getDni());
         if(credentialsDwellingToVerify!=null && !credentialsDwellingToVerify.isEmpty()) {
@@ -434,10 +437,44 @@ public class SyncDidiProcessService {
 
     }
 
-    /*
-    private CredentialDwellingService credentialDwellingService;
+    public void verifyCredentialEntrepreneurshipForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
 
-    private CredentialEntrepreneurshipService credentialEntrepreneurshipService;
+        List<CredentialEntrepreneurship> credentialsEntrepreneurshipToVerify = this.credentialEntrepreneurshipService.getCredentialEntrepreneurshipActiveForDni(didiAppUser.getDni());
+        if(credentialsEntrepreneurshipToVerify!=null && !credentialsEntrepreneurshipToVerify.isEmpty()) {
+            for(CredentialEntrepreneurship credentialEntrepreneurship : credentialsEntrepreneurshipToVerify) {
+                if (!credentialEntrepreneurship.getIdDidiReceptor().equals(didiAppUser.getDid())) {
+                    this.credentialEntrepreneurshipService.revokeComplete(credentialEntrepreneurship, RevocationReasonsCodes.UPDATE_INTERNAL);
+                    CredentialEntrepreneurship newCredentialEntrepreneurship = credentialEntrepreneurshipService.buildNewOnPendidgDidi(credentialEntrepreneurship, didiAppUser);
+                    this.credentialEntrepreneurshipService.save(newCredentialEntrepreneurship);
+                    log.info("Credential Entrepreneurship for dni holder {} and dni beneficiary {} updated to id didi {} and set on pending didi state", newCredentialEntrepreneurship.getCreditHolderDni(), newCredentialEntrepreneurship.getBeneficiaryDni(), didiAppUser.getDid());
+                }
+                log.info("Credential Entrepreneurship for dni holder {} and dni beneficiary {} dont need be updated", credentialEntrepreneurship.getCreditHolderDni(), credentialEntrepreneurship.getBeneficiaryDni());
+            }
+        }
+        else
+            log.info("dni {} not have credentials Entrepreneurship active", didiAppUser.getDni());
 
-    private CredentialBenefitSancorService credentialBenefitSancorService;*/
+    }
+
+
+    public void verifyCredentialBenefitSancorForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
+
+        List<CredentialBenefitSancor> credentialsBenefitSancorToVerify = this.credentialBenefitSancorService.getBenefitSancorActiveForDni(didiAppUser.getDni());
+        if(credentialsBenefitSancorToVerify!=null && !credentialsBenefitSancorToVerify.isEmpty()) {
+            for(CredentialBenefitSancor credentialBenefitSancor : credentialsBenefitSancorToVerify) {
+                if (!credentialBenefitSancor.getIdDidiReceptor().equals(didiAppUser.getDid())) {
+                    this.credentialBenefitSancorService.revokeComplete(credentialBenefitSancor, RevocationReasonsCodes.UPDATE_INTERNAL);
+                    CredentialBenefitSancor newCredentialBenefitSancor = credentialBenefitSancorService.buildNewOnPendidgDidi(credentialBenefitSancor, didiAppUser);
+                    this.credentialBenefitSancorService.save(newCredentialBenefitSancor);
+                    log.info("Credential Sancor for dni holder {} and dni beneficiary {} updated to id didi {} and set on pending didi state", newCredentialBenefitSancor.getCreditHolderDni(), newCredentialBenefitSancor.getBeneficiaryDni(), didiAppUser.getDid());
+                }
+                log.info("Credential Sancor for dni holder {} and dni beneficiary {} dont need be updated", credentialBenefitSancor.getCreditHolderDni(), credentialBenefitSancor.getBeneficiaryDni());
+            }
+        }
+        else
+            log.info("dni {} not have credentials Sancor active", didiAppUser.getDni());
+
+    }
+
+
 }

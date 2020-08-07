@@ -1,11 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialEntrepreneurship;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
@@ -139,6 +141,21 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
     public CredentialBenefitSancor save(CredentialBenefitSancor credentialBenefitSancor){
         return credentialBenefitSancorRepository.save(credentialBenefitSancor);
+    }
+
+    public List<CredentialBenefitSancor> getBenefitSancorActiveForDni(Long dni) throws CredentialException {
+        Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
+
+        return credentialBenefitSancorRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());
+    }
+
+    public CredentialBenefitSancor buildNewOnPendidgDidi(CredentialBenefitSancor credentialBenefitSancor, DidiAppUser newDidiAppUser) throws CredentialException {
+        CredentialBenefitSancor newCredentialBenefitSancor =  new CredentialBenefitSancor(credentialBenefitSancor);
+        newCredentialBenefitSancor.setIdDidiReceptor(newDidiAppUser.getDid());
+
+        this.resetStateOnPendingDidi(newCredentialBenefitSancor);
+
+        return newCredentialBenefitSancor;
     }
 
     @Override

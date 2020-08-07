@@ -23,6 +23,7 @@ import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.expression.spel.ast.OpOr;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -139,6 +140,8 @@ public class SyncDidiProcessServiceTest {
         CredentialBenefits credentialBenefits = this.getCredentialBenefitsMock();
         credentialBenefits.setIdDidiReceptor(null);
 
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.empty());
+
         syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
 
         Assert.assertNull(credentialBenefits.getIdDidiReceptor());
@@ -183,6 +186,8 @@ public class SyncDidiProcessServiceTest {
 
         CredentialIdentity credentialIdentity = this.getCredentialIdentityMock();
         credentialIdentity.setIdDidiReceptor(null);
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(Optional.empty());
 
         syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);
 
@@ -229,6 +234,8 @@ public class SyncDidiProcessServiceTest {
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
         CredentialDwelling credentialDwelling = this.getCredentialDwellingMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni())).thenReturn(Optional.empty());
 
         credentialDwelling.setIdDidiReceptor(null);
 
@@ -279,6 +286,8 @@ public class SyncDidiProcessServiceTest {
 
         credentialEntrepreneurship.setIdDidiReceptor(null);
 
+        when(didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni())).thenReturn(Optional.empty());
+
         syncDidiProcessService.emmitCredentialEntrepreneurship(credentialEntrepreneurship);
 
         Assert.assertNull(credentialEntrepreneurship.getIdDidiReceptor());
@@ -310,6 +319,8 @@ public class SyncDidiProcessServiceTest {
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
         CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.empty());
 
         credentialBenefitSancor.setIdDidiReceptor(null);
 
@@ -410,7 +421,31 @@ public class SyncDidiProcessServiceTest {
 
     }
 
-    //TODO same didi
+
+    @Test
+    public void whenVerifyCrendentialIdentityForSameDidiAppUserAndIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        CredentialIdentity credentialIdentity = this.getCredentialIdentityMock();
+        credentialIdentity.setCredentialState(this.getActiveStateMock());
+        credentialIdentity.setIdDidiReceptor(didiAppUser.getDid());
+        CredentialIdentity credentialIdentityNew = this.getCredentialIdentityMock();
+
+
+        credentialIdentityNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        //when(creden)
+        when(credentialIdentityService.getCredentialIdentityActiveForDni(didiAppUser.getDni())).thenReturn(Optional.of(credentialIdentity));
+
+        syncDidiProcessService.verifyCredentialIdentityForDidiAppUser(didiAppUser);
+
+        verify(credentialIdentityService, times(0)).save(any());
+
+        verify(credentialIdentityService, times(0)).revokeComplete(credentialIdentity, RevocationReasonsCodes.UPDATE_INTERNAL);
+
+
+    }
 
     private CredentialCredit getCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();

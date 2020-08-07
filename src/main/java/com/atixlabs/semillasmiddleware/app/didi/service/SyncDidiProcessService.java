@@ -341,6 +341,7 @@ public class SyncDidiProcessService {
                 try {
                     this.verifyCredentialIdentityForDidiAppUser(didiAppUser);
                     this.verifyCredentialCreditForDidiAppUser(didiAppUser);
+                    this.verifyCredentialBenefitForDidiAppUser(didiAppUser);
 
                     didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_OK.getCode());
                     didiAppUserService.save(didiAppUser);
@@ -395,9 +396,45 @@ public class SyncDidiProcessService {
     }
 
 
-    /*
-    private CredentialBenefitService credentialBenefitService;
+    public void verifyCredentialBenefitForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
 
+        List<CredentialBenefits> credentialsBenefitToVerify = this.credentialBenefitService.getCredentialBenefitsActiveForDni(didiAppUser.getDni());
+        if(credentialsBenefitToVerify!=null && !credentialsBenefitToVerify.isEmpty()) {
+            for(CredentialBenefits credentialBenefits : credentialsBenefitToVerify) {
+                if (!credentialBenefits.getIdDidiReceptor().equals(didiAppUser.getDid())) {
+                    this.credentialBenefitService.revokeComplete(credentialBenefits, RevocationReasonsCodes.UPDATE_INTERNAL);
+                    CredentialBenefits newcCedentialBenefits = credentialBenefitService.buildNewOnPendidgDidi(credentialBenefits, didiAppUser);
+                    this.credentialBenefitService.save(newcCedentialBenefits);
+                    log.info("Credential Benefits for dni holder {} and dni beneficiary {} updated to id didi {} and set on pending didi state", newcCedentialBenefits.getCreditHolderDni(), newcCedentialBenefits.getBeneficiaryDni(), didiAppUser.getDid());
+                }
+                log.info("Credential Benefits for dni holder {} and dni beneficiary {} dont need be updated", credentialBenefits.getCreditHolderDni(), credentialBenefits.getBeneficiaryDni());
+            }
+        }
+        else
+            log.info("dni {} not have credentials Benefits active", didiAppUser.getDni());
+
+    }
+
+    public void verifycredentialDwellingForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
+
+        List<CredentialDwelling> credentialsDwellingToVerify = this.credentialDwellingService.getCredentialDwellingActiveForDni(didiAppUser.getDni());
+        if(credentialsDwellingToVerify!=null && !credentialsDwellingToVerify.isEmpty()) {
+            for(CredentialDwelling credentialDwelling : credentialsDwellingToVerify) {
+                if (!credentialDwelling.getIdDidiReceptor().equals(didiAppUser.getDid())) {
+                    this.credentialDwellingService.revokeComplete(credentialDwelling, RevocationReasonsCodes.UPDATE_INTERNAL);
+                    CredentialDwelling newCredentialDwelling = credentialDwellingService.buildNewOnPendidgDidi(credentialDwelling, didiAppUser);
+                    this.credentialDwellingService.save(newCredentialDwelling);
+                    log.info("Credential Dwelling for dni holder {} and dni beneficiary {} updated to id didi {} and set on pending didi state", newCredentialDwelling.getCreditHolderDni(), newCredentialDwelling.getBeneficiaryDni(), didiAppUser.getDid());
+                }
+                log.info("Credential Dwelling for dni holder {} and dni beneficiary {} dont need be updated", credentialDwelling.getCreditHolderDni(), credentialDwelling.getBeneficiaryDni());
+            }
+        }
+        else
+            log.info("dni {} not have credentials Dwelling active", didiAppUser.getDni());
+
+    }
+
+    /*
     private CredentialDwellingService credentialDwellingService;
 
     private CredentialEntrepreneurshipService credentialEntrepreneurshipService;

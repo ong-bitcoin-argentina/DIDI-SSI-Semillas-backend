@@ -44,13 +44,12 @@ public class DidiAppUserService {
 
         Optional<DidiAppUser> opDidiAppUser = didiAppUserRepository.findByDniAndActiveTrue(didiAppUserDto.getDni());
 
-
         //if DNI is new.
         if (opDidiAppUser.isEmpty()) {
             return this.addNewDidiAppUser(didiAppUserDto);
         } else {
             DidiAppUser didiAppUser = new DidiAppUser(didiAppUserDto);
-            if (didiAppUser.getDid().equals(didiAppUserDto.getDid())) {
+            if (opDidiAppUser.get().getDid().equals(didiAppUserDto.getDid())) {
                 //if DID is the same:
                 switch (DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus())) {
                     case SYNC_OK:
@@ -58,15 +57,16 @@ public class DidiAppUserService {
                         return DidiAppUserOperationResult.USER_ALREADY_EXIST_NO_CHANGES;
 
                     case SYNC_ERROR:
-                        didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
-                        didiAppUserRepository.save(didiAppUser);
+                        opDidiAppUser.get().setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
+                        didiAppUserRepository.save(opDidiAppUser.get());
                         return DidiAppUserOperationResult.NEW_REQUEST_REGISTERED;
                 }
             } else {
                 //if DID is different requires sync:
-                didiAppUser.setDid(didiAppUserDto.getDid());
-                didiAppUser.setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
-                didiAppUserRepository.save(didiAppUser);
+
+                opDidiAppUser.get().setDid(didiAppUserDto.getDid());
+                opDidiAppUser.get().setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
+                didiAppUserRepository.save(opDidiAppUser.get());
                 return DidiAppUserOperationResult.NEW_DID_REGISTERED_FOR_USER;
             }
         }

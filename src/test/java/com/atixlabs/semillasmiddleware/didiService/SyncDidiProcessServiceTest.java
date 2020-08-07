@@ -16,6 +16,7 @@ import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -75,6 +76,20 @@ public class SyncDidiProcessServiceTest {
     @Captor
     private ArgumentCaptor<CredentialIdentity> credentialIdentityArgumentCaptor;
 
+    @Captor
+    private ArgumentCaptor<CredentialCredit> credentialCreditArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<CredentialBenefits> credentialBenefitsArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<CredentialDwelling> credentialDwellingArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<CredentialEntrepreneurship> credentialEntrepreneurshipArgumentCaptor;
+
+    @Captor
+    private ArgumentCaptor<CredentialBenefitSancor> credentialBenefitSancorArgumentCaptor;
 
     @Test
     public void whenEmmitCredentialCreditsAndCredentialCreditsToEmmitIsEmpty_thenDoNothing() throws CredentialException {
@@ -87,7 +102,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialCreditNotEmmit(){
+    public void whenHolderNotHaveDIDRegister_thenCredentialCreditNotEmmit() {
 
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
@@ -102,7 +117,7 @@ public class SyncDidiProcessServiceTest {
 
 
     @Test
-    public void whenHolderHaveDIDRegister_thenEmmitCredentialCredit(){
+    public void whenHolderHaveDIDRegister_thenEmmitCredentialCredit() {
 
 
         CredentialCredit credentialCredit = this.getCredentialCreditMock();
@@ -133,7 +148,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialBenefitsNotEmmit(){
+    public void whenHolderNotHaveDIDRegister_thenCredentialBenefitsNotEmmit() {
 
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
@@ -149,7 +164,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderHaveDIDRegisterAndCredentialBenefitPendindDidi_thenEmmitCredentialBenefit(){
+    public void whenHolderHaveDIDRegisterAndCredentialBenefitPendindDidi_thenEmmitCredentialBenefit() {
 
 
         CredentialBenefits credentialBenefits = this.getCredentialBenefitsMock();
@@ -180,7 +195,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialIdentityNotEmmit(){
+    public void whenHolderNotHaveDIDRegister_thenCredentialIdentityNotEmmit() {
 
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
@@ -197,7 +212,7 @@ public class SyncDidiProcessServiceTest {
 
 
     @Test
-    public void whenHolderHaveDIDRegisterAndCredentialIdentityPendindDidi_thenEmmitCredentialIdentity(){
+    public void whenHolderHaveDIDRegisterAndCredentialIdentityPendindDidi_thenEmmitCredentialIdentity() {
 
 
         CredentialIdentity credentialIdentity = this.getCredentialIdentityMock();
@@ -229,7 +244,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialDwellingNotEmmit(){
+    public void whenHolderNotHaveDIDRegister_thenCredentialDwellingNotEmmit() {
 
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
@@ -247,7 +262,7 @@ public class SyncDidiProcessServiceTest {
 
 
     @Test
-    public void whenHolderHaveDIDRegisterAndCredentialDwellingPendindDidi_thenEmmitCredentialDwelling(){
+    public void whenHolderHaveDIDRegisterAndCredentialDwellingPendindDidi_thenEmmitCredentialDwelling() {
 
 
         CredentialDwelling credentialDwelling = this.getCredentialDwellingMock();
@@ -278,7 +293,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialEntrepreneurshipNotEmmit(){
+    public void whenHolderNotHaveDIDRegister_thenCredentialEntrepreneurshipNotEmmit() {
 
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
@@ -295,7 +310,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderHaveDIDRegisterAndCredentialEntrepreneurshipPendindDidi_thenEmmitCredentialEntrepreneurship(){
+    public void whenHolderHaveDIDRegisterAndCredentialEntrepreneurshipPendindDidi_thenEmmitCredentialEntrepreneurship() {
 
 
         CredentialEntrepreneurship credentialEntrepreneurship = this.getCredentialEntrepreneurshipMock();
@@ -314,7 +329,7 @@ public class SyncDidiProcessServiceTest {
 
 
     @Test
-    public void whenHolderNotHaveDIDRegister_thenCredentialSancorNotEmmited(){
+    public void whenHolderNotHaveDIDRegister_thenCredentialSancorNotEmmited() {
 
         when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
 
@@ -331,7 +346,7 @@ public class SyncDidiProcessServiceTest {
     }
 
     @Test
-    public void whenHolderHaveDIDRegisterButNotHaveSancorPolicy_thenCredentialSancorNotEmmited(){
+    public void whenHolderHaveDIDRegisterButNotHaveSancorPolicy_thenCredentialSancorNotEmmited() {
 
         CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
 
@@ -352,7 +367,7 @@ public class SyncDidiProcessServiceTest {
 
 
     @Test
-    public void whenHolderHaveDIDRegisterAndSancorPolicyAndCredentialBnefitSancorPendindDidi_thenEmmitCredentialBenefitSancor(){
+    public void whenHolderHaveDIDRegisterAndSancorPolicyAndCredentialBnefitSancorPendindDidi_thenEmmitCredentialBenefitSancor() {
 
         CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
 
@@ -373,7 +388,7 @@ public class SyncDidiProcessServiceTest {
 
     }
 
-
+    // id
     @Test
     public void whenVerifyCrendentialIdentityForNewDidiAppUserAndNotIsActive_thenDoNothing() throws CredentialException {
 
@@ -384,7 +399,7 @@ public class SyncDidiProcessServiceTest {
         syncDidiProcessService.verifyCredentialIdentityForDidiAppUser(didiAppUser);
 
         verify(credentialIdentityService, times(0)).save(any());
-        verify(credentialIdentityService, times(0)).revokeComplete(any(),anyString());
+        verify(credentialIdentityService, times(0)).revokeComplete(any(), anyString());
 
     }
 
@@ -401,7 +416,7 @@ public class SyncDidiProcessServiceTest {
 
         //when(creden)
         when(credentialIdentityService.getCredentialIdentityActiveForDni(didiAppUser.getDni())).thenReturn(Optional.of(credentialIdentity));
-        when(credentialIdentityService.buildNewOnPendidgDidi(credentialIdentity,didiAppUser)).thenReturn(credentialIdentityNew);
+        when(credentialIdentityService.buildNewOnPendidgDidi(credentialIdentity, didiAppUser)).thenReturn(credentialIdentityNew);
         when(credentialIdentityService.save(any(CredentialIdentity.class))).thenAnswer(new Answer<CredentialIdentity>() {
             @Override
             public CredentialIdentity answer(InvocationOnMock invocation) throws Throwable {
@@ -417,7 +432,7 @@ public class SyncDidiProcessServiceTest {
 
         verify(credentialIdentityService, times(1)).revokeComplete(credentialIdentity, RevocationReasonsCodes.UPDATE_INTERNAL);
         Assert.assertNotEquals(credentialIdentity, credentialIdentityResult);
-        Assert.assertEquals(didiAppUser.getDid(),credentialIdentityResult.getIdDidiReceptor());
+        Assert.assertEquals(didiAppUser.getDid(), credentialIdentityResult.getIdDidiReceptor());
 
     }
 
@@ -446,6 +461,387 @@ public class SyncDidiProcessServiceTest {
 
 
     }
+
+
+//Credit
+@Test
+public void whenVerifyCrendentialCreditForNewDidiAppUserAndNotIsActive_thenDoNothing() throws CredentialException {
+
+    DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+    when(credentialCreditService.getCredentialsCreditActiveForDni(didiAppUser.getDni())).thenReturn(null);
+
+    syncDidiProcessService.verifyCredentialCreditForDidiAppUser(didiAppUser);
+
+    verify(credentialCreditService, times(0)).save(any());
+    verify(credentialCreditService, times(0)).revokeComplete(any(),anyString());
+
+}
+
+    @Test
+    public void whenVerifyCrendentialCreditForNewDidiAppUserAndIsActive_thenRevokeAndCreateNewPendingDidi() throws CredentialException {
+
+        CredentialCredit credential = this.getCredentialCreditMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor("didiold");
+        CredentialCredit credentialNew = this.getCredentialCreditMock();
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialCredit> list = new ArrayList<CredentialCredit>();
+        list.add(credential);
+
+        when(credentialCreditService.getCredentialsCreditActiveForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialCreditService.buildNewOnPendidgDidi(credential,didiAppUser)).thenReturn(credentialNew);
+        when(credentialCreditService.save(any(CredentialCredit.class))).thenAnswer(new Answer<CredentialCredit>() {
+            @Override
+            public CredentialCredit answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialCredit) args[0];
+            }
+        });
+
+        syncDidiProcessService.verifyCredentialCreditForDidiAppUser(didiAppUser);
+
+        verify(credentialCreditService, times(1)).save(credentialCreditArgumentCaptor.capture());
+        CredentialCredit credentialCreditResult = credentialCreditArgumentCaptor.getValue();
+
+        verify(credentialCreditService, times(1)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+        Assert.assertNotEquals(credential, credentialCreditResult);
+        Assert.assertEquals(didiAppUser.getDid(),credentialCreditResult.getIdDidiReceptor());
+
+    }
+
+
+    @Test
+    public void whenVerifyCrendentialCreditForSameDidiAppUserAndIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        CredentialCredit credential = this.getCredentialCreditMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor(didiAppUser.getDid());
+        CredentialCredit credentialNew = this.getCredentialCreditMock();
+
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialCredit> list = new ArrayList<CredentialCredit>();
+        list.add(credential);
+        when(credentialCreditService.getCredentialsCreditActiveForDni(didiAppUser.getDni())).thenReturn(list);
+
+        syncDidiProcessService.verifyCredentialCreditForDidiAppUser(didiAppUser);
+
+        verify(credentialCreditService, times(0)).save(any());
+
+        verify(credentialCreditService, times(0)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+
+
+    }
+
+    //Benefits
+    @Test
+    public void whenVerifyCrendentialBenefitsForNewDidiAppUserAndNotIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(credentialBenefitService.getCredentialBenefitsActiveForDni(didiAppUser.getDni())).thenReturn(null);
+
+        syncDidiProcessService.verifyCredentialBenefitForDidiAppUser(didiAppUser);
+
+        verify(credentialBenefitService, times(0)).save(any());
+        verify(credentialBenefitService, times(0)).revokeComplete(any(),anyString());
+
+    }
+
+    @Test
+    public void whenVerifyCrendentialBenefitForNewDidiAppUserAndIsActive_thenRevokeAndCreateNewPendingDidi() throws CredentialException {
+
+        CredentialBenefits credential = this.getCredentialBenefitsMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor("didiold");
+        CredentialBenefits credentialNew = this.getCredentialBenefitsMock();
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialBenefits> list = new ArrayList<CredentialBenefits>();
+        list.add(credential);
+
+        when(credentialBenefitService.getCredentialBenefitsActiveForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialBenefitService.buildNewOnPendidgDidi(credential,didiAppUser)).thenReturn(credentialNew);
+        when(credentialBenefitService.save(any(CredentialBenefits.class))).thenAnswer(new Answer<CredentialBenefits>() {
+            @Override
+            public CredentialBenefits answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialBenefits) args[0];
+            }
+        });
+
+        syncDidiProcessService.verifyCredentialBenefitForDidiAppUser(didiAppUser);
+
+        verify(credentialBenefitService, times(1)).save(credentialBenefitsArgumentCaptor.capture());
+        CredentialBenefits credentialBenefitsResult = credentialBenefitsArgumentCaptor.getValue();
+
+        verify(credentialBenefitService, times(1)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+        Assert.assertNotEquals(credential, credentialBenefitsResult);
+        Assert.assertEquals(didiAppUser.getDid(),credentialBenefitsResult.getIdDidiReceptor());
+
+    }
+
+
+    @Test
+    public void whenVerifyCredentialBenefitsForSameDidiAppUserAndIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        CredentialBenefits credential = this.getCredentialBenefitsMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor(didiAppUser.getDid());
+        CredentialBenefits credentialNew = this.getCredentialBenefitsMock();
+
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialBenefits> list = new ArrayList<CredentialBenefits>();
+        list.add(credential);
+        when(credentialBenefitService.getCredentialBenefitsActiveForDni(didiAppUser.getDni())).thenReturn(list);
+
+        syncDidiProcessService.verifyCredentialBenefitForDidiAppUser(didiAppUser);
+
+        verify(credentialBenefitService, times(0)).save(any());
+
+        verify(credentialBenefitService, times(0)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+
+
+    }
+
+
+    //Dwelling
+    @Test
+    public void whenVerifyCrendentialDwellingForNewDidiAppUserAndNotIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(credentialDwellingService.getCredentialDwellingActiveForDni(didiAppUser.getDni())).thenReturn(null);
+
+        syncDidiProcessService.verifyCredentialDwellingForDidiAppUser(didiAppUser);
+
+        verify(credentialDwellingService, times(0)).save(any());
+        verify(credentialDwellingService, times(0)).revokeComplete(any(),anyString());
+
+    }
+
+    @Test
+    public void whenVerifyCrendentialDwellingForNewDidiAppUserAndIsActive_thenRevokeAndCreateNewPendingDidi() throws CredentialException {
+
+        CredentialDwelling credential = this.getCredentialDwellingMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor("didiold");
+        CredentialDwelling credentialNew = this.getCredentialDwellingMock();
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialDwelling> list = new ArrayList<CredentialDwelling>();
+        list.add(credential);
+
+        when(credentialDwellingService.getCredentialDwellingActiveForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialDwellingService.buildNewOnPendidgDidi(credential,didiAppUser)).thenReturn(credentialNew);
+        when(credentialDwellingService.save(any(CredentialDwelling.class))).thenAnswer(new Answer<CredentialDwelling>() {
+            @Override
+            public CredentialDwelling answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialDwelling) args[0];
+            }
+        });
+
+        syncDidiProcessService.verifyCredentialDwellingForDidiAppUser(didiAppUser);
+
+        verify(credentialDwellingService, times(1)).save(credentialDwellingArgumentCaptor.capture());
+        CredentialDwelling credentialDwellingResult = credentialDwellingArgumentCaptor.getValue();
+
+        verify(credentialDwellingService, times(1)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+        Assert.assertNotEquals(credential, credentialDwellingResult);
+        Assert.assertEquals(didiAppUser.getDid(),credentialDwellingResult.getIdDidiReceptor());
+
+    }
+
+
+    @Test
+    public void whenVerifyCredentialDwellingForSameDidiAppUserAndIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        CredentialDwelling credential = this.getCredentialDwellingMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor(didiAppUser.getDid());
+        CredentialDwelling credentialNew = this.getCredentialDwellingMock();
+
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialDwelling> list = new ArrayList<CredentialDwelling>();
+        list.add(credential);
+        when(credentialDwellingService.getCredentialDwellingActiveForDni(didiAppUser.getDni())).thenReturn(list);
+
+        syncDidiProcessService.verifyCredentialDwellingForDidiAppUser(didiAppUser);
+
+        verify(credentialDwellingService, times(0)).save(any());
+
+        verify(credentialDwellingService, times(0)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+
+    }
+
+
+    //Entrepreneurship
+    @Test
+    public void whenVerifyCrendentialEntrepreneurshipForNewDidiAppUserAndNotIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(credentialEntrepreneurshipService.getCredentialEntrepreneurshipActiveForDni(didiAppUser.getDni())).thenReturn(null);
+
+        syncDidiProcessService.verifyCredentialEntrepreneurshipForDidiAppUser(didiAppUser);
+
+        verify(credentialEntrepreneurshipService, times(0)).save(any());
+        verify(credentialEntrepreneurshipService, times(0)).revokeComplete(any(),anyString());
+
+    }
+
+    @Test
+    public void whenVerifyCrendentialEntrepreneurshipForNewDidiAppUserAndIsActive_thenRevokeAndCreateNewPendingDidi() throws CredentialException {
+
+        CredentialEntrepreneurship credential = this.getCredentialEntrepreneurshipMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor("didiold");
+        CredentialEntrepreneurship credentialNew = this.getCredentialEntrepreneurshipMock();
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialEntrepreneurship> list = new ArrayList<CredentialEntrepreneurship>();
+        list.add(credential);
+
+        when(credentialEntrepreneurshipService.getCredentialEntrepreneurshipActiveForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialEntrepreneurshipService.buildNewOnPendidgDidi(credential,didiAppUser)).thenReturn(credentialNew);
+        when(credentialEntrepreneurshipService.save(any(CredentialEntrepreneurship.class))).thenAnswer(new Answer<CredentialEntrepreneurship>() {
+            @Override
+            public CredentialEntrepreneurship answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialEntrepreneurship) args[0];
+            }
+        });
+
+        syncDidiProcessService.verifyCredentialEntrepreneurshipForDidiAppUser(didiAppUser);
+
+        verify(credentialEntrepreneurshipService, times(1)).save(credentialEntrepreneurshipArgumentCaptor.capture());
+        CredentialEntrepreneurship credentialEntrepreneurshipResult = credentialEntrepreneurshipArgumentCaptor.getValue();
+
+        verify(credentialEntrepreneurshipService, times(1)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+        Assert.assertNotEquals(credential, credentialEntrepreneurshipResult);
+        Assert.assertEquals(didiAppUser.getDid(),credentialEntrepreneurshipResult.getIdDidiReceptor());
+
+    }
+
+
+    @Test
+    public void whenVerifyCredentialEntrepreneurshipForSameDidiAppUserAndIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        CredentialEntrepreneurship credential = this.getCredentialEntrepreneurshipMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor(didiAppUser.getDid());
+        CredentialEntrepreneurship credentialNew = this.getCredentialEntrepreneurshipMock();
+
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialEntrepreneurship> list = new ArrayList<CredentialEntrepreneurship>();
+        list.add(credential);
+        when(credentialEntrepreneurshipService.getCredentialEntrepreneurshipActiveForDni(didiAppUser.getDni())).thenReturn(list);
+
+        syncDidiProcessService.verifyCredentialEntrepreneurshipForDidiAppUser(didiAppUser);
+
+        verify(credentialEntrepreneurshipService, times(0)).save(any());
+
+        verify(credentialEntrepreneurshipService, times(0)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+
+    }
+
+    //BenefitSancor
+    @Test
+    public void whenVerifyCrendentialBenefitSancorForNewDidiAppUserAndNotIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(credentialBenefitSancorService.getCredentialBenefitSancorActiveForDni(didiAppUser.getDni())).thenReturn(null);
+
+        syncDidiProcessService.verifyCredentialBenefitSancorForDidiAppUser(didiAppUser);
+
+        verify(credentialBenefitSancorService, times(0)).save(any());
+        verify(credentialBenefitSancorService, times(0)).revokeComplete(any(),anyString());
+
+    }
+
+    @Test
+    public void whenVerifyCrendentialBenefitSancorForNewDidiAppUserAndIsActive_thenRevokeAndCreateNewPendingDidi() throws CredentialException {
+
+        CredentialBenefitSancor credential = this.getCredentialBenefitSancorMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor("didiold");
+        CredentialBenefitSancor credentialNew = this.getCredentialBenefitSancorMock();
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialBenefitSancor> list = new ArrayList<CredentialBenefitSancor>();
+        list.add(credential);
+
+        when(credentialBenefitSancorService.getCredentialBenefitSancorActiveForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialBenefitSancorService.buildNewOnPendidgDidi(credential,didiAppUser)).thenReturn(credentialNew);
+        when(credentialBenefitSancorService.save(any(CredentialBenefitSancor.class))).thenAnswer(new Answer<CredentialBenefitSancor>() {
+            @Override
+            public CredentialBenefitSancor answer(InvocationOnMock invocation) throws Throwable {
+                Object[] args = invocation.getArguments();
+                return (CredentialBenefitSancor) args[0];
+            }
+        });
+
+        syncDidiProcessService.verifyCredentialBenefitSancorForDidiAppUser(didiAppUser);
+
+        verify(credentialBenefitSancorService, times(1)).save(credentialBenefitSancorArgumentCaptor.capture());
+        CredentialBenefitSancor credentialBenefitSancorResult = credentialBenefitSancorArgumentCaptor.getValue();
+
+        verify(credentialBenefitSancorService, times(1)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+        Assert.assertNotEquals(credential, credentialBenefitSancorResult);
+        Assert.assertEquals(didiAppUser.getDid(),credentialBenefitSancorResult.getIdDidiReceptor());
+
+    }
+
+
+    @Test
+    public void whenVerifyCredentialBenefitSancorForSameDidiAppUserAndIsActive_thenDoNothing() throws CredentialException {
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        CredentialBenefitSancor credential = this.getCredentialBenefitSancorMock();
+        credential.setCredentialState(this.getActiveStateMock());
+        credential.setIdDidiReceptor(didiAppUser.getDid());
+        CredentialBenefitSancor credentialNew = this.getCredentialBenefitSancorMock();
+
+        credentialNew.setIdDidiReceptor(didiAppUser.getDid());
+
+        ArrayList<CredentialBenefitSancor> list = new ArrayList<CredentialBenefitSancor>();
+        list.add(credential);
+        when(credentialBenefitSancorService.getCredentialBenefitSancorActiveForDni(didiAppUser.getDni())).thenReturn(list);
+
+        syncDidiProcessService.verifyCredentialBenefitSancorForDidiAppUser(didiAppUser);
+
+        verify(credentialBenefitSancorService, times(0)).save(any());
+
+        verify(credentialBenefitSancorService, times(0)).revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL);
+
+    }
+
 
     private CredentialCredit getCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();

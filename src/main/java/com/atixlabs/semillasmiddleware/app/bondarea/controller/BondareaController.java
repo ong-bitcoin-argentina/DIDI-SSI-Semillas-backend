@@ -95,7 +95,7 @@ public class BondareaController {
 
         try {
             credentialService.generateCreditAndBenefitsCredentialsByLoans();
-        } catch (InvalidProcessException | PersonDoesNotExistsException ex) {
+        } catch (InvalidProcessException ex) {
             log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
             return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
         }
@@ -110,7 +110,7 @@ public class BondareaController {
 
         try {
             credentialService.generateCreditAndBenefitsCredentialsByLoans();
-        } catch (InvalidProcessException | PersonDoesNotExistsException ex) {
+        } catch (InvalidProcessException ex) {
             log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
             return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
         }

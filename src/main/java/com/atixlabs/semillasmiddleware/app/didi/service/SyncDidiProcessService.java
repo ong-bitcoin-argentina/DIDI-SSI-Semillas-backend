@@ -331,7 +331,10 @@ public class SyncDidiProcessService {
         }
     }
 
-  public void processNewsAppDidiUsers(){
+    //TODO improve return information
+  public Boolean processNewsAppDidiUsers(){
+
+        Boolean finalizedOk = true;
 
         List<DidiAppUser> didiAppUsersToProcces = didiAppUserService.getDidiAppUsersNeedProcess();
 
@@ -350,6 +353,7 @@ public class SyncDidiProcessService {
                     didiAppUserService.save(didiAppUser);
                 } catch (CredentialException e) {
                     log.error("Error updating info new id didi for dni {}",didiAppUser.getDni());
+                    finalizedOk = false;
                 }
 
             }
@@ -357,6 +361,8 @@ public class SyncDidiProcessService {
         }else{
             log.info("No new didi app user to process");
         }
+
+        return finalizedOk;
 
     }
 
@@ -459,7 +465,7 @@ public class SyncDidiProcessService {
 
     public void verifyCredentialBenefitSancorForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
 
-        List<CredentialBenefitSancor> credentialsBenefitSancorToVerify = this.credentialBenefitSancorService.getBenefitSancorActiveForDni(didiAppUser.getDni());
+        List<CredentialBenefitSancor> credentialsBenefitSancorToVerify = this.credentialBenefitSancorService.getCredentialBenefitSancorActiveForDni(didiAppUser.getDni());
         if(credentialsBenefitSancorToVerify!=null && !credentialsBenefitSancorToVerify.isEmpty()) {
             for(CredentialBenefitSancor credentialBenefitSancor : credentialsBenefitSancorToVerify) {
                 if (!credentialBenefitSancor.getIdDidiReceptor().equals(didiAppUser.getDid())) {

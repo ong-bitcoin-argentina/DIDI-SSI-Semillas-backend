@@ -37,7 +37,7 @@ public class CredentialIdentityService extends CredentialCommonService {
     public Optional<CredentialIdentity> getCredentialIdentityActiveForDni(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialIdentityRepository.findTopByHolderDniAndCredentialStateOrderByDateOfIssueDesc(dni, activeDidiState.get());
+        return credentialIdentityRepository.findTopByCreditHolderDniAndCredentialStateOrderByDateOfIssueDesc(dni, activeDidiState.get());
     }
 
     public CredentialIdentity save(CredentialIdentity credentialIdentity){

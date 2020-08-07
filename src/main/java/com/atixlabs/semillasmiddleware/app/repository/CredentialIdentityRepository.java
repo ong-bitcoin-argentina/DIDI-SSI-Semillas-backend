@@ -24,6 +24,6 @@ public interface CredentialIdentityRepository extends JpaRepository<CredentialId
 
     List<CredentialIdentity> findByCredentialState(CredentialState credentialState);
 
-    Optional<CredentialIdentity> findTopByHolderDniAndCredentialStateOrderByDateOfIssueDesc(Long holderDni, CredentialState credentialState);
+    Optional<CredentialIdentity> findTopByCreditHolderDniAndCredentialStateOrderByDateOfIssueDesc(Long holderDni, CredentialState credentialState);
 
 }

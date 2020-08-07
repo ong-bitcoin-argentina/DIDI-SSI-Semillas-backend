@@ -143,7 +143,7 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
         return credentialBenefitSancorRepository.save(credentialBenefitSancor);
     }
 
-    public List<CredentialBenefitSancor> getBenefitSancorActiveForDni(Long dni) throws CredentialException {
+    public List<CredentialBenefitSancor> getCredentialBenefitSancorActiveForDni(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
         return credentialBenefitSancorRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());

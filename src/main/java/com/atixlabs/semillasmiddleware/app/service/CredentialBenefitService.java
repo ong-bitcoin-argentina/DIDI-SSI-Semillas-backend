@@ -24,6 +24,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -216,7 +217,8 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
      *     *
      *DEFAULT
      *  Titular
-     *      Si es el unico credito activo para el titularNo hago nada, se supone que todas las credenciales estan revocadas
+     *      Si es el unico credito activo para el titular
+     *      No hago nada, se supone que todas las credenciales estan revocadas
      *      Si Tiene mas creditos
      *          Marco los demas creditos para revision en el próximo proceso y que verifique segun su estado lo que deben hacer conlas credenciales
      *  Familiar
@@ -225,21 +227,28 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
      *      Si es el unico titularno hago nada
      * @param loanFinalized
      */
-    public void handleLoanFinalized(Loan loanFinalized,  List<Loan> otherLoansActiveForHolder) throws CredentialException {
+    public List<Loan> handleLoanFinalized(Loan loanFinalized,  List<Loan> otherLoansActiveForHolder) throws CredentialException {
 
-        if(!loanFinalized.isDefault()){
-            if(otherLoansActiveForHolder==null || otherLoansActiveForHolder.isEmpty()){ //active loan is the only
+        if(!loanFinalized.isDefault()) {
+            if (otherLoansActiveForHolder == null || otherLoansActiveForHolder.isEmpty()) { //active loan is the only
                 Optional<Person> holder = this.personService.findByDocumentNumber(loanFinalized.getDniPerson());
-                if(holder.isPresent()) {
+                if (holder.isPresent()) {
+                    log.info("Loan {} is the only credit for holder {}, revoking credentials", loanFinalized.getIdBondareaLoan(), loanFinalized.getDniPerson());
                     this.revokeHolderCredentialsBenefitsForLoan(holder.get());
                     this.revokeFamilyCredentialsBenefitsForLoan(holder.get());
-                }else
-                    log.error("holder {} not exist, cant revoke credentials");
+                } else
+                    log.error("holder {} not exist, cant revoke credentials", loanFinalized.getDniPerson());
 
-            }else{
+            } else {
                 log.info("Loan {} is not the only of holder {}, not evaluate credentials states", loanFinalized.getIdBondareaLoan(), loanFinalized.getDniPerson());
             }
+        }else{
+                if(otherLoansActiveForHolder!=null || !otherLoansActiveForHolder.isEmpty()) {
+                    return otherLoansActiveForHolder;
+                }
+
         }
+        return new ArrayList<Loan>();
 
     }
 

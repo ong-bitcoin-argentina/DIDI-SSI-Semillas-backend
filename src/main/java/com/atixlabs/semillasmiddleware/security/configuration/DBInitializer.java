@@ -1,6 +1,8 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
 import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
+import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
+import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderCategoryRepository;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
@@ -28,7 +30,7 @@ import com.atixlabs.semillasmiddleware.security.service.UserService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.common.collect.Sets;
 
-import java.util.Optional;
+import java.util.*;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,8 @@ public class DBInitializer implements CommandLineRunner {
 
     private String enviroment;
 
+    private ProviderCategoryRepository providerCategoryRepository;
+
 private CertTemplateRepository certTemplateRepository;
 
     @Value("${didi.semillas.template_code_identity}")
@@ -79,7 +83,7 @@ private CertTemplateRepository certTemplateRepository;
     private String didiTemplateCodeSancorSalud;
 
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment, CertTemplateRepository certTemplateRepository) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment, CertTemplateRepository certTemplateRepository, ProviderCategoryRepository providerCategoryRepository) {
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
@@ -90,6 +94,7 @@ private CertTemplateRepository certTemplateRepository;
         this.processControlRepository = processControlRepository;
         this.enviroment = enviroment;
         this.certTemplateRepository = certTemplateRepository;
+        this.providerCategoryRepository = providerCategoryRepository;
     }
 
    @Override
@@ -274,7 +279,19 @@ private CertTemplateRepository certTemplateRepository;
             processControlRepository.save(process);
         }
 	
-	this.loadCertTemplatesValues();
+	    this.loadCertTemplatesValues();
+        this.saveCategories();
+    }
+
+    private void saveCategories(){
+        String[] categories = new String[]{"Salud", "Oportunidad", "Saber", "Sueño", "Finanza"};
+        for (String category : categories) {
+            if(!providerCategoryRepository.findByName(category).isPresent()) {
+                providerCategoryRepository.save(new ProviderCategory(category));
+            }
+        }
+
+
     }
 
     private void createUsers() throws ExistUserException {

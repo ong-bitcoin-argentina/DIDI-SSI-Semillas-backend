@@ -24,7 +24,7 @@ public class ProviderService {
     private ProviderRepository providerRepository;
     private ProviderCategoryService providerCategoryService;
 
-    public Provider create(ProviderCreateRequest providerCreateRequest) throws InexistentCategoryException {
+    public Provider create(ProviderCreateRequest providerCreateRequest) {
         Provider provider = new Provider();
         Optional<ProviderCategory> category = providerCategoryService.findById(providerCreateRequest.getCategoryId());
         if(!category.isPresent()) throw new InexistentCategoryException();
@@ -40,7 +40,7 @@ public class ProviderService {
     }
 
     public List<Provider> findAll(boolean activesOnly){
-        if (activesOnly) return providerRepository.findAll();
-        return providerRepository.findAllByActive(false);
+        if (activesOnly) return providerRepository.findAllByActive(true);
+        return providerRepository.findAll();
     }
 }

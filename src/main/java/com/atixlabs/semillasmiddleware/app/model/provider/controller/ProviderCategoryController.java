@@ -32,7 +32,7 @@ public class ProviderCategoryController {
     public List<ProviderCategoryDto> findAllProviders(){
         List<ProviderCategory> providerCategories = providerCategoryService.findAll();
         List<ProviderCategoryDto> providerCategoryDtos = new ArrayList<>();
-        providerCategories .forEach(providerCategory -> providerCategoryDtos.add(providerCategory.toDto()));
+        providerCategories.forEach(providerCategory -> providerCategoryDtos.add(providerCategory.toDto()));
         return providerCategoryDtos;
 
     }

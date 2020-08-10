@@ -282,16 +282,13 @@ private CertTemplateRepository certTemplateRepository;
     }
 
     private void saveCategories(){
-        Map<String, Optional<ProviderCategory>> categories = new HashMap<>();
-        categories.put("Salud", providerCategoryRepository.findByName("Salud"));
-        categories.put("Oportnuidad", providerCategoryRepository.findByName("Oportnuidad"));
-        categories.put("Saber", providerCategoryRepository.findByName("Saber"));
-        categories.put("Sueño", providerCategoryRepository.findByName("Sueño"));
-        categories.put("Finanza", providerCategoryRepository.findByName("Finanza"));
-
-        for (Map.Entry<String, Optional<ProviderCategory>> entry : categories.entrySet()){
-            if(!entry.getValue().isPresent()) providerCategoryRepository.save(new ProviderCategory(entry.getKey()));
+        String[] categories = new String[]{"Salud", "Oportunidad", "Saber", "Sueño", "Finanza"};
+        for (String category : categories) {
+            if(!providerCategoryRepository.findByName(category).isPresent()) {
+                providerCategoryRepository.save(new ProviderCategory(category));
+            }
         }
+
 
     }
 

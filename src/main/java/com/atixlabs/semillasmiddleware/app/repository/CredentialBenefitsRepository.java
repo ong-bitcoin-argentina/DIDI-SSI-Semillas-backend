@@ -29,4 +29,6 @@ public interface CredentialBenefitsRepository extends JpaRepository<CredentialBe
 
     List<CredentialBenefits> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
 
+    List<CredentialBenefits> findByBeneficiaryDniAndCredentialState(Long holderDni, CredentialState credentialStates);
+
 }

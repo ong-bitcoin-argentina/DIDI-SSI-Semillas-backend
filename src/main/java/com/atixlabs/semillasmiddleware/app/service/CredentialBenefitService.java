@@ -212,7 +212,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
     }
 
     public CredentialBenefits buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException{
-        return this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.HOLDER);
+        return this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.FAMILY);
     }
 
     /**
@@ -281,7 +281,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
     public List<CredentialBenefits> getCredentialBenefitsActiveForDni(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialBenefitsRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());
+        return credentialBenefitsRepository.findByBeneficiaryDniAndCredentialState(dni, activeDidiState.get());
     }
 
     public CredentialBenefits buildNewOnPendidgDidi(CredentialBenefits credentialBenefits, DidiAppUser newDidiAppUser) throws CredentialException {

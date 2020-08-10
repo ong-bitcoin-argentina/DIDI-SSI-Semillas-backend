@@ -115,7 +115,7 @@ public class SyncDidiProcessController {
 
 
 
-    @GetMapping("/precess/new/appdidiusers")
+    @GetMapping("/process/new/appdidiusers")
     @ResponseStatus(HttpStatus.OK)
     public Map<String, String> processNewsAppDidiUsers(){
         Map<String, String> jsonMessage = new HashMap<>();

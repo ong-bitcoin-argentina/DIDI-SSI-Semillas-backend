@@ -74,6 +74,7 @@ public class CredentialService {
     private PersonService personService;
     private CredentialBenefitService credentialBenefitService;
     private CredentialStateService credentialStateService;
+    private CredentialBenefitSancorService credentialBenefitSancorService;
 
     @Value("${credentials.pageSize}")
     private String size;
@@ -94,7 +95,7 @@ public class CredentialService {
             CredentialDwellingRepository credentialDwellingRepository,
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
-            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService,PersonService personService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService) {
+            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService,PersonService personService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
@@ -114,6 +115,7 @@ public class CredentialService {
         this.personService = personService;
         this.credentialBenefitService = credentialBenefitService;
         this.credentialStateService = credentialStateService;
+        this.credentialBenefitSancorService = credentialBenefitSancorService;
     }
 
     /**
@@ -133,8 +135,8 @@ public class CredentialService {
             try {
                 List<Loan> loansDefaultToReview = this.handleDefaultCredits(lastTimeProcessRun);
                 List<Loan> loansActiveToReview = this.handleActiveCredits(lastTimeProcessRun);
-                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun);
-                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);
+                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun); //TODO add sancor
+                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);//TODO add sancor
                 List<Loan> loansNewToReview = this.handleNewCredits();
 
             } catch (PersonDoesNotExistsException ex) {
@@ -171,7 +173,9 @@ public class CredentialService {
         for (Loan newLoan : newLoans) {
             try {
                 CredentialCredit credentialCredit = this.createNewCreditCredential(newLoan);
-                credentialBenefitService.createCredentialsBenefitsForNewLoan(newLoan);
+                credentialBenefitService.createCredentialsBenefitsHolderForNewLoan(newLoan);
+                credentialBenefitService.createCredentialsBenefitsFamilyForNewLoan(newLoan);
+                credentialBenefitSancorService.createCredentialsBenefitsHolderForNewLoan(newLoan);
             } catch (PersonDoesNotExistsException | CredentialException ex) {
                 log.error("Error creating new credential credit for loan " + newLoan.getIdBondareaLoan() + " " + ex.getMessage());
                 loansForReview.add(newLoan);
@@ -343,6 +347,7 @@ public class CredentialService {
 
                     credentialBenefitService.revokeHolderCredentialsBenefitsForLoan(holder);
                     credentialBenefitService.revokeFamilyCredentialsBenefitsForLoan(holder);
+                    credentialBenefitSancorService.revokeHolderCredentialsBenefitsForLoan(holder);
 
                 } catch (CredentialException ex) {
                     log.error("Error creating new credential credit for loan " + defaultLoan.getIdBondareaLoan() + " " + ex.getMessage());
@@ -595,6 +600,7 @@ public class CredentialService {
                     this.updateCredentialCreditForActiveLoan(loan, holder);
 
                     credentialBenefitService.updateCredentialBenefitForActiveLoan(loan,holder);
+                    credentialBenefitSancorService.updateCredentialBenefitForActiveLoan(loan, holder);
 
             } else {
                 this.updateCredentialCreditForActiveLoan(loan, holder);

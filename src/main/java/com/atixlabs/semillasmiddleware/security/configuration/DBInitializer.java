@@ -79,6 +79,8 @@ private CertTemplateRepository certTemplateRepository;
     @Value("${didi.semillas.template_code_credit}")
     private String didiTemplateCodeCredit;
 
+    @Value("${didi.semillas.template_code_sancor_salud}")
+    private String didiTemplateCodeSancorSalud;
 
     @Autowired
     public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment, CertTemplateRepository certTemplateRepository, ProviderCategoryRepository providerCategoryRepository) {
@@ -492,6 +494,11 @@ private CertTemplateRepository certTemplateRepository;
         }
         if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT)){
             CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT,didiTemplateCodeBenefit,"Semillas Beneficio" );
+            certTemplateRepository.save(certTemplate);
+        }
+
+        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT_SANCOR)){
+            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT_SANCOR,didiTemplateCodeSancorSalud,"Sancor Salud" );
             certTemplateRepository.save(certTemplate);
         }
     }

@@ -59,6 +59,7 @@ public class CredentialDto {
     private String creditState;
     private LocalDate finishDate;
     private String expiredAmount;
+    private Integer currentCycleNumber;
 
     //dwelling
     private String dwellingType;
@@ -72,6 +73,11 @@ public class CredentialDto {
     private String mainActivity;
     private String entrepreneurshipName;
     private String entrepreneurshipAddress;
+
+    //Sancor
+    private Long certificateNumber;
+    private Long ref;
+    private Long policyNumber;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private LocalDate endActivity;
@@ -137,6 +143,9 @@ public class CredentialDto {
                             if (CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode().equals(credential.getCredentialCategory())) {
                                 return new CredentialDto((CredentialEntrepreneurship) credential);
                             } else
+                            if (CredentialCategoriesCodes.BENEFIT_SANCOR.getCode().equals(credential.getCredentialCategory())) {
+                                return new CredentialDto((CredentialBenefitSancor) credential);
+                            } else
                                 return new CredentialDto();
                         }
                     }
@@ -164,6 +173,7 @@ public class CredentialDto {
         this.creditState = credit.getCreditState();
         this.finishDate = credit.getFinishDate();
         this.expiredAmount = credit.getExpiredAmount().toString();
+        this.currentCycleNumber = credit.getCurrentCycleNumber();
     }
 
     public CredentialDto(CredentialDwelling dwelling){
@@ -189,6 +199,14 @@ public class CredentialDto {
         this.relationWithCreditHolder = identity.getRelationWithCreditHolder();
         this.beneficiaryGender = identity.getBeneficiaryGender();
         this.beneficiaryBirthDate = identity.getBeneficiaryBirthDate();
+    }
+
+    public CredentialDto(CredentialBenefitSancor sancor) {
+        this.baseCredentialDto(sancor);
+        this.certificateNumber = sancor.getCertificateNumber();
+        this.ref = sancor.getRef();
+        this.policyNumber = sancor.getPolicyNumber();
+
     }
 
 }

@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.model;
 
+import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -43,6 +44,10 @@ public class LoanDto implements Serializable {
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
 
     private Boolean hasCredential;
+
+    private String tc;
+
+    private Integer nc;
 
 
 }

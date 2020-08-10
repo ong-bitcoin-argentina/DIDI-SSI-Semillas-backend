@@ -12,7 +12,8 @@ public enum CredentialTypesCodes {
     CREDENTIAL_IDENTITY_FAMILY("Identidad - Familiar"),
     CREDENTIAL_ENTREPRENEURSHIP("Emprendimiento"),
     CREDENTIAL_BENEFITS("Beneficios Sembrando Titular"),
-    CREDENTIAL_BENEFITS_FAMILY("Beneficios Sembrando Familiar");
+    CREDENTIAL_BENEFITS_FAMILY("Beneficios Sembrando Familiar"),
+    CREDENTIAL_BENEFITS_SANCOR("Sancor Salud");
 
     private String code;
 

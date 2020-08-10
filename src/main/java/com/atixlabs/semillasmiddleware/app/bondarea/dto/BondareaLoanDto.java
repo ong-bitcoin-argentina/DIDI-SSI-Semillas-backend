@@ -91,5 +91,7 @@ public class BondareaLoanDto {
         this.amount = loan.getAmount();
         this.dateFirstInstalment = loan.getDateFirstInstalment();
         this.expiredAmount = loan.getExpiredAmount();
+        this.feeDuration = loan.getTc();
+        this.feeTotalQuantity = loan.getNc();
     }
 }

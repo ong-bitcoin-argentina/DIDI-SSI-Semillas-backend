@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-d84c14f3
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-aa30e214
     environment:
       - spring_profiles_active=${ENVIRONMENT}
       - SEMILLAS_DB=${SEMILLAS_DB}
@@ -26,6 +26,8 @@ services:
       - "traefik.http.routers.backend.entrypoints=web-secure"
       - "traefik.http.routers.backend.tls=true"
       - "traefik.http.routers.backend.tls.certresolver=le"
+    volumes:
+      - "/var/log/semillas:/var/log/semillas"
 
   proxy:
     image: traefik:v2.2.0

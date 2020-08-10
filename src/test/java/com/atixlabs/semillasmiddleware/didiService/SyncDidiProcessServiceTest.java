@@ -11,6 +11,8 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
+import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -24,6 +26,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.Optional;
 
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.*;
@@ -52,6 +55,12 @@ public class SyncDidiProcessServiceTest {
 
     @Mock
     private DidiService didiService;
+
+    @Mock
+    private SancorPolicyService sancorPolicyService;
+
+    @Mock
+    private CredentialBenefitSancorService credentialBenefitSancorService;
 
     @InjectMocks
     private SyncDidiProcessService syncDidiProcessService;
@@ -290,6 +299,65 @@ public class SyncDidiProcessServiceTest {
 
     }
 
+
+    @Test
+    public void whenHolderNotHaveDIDRegister_thenCredentialSancorNotEmmited(){
+
+        when(didiAppUserService.getDidiAppUserByDni(anyLong())).thenReturn(null);
+
+        CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
+
+        credentialBenefitSancor.setIdDidiReceptor(null);
+
+        syncDidiProcessService.emmitCredentialBenefitSancor(credentialBenefitSancor);
+
+        Assert.assertNull(credentialBenefitSancor.getIdDidiReceptor());
+
+    }
+
+    @Test
+    public void whenHolderHaveDIDRegisterButNotHaveSancorPolicy_thenCredentialSancorNotEmmited(){
+
+        CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
+
+        credentialBenefitSancor.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.empty());
+
+        syncDidiProcessService.emmitCredentialBenefitSancor(credentialBenefitSancor);
+
+        Assert.assertNull(credentialBenefitSancor.getIdDidiReceptor());
+        verify(didiService, times(0)).createAndEmmitCertificateDidi(credentialBenefitSancor);
+
+
+    }
+
+
+    @Test
+    public void whenHolderHaveDIDRegisterAndSancorPolicyAndCredentialBnefitSancorPendindDidi_thenEmmitCredentialBenefitSancor(){
+
+        CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
+
+        credentialBenefitSancor.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        SancorPolicy sancorPolicy = this.getSancorPolicyMock();
+
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(didiAppUser);
+        when(sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.of(sancorPolicy));
+        when(credentialBenefitSancorService.save(credentialBenefitSancor)).thenReturn(credentialBenefitSancor);
+
+        syncDidiProcessService.emmitCredentialBenefitSancor(credentialBenefitSancor);
+
+        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefitSancor);
+
+    }
+
     private CredentialCredit getCredentialCreditMock(){
         CredentialCredit credentialCredit = new CredentialCredit();
         credentialCredit.setCreditHolderDni(36637842L);
@@ -393,6 +461,27 @@ public class SyncDidiProcessServiceTest {
         return credentialEntrepreneurship;
     }
 
+    private CredentialBenefitSancor getCredentialBenefitSancorMock(){
+        CredentialBenefitSancor credentialBenefitSancor = new CredentialBenefitSancor();
+        credentialBenefitSancor.setCredentialState(this.getPendingDidiCredentialStateMock());
+        credentialBenefitSancor.setBeneficiaryFirstName("Flor");
+        credentialBenefitSancor.setBeneficiaryLastName("Tior");
+        credentialBenefitSancor.setCreditHolderFirstName("Flor");
+        credentialBenefitSancor.setCreditHolderLastName("Tiore");
+        credentialBenefitSancor.setCreditHolderDni(36637842L);
+        credentialBenefitSancor.setBeneficiaryDni(36637842L);
+        credentialBenefitSancor.setIdDidiReceptor(null);
+        credentialBenefitSancor.setId(1L);
+        credentialBenefitSancor.setCreditHolder(null);
+        credentialBenefitSancor.setCredentialCategory(CredentialCategoriesCodes.BENEFIT_SANCOR.getCode());
+        credentialBenefitSancor.setCertificateNumber(1L);
+        credentialBenefitSancor.setPolicyNumber(429273L);
+        credentialBenefitSancor.setRef(429273L);
+
+
+        return credentialBenefitSancor;
+    }
+
     private CredentialState getPendingDidiCredentialStateMock(){
         return new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode());
     }
@@ -406,4 +495,12 @@ public class SyncDidiProcessServiceTest {
         return didiAppUser;
     }
 
+    private SancorPolicy getSancorPolicyMock(){
+        SancorPolicy sancorPolicy = new SancorPolicy();
+        sancorPolicy.setCertificateClientDni(36637842L);
+        sancorPolicy.setPolicyNumber(429273L);
+        sancorPolicy.setCertificateNumber(1L);
+
+        return sancorPolicy;
+    }
 }

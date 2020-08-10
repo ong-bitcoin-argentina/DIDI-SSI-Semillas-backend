@@ -51,6 +51,7 @@ package-backend:
   only:
     refs:
       - ADD-PRODUCTION-CONFIG
+      - SEMI-350-Sancor-Credential
       # Only run on develop, release/x.y.x and hotfix/xxxx
       - develop
       - /^release.*$/

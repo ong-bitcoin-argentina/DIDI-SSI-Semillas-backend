@@ -77,4 +77,8 @@ public class LoanService {
         return finalizedCredits;
     }
 
+    public List<Loan> findOthersLoansActivesForHolder(Loan loan){
+        return loanRepository.findAllByDniPersonAndStatusAndIdBondareaLoanNot(loan.getDniPerson(), LoanStatusCodes.ACTIVE.getCode(),loan.getIdBondareaLoan());
+    }
+
 }

@@ -420,15 +420,28 @@ public class CredentialService {
 
 
     /**
-     * Si finalizó un credito
-     * Si el Credito estaba Activo
-     * Revoco beneficios asociados al titular y familiares, solo si es el unico credito activo para el titular, queda credencial crediticia vigente
+     * Si el credito esta activo
+     *  Cred Credito
+     *      Cargo fecha de finalizacion a la credencial, no modifico su estado
+     *  Beneficio
+     *      Si es el unico credito activo para el titular
+     *          Revoco beneficios asociados al titular y familiares, si estan vigentes o pendientes de didi
+     *      Si no es el unico credito activo
+     *          No hago nada
+     *  Sancor
+     *      Si es el unico credito, revoco la credencial
+     *      si tiene mas creditos no hago nada
      * Si el Credito estaba en Mora (se supone credenciales revocadas)
-     * Doy de baja el credito en Mora parael Titular
-     * Verifico el estado del Titular
-     * Reactivo sus beneficios de otros creditos activos de los que sea Titular en estado Pendiente de Didi
-     * Reactivo los beneficios de los familiares relacionados con el Titular para ese Credito en estado Pendiente de Didi
-     *
+     *      Quito el credito del listado de mora del titularCred Credito
+     *      Cargo fecha de finalizacion a la credencial, no modifico su estadoCred
+     *  Beneficio
+     *      Si es el unico credito activo para el titular
+     *          No hago nada, se supone que todas las credenciales estan revocadas
+     *      Si Tiene mas creditos
+     *          Marco los demas creditos para revision en el próximo proceso y que verifique segun su estado lo que deben hacer conlas credenciales
+     *  Sancor
+     *      Si es el unico credito, revoco la credencial si es necesario
+     *      Si tiene mas creditos no hago nada
      * @param lastTimeProcessRun
      * @return
      * @throws PersonDoesNotExistsException
@@ -445,6 +458,10 @@ public class CredentialService {
             Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
             if (opCredit.isPresent()) {
                 try {
+
+                    List<Loan> otherLoansActiveForHolder = this.getOthersLoansActivesForHolder(loan);
+
+                    credentialBenefitService.handleLoanFinalized(loan, otherLoansActiveForHolder);
                     this.closeCredit(opCredit.get(), loan);
                     log.info("Credential Credit is set to FINALIZE, for credential id historic" + opCredit.get().getIdHistorical());
 
@@ -470,6 +487,10 @@ public class CredentialService {
 
         return loansToreview;
 
+    }
+
+    public List<Loan> getOthersLoansActivesForHolder(Loan loan){
+        return this.loanService.findOthersLoansActivesForHolder(loan);
     }
 
     private void closeCredit(CredentialCredit credentialCredit, Loan loan) {

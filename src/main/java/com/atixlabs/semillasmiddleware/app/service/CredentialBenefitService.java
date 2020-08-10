@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
@@ -29,10 +30,6 @@ import java.util.Optional;
 @Slf4j
 @Service
 public class CredentialBenefitService extends CredentialBenefitCommonService<CredentialBenefits> {
-
-    //private PersonService personService;
-
-   // private CredentialStateService credentialStateService;
 
     private CredentialBenefitsRepository credentialBenefitsRepository;
 
@@ -203,6 +200,50 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
         Optional<CredentialBenefits> opCredentialBenefitsHolder = credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holderDni, beneficiaryDni, personTypesCodes.getCode());
         return opCredentialBenefitsHolder;
     }
+
+    /**
+     * ACTIVO
+     * Titular (id didi titular)
+     *  Si es el unico credito activo para el titular
+     *      Revoco beneficios asociados al titular y familiares, si estan vigentes o pendientes de didi
+     *  Si no es el unico credito activo
+     *      No hago nada,
+     * Familiar (Id Didi familiar)
+     *  Si es el unico credito activo para el titular
+     *      *      Revoco beneficios asociados al titular y familiares, si estan vigentes o pendientes de didi
+     *      *  Si no es el unico credito activo
+     *      *      No hago nada,
+     *     *
+     *DEFAULT
+     *  Titular
+     *      Si es el unico credito activo para el titularNo hago nada, se supone que todas las credenciales estan revocadas
+     *      Si Tiene mas creditos
+     *          Marco los demas creditos para revision en el próximo proceso y que verifique segun su estado lo que deben hacer conlas credenciales
+     *  Familiar
+     *      Si es familiar de algun otro titular que tenga creditos activos,
+     *          Marco los demas creditos para revision en el próximo proceso y que verifique segun su estado lo que deben hacer conlas credenciales
+     *      Si es el unico titularno hago nada
+     * @param loanFinalized
+     */
+    public void handleLoanFinalized(Loan loanFinalized,  List<Loan> otherLoansActiveForHolder) throws CredentialException {
+
+        if(!loanFinalized.isDefault()){
+            if(otherLoansActiveForHolder==null || otherLoansActiveForHolder.isEmpty()){ //active loan is the only
+                Optional<Person> holder = this.personService.findByDocumentNumber(loanFinalized.getDniPerson());
+                if(holder.isPresent()) {
+                    this.revokeHolderCredentialsBenefitsForLoan(holder.get());
+                    this.revokeFamilyCredentialsBenefitsForLoan(holder.get());
+                }else
+                    log.error("holder {} not exist, cant revoke credentials");
+
+            }else{
+                log.info("Loan {} is not the only of holder {}, not evaluate credentials states", loanFinalized.getIdBondareaLoan(), loanFinalized.getDniPerson());
+            }
+        }
+
+    }
+
+
 
 
     @Override

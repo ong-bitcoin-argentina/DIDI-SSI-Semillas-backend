@@ -17,22 +17,12 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(SpringRunner.class)
+
 @SpringBootTest
 class ProviderServiceTest {
 
-    @InjectMocks
+    @Autowired
     ProviderService providerService;
-
-    @Mock
-    ProviderRepository providerRepository;
-
-    @Mock
-    ProviderCategoryRepository providerCategoryRepository;
-
-    @Mock
-    ProviderCategoryService providerCategoryService;
-
 
     @Test
     void whenCreatingUserWitInvalidCategoryExpectToThrowInexistentCategoryException() {

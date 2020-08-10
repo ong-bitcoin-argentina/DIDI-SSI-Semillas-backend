@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
@@ -14,6 +15,7 @@ import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Slf4j
@@ -35,6 +37,21 @@ public class CredentialEntrepreneurshipService extends CredentialCommonService {
 
     public CredentialEntrepreneurship save(CredentialEntrepreneurship credentialEntrepreneurship){
         return credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
+    }
+
+    public List<CredentialEntrepreneurship> getCredentialEntrepreneurshipActiveForDni(Long dni) throws CredentialException {
+        Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
+
+        return credentialEntrepreneurshipRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());
+    }
+
+    public CredentialEntrepreneurship buildNewOnPendidgDidi(CredentialEntrepreneurship credentialEntrepreneurship, DidiAppUser newDidiAppUser) throws CredentialException {
+        CredentialEntrepreneurship newCredentialEntrepreneurship =  new CredentialEntrepreneurship(credentialEntrepreneurship);
+        newCredentialEntrepreneurship.setIdDidiReceptor(newDidiAppUser.getDid());
+
+        this.resetStateOnPendingDidi(newCredentialEntrepreneurship);
+
+        return newCredentialEntrepreneurship;
     }
 
     @Override

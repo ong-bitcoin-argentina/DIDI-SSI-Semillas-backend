@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialEntrepreneurship;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
@@ -17,5 +18,8 @@ public interface CredentialBenefitSancorRepository extends JpaRepository<Credent
     List<CredentialBenefitSancor> findByCredentialState(CredentialState credentialState);
 
     Optional<CredentialBenefitSancor> findTopByCreditHolderDniAndBeneficiaryDniAndCredentialStateOrderByDateOfIssueDesc(Long holderDni, Long beneficiaryDni, CredentialState credentialState);
+
+    List<CredentialBenefitSancor> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
+
 
 }

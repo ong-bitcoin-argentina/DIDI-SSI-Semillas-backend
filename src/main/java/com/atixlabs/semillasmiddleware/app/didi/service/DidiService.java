@@ -190,7 +190,7 @@ public class DidiService {
         ArrayList<String> didiSyncStatus = new ArrayList<>();
         didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
         didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
-        ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findBySyncStatusIn(didiSyncStatus);
+        ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findByActiveAndSyncStatusIn(true,didiSyncStatus);
 
         if (didiAppUsers.size() <= 0) {
             log.info("didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi");
@@ -219,7 +219,7 @@ public class DidiService {
             log.info("BENEFICIARIES");
             log.info(credential.toString());
             if (!credential.getCreditHolderDni().equals(credential.getBeneficiaryDni())) {
-                String receivedDid = didiAppUserRepository.findByDni(credential.getBeneficiaryDni()).getDid();
+                String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getBeneficiaryDni()).get().getDid();
                 try {
                     updateCredentialDidAndDidiSync(credential, receivedDid);
                 } catch (CredentialException e) {
@@ -232,7 +232,7 @@ public class DidiService {
         for (Credential credential : creditHolders) {
             log.info("CREDIT HOLDERS");
             log.info(credential.toString());
-            String receivedDid = didiAppUserRepository.findByDni(credential.getCreditHolderDni()).getDid();
+            String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getCreditHolderDni()).get().getDid();
             try {
                 this.updateCredentialDidAndDidiSync(credential, receivedDid);
             } catch (CredentialException e) {

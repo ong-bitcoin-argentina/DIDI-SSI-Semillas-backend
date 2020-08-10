@@ -12,4 +12,8 @@ public interface CredentialEntrepreneurshipRepository extends JpaRepository<Cred
 
     List<CredentialEntrepreneurship> findByCredentialState(CredentialState credentialState);
 
+
+    List<CredentialEntrepreneurship> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
+
+
 }

@@ -224,7 +224,7 @@ private CertTemplateRepository certTemplateRepository;
 
         if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
-            configuration.setValue("10250");
+            configuration.setValue("500");
             configuration.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
             parameterConfigurationRepository.save(configuration);
         }

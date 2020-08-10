@@ -35,8 +35,7 @@ public class Provider extends AuditableEntity {
 
     private boolean active = true;
 
-    /*
-    public Provider(String providerCategory, String name, String phone, String email, Integer benefit, String speciality){
+    public Provider(ProviderCategory providerCategory, String name, String phone, String email, Integer benefit, String speciality){
         this.providerCategory = providerCategory;
         this.name = name;
         this.phone = phone;
@@ -44,7 +43,17 @@ public class Provider extends AuditableEntity {
         this.benefit = benefit;
         this.speciality = speciality;
     }
-    */
+
+    public Provider(ProviderCategory providerCategory, String name, String phone, String email, Integer benefit, String speciality, boolean active){
+        this.providerCategory = providerCategory;
+        this.name = name;
+        this.phone = phone;
+        this.email = email;
+        this.benefit = benefit;
+        this.speciality = speciality;
+        this.active = active;
+    }
+
     public ProviderDto toDto(){
         return ProviderDto.builder()
                 .name(this.name)

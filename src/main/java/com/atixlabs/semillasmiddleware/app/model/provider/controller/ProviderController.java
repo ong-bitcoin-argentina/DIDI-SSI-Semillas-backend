@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.model.provider.controller;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
+import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.service.ProviderService;
 import lombok.extern.slf4j.Slf4j;
@@ -13,6 +14,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -48,5 +50,16 @@ public class ProviderController {
         providers.forEach(provider -> providerDtos.add(provider.toDto()));
         return providerDtos;
 
+    }
+
+    @PostMapping("/disable/{id}")
+    public ResponseEntity<?> findAllProvidersByActive(@PathVariable @Min(1) Long providerId){
+        try {
+            providerService.disable(providerId);
+        }catch (InexistentProviderException ipe){
+            return ResponseEntity.badRequest().body("There is no provider with id: "+providerId);
+        }
+
+        return ResponseEntity.ok().body("ok");
     }
 }

@@ -48,16 +48,15 @@ public class ProviderController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<Provider> findAllProvidersByActive(@RequestParam boolean activesOnly,
-                                                      @RequestParam("page") @Min(0) @Max(9999999) int page,
-                                                      @RequestParam("size") @Min(1) @Max(9999) int size){
+    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) @Max(9999999) int page,
+                                           @RequestParam("size") @Min(1) @Max(9999) int size){
 
         Pageable pageRequest = PageRequest.of(page, size, Sort.by("name").ascending());
-        return providerService.findAll(activesOnly, pageRequest);
+        return providerService.findAll(false, pageRequest);
     }
 
     @PostMapping("/disable/{id}")
-    public ResponseEntity<?> findAllProvidersByActive(@PathVariable @Min(1) Long providerId){
+    public ResponseEntity<?> disableProvider(@PathVariable @Min(1) Long providerId){
         try {
             providerService.disable(providerId);
         }catch (InexistentProviderException ipe){

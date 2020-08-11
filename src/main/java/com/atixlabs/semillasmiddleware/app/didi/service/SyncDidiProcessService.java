@@ -369,18 +369,24 @@ public class SyncDidiProcessService {
     //verify if credential identity is active and id didi is valid
     public void verifyCredentialIdentityForDidiAppUser(DidiAppUser didiAppUser) throws CredentialException {
 
-        Optional<CredentialIdentity> credentialIdentityToVerify = this.credentialIdentityService.getCredentialIdentityActiveForDni(didiAppUser.getDni());
-        if(credentialIdentityToVerify.isPresent()) {
-            if(!credentialIdentityToVerify.get().getIdDidiReceptor().equals(didiAppUser.getDid())){
-                credentialIdentityService.revokeComplete(credentialIdentityToVerify.get(), RevocationReasonsCodes.UPDATE_INTERNAL);
-                CredentialIdentity newCredentialIdentity =  credentialIdentityService.buildNewOnPendidgDidi(credentialIdentityToVerify.get(), didiAppUser);
-                credentialIdentityService.save(newCredentialIdentity);
-                log.info("Credential Identity for dni {} updated to id didi {} and set on pending didi state",newCredentialIdentity.getBeneficiaryDni(), didiAppUser.getDid());
-            }
-            log.info("Credential Identity for dni {} dont need be updated",credentialIdentityToVerify.get().getBeneficiaryDni());
-        }
-        else
+        //credential with principal dni is a holder
+        List<CredentialIdentity> credentialsIdentityToVerify = this.credentialIdentityService.getAllCredentialIdentityActivesForDni(didiAppUser.getDni());
+
+        if(credentialsIdentityToVerify==null || credentialsIdentityToVerify.isEmpty()){
             log.info("Credential identity for dni {} is not present", didiAppUser.getDni());
+        }
+
+        for(CredentialIdentity credentialIdentityToVerify : credentialsIdentityToVerify) {
+
+                if (!credentialIdentityToVerify.getIdDidiReceptor().equals(didiAppUser.getDid())) {
+                    credentialIdentityService.revokeComplete(credentialIdentityToVerify, RevocationReasonsCodes.UPDATE_INTERNAL);
+                    CredentialIdentity newCredentialIdentity = credentialIdentityService.buildNewOnPendidgDidi(credentialIdentityToVerify, didiAppUser);
+                    credentialIdentityService.save(newCredentialIdentity);
+                    log.info("Credential Identity for holder {} and beneficiary {} type {} updated to id didi {} and set on pending didi state", newCredentialIdentity.getCreditHolderDni(),newCredentialIdentity.getBeneficiaryDni(), newCredentialIdentity.getRelationWithCreditHolder(), didiAppUser.getDid());
+                }
+                log.info("Credential Identity for holder {} and beneficiary {} and type {} dont need be updated", credentialIdentityToVerify.getCreditHolderDni(), credentialIdentityToVerify.getBeneficiaryDni(), credentialIdentityToVerify.getRelationWithCreditHolder());
+
+        }
 
     }
 

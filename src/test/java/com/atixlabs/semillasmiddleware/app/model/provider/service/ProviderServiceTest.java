@@ -62,7 +62,7 @@ class ProviderServiceTest {
             fail();
         }
 
-        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "prov@at.com", 30, "Speciality", false);
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555","+541555555", "prov@at.com", 30, "Speciality", false);
         Long totalActives = providerService.findAll(true, pageRequest).getTotalElements();
         providerRepository.save(provider);
         assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives);
@@ -80,7 +80,7 @@ class ProviderServiceTest {
             fail();
         }
 
-        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "prov@at.com", 30, "Speciality", true);
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
         Long totalActives = providerService.findAll(true, pageRequest).getTotalElements();
         providerRepository.save(provider);
         assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives+1);

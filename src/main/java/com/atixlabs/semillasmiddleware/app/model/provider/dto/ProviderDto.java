@@ -12,6 +12,7 @@ public class ProviderDto implements Serializable {
     private int benefit;
     private String email;
     private String name;
+    private String whatsappNumber;
     private String phone;
     private String speciality;
 }

@@ -14,6 +14,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
@@ -35,7 +38,7 @@ class ProviderServiceTest {
 
     @Test
     void whenCreatingUserWitInvalidCategoryExpectToThrowInexistentCategoryException() {
-        ProviderCreateRequest providerCreateRequest = this.getNewProviderRequest(999l);
+        ProviderCreateRequest providerCreateRequest = this.getNewProviderRequest(Long.MAX_VALUE);
         assertThrows(InexistentCategoryException.class, () -> providerService.create(providerCreateRequest));
     }
 
@@ -50,6 +53,7 @@ class ProviderServiceTest {
 
     @Test
     void whenAddingInactiveProviderSizeDoesNotChange() {
+        Pageable pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("name").ascending());
         ProviderCategory providerCategory = null;
         try {
            providerCategory = providerCategoryService.findAll().get(0);
@@ -59,14 +63,15 @@ class ProviderServiceTest {
         }
 
         Provider provider = new Provider(providerCategory, "Provider", "+541555555", "prov@at.com", 30, "Speciality", false);
-        int totalActives = providerService.findAll(true).size();
+        Long totalActives = providerService.findAll(true, pageRequest).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true).size(), totalActives);
+        assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives);
 
     }
 
     @Test
     void whenAddingActiveProviderSizeUppers1() {
+        Pageable pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("name").ascending());
         ProviderCategory providerCategory = null;
         try {
             providerCategory = providerCategoryService.findAll().get(0);
@@ -76,9 +81,9 @@ class ProviderServiceTest {
         }
 
         Provider provider = new Provider(providerCategory, "Provider", "+541555555", "prov@at.com", 30, "Speciality", true);
-        int totalActives = providerService.findAll(true).size();
+        Long totalActives = providerService.findAll(true, pageRequest).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true).size(), totalActives+1);
+        assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives+1);
 
     }
 

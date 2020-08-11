@@ -8,11 +8,17 @@ import com.atixlabs.semillasmiddleware.app.model.provider.service.ProviderServic
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
+import javax.validation.constraints.Min;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -42,11 +48,11 @@ public class ProviderController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProviderDto> findAllProvidersByActive(@RequestParam boolean activesOnly){
-        List<Provider> providers = providerService.findAll(activesOnly);
-        List<ProviderDto> providerDtos = new ArrayList<>();
-        providers.forEach(provider -> providerDtos.add(provider.toDto()));
-        return providerDtos;
+    public Page<Provider> findAllProvidersByActive(@RequestParam boolean activesOnly,
+                                                      @RequestParam("page") @Min(0) @Max(9999999) int page,
+                                                      @RequestParam("size") @Min(1) @Max(9999) int size){
 
+        Pageable pageRequest = PageRequest.of(page, size, Sort.by("name").ascending());
+        return providerService.findAll(activesOnly, pageRequest);
     }
 }

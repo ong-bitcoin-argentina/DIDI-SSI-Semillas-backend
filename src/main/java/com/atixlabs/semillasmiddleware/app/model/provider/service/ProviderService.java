@@ -6,6 +6,8 @@ import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -39,8 +41,8 @@ public class ProviderService {
         return providerRepository.save(provider);
     }
 
-    public List<Provider> findAll(boolean activesOnly){
-        if (activesOnly) return providerRepository.findAllByActive(true);
-        return providerRepository.findAll();
+    public Page<Provider> findAll(boolean activesOnly, Pageable pageRequest){
+        if (activesOnly) return providerRepository.findAllByActive(pageRequest, true);
+        return providerRepository.findAll(pageRequest);
     }
 }

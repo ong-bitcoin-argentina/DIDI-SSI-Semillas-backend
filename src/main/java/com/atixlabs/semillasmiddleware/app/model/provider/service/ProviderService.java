@@ -1,19 +1,22 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.service;
 
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderRepository;
+import com.google.common.collect.Lists;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
-
+import javax.persistence.criteria.*;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,10 +51,33 @@ public class ProviderService {
         return providerRepository.save(provider);
     }
 
-    public Page<Provider> findAll(boolean activesOnly, Integer page){
+    private Specification<Provider> getProviderSpecification (ProviderFilterDto providerFilterDto){
+        return (Specification<Provider>) (root, query, cb) -> {
+            List<Predicate> predicates = Lists.newLinkedList();
+
+            if (providerFilterDto.getActivesOnly().isPresent()){
+                predicates.add(cb.equal(root.get("active"), providerFilterDto.getActivesOnly().get()));
+            }
+            if (providerFilterDto.getCategoryId().isPresent()){
+
+                predicates.add(cb.equal(root.get("providerCategory").get("id"), providerFilterDto.getCategoryId().get()));
+            }
+            if (providerFilterDto.getCriteriaQuery().isPresent()){
+                String criteria = providerFilterDto.getCriteriaQuery().get();
+                predicates.add(
+                        cb.or(
+                                cb.like(cb.upper(root.get("name")), criteria),
+                                cb.like(cb.upper(root.get("email")),criteria)));
+            }
+
+            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+        };
+
+    }
+
+    public Page<Provider> findAll(Integer page, ProviderFilterDto providerFilterDto){
         Pageable pageRequest = PageRequest.of(page, Integer.valueOf(size), Sort.by("name").ascending());
-        if (activesOnly) return providerRepository.findAllByActive(pageRequest, true);
-        return providerRepository.findAll(pageRequest);
+        return providerRepository.findAll(getProviderSpecification(providerFilterDto), pageRequest);
     }
 
     public void disable(Long providerId){

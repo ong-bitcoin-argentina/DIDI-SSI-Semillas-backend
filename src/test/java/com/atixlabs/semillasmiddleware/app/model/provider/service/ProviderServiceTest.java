@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.service;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
@@ -55,6 +56,7 @@ class ProviderServiceTest {
     @Test
     void whenAddingInactiveProviderSizeDoesNotChange() {
         ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder().activesOnly(Optional.of(true)).build();
         try {
            providerCategory = providerCategoryService.findAll().get(0);
         }catch (Exception ex){
@@ -63,15 +65,16 @@ class ProviderServiceTest {
         }
 
         Provider provider = new Provider(providerCategory, "Provider", "+541555555","+541555555", "prov@at.com", 30, "Speciality", false);
-        Long totalActives = providerService.findAll(true, 0).getTotalElements();
+        Long totalActives = providerService.findAll( 0,providerFilterDto ).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true, 0 ).getTotalElements(), totalActives);
+        assertEquals(providerService.findAll( 0 , providerFilterDto).getTotalElements(), totalActives);
 
     }
 
     @Test
     void whenAddingActiveProviderSizeUppers1() {
         ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder().activesOnly(Optional.of(true)).build();
         try {
             providerCategory = providerCategoryService.findAll().get(0);
         }catch (Exception ex){
@@ -80,15 +83,55 @@ class ProviderServiceTest {
         }
 
         Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
-        Long totalActives = providerService.findAll(true, 0).getTotalElements();
+        Long totalActives = providerService.findAll(0, providerFilterDto).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true, 0 ).getTotalElements(), totalActives+1);
+        assertEquals(providerService.findAll(0, providerFilterDto ).getTotalElements(), totalActives+1);
 
     }
 
     @Test
     void whenDisablingInexistentProviderThrowException() {
         assertThrows(InexistentProviderException.class, () -> providerService.disable(999l));
+    }
+
+    @Test
+    void whenCriteriaMatchesReturnProvider() {
+        ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder()
+                .criteriaQuery(Optional.of("der"))
+                .activesOnly(Optional.of(true)).build();
+
+        try {
+            providerCategory = providerCategoryService.findAll().get(0);
+        }catch (Exception ex){
+            //in case there are no categories in the repository
+            fail();
+        }
+
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
+        providerRepository.save(provider);
+        assertEquals(providerService.findAll(0, providerFilterDto ).getContent().size(), 1);
+
+    }
+
+    @Test
+    void whenCriteriaDoesNotMatchReturn0Providers() {
+        ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder()
+                .criteriaQuery(Optional.of("derdd"))
+                .activesOnly(Optional.of(true)).build();
+
+        try {
+            providerCategory = providerCategoryService.findAll().get(0);
+        }catch (Exception ex){
+            //in case there are no categories in the repository
+            fail();
+        }
+
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
+        providerRepository.save(provider);
+        assertEquals(providerService.findAll(0, providerFilterDto ).getContent().size(), 0);
+
     }
 
     private ProviderCreateRequest getNewProviderRequest(Long providerCategory){

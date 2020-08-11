@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.controller;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderDto;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
@@ -20,6 +21,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.Optional;
 
 
 @Slf4j
@@ -48,9 +50,17 @@ public class ProviderController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) @Max(9999999) int page){
+    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) int page,
+                                           @RequestParam Optional<Boolean> activesOnly,
+                                           @RequestParam Optional<String> criteriaQuery,
+                                           @RequestParam Optional<Long> categoryId){
 
-        return providerService.findAll(false, page);
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder()
+                .activesOnly(activesOnly)
+                .criteriaQuery(criteriaQuery)
+                .categoryId(categoryId)
+                .build();
+        return providerService.findAll(page, providerFilterDto);
     }
 
     @PostMapping("/disable/{id}")

@@ -48,11 +48,9 @@ public class ProviderController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) @Max(9999999) int page,
-                                           @RequestParam("size") @Min(1) @Max(9999) int size){
+    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) @Max(9999999) int page){
 
-        Pageable pageRequest = PageRequest.of(page, size, Sort.by("name").ascending());
-        return providerService.findAll(false, pageRequest);
+        return providerService.findAll(false, page);
     }
 
     @PostMapping("/disable/{id}")

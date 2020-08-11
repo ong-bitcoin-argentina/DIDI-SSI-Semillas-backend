@@ -54,7 +54,6 @@ class ProviderServiceTest {
 
     @Test
     void whenAddingInactiveProviderSizeDoesNotChange() {
-        Pageable pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("name").ascending());
         ProviderCategory providerCategory = null;
         try {
            providerCategory = providerCategoryService.findAll().get(0);
@@ -64,15 +63,14 @@ class ProviderServiceTest {
         }
 
         Provider provider = new Provider(providerCategory, "Provider", "+541555555","+541555555", "prov@at.com", 30, "Speciality", false);
-        Long totalActives = providerService.findAll(true, pageRequest).getTotalElements();
+        Long totalActives = providerService.findAll(true, 0).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives);
+        assertEquals(providerService.findAll(true, 0 ).getTotalElements(), totalActives);
 
     }
 
     @Test
     void whenAddingActiveProviderSizeUppers1() {
-        Pageable pageRequest = PageRequest.of(0, Integer.MAX_VALUE, Sort.by("name").ascending());
         ProviderCategory providerCategory = null;
         try {
             providerCategory = providerCategoryService.findAll().get(0);
@@ -82,9 +80,9 @@ class ProviderServiceTest {
         }
 
         Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
-        Long totalActives = providerService.findAll(true, pageRequest).getTotalElements();
+        Long totalActives = providerService.findAll(true, 0).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives+1);
+        assertEquals(providerService.findAll(true, 0 ).getTotalElements(), totalActives+1);
 
     }
 

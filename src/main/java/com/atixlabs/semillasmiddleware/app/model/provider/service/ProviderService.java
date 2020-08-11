@@ -19,6 +19,7 @@ import org.springframework.stereotype.Service;
 import javax.persistence.criteria.*;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Service
 public class ProviderService {
@@ -51,29 +52,21 @@ public class ProviderService {
         return providerRepository.save(provider);
     }
 
-    private Specification<Provider> getProviderSpecification (ProviderFilterDto providerFilterDto){
+    private Specification<Provider> getProviderSpecification (ProviderFilterDto providerFilterDto) {
         return (Specification<Provider>) (root, query, cb) -> {
-            List<Predicate> predicates = Lists.newLinkedList();
-
-            if (providerFilterDto.getActivesOnly().isPresent()){
-                predicates.add(cb.equal(root.get("active"), providerFilterDto.getActivesOnly().get()));
-            }
-            if (providerFilterDto.getCategoryId().isPresent()){
-
-                predicates.add(cb.equal(root.get("providerCategory").get("id"), providerFilterDto.getCategoryId().get()));
-            }
-            if (providerFilterDto.getCriteriaQuery().isPresent()){
-                String criteria = "%".concat(providerFilterDto.getCriteriaQuery().get().toUpperCase().concat("%"));
-                predicates.add(
-                        cb.or(
+            Stream<Predicate> predicates = Stream.of(
+                    providerFilterDto.getActivesOnly().map(value -> cb.equal(root.get("active"), value)),
+                    providerFilterDto.getCategoryId().map(value -> cb.equal(root.get("providerCategory"), value)),
+                    providerFilterDto.getCriteriaQuery().map(value -> {
+                        String criteria = "%" + value.toUpperCase() + "%";
+                        return cb.or(
                                 cb.like(cb.upper(root.get("name")), criteria),
-                                cb.like(cb.upper(root.get("email")),criteria)
-                        ));
-            }
-
-            return cb.and(predicates.toArray(new Predicate[predicates.size()]));
+                                cb.like(cb.upper(root.get("email")), criteria)
+                        );
+                    })
+            ).flatMap(Optional::stream);
+            return cb.and(predicates.toArray(Predicate[]::new));
         };
-
     }
 
     public Page<Provider> findAll(Integer page, ProviderFilterDto providerFilterDto){

@@ -63,11 +63,12 @@ public class ProviderService {
                 predicates.add(cb.equal(root.get("providerCategory").get("id"), providerFilterDto.getCategoryId().get()));
             }
             if (providerFilterDto.getCriteriaQuery().isPresent()){
-                String criteria = providerFilterDto.getCriteriaQuery().get().toUpperCase();
+                String criteria = "%".concat(providerFilterDto.getCriteriaQuery().get().toUpperCase().concat("%"));
                 predicates.add(
                         cb.or(
                                 cb.like(cb.upper(root.get("name")), criteria),
-                                cb.like(cb.upper(root.get("email")),criteria)));
+                                cb.like(cb.upper(root.get("email")),criteria)
+                        ));
             }
 
             return cb.and(predicates.toArray(new Predicate[predicates.size()]));

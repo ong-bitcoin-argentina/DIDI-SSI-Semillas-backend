@@ -63,7 +63,7 @@ public class ProviderService {
                 predicates.add(cb.equal(root.get("providerCategory").get("id"), providerFilterDto.getCategoryId().get()));
             }
             if (providerFilterDto.getCriteriaQuery().isPresent()){
-                String criteria = providerFilterDto.getCriteriaQuery().get();
+                String criteria = providerFilterDto.getCriteriaQuery().get().toUpperCase();
                 predicates.add(
                         cb.or(
                                 cb.like(cb.upper(root.get("name")), criteria),

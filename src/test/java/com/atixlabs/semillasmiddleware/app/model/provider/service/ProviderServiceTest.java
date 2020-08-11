@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.provider.service;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
+import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
 import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderCategoryRepository;
@@ -85,6 +86,11 @@ class ProviderServiceTest {
         providerRepository.save(provider);
         assertEquals(providerService.findAll(true, pageRequest ).getTotalElements(), totalActives+1);
 
+    }
+
+    @Test
+    void whenDisablingInexistentProviderThrowException() {
+        assertThrows(InexistentProviderException.class, () -> providerService.disable(999l));
     }
 
     private ProviderCreateRequest getNewProviderRequest(Long providerCategory){

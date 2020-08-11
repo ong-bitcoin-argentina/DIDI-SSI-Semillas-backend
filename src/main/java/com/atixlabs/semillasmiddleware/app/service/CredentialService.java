@@ -122,7 +122,7 @@ public class CredentialService {
      * Generate and update the credentials credit.
      * Checking for defaulters, and revoking or activate credentials (credit and benefit)
      */
-    public void generateCreditAndBenefitsCredentialsByLoans() throws InvalidProcessException, PersonDoesNotExistsException {
+    public void generateCreditAndBenefitsCredentialsByLoans() throws InvalidProcessException {
         //check if process in credentials is not running
         if (!processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS)) {
 

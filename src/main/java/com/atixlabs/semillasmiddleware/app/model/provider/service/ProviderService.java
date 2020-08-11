@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.service;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
+import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
@@ -44,5 +45,11 @@ public class ProviderService {
     public Page<Provider> findAll(boolean activesOnly, Pageable pageRequest){
         if (activesOnly) return providerRepository.findAllByActive(pageRequest, true);
         return providerRepository.findAll(pageRequest);
+    }
+
+    public void disable(Long providerId){
+        Provider provider = providerRepository.findById(providerId).orElseThrow( () -> new InexistentProviderException());
+        provider.setActive(false);
+        providerRepository.save(provider);
     }
 }

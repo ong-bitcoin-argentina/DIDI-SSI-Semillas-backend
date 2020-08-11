@@ -12,4 +12,6 @@ public interface CredentialDwellingRepository extends JpaRepository<CredentialDw
 
     List<CredentialDwelling> findByCredentialState(CredentialState credentialState);
 
+    List<CredentialDwelling> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
+
 }

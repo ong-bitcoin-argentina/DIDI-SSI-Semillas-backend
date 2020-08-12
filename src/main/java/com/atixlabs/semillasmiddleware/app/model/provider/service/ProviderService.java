@@ -79,4 +79,8 @@ public class ProviderService {
         provider.setActive(false);
         providerRepository.save(provider);
     }
+
+    public Provider findById(Long id){
+        return providerRepository.findById(id).orElseThrow(InexistentProviderException::new);
+    }
 }

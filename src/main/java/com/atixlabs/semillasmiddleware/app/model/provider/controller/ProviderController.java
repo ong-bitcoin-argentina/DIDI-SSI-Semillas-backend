@@ -16,6 +16,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -38,6 +39,7 @@ public class ProviderController {
 
     private ProviderService providerService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<String> createProvider(@RequestBody @Valid ProviderCreateRequest providerCreateRequest){
         try {
@@ -48,6 +50,7 @@ public class ProviderController {
         return ResponseEntity.accepted().body("created.");
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) int page,
@@ -63,6 +66,20 @@ public class ProviderController {
         return providerService.findAll(page, providerFilterDto);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> findProvider(@PathVariable @Min(1) Long id){
+
+        try {
+            ProviderDto provider = providerService.findById(id).toDto();
+            return ResponseEntity.ok().body(provider);
+        }catch (InexistentProviderException ipe){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/disable/{id}")
     public ResponseEntity<?> disableProvider(@PathVariable @Min(1) Long providerId){
         try {

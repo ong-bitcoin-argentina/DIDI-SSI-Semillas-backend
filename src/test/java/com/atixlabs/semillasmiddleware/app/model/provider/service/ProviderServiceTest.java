@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.service;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
@@ -15,6 +16,9 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
@@ -36,7 +40,7 @@ class ProviderServiceTest {
 
     @Test
     void whenCreatingUserWitInvalidCategoryExpectToThrowInexistentCategoryException() {
-        ProviderCreateRequest providerCreateRequest = this.getNewProviderRequest(999l);
+        ProviderCreateRequest providerCreateRequest = this.getNewProviderRequest(Long.MAX_VALUE);
         assertThrows(InexistentCategoryException.class, () -> providerService.create(providerCreateRequest));
     }
 
@@ -52,6 +56,7 @@ class ProviderServiceTest {
     @Test
     void whenAddingInactiveProviderSizeDoesNotChange() {
         ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder().activesOnly(Optional.of(true)).build();
         try {
            providerCategory = providerCategoryService.findAll().get(0);
         }catch (Exception ex){
@@ -59,16 +64,17 @@ class ProviderServiceTest {
             fail();
         }
 
-        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "prov@at.com", 30, "Speciality", false);
-        int totalActives = providerService.findAll(true).size();
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555","+541555555", "prov@at.com", 30, "Speciality", false);
+        Long totalActives = providerService.findAll( 0,providerFilterDto ).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true).size(), totalActives);
+        assertEquals(providerService.findAll( 0 , providerFilterDto).getTotalElements(), totalActives);
 
     }
 
     @Test
     void whenAddingActiveProviderSizeUppers1() {
         ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder().activesOnly(Optional.of(true)).build();
         try {
             providerCategory = providerCategoryService.findAll().get(0);
         }catch (Exception ex){
@@ -76,16 +82,56 @@ class ProviderServiceTest {
             fail();
         }
 
-        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "prov@at.com", 30, "Speciality", true);
-        int totalActives = providerService.findAll(true).size();
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
+        Long totalActives = providerService.findAll(0, providerFilterDto).getTotalElements();
         providerRepository.save(provider);
-        assertEquals(providerService.findAll(true).size(), totalActives+1);
+        assertEquals(providerService.findAll(0, providerFilterDto ).getTotalElements(), totalActives+1);
 
     }
 
     @Test
     void whenDisablingInexistentProviderThrowException() {
         assertThrows(InexistentProviderException.class, () -> providerService.disable(999l));
+    }
+
+    @Test
+    void whenCriteriaMatchesReturnProvider() {
+        ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder()
+                .criteriaQuery(Optional.of("der"))
+                .activesOnly(Optional.of(true)).build();
+
+        try {
+            providerCategory = providerCategoryService.findAll().get(0);
+        }catch (Exception ex){
+            //in case there are no categories in the repository
+            fail();
+        }
+
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
+        providerRepository.save(provider);
+        assertEquals(providerService.findAll(0, providerFilterDto ).getContent().size(), 1);
+
+    }
+
+    @Test
+    void whenCriteriaDoesNotMatchReturn0Providers() {
+        ProviderCategory providerCategory = null;
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder()
+                .criteriaQuery(Optional.of("derdd"))
+                .activesOnly(Optional.of(true)).build();
+
+        try {
+            providerCategory = providerCategoryService.findAll().get(0);
+        }catch (Exception ex){
+            //in case there are no categories in the repository
+            fail();
+        }
+
+        Provider provider = new Provider(providerCategory, "Provider", "+541555555", "+541555555","prov@at.com", 30, "Speciality", true);
+        providerRepository.save(provider);
+        assertEquals(providerService.findAll(0, providerFilterDto ).getContent().size(), 0);
+
     }
 
     private ProviderCreateRequest getNewProviderRequest(Long providerCategory){

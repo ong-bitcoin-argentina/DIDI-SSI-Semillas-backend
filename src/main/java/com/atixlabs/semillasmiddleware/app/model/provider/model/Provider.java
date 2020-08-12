@@ -26,6 +26,7 @@ public class Provider extends AuditableEntity {
 
     private String name;
     private String phone;
+    private String whatsappNumber;
     private String email;
 
     @Min(0)
@@ -44,9 +45,10 @@ public class Provider extends AuditableEntity {
         this.speciality = speciality;
     }
 
-    public Provider(ProviderCategory providerCategory, String name, String phone, String email, Integer benefit, String speciality, boolean active){
+    public Provider(ProviderCategory providerCategory, String name, String whatsappNumber, String phone, String email, Integer benefit, String speciality, boolean active){
         this.providerCategory = providerCategory;
         this.name = name;
+        this.whatsappNumber = whatsappNumber;
         this.phone = phone;
         this.email = email;
         this.benefit = benefit;
@@ -62,6 +64,7 @@ public class Provider extends AuditableEntity {
                 .id(this.id)
                 .phone(this.phone)
                 .speciality(this.speciality)
+                .whatsappNumber(this.whatsappNumber)
                 .build();
     }
 }

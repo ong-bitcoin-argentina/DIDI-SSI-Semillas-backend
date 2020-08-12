@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.controller;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderDto;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
@@ -9,14 +10,20 @@ import com.atixlabs.semillasmiddleware.app.model.provider.service.ProviderServic
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Optional;
+
 
 @Slf4j
 @RestController
@@ -32,6 +39,7 @@ public class ProviderController {
 
     private ProviderService providerService;
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping
     public ResponseEntity<String> createProvider(@RequestBody @Valid ProviderCreateRequest providerCreateRequest){
         try {
@@ -42,18 +50,38 @@ public class ProviderController {
         return ResponseEntity.accepted().body("created.");
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public List<ProviderDto> findAllProvidersByActive(@RequestParam boolean activesOnly){
-        List<Provider> providers = providerService.findAll(activesOnly);
-        List<ProviderDto> providerDtos = new ArrayList<>();
-        providers.forEach(provider -> providerDtos.add(provider.toDto()));
-        return providerDtos;
+    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) int page,
+                                           @RequestParam Optional<Boolean> activesOnly,
+                                           @RequestParam Optional<String> criteriaQuery,
+                                           @RequestParam Optional<Long> categoryId){
 
+        ProviderFilterDto providerFilterDto = ProviderFilterDto.builder()
+                .activesOnly(activesOnly)
+                .criteriaQuery(criteriaQuery)
+                .categoryId(categoryId)
+                .build();
+        return providerService.findAll(page, providerFilterDto);
     }
 
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping("/{id}")
+    @ResponseStatus(HttpStatus.OK)
+    public ResponseEntity<?> findProvider(@PathVariable @Min(1) Long id){
+
+        try {
+            ProviderDto provider = providerService.findById(id).toDto();
+            return ResponseEntity.ok().body(provider);
+        }catch (InexistentProviderException ipe){
+            return ResponseEntity.notFound().build();
+        }
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/disable/{id}")
-    public ResponseEntity<?> findAllProvidersByActive(@PathVariable @Min(1) Long providerId){
+    public ResponseEntity<?> disableProvider(@PathVariable @Min(1) Long providerId){
         try {
             providerService.disable(providerId);
         }catch (InexistentProviderException ipe){

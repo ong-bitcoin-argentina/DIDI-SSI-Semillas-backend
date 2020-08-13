@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.provider.controller;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderUpdateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
@@ -20,15 +21,17 @@ import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
-import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 
 @Slf4j
 @RestController
 @RequestMapping(ProviderController.URL_MAPPING)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
 public class ProviderController {
     public static final String URL_MAPPING = "/providers";
 
@@ -51,9 +54,9 @@ public class ProviderController {
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
-    @GetMapping
+    @GetMapping("/filtered")
     @ResponseStatus(HttpStatus.OK)
-    public Page<Provider> findAllProviders(@RequestParam("page") @Min(0) int page,
+    public Page<Provider> findAllProvidersFiltered(@RequestParam("page") @Min(0) int page,
                                            @RequestParam Optional<Boolean> activesOnly,
                                            @RequestParam Optional<String> criteriaQuery,
                                            @RequestParam Optional<Long> categoryId){
@@ -64,6 +67,13 @@ public class ProviderController {
                 .categoryId(categoryId)
                 .build();
         return providerService.findAll(page, providerFilterDto);
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @GetMapping
+    @ResponseStatus(HttpStatus.OK)
+    public List<ProviderDto> findAllProviders(){
+        return providerService.findAll().stream().map(Provider::toDto).collect(Collectors.toList());
     }
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
@@ -89,5 +99,20 @@ public class ProviderController {
         }
 
         return ResponseEntity.ok().body("ok");
+    }
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PatchMapping("/{id}")
+    public ResponseEntity<?> updateProvider(@PathVariable @Min(1) Long id,
+                                            @RequestBody ProviderUpdateRequest providerUpdateRequest){
+        try {
+            providerService.update(id, providerUpdateRequest);
+        }catch (InexistentProviderException ipe){
+            return ResponseEntity.badRequest().body("There is no provider with id: "+id);
+        }catch (InexistentCategoryException ice){
+            return ResponseEntity.badRequest().body("There is no category with id: "+providerUpdateRequest.getCategoryId().get());
+        }
+
+        return ResponseEntity.ok().body("updated");
     }
 }

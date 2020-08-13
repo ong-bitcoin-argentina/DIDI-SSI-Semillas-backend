@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.service;
 
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderUpdateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCategoryException;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
@@ -18,6 +19,7 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import javax.persistence.criteria.*;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -39,14 +41,14 @@ public class ProviderService {
 
     public Provider create(ProviderCreateRequest providerCreateRequest) {
         Provider provider = new Provider();
-        Optional<ProviderCategory> category = providerCategoryService.findById(providerCreateRequest.getCategoryId());
-        if(!category.isPresent()) throw new InexistentCategoryException();
+        ProviderCategory category = providerCategoryService.findById(providerCreateRequest.getCategoryId());
 
-        provider.setProviderCategory(category.get());
+        provider.setProviderCategory(category);
         provider.setEmail(providerCreateRequest.getEmail());
         provider.setName(providerCreateRequest.getName());
         provider.setPhone(providerCreateRequest.getPhone());
         provider.setBenefit(providerCreateRequest.getBenefit());
+        provider.setWhatsappNumber(providerCreateRequest.getWhatsappNumber());
         provider.setSpeciality(providerCreateRequest.getSpeciality());
 
         return providerRepository.save(provider);
@@ -74,6 +76,10 @@ public class ProviderService {
         return providerRepository.findAll(getProviderSpecification(providerFilterDto), pageRequest);
     }
 
+    public List<Provider> findAll(){
+        return providerRepository.findAll();
+    }
+
     public void disable(Long providerId){
         Provider provider = providerRepository.findById(providerId).orElseThrow( () -> new InexistentProviderException());
         provider.setActive(false);
@@ -82,5 +88,17 @@ public class ProviderService {
 
     public Provider findById(Long id){
         return providerRepository.findById(id).orElseThrow(InexistentProviderException::new);
+    }
+
+    public Provider update(Long id, ProviderUpdateRequest providerUpdateRequest){
+        Provider provider = this.findById(id);
+        providerUpdateRequest.getName().ifPresent(provider::setName);
+        providerUpdateRequest.getBenefit().ifPresent(provider::setBenefit);
+        providerUpdateRequest.getEmail().ifPresent(provider::setEmail);
+        providerUpdateRequest.getPhone().ifPresent(provider::setPhone);
+        providerUpdateRequest.getSpeciality().ifPresent(provider::setSpeciality);
+        providerUpdateRequest.getCategoryId().ifPresent( catId -> provider.setProviderCategory(providerCategoryService.findById(catId)));
+
+        return providerRepository.save(provider);
     }
 }

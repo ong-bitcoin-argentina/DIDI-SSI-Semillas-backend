@@ -21,6 +21,8 @@ public class ProviderCreateRequest {
     @NotNull
     private String email;
 
+    private String whatsappNumber;
+
     @NotNull
     @Min(0)
     @Max(100)

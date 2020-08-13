@@ -48,6 +48,7 @@ public class ProviderService {
         provider.setName(providerCreateRequest.getName());
         provider.setPhone(providerCreateRequest.getPhone());
         provider.setBenefit(providerCreateRequest.getBenefit());
+        provider.setWhatsappNumber(providerCreateRequest.getWhatsappNumber());
         provider.setSpeciality(providerCreateRequest.getSpeciality());
 
         return providerRepository.save(provider);

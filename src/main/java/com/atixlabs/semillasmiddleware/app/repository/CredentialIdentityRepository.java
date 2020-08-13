@@ -29,7 +29,10 @@ public interface CredentialIdentityRepository extends JpaRepository<CredentialId
 
     List<CredentialIdentity> findByCreditHolderDniAndCredentialStateAndRelationWithCreditHolder(Long holderDni, CredentialState credentialState, String relationWithHolder);
 
-    List<CredentialIdentity> findByBeneficiaryDniAndCredentialStateAndRelationWithCreditHolder(Long holderDni, CredentialState credentialState, String relationWithHolder);
+    List<CredentialIdentity> findByBeneficiaryDniAndCredentialStateAndRelationWithCreditHolder(Long beneficiaryDni, CredentialState credentialState, String relationWithHolder);
 
+    List<CredentialIdentity> findByBeneficiaryDniAndCredentialStateInAndRelationWithCreditHolderAndCreditHolderDniNot(Long beneficiaryDni, List<CredentialState> credentialActivePending, String relationWithHolder, Long beneficiaryAsHolderDni);
+
+    Boolean existsByBeneficiaryDniAndRelationWithCreditHolderAndCreditHolderDni(Long beneficiaryDni, String relationWithHolder, Long holderDni);
 
 }

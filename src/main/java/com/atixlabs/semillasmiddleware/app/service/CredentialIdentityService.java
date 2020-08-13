@@ -36,12 +36,33 @@ public class CredentialIdentityService extends CredentialCommonService {
         return  credentialIdentityRepository.findByCredentialState(pendingDidiState);
     }
 
-    /*
-    public Optional<CredentialIdentity> getCredentialIdentityActiveForDni(Long dni) throws CredentialException {
-        Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialIdentityRepository.findTopByCreditHolderDniAndCredentialStateOrderByDateOfIssueDesc(dni, activeDidiState.get());
-    }*/
+    /**
+     * get credential type
+     * Id Didi (Holder) (not param dni), Dni Holder (not param dni), Dni beneficiary (param dni), type HOLDER
+     * @param dni
+     * @return
+     * @throws CredentialException
+     */
+    public List<CredentialIdentity> getAllCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeHolder(Long dni) throws CredentialException {
+        //dni is beneficiary but not holder, and type is holder
+        return credentialIdentityRepository.findByBeneficiaryDniAndCredentialStateInAndRelationWithCreditHolderAndCreditHolderDniNot(dni, getActiveAndPendingDidiStates(), CredentialRelationHolderType.HOLDER.getCode(), dni);
+
+    }
+
+    /**
+     * get credential type
+     * Id Didi (Beneficiary) (param dni), Dni Holder (not param dni), Dni beneficiary (param dni), type KINSMAN
+     * @param holderDni, beneficiaryDni
+     * @return
+     */
+    public Boolean existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(Long holderDni, Long beneficiaryDni) {
+        //dni is beneficiary but not holder, and type is holder
+        return credentialIdentityRepository.existsByBeneficiaryDniAndRelationWithCreditHolderAndCreditHolderDni(beneficiaryDni, CredentialRelationHolderType.KINSMAN.getCode(), holderDni);
+
+    }
+
+
 
     /**
      * Abuelo Beneficiario en la encuesta, Flor Familiar
@@ -95,6 +116,24 @@ public class CredentialIdentityService extends CredentialCommonService {
 
         return newCredentialIdentity;
     }
+
+    public CredentialIdentity buildNewOnPendidgDidiAsKinsmanType(CredentialIdentity credentialIdentity, DidiAppUser newDidiAppUser) throws CredentialException {
+        CredentialIdentity newCredentialIdentity =  new CredentialIdentity(credentialIdentity, CredentialRelationHolderType.KINSMAN.getCode());
+        newCredentialIdentity.setIdDidiReceptor(newDidiAppUser.getDid());
+
+        this.resetStateOnPendingDidi(newCredentialIdentity);
+
+        return newCredentialIdentity;
+    }
+
+    public List<CredentialIdentity> findByCreditHolderDniAndCredentialStateIn(Long holderDni, List<CredentialState> credentialActivePending){
+        return credentialIdentityRepository.findByCreditHolderDniAndCredentialStateIn(holderDni,credentialActivePending);
+    }
+
+    public List<CredentialIdentity> findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(Long holderDni, Long beneficiaryDni, List<CredentialState> credentialActivePending){
+        return credentialIdentityRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni,beneficiaryDni,credentialActivePending);
+    }
+
 
 
     @Override

@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
@@ -386,6 +387,38 @@ public class SyncDidiProcessService {
                 }
                 log.info("Credential Identity for holder {} and beneficiary {} and type {} dont need be updated", credentialIdentityToVerify.getCreditHolderDni(), credentialIdentityToVerify.getBeneficiaryDni(), credentialIdentityToVerify.getRelationWithCreditHolder());
 
+        }
+
+        if(didiAppUser.getSyncStatus().equals(DidiSyncStatus.SYNC_NEW.getCode())){
+            log.info("Id didi {} is new for dni {}, create if is necesary Credentials Identity Kinsman type", didiAppUser.getId(), didiAppUser.getDni());
+            this.createCredentialIdentityKinsmanType(didiAppUser);
+        }
+    }
+
+    /**
+     *  for didi app user dni beneficiary
+     * for each credential identity
+     * id didi holder, dni holder, dni beneficiary, type holder
+     * must have
+     * id didi beneficary, dni holder, dni beneficiary, type kinsman
+     *
+     *
+     * @param didiAppUserNew
+     */
+    public void createCredentialIdentityKinsmanType(DidiAppUser didiAppUserNew) throws CredentialException {
+
+        List<CredentialIdentity> credentialsIdentityHolderToCompare = this.credentialIdentityService.getAllCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeHolder(didiAppUserNew.getDni());
+
+        for (CredentialIdentity credentialIdentityHolderType : credentialsIdentityHolderToCompare){
+            if(!this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(credentialIdentityHolderType.getCreditHolderDni(), credentialIdentityHolderType.getBeneficiaryDni())) {
+                CredentialIdentity newCredentialidentityAsKinsmanType = this.credentialIdentityService.buildNewOnPendidgDidiAsKinsmanType(credentialIdentityHolderType, didiAppUserNew);
+                this.credentialIdentityService.save(newCredentialidentityAsKinsmanType);
+                log.info("Credential Identity for holder {} and beneficiary {} type {} generated for id didi {} and set on pending didi state", newCredentialidentityAsKinsmanType.getCreditHolderDni(),newCredentialidentityAsKinsmanType.getBeneficiaryDni(), newCredentialidentityAsKinsmanType.getRelationWithCreditHolder(), newCredentialidentityAsKinsmanType.getIdDidiReceptor());
+
+            }else{
+                log.info("Credential Identity for holder {} and beneficiary {} type {} generated for id didi {} and set on pending didi state", credentialIdentityHolderType.getCreditHolderDni(),credentialIdentityHolderType.getBeneficiaryDni(), CredentialRelationHolderType.KINSMAN.getCode(), didiAppUserNew.getDid());
+
+            }
         }
 
     }

@@ -29,4 +29,13 @@ public class CredentialIdentity extends Credential {
 
     }
 
+    public CredentialIdentity(CredentialIdentity credentialIdentity, String relationWithCreditHolder){
+        super(credentialIdentity);
+
+        this.relationWithCreditHolder = relationWithCreditHolder;
+        this.beneficiaryGender = credentialIdentity.beneficiaryGender;
+        this.beneficiaryBirthDate = credentialIdentity.beneficiaryBirthDate;
+
+    }
+
 }

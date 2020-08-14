@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
@@ -56,7 +57,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult){
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
 
         AnswerRow answerRow = null;
         try {
@@ -97,7 +98,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult) throws CredentialException {
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
 

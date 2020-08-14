@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.provider.model;
 
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCategoryDto;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderDto;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
@@ -65,6 +66,10 @@ public class Provider extends AuditableEntity {
                 .phone(this.phone)
                 .speciality(this.speciality)
                 .whatsappNumber(this.whatsappNumber)
+                .providerCategoryDto(ProviderCategoryDto.builder()
+                        .id(this.providerCategory.getId())
+                        .name(this.providerCategory.getName())
+                        .build())
                 .build();
     }
 }

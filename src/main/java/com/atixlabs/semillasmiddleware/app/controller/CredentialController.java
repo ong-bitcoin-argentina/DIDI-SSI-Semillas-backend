@@ -133,7 +133,7 @@ public class CredentialController {
         try {
             credentialService.generateCreditAndBenefitsCredentialsByLoans();
         }
-        catch (InvalidProcessException | PersonDoesNotExistsException ex){
+        catch (InvalidProcessException ex){
             log.error("Could not get the process ! "+ ex.getMessage());
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }

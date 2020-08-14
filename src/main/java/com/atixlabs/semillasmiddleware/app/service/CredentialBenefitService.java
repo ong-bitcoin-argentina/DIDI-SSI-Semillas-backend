@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
@@ -261,7 +262,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
     }
 
     public CredentialBenefits buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException{
-        return this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.HOLDER);
+        return this.buildNewBenefitsCredential(holder, beneficiary, PersonTypesCodes.FAMILY);
     }
 
     /**
@@ -326,6 +327,22 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
     public CredentialBenefits save(CredentialBenefits credentialBenefits){
         return credentialBenefitsRepository.save(credentialBenefits);
     }
+
+    public List<CredentialBenefits> getCredentialBenefitsActiveForDni(Long dni) throws CredentialException {
+        Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
+
+        return credentialBenefitsRepository.findByBeneficiaryDniAndCredentialState(dni, activeDidiState.get());
+    }
+
+    public CredentialBenefits buildNewOnPendidgDidi(CredentialBenefits credentialBenefits, DidiAppUser newDidiAppUser) throws CredentialException {
+        CredentialBenefits newCredentialBenefits =  new CredentialBenefits(credentialBenefits);
+        newCredentialBenefits.setIdDidiReceptor(newDidiAppUser.getDid());
+
+        this.resetStateOnPendingDidi(newCredentialBenefits);
+
+        return newCredentialBenefits;
+    }
+
 
     @Override
     protected Logger getLog() {

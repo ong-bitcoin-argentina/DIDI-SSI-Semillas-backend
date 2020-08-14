@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
@@ -172,6 +173,21 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
     public CredentialBenefitSancor save(CredentialBenefitSancor credentialBenefitSancor){
         return credentialBenefitSancorRepository.save(credentialBenefitSancor);
+    }
+
+    public List<CredentialBenefitSancor> getCredentialBenefitSancorActiveForDni(Long dni) throws CredentialException {
+        Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
+
+        return credentialBenefitSancorRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());
+    }
+
+    public CredentialBenefitSancor buildNewOnPendidgDidi(CredentialBenefitSancor credentialBenefitSancor, DidiAppUser newDidiAppUser) throws CredentialException {
+        CredentialBenefitSancor newCredentialBenefitSancor =  new CredentialBenefitSancor(credentialBenefitSancor);
+        newCredentialBenefitSancor.setIdDidiReceptor(newDidiAppUser.getDid());
+
+        this.resetStateOnPendingDidi(newCredentialBenefitSancor);
+
+        return newCredentialBenefitSancor;
     }
 
     @Override

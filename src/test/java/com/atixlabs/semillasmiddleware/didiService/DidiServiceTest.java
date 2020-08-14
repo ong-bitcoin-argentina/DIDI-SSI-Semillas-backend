@@ -120,32 +120,6 @@ public class DidiServiceTest {
         return didiCreateCredentialResponse;
     }
 
-    @Test
-    @Ignore
-    public void didiCredentialSyncEmpty() {
-        ArrayList<DidiAppUser> didiAppUsers = new ArrayList<>();
-        when(didiAppUserRepository.findBySyncStatusIn(any(ArrayList.class))).thenReturn(didiAppUsers);
-        String response = didiService.didiCredentialSync();
-        Assertions.assertEquals(response, "No existen credenciales pendientes para enviar hacia didi");
-    }
 
-    @Test
-    @Ignore
-    public void didiCredentialSyncAllOk() {
-        when(didiAppUserRepository.findBySyncStatusIn(any(ArrayList.class))).thenReturn(getAppUserMockOneMissing());
-
-        //ArrayList<Credential> creditHolders = credentialRepository.findByCreditHolderDniIn(dniList);
-        when(credentialRepository.findByCreditHolderDniIn(any(ArrayList.class))).thenReturn(getCredentialsCreditHolder());
-
-        ArrayList<Credential> beneficiaries = new ArrayList<>();
-        when(credentialRepository.findByBeneficiaryDniIn(any(ArrayList.class))).thenReturn(beneficiaries);
-
-        //tuve que hacer createCertificatyDidi public para poder mockear. (luego usaré spy)
-        when(didiService.createCertificateDidiCall(anyString(), any(DidiCredentialData.class), anyBoolean())).thenReturn(createDidiCredentialResponseOkMock());
-
-        String response = didiService.didiCredentialSync();
-
-        Assertions.assertEquals(response, "La credencial fue actualizada con exito, se obtuvo el id de didi: ID-VALIDO-DIDI");
-    }
 
 }

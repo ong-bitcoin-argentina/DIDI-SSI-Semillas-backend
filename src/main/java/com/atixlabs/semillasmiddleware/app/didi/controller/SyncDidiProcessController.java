@@ -77,7 +77,7 @@ public class SyncDidiProcessController {
             jsonMessage.put("message", "ERROR "+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Identity Emmited OK");
+        jsonMessage.put("message", "Credentials Emmited OK");
         return jsonMessage;
     }
 
@@ -93,7 +93,7 @@ public class SyncDidiProcessController {
             jsonMessage.put("message", "ERROR "+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Identity Dwelling OK");
+        jsonMessage.put("message", "Credentials Dwelling OK");
         return jsonMessage;
     }
 
@@ -109,7 +109,25 @@ public class SyncDidiProcessController {
             jsonMessage.put("message", "ERROR "+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Identity Entrepreneurship OK");
+        jsonMessage.put("message", "Credentials Entrepreneurship OK");
+        return jsonMessage;
+    }
+
+
+
+    @GetMapping("/process/new/appdidiusers")
+    @ResponseStatus(HttpStatus.OK)
+    public Map<String, String> processNewsAppDidiUsers(){
+        Map<String, String> jsonMessage = new HashMap<>();
+
+        try {
+            this.syncDidiProcessService.processNewsAppDidiUsers();
+        } catch (Exception e) {
+            log.error("ERROR process appdidiusers",e);
+            jsonMessage.put("message", "ERROR "+e.getMessage());
+        }
+
+        jsonMessage.put("message", "update didi user processs ok OK");
         return jsonMessage;
     }
 }

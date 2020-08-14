@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
+import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -33,6 +34,11 @@ public abstract class  CredentialCommonService {
     }
 
     protected abstract Logger getLog();
+
+
+    public boolean revokeComplete(Credential credentialToRevok, RevocationReasonsCodes revocationReasonsCodes) throws CredentialException {
+        return this.revokeComplete(credentialToRevok, revocationReasonsCodes.getCode());
+    }
 
     /**
      * If exists and is emitted, revoke complete
@@ -142,5 +148,15 @@ public abstract class  CredentialCommonService {
         states.add(pendingDidieState);
 
         return  states;
+    }
+
+  public Credential resetStateOnPendingDidi(Credential credential) throws CredentialException {
+        credential.setDateOfRevocation(null);
+        credential.setRevocationReason(null);
+        credential.setCredentialState(this.credentialStateService.getCredentialPendingDidiState());
+        credential.setDateOfIssue(DateUtil.getLocalDateTimeNow());
+
+        return credential;
+
     }
 }

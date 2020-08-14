@@ -1,8 +1,6 @@
 package com.atixlabs.semillasmiddleware.security.configuration;
 
 import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
-import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
-import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderCategoryRepository;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
@@ -30,7 +28,7 @@ import com.atixlabs.semillasmiddleware.security.service.UserService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.common.collect.Sets;
 
-import java.util.*;
+import java.util.Optional;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,11 +56,13 @@ public class DBInitializer implements CommandLineRunner {
 
     private ProcessControlRepository processControlRepository;
 
+<<<<<<< HEAD
     private String enviroment;
 
-    private ProviderCategoryRepository providerCategoryRepository;
-
-private CertTemplateRepository certTemplateRepository;
+    @Autowired
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment) {
+=======
+    private CertTemplateRepository certTemplateRepository;
 
     @Value("${didi.semillas.template_code_identity}")
     private String didiTemplateCodeIdentity;
@@ -79,11 +79,9 @@ private CertTemplateRepository certTemplateRepository;
     @Value("${didi.semillas.template_code_credit}")
     private String didiTemplateCodeCredit;
 
-    @Value("${didi.semillas.template_code_sancor_salud}")
-    private String didiTemplateCodeSancorSalud;
-
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment, CertTemplateRepository certTemplateRepository, ProviderCategoryRepository providerCategoryRepository) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, CertTemplateRepository certTemplateRepository) {
+>>>>>>> develop
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
@@ -92,12 +90,14 @@ private CertTemplateRepository certTemplateRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.revocationReasonRepository = revocationReasonRepository;
         this.processControlRepository = processControlRepository;
+<<<<<<< HEAD
         this.enviroment = enviroment;
+=======
         this.certTemplateRepository = certTemplateRepository;
-        this.providerCategoryRepository = providerCategoryRepository;
+>>>>>>> develop
     }
 
-   @Override
+    @Override
     public void run(String... args) throws Exception {
         if (roleService.findByCode(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role()) == null) {
             menuRepository.deleteAll();
@@ -224,7 +224,7 @@ private CertTemplateRepository certTemplateRepository;
 
         if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
-            configuration.setValue("500");
+            configuration.setValue("10250");
             configuration.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
             parameterConfigurationRepository.save(configuration);
         }
@@ -278,19 +278,6 @@ private CertTemplateRepository certTemplateRepository;
             process.setStartTime(DateUtil.getLocalDateTimeNowWithFormat("yyyy-MM-dd HH:mm:ss"));
             processControlRepository.save(process);
         }
-	
-	    this.loadCertTemplatesValues();
-        this.saveCategories();
-    }
-
-    private void saveCategories(){
-        String[] categories = new String[]{"Salud", "Oportunidad", "Saber", "Sueño", "Finanza"};
-        for (String category : categories) {
-            if(!providerCategoryRepository.findByName(category).isPresent()) {
-                providerCategoryRepository.save(new ProviderCategory(category));
-            }
-        }
-
 
     }
 
@@ -466,9 +453,13 @@ private CertTemplateRepository certTemplateRepository;
             userResponse.setLastName("Viewer");
             userService.createOrEdit(userResponse);
         }
+<<<<<<< HEAD
+=======
+
+        this.loadCertTemplatesValues();
     }
 
-/**
+    /**
      *    IDENTITY("Identidad"),
      *     DWELLING("Vivienda"),
      *     ENTREPRENEURSHIP("Emprendimiento"),
@@ -496,15 +487,11 @@ private CertTemplateRepository certTemplateRepository;
             CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT,didiTemplateCodeBenefit,"Semillas Beneficio" );
             certTemplateRepository.save(certTemplate);
         }
-
-        if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT_SANCOR)){
-            CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT_SANCOR,didiTemplateCodeSancorSalud,"Sancor Salud" );
-            certTemplateRepository.save(certTemplate);
-        }
     }
     private boolean isCertTemplateValueExists(CredentialCategoriesCodes credentialCategoriesCodes){
 
         Optional<CertTemplate> certTemplate =  certTemplateRepository.findByCredentialCategoriesCodes(credentialCategoriesCodes);
         return certTemplate.isPresent();
+>>>>>>> develop
     }
 }

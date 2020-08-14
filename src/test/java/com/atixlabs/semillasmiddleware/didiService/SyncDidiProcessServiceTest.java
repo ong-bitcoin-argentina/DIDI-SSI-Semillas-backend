@@ -394,7 +394,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(credentialIdentityService.getAllCredentialIdentityActivesForDni(didiAppUser.getDni())).thenReturn(new ArrayList<>());
+        when(credentialIdentityService.getCredentialIdentityActiveForDni(didiAppUser.getDni())).thenReturn(Optional.empty());
 
         syncDidiProcessService.verifyCredentialIdentityForDidiAppUser(didiAppUser);
 
@@ -414,11 +414,8 @@ public class SyncDidiProcessServiceTest {
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
         credentialIdentityNew.setIdDidiReceptor(didiAppUser.getDid());
 
-        ArrayList<CredentialIdentity> list = new ArrayList<CredentialIdentity>();
-        list.add(credentialIdentity);
-
         //when(creden)
-        when(credentialIdentityService.getAllCredentialIdentityActivesForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialIdentityService.getCredentialIdentityActiveForDni(didiAppUser.getDni())).thenReturn(Optional.of(credentialIdentity));
         when(credentialIdentityService.buildNewOnPendidgDidi(credentialIdentity, didiAppUser)).thenReturn(credentialIdentityNew);
         when(credentialIdentityService.save(any(CredentialIdentity.class))).thenAnswer(new Answer<CredentialIdentity>() {
             @Override
@@ -453,11 +450,8 @@ public class SyncDidiProcessServiceTest {
 
         credentialIdentityNew.setIdDidiReceptor(didiAppUser.getDid());
 
-        ArrayList<CredentialIdentity> list = new ArrayList<CredentialIdentity>();
-        list.add(credentialIdentity);
-
         //when(creden)
-        when(credentialIdentityService.getAllCredentialIdentityActivesForDni(didiAppUser.getDni())).thenReturn(list);
+        when(credentialIdentityService.getCredentialIdentityActiveForDni(didiAppUser.getDni())).thenReturn(Optional.of(credentialIdentity));
 
         syncDidiProcessService.verifyCredentialIdentityForDidiAppUser(didiAppUser);
 

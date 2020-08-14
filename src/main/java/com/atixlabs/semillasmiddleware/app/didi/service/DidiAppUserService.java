@@ -106,7 +106,6 @@ public class DidiAppUserService {
     ArrayList<String> didiSyncStatus = new ArrayList<>();
         didiSyncStatus.add(DidiSyncStatus.SYNC_MISSING.getCode());
         didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
-        didiSyncStatus.add(DidiSyncStatus.SYNC_NEW.getCode());
 
         return didiSyncStatus;
     }

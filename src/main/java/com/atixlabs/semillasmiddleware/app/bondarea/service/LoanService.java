@@ -13,7 +13,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -76,10 +75,6 @@ public class LoanService {
         //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
         List<Loan> finalizedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatusAndState(credentialProcessLastTime, LoanStatusCodes.CANCELLED.getCode(), LoanStateCodes.OK.getCode());
         return finalizedCredits;
-    }
-
-    public List<Loan>  saveAll(List<Loan> loans){
-        return this.loanRepository.saveAll(loans);
     }
 
 }

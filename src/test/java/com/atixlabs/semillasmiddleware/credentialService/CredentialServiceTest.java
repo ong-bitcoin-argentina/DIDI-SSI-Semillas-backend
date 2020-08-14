@@ -4,7 +4,6 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
@@ -22,7 +21,6 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonType
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
-import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
@@ -35,7 +33,6 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
-import io.jsonwebtoken.lang.Assert;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
@@ -52,7 +49,6 @@ import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.security.access.method.P;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -117,9 +113,6 @@ public class CredentialServiceTest {
     private PersonService personService;
 
     @Mock
-    private LoanService loanService;
-
-    @Mock
     private CredentialStateService credentialStateService;
 
     @Captor
@@ -133,9 +126,6 @@ public class CredentialServiceTest {
 
     @Captor
     private ArgumentCaptor<Loan> loanCaptor;
-
-    @Captor
-    private ArgumentCaptor<List<Loan>> loansCaptor;
 
     @Captor
     private ArgumentCaptor<CredentialStateRepository> credentialStateRepositoryCaptor;
@@ -782,26 +772,6 @@ public class CredentialServiceTest {
         Assertions.assertEquals(true, savedLoan.getHasCredential());
     }
 
-
-    @Test
-    public void whenHasOneLoanToReview_thenUpdateUpdatedTime(){
-
-        Loan loan = this.getMockLoan();
-        loan.setUpdateTime(LocalDateTime.of(2020,1,1,1,0,0,0));
-
-        ArrayList<Loan> loansToReview = new ArrayList<Loan>();
-        loansToReview.add(loan);
-
-        ProcessControl processCrendentialControl = new ProcessControl();
-        processCrendentialControl.setStartTime(LocalDateTime.of(2020,1,1,0,0,0,0));
-
-        credentialService.handleLoansNeedReview(loansToReview,null,null,null,null,processCrendentialControl);
-
-        verify(loanService, times(1)).saveAll(loansCaptor.capture());
-        List<Loan> loansModified = loansCaptor.getValue();
-        Assertions.assertEquals(1,loansModified.size());
-        Assertions.assertEquals(LocalDateTime.of(2020,1,1,0,5,0,0), loansModified.get(0).getUpdateTime());
-    }
 
 
 

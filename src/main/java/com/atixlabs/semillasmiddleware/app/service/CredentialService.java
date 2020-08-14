@@ -5,18 +5,19 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCod
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
-import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
@@ -29,18 +30,22 @@ import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
@@ -52,22 +57,24 @@ public class CredentialService {
 
     private CredentialRepository credentialRepository;
     private CredentialCreditRepository credentialCreditRepository;
-    private CredentialIdentityService credentialIdentityService;
+    private CredentialIdentityRepository credentialIdentityRepository;
     private CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository;
     private CredentialDwellingRepository credentialDwellingRepository;
     private PersonRepository personRepository;
     private LoanRepository loanRepository;
     private CredentialBenefitsRepository credentialBenefitsRepository;
+    private DIDHistoricRepository didHistoricRepository;
     private CredentialStateRepository credentialStateRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
+    private AnswerCategoryFactory answerCategoryFactory;
     private DidiService didiService;
     private RevocationReasonRepository revocationReasonRepository;
     private LoanService loanService;
     private ProcessControlService processControlService;
+    private PersonService personService;
     private CredentialBenefitService credentialBenefitService;
     private CredentialStateService credentialStateService;
     private CredentialBenefitSancorService credentialBenefitSancorService;
-    private DidiAppUserService didiAppUserService;
 
     @Value("${credentials.pageSize}")
     private String size;
@@ -80,32 +87,35 @@ public class CredentialService {
             PersonRepository personRepository,
             LoanRepository loanRepository,
             CredentialBenefitsRepository credentialBenefitsRepository,
+            DIDHistoricRepository didHistoricRepository,
             CredentialStateRepository credentialStateRepository,
-            CredentialIdentityService credentialIdentityService,
+            AnswerCategoryFactory answerCategoryFactory,
+            CredentialIdentityRepository credentialIdentityRepository,
             CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
             CredentialDwellingRepository credentialDwellingRepository,
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
-            DidiAppUserService didiAppUserService,
-            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
+            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService,PersonService personService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
         this.loanRepository = loanRepository;
         this.credentialBenefitsRepository = credentialBenefitsRepository;
+        this.didHistoricRepository = didHistoricRepository;
         this.credentialStateRepository = credentialStateRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
-        this.credentialIdentityService = credentialIdentityService;
+        this.answerCategoryFactory = answerCategoryFactory;
+        this.credentialIdentityRepository = credentialIdentityRepository;
         this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
         this.credentialDwellingRepository = credentialDwellingRepository;
         this.didiService = didiService;
         this.revocationReasonRepository = revocationReasonRepository;
         this.loanService = loanService;
         this.processControlService = processControlService;
+        this.personService = personService;
         this.credentialBenefitService = credentialBenefitService;
         this.credentialStateService = credentialStateService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
-        this.didiAppUserService = didiAppUserService;
     }
 
     /**
@@ -652,8 +662,14 @@ public class CredentialService {
     }
 
 
+/*
+    private void createCredentialCredit(Loan loan) throws PersonDoesNotExistsException {
+        this.createNewCreditCredentials(loan);//TODO <-refactor this, one type of credential for method, and create de familiy benefits
+        //TODO EMMIT DIDI
+    }*/
 
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
+
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
             saveAllCredentialsFromForm(surveyForm);
@@ -727,7 +743,7 @@ public class CredentialService {
         return true;
     }
 
-    private void saveAllCredentialsFromForm(SurveyForm surveyForm) throws CredentialException {
+    private void saveAllCredentialsFromForm(SurveyForm surveyForm) {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
@@ -737,23 +753,19 @@ public class CredentialService {
 
         //4-Now working with each beneficiary
         for (Category category : categoryArrayList) {
-           // log.info("CATEGORY {}, UNIQUE {}",category.getCategoryName(), category.getCategoryUniqueName());
             saveCredential(category, creditHolder);
         }
     }
 
 
-    private void saveCredential(Category category, Person creditHolder) throws CredentialException {
+    private void saveCredential(Category category, Person creditHolder) {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:
-                credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
-                break;
             case CHILD_CATEGORY_NAME:
             case SPOUSE_CATEGORY_NAME:
             case KINSMAN_CATEGORY_NAME:
-                CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
-                this.createCredentialIdentityKinsman(credentialIdentity);
+                credentialIdentityRepository.save(buildIdentityCredential(category, creditHolder));
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
                 credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
@@ -798,10 +810,8 @@ public class CredentialService {
         credentialStateOptional.ifPresent(credential::setCredentialState);
     }
 
-    //todo move into credentia{}
-    //
-    // l type class
-    private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder)  {
+    //todo move into credential type class
+    private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder) {
         PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
         Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
         beneficiary = savePersonIfNew(beneficiary);
@@ -823,32 +833,17 @@ public class CredentialService {
         switch (beneficiaryPersonCategory.getPersonType()) {
             case BENEFICIARY:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-                credentialIdentity.setRelationWithCreditHolder(CredentialRelationHolderType.HOLDER.getCode());
+                credentialIdentity.setRelationWithCreditHolder("titular");//todo parar a enum
                 break;
             case SPOUSE:
             case CHILD:
             case OTHER_KINSMAN:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILY.getCode());
-                credentialIdentity.setRelationWithCreditHolder(CredentialRelationHolderType.HOLDER.getCode());
-
+                credentialIdentity.setRelationWithCreditHolder("familiar");//todo pasar a enum
                 break;
         }
 
         return credentialIdentity;
-    }
-
-    private void createCredentialIdentityKinsman(CredentialIdentity credentialIdentity) throws CredentialException {
-
-        log.info("verify credential kinsman type for beneficiary {}  and holder {}", credentialIdentity.getBeneficiaryDni(), credentialIdentity.getCreditHolderDni());
-
-        Optional<DidiAppUser> didiAppUser = didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
-
-        if(didiAppUser.isPresent()){
-            if(!this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(credentialIdentity.getCreditHolderDni(), credentialIdentity.getBeneficiaryDni())) {
-                CredentialIdentity newCredentialidentityAsKinsmanType = this.credentialIdentityService.buildNewOnPendidgDidiAsKinsmanType(credentialIdentity, didiAppUser.get());
-                this.credentialIdentityService.save(newCredentialidentityAsKinsmanType);
-            }
-        }
     }
 
     //todo move into credential type class
@@ -967,6 +962,53 @@ public class CredentialService {
 
     }
 
+    /**
+     * This will try to create a new benefit credential for the beneficiary.
+     * The benefits familiar depends on if he has his OWN credential credit (so he download the app)
+     */
+   /* public void createNewBenefitsCredential(CredentialIdentity identity) {
+        //check if person is valid to create a benefit of the type required.
+        if (this.isValidPersonForNewBenefits(identity.getCreditHolder(), identity.getBeneficiary())) {
+
+            log.info("Creating Credential Benefits");
+            CredentialBenefits benefits = null;
+            if (identity.getCreditHolderDni().equals(identity.getBeneficiaryDni()))
+                benefits = this.buildBenefitsCredential(identity.getBeneficiary(), PersonTypesCodes.HOLDER);
+            else
+                benefits = this.buildBenefitsCredential(identity.getBeneficiary(), PersonTypesCodes.FAMILY);
+
+            if (benefits != null) {
+                credentialBenefitsRepository.save(benefits);
+                log.info("Credential benefits created for dni: " + identity.getBeneficiary().getDocumentNumber());
+            }
+        }
+    }*/
+    private boolean isValidPersonForNewBenefits(Person holder, Person beneficiary) {
+        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+
+        Long holderDni = holder.getDocumentNumber();
+        Long beneficiaryDni = beneficiary.getDocumentNumber();
+        //is holder
+        if (holderDni.equals(beneficiaryDni)) {
+            //get actual benefits of the holder
+            Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(beneficiaryDni, pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
+
+            //if he doesnt have a credential benefits, is valid to create
+            if (opBenefits.isEmpty())
+                return true;
+        } else {
+            //is familiar
+            List<CredentialIdentity> identitiesFamiliar = credentialIdentityRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
+            //this mean, the beneficiary familiar, have his own identity because he download the app, and the identity familiar created by the survey.
+            if (identitiesFamiliar.size() == 2) {
+                //validate if he doesnt have a benefit with this holder dni
+                Optional<CredentialBenefits> opCredentialBenefit = credentialBenefitsRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
+                return opCredentialBenefit.isEmpty();
+            }
+        }
+        return false;
+    }
+
 
     /**
      * Set holder in default and
@@ -1074,7 +1116,7 @@ public class CredentialService {
                 case CREDENTIAL_IDENTITY:
                     //find all the identities that the dni of the holder is into. (with state active or pending)
                     List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialIdentity> holderIdentities = credentialIdentityService.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
+                    List<CredentialIdentity> holderIdentities = credentialIdentityRepository.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
 
                     if (holderIdentities.size() == 0) {
                         log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
@@ -1089,7 +1131,7 @@ public class CredentialService {
                 case CREDENTIAL_IDENTITY_FAMILY:
                     //revoke the identities of the familiar: the one created by the survey and if it exists, the one created because the person download the app. (with state active or pending)
                     activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialIdentity> familiarIdentities = credentialIdentityService.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(),
+                    List<CredentialIdentity> familiarIdentities = credentialIdentityRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(),
                             credentialToRevoke.getBeneficiaryDni(), activePendingStates);
 
                     if (familiarIdentities.size() == 0) {

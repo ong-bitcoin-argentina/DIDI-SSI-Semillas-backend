@@ -48,8 +48,10 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.stereotype.Service;
 
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -139,6 +141,8 @@ public class CredentialService {
                 List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);//TODO add sancor
                 List<Loan> loansNewToReview = this.handleNewCredits();
 
+                this.handleLoansNeedReview(loansDefaultToReview,loansActiveToReview,loansFinalizedToReview, loansCancelledToReview, loansNewToReview,processCrendentialControl );
+
             } catch (PersonDoesNotExistsException ex) {
                 log.error(ex.getMessage());
             } catch (Exception ex) {
@@ -150,9 +154,30 @@ public class CredentialService {
             //finish process
             processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.OK.getCode());
 
+
+
         } else {
             log.info("Generate credentials can't run ! Process " + ProcessNamesCodes.BONDAREA.getCode() + " or " + ProcessNamesCodes.CHECK_DEFAULTERS.getCode() + " is still running");
         }
+
+    }
+
+    public void handleLoansNeedReview(List<Loan> loansDefaultToReview, List<Loan> loansActiveToReview, List<Loan> loansFinalizedToReview, List<Loan> loansCancelledToReview, List<Loan> loansNewToReview, ProcessControl processCrendentialControl ){
+
+        HashSet<Loan> loansToReview = new HashSet<Loan>();
+
+        if(loansDefaultToReview!=null)  loansToReview.addAll(loansDefaultToReview);
+        if(loansActiveToReview!=null)  loansToReview.addAll(loansActiveToReview);
+        if(loansFinalizedToReview!=null)  loansToReview.addAll(loansFinalizedToReview);
+        if(loansCancelledToReview!=null) loansToReview.addAll(loansCancelledToReview);
+        if(loansNewToReview!=null) loansToReview.addAll(loansNewToReview);
+        LocalDateTime timeForUpdated = processCrendentialControl.getStartTime().plusMinutes(5);
+        loansToReview.stream().forEach(loan -> loan.setUpdateTime(timeForUpdated));
+
+        this.loanService.saveAll(new ArrayList<Loan>(loansToReview));
+
+        log.info("Set {} loans for review", loansToReview.size());
+
 
     }
 

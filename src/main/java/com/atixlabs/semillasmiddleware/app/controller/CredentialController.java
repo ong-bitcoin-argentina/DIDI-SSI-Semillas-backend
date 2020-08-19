@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.ShareCredentialRequest;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -25,6 +26,7 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.io.IOException;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -153,7 +155,14 @@ public class CredentialController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/share")
     public ResponseEntity<?> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
-        shareCredentialService.shareCredential(shareCredentialRequest);
+        try{
+            shareCredentialService.shareCredential(shareCredentialRequest);
+        }catch (PersonDoesNotExistsException pdnee){
+            return ResponseEntity.badRequest().body(String.format("person with dni %s not found", shareCredentialRequest.getDni()));
+        }catch (InexistentProviderException ipe){
+            return ResponseEntity.badRequest().body(String.format("provider with id %s not found", shareCredentialRequest.getProviderId()));
+        }
+
         return ResponseEntity.ok().body("shared.");
     }
 

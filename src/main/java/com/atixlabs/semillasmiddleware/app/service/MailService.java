@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.EmailNotSentException;
 import com.atixlabs.semillasmiddleware.app.model.Email;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.*;
@@ -47,6 +48,7 @@ public class MailService {
             log.info("Succesfully sent email response status["+response.code()+"] msg["+response.message()+"]");
         }catch (IOException ioe){
             log.error(ioe.getMessage());
+            throw new EmailNotSentException(ioe.getMessage());
         }
 
     }

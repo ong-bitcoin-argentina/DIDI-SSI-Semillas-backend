@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.EmailNotSentException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
@@ -72,24 +73,14 @@ public class ShareCredentialService {
     private PersonService personService;
     private CredentialService credentialService;
 
-    public boolean shareCredential(ShareCredentialRequest credentialRequest){
-        try{
-            Email email = Email.builder()
-                    .subject(EMAIL_SUBJECT)
-                    .to(getTo(credentialRequest))
-                    .template(getTemplate(credentialRequest))
-                    .build();
+    public void shareCredential(ShareCredentialRequest credentialRequest) throws IOException{
+        Email email = Email.builder()
+            .subject(EMAIL_SUBJECT)
+            .to(getTo(credentialRequest))
+            .template(getTemplate(credentialRequest))
+            .build();
 
-            mailService.send(email);
-            return true;
-        }catch (PersonDoesNotExistsException pdnee){
-            log.error("Person with dni %s does not exist", credentialRequest.getDni());
-        }catch (InexistentProviderException ipe){
-            log.error("Provider with id %s does not exist", credentialRequest.getProviderId());
-        }catch (IOException ioe){
-            log.error("Could not get template, ex: %s", ioe.getMessage());
-        }
-        return false;
+         mailService.send(email);
     }
 
     private String getTo(ShareCredentialRequest credentialRequest){
@@ -101,13 +92,17 @@ public class ShareCredentialService {
         return replaceParams(getHtml(), getTemplateParameters(credentialRequest));
     }
 
-    private String getHtml() throws IOException {
+    private String getHtml(){
         Resource resource = new DefaultResourceLoader().getResource("classpath:templates/"+TEMPLATE_NAME);
-        InputStream inputStream = resource.getInputStream();
-        byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
-        String data = new String(bdata, StandardCharsets.UTF_8);
-        log.info("Template read correctly");
-        return data;
+        try {
+            InputStream inputStream = resource.getInputStream();
+            byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
+            String data = new String(bdata, StandardCharsets.UTF_8);
+            log.info("Template read correctly");
+            return data;
+        }catch (IOException ioe){
+            throw new EmailNotSentException(ioe.getMessage());
+        }
     }
 
     private String replaceParams(String html, Map<String, String> parameters ){

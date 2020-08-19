@@ -158,9 +158,14 @@ public class CredentialController {
         try{
             shareCredentialService.shareCredential(shareCredentialRequest);
         }catch (PersonDoesNotExistsException pdnee){
+            log.error("Person with dni %s does not exist", shareCredentialRequest.getDni());
             return ResponseEntity.badRequest().body(String.format("person with dni %s not found", shareCredentialRequest.getDni()));
         }catch (InexistentProviderException ipe){
+            log.error("Provider with id %s does not exist", shareCredentialRequest.getProviderId());
             return ResponseEntity.badRequest().body(String.format("provider with id %s not found", shareCredentialRequest.getProviderId()));
+        } catch (Exception ex){
+            log.error("Could not send email message: %s", ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
         }
 
         return ResponseEntity.ok().body("shared.");

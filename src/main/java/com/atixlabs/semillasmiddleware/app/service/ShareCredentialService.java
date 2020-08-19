@@ -55,6 +55,7 @@ public class ShareCredentialService {
     private static final String FAMILY_BENEFIT_TEXT = "Integrante del grupo familiar";
     private static final String OWN_BENEFIT_TEXT = "Beneficio propio";
 
+    private static final String EMAIL_SUBJECT = "Solicitud de turno - Beneficio Semillas";
 
     private ProviderService providerService;
     private MailService mailService;
@@ -64,7 +65,7 @@ public class ShareCredentialService {
     public boolean shareCredential(ShareCredentialRequest credentialRequest){
         try{
             Email email = Email.builder()
-                    .subject(getSubject())
+                    .subject(EMAIL_SUBJECT)
                     .to(getTo(credentialRequest))
                     .template(getTemplate(credentialRequest))
                     .build();
@@ -79,10 +80,6 @@ public class ShareCredentialService {
             log.error("Could not get template, ex: %s", ioe.getMessage());
         }
         return false;
-    }
-
-    private String getSubject(){
-        return "";
     }
 
     private String getTo(ShareCredentialRequest credentialRequest){

@@ -12,6 +12,7 @@ import com.atixlabs.semillasmiddleware.app.model.provider.service.ProviderServic
 import com.atixlabs.semillasmiddleware.app.model.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.DefaultResourceLoader;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
@@ -40,6 +41,9 @@ public class ShareCredentialService {
         this.credentialService = credentialService;
     }
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     private static final String TEMPLATE_NAME = "share_credentials_template.html";
     private static final String PROVIDER_NAME_PARAM ="{providerName}";
     private static final String BENEFICIARY_NAME_PARAM ="{name}";
@@ -55,6 +59,7 @@ public class ShareCredentialService {
     // private static final String EXPIRE_DATE_PARAM ="{expireDate}";
     private static final String BENEFICIARY_CREDENTIAL_ID_PARAM ="{credentialId}";
     private static final String HIMSELF_OR_FAMILIAR_PARAM ="{himselfOrFamiliar}";
+    private static final String FRONTEND_URL_PARAM ="{frontendUrl}";
 
 
     private static final String FAMILY_BENEFIT_TEXT = "Integrante del grupo familiar";
@@ -144,7 +149,8 @@ public class ShareCredentialService {
                 .replace(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().get().getCreditHolderLastName())
                 .replace( BENEFICIARY_CHARACTER_PARAM, character)
                 .replace(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar)
-                .replace(BENEFICIARY_CREDENTIAL_ID_PARAM, cred.getIdDidiCredential());
+                .replace(BENEFICIARY_CREDENTIAL_ID_PARAM, cred.getIdDidiCredential())
+                .replace(FRONTEND_URL_PARAM, frontendUrl);
 
 
     }

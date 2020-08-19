@@ -114,6 +114,7 @@ public class ShareCredentialService {
         return html;
     }
 
+    //TODO: change parameter replacement for a more light weight solution
     private Map<String, String> getTemplateParameters(ShareCredentialRequest credentialRequest ){
         Map<String, String> parameters = new HashMap<>();
 

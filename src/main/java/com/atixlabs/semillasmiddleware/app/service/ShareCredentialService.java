@@ -21,9 +21,7 @@ import org.springframework.util.FileCopyUtils;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 
 
 @Service
@@ -100,9 +98,7 @@ public class ShareCredentialService {
 
 
     private String getTemplate(ShareCredentialRequest credentialRequest) throws IOException{
-
-        String html = getHtml();
-        return replaceParams(html, credentialRequest);
+        return replaceParams(getHtml(), getTemplateParameters(credentialRequest));
     }
 
     private String getHtml() throws IOException {
@@ -114,7 +110,18 @@ public class ShareCredentialService {
         return data;
     }
 
-    private String replaceParams(String html, ShareCredentialRequest credentialRequest ){
+    private String replaceParams(String html, Map<String, String> parameters ){
+
+        for (Map.Entry<String, String> entry : parameters.entrySet()) {
+            html = html.replace(entry.getKey(), entry.getValue());
+        }
+
+        return html;
+    }
+
+    private Map<String, String> getTemplateParameters(ShareCredentialRequest credentialRequest ){
+        Map<String, String> parameters = new HashMap<>();
+
         Provider provider = providerService.findById(credentialRequest.getProviderId());
         Person person = personService.findByDocumentNumber(credentialRequest.getDni()).orElseThrow(() -> new PersonDoesNotExistsException(""));
 
@@ -138,22 +145,24 @@ public class ShareCredentialService {
             himselfOrFamiliar = HIMSELF_TEXT;
         }
 
-        return html.replace(PROVIDER_NAME_PARAM, provider.getName())
-                .replace(BENEFICIARY_NAME_PARAM, person.getFirstName())
-                .replace(BENEFICIARY_LASTNAME_PARAM, person.getLastName() )
-                .replace(BENEFICIARY_DNI_PARAM ,person.getDocumentNumber().toString())
-                .replace(BENEFICIARY_BIRTHDATE_PARAM, person.getBirthDate().toString())
-                .replace(BENEFICIARY_PHONE_PARAM, credentialRequest.getPhone())
-                .replace(BENEFICIARY_EMAIL_PARAM, credentialRequest.getEmail())
-                .replace(OWNER_NAME_PARAM, credentials.stream().findFirst().get().getCreditHolderFirstName())
-                .replace(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().get().getCreditHolderLastName())
-                .replace( BENEFICIARY_CHARACTER_PARAM, character)
-                .replace(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar)
-                .replace(BENEFICIARY_CREDENTIAL_ID_PARAM, cred.getIdDidiCredential())
-                .replace(FRONTEND_URL_PARAM, frontendUrl);
+        parameters.put(PROVIDER_NAME_PARAM, provider.getName());
+        parameters.put(BENEFICIARY_NAME_PARAM, person.getFirstName());
+        parameters.put(BENEFICIARY_LASTNAME_PARAM, person.getLastName() );
+        parameters.put(BENEFICIARY_DNI_PARAM ,person.getDocumentNumber().toString());
+        parameters.put(BENEFICIARY_BIRTHDATE_PARAM, person.getBirthDate().toString());
+        parameters.put(BENEFICIARY_PHONE_PARAM, credentialRequest.getPhone());
+        parameters.put(BENEFICIARY_EMAIL_PARAM, credentialRequest.getEmail());
+        parameters.put(OWNER_NAME_PARAM, credentials.stream().findFirst().get().getCreditHolderFirstName());
+        parameters.put(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().get().getCreditHolderLastName());
+        parameters.put( BENEFICIARY_CHARACTER_PARAM, character);
+        parameters.put(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar);
+        parameters.put(BENEFICIARY_CREDENTIAL_ID_PARAM, cred.getIdDidiCredential());
+        parameters.put(FRONTEND_URL_PARAM, frontendUrl);
 
-
+        return parameters;
     }
+
+
 
 
 

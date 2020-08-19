@@ -24,7 +24,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Service
-public class ProviderService {
+public class ProviderService{
 
     @Autowired
     public ProviderService(ProviderRepository providerRepository,
@@ -101,4 +101,6 @@ public class ProviderService {
 
         return providerRepository.save(provider);
     }
+
+
 }

@@ -64,7 +64,7 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
     @Ignore
     public void fileUploadOk() throws IOException {
 
-        String filePath = "src/test/resources/files/exampleFile.xls";
+        String filePath = "src/test/templates/files/exampleFile.xls";
 
         //borra carpeta tmp local si ya existe algo pre-cargado
         File uploadFile = new File("/tmp/exampleFile.xls");
@@ -91,7 +91,7 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
     public void fileUploadSurveyOk() throws Exception, InvalidCategoryException {
 
         String fileName = "survey_example.xlsx";
-        String initialFilePath = "src/test/resources/files/"+fileName;
+        String initialFilePath = "src/test/templates/files/"+fileName;
         String tmpFilePath = "/tmp/"+fileName;
 
         //revisa si ya existe de forma local y la borra

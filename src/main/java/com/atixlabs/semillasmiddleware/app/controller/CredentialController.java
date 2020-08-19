@@ -3,21 +3,26 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.credential.ShareCredentialRequest;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
+import com.atixlabs.semillasmiddleware.app.service.MailService;
+import com.atixlabs.semillasmiddleware.app.service.ShareCredentialService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.util.*;
@@ -32,16 +37,19 @@ public class CredentialController {
     public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
     private CredentialService credentialService;
-
     private LoanService loanService;
-
     private ProcessControlService processControlService;
+    private ShareCredentialService shareCredentialService;
 
     @Autowired
-    public CredentialController(CredentialService credentialService, LoanService loanService, ProcessControlService processControlService) {
+    public CredentialController(CredentialService credentialService,
+                                LoanService loanService,
+                                ProcessControlService processControlService,
+                                ShareCredentialService shareCredentialService) {
         this.credentialService = credentialService;
         this.loanService = loanService;
         this.processControlService = processControlService;
+        this.shareCredentialService = shareCredentialService;
     }
 
 
@@ -139,6 +147,14 @@ public class CredentialController {
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
+    @PostMapping("/share")
+    public ResponseEntity<?> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
+        shareCredentialService.shareCredential(shareCredentialRequest);
+        return ResponseEntity.ok().body("shared.");
     }
 
 }

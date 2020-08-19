@@ -51,9 +51,16 @@ public class ShareCredentialService {
     private static final String BENEFICIARY_CHARACTER_PARAM ="{character}";
     private static final String OWNER_NAME_PARAM ="{nameOwner}";
     private static final String OWNER_LASTNAME_PARAM ="{lastnameOwner}";
+    //not yet implemented
+    // private static final String EXPIRE_DATE_PARAM ="{expireDate}";
+    private static final String BENEFICIARY_CREDENTIAL_ID_PARAM ="{credentialId}";
+    private static final String HIMSELF_OR_FAMILIAR_PARAM ="{himselfOrFamiliar}";
+
 
     private static final String FAMILY_BENEFIT_TEXT = "Integrante del grupo familiar";
     private static final String OWN_BENEFIT_TEXT = "Beneficio propio";
+    private static final String HIMSELF_TEXT = "el mismo";
+    private static final String FAMILIAR_TEXT = "un familiar";
 
     private static final String EMAIL_SUBJECT = "Solicitud de turno - Beneficio Semillas";
 
@@ -117,10 +124,13 @@ public class ShareCredentialService {
         Credential cred = credentials.stream().findFirst().orElseThrow(RuntimeException::new);
 
         String character;
+        String himselfOrFamiliar;
         if (!cred.getBeneficiaryDni().equals(cred.getCreditHolderDni())) {
             character = FAMILY_BENEFIT_TEXT;
+            himselfOrFamiliar = FAMILIAR_TEXT;
         }else{
             character = OWN_BENEFIT_TEXT;
+            himselfOrFamiliar = HIMSELF_TEXT;
         }
 
         return html.replace(PROVIDER_NAME_PARAM, provider.getName())
@@ -132,7 +142,9 @@ public class ShareCredentialService {
                 .replace(BENEFICIARY_EMAIL_PARAM, credentialRequest.getEmail())
                 .replace(OWNER_NAME_PARAM, credentials.stream().findFirst().get().getCreditHolderFirstName())
                 .replace(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().get().getCreditHolderLastName())
-                .replace( BENEFICIARY_CHARACTER_PARAM, character);
+                .replace( BENEFICIARY_CHARACTER_PARAM, character)
+                .replace(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar)
+                .replace(BENEFICIARY_CREDENTIAL_ID_PARAM, cred.getIdDidiCredential());
 
 
     }

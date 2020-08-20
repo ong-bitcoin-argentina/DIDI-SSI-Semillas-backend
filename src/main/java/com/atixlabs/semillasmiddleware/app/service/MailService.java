@@ -3,9 +3,9 @@ package com.atixlabs.semillasmiddleware.app.service;
 import com.atixlabs.semillasmiddleware.app.exceptions.EmailNotSentException;
 import com.atixlabs.semillasmiddleware.app.model.Email;
 import lombok.extern.slf4j.Slf4j;
-import okhttp3.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import okhttp3.*;
 
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;

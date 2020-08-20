@@ -7,7 +7,6 @@ import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialPage;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
@@ -46,10 +45,13 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -116,6 +118,22 @@ public class CredentialService {
         this.credentialBenefitService = credentialBenefitService;
         this.credentialStateService = credentialStateService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
+    }
+
+
+    private Specification<Credential> getCredentialSpecification (CredentialFilterDto credentialFilterDto) {
+        return (Specification<Credential>) (root, query, cb) -> {
+            Stream<Predicate> predicates = Stream.of(
+                    credentialFilterDto.getDid().map(value -> cb.equal(root.get("idDidiReceptor"), value)),
+                    credentialFilterDto.getCategory().map(value -> cb.equal(root.get("credentialCategory"), value)),
+                    credentialFilterDto.getBeneficiaryDni().map(value -> cb.equal(root.get("beneficiaryDni"), value))
+            ).flatMap(Optional::stream);
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+    }
+
+    public List<Credential> findAll(CredentialFilterDto credentialFilterDto){
+        return credentialRepository.findAll(getCredentialSpecification(credentialFilterDto));
     }
 
     /**

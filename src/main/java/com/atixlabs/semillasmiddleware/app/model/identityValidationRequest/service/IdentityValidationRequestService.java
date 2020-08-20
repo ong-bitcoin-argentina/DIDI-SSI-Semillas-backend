@@ -17,7 +17,15 @@ public class IdentityValidationRequestService {
     private IdentityValidationRequestRepository identityValidationRequestRepository;
 
     public IdentityValidationRequest save(IdentityValidationRequestDto identityValidationRequestDto){
+        IdentityValidationRequest idr =
+                new IdentityValidationRequest(identityValidationRequestDto.getDni(),
+                        identityValidationRequestDto.getDid(),
+                        identityValidationRequestDto.getEmail(),
+                        identityValidationRequestDto.getPhone(),
+                        identityValidationRequestDto.getName(),
+                        identityValidationRequestDto.getLastName());
 
+        return identityValidationRequestRepository.save(idr);
     }
 
 }

@@ -28,4 +28,20 @@ public class IdentityValidationRequest {
 
     private LocalDate date;
 
+    protected IdentityValidationRequest(){}
+
+    public IdentityValidationRequest(Long dni,
+                                     String did,
+                                     String email,
+                                     String phone,
+                                     String name,
+                                     String lastName){
+        this.dni = dni;
+        this.did = did;
+        this.email = email;
+        this.phone = phone;
+        this.name = name;
+        this.lastName = lastName;
+    }
+
 }

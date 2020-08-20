@@ -37,14 +37,14 @@ import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.*;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -106,6 +106,22 @@ public class CredentialService {
         this.credentialStateService = credentialStateService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
         this.didiAppUserService = didiAppUserService;
+    }
+
+
+    private Specification<Credential> getCredentialSpecification (CredentialFilterDto credentialFilterDto) {
+        return (Specification<Credential>) (root, query, cb) -> {
+            Stream<Predicate> predicates = Stream.of(
+                    credentialFilterDto.getDid().map(value -> cb.equal(root.get("idDidiReceptor"), value)),
+                    credentialFilterDto.getCategory().map(value -> cb.equal(root.get("credentialCategory"), value)),
+                    credentialFilterDto.getBeneficiaryDni().map(value -> cb.equal(root.get("beneficiaryDni"), value))
+            ).flatMap(Optional::stream);
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+    }
+
+    public List<Credential> findAll(CredentialFilterDto credentialFilterDto){
+        return credentialRepository.findAll(getCredentialSpecification(credentialFilterDto));
     }
 
     /**

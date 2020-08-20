@@ -20,7 +20,7 @@ import java.time.LocalDateTime;
 @Entity
 @Inheritance( strategy = InheritanceType.JOINED )
 @ToString
-public abstract class Credential extends AuditableEntity {
+public class Credential extends AuditableEntity {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)

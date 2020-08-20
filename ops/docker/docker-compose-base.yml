@@ -1,7 +1,7 @@
 version: "3"
 services:
   backend:
-    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-4019b2dc
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-f9ac5091
     environment:
       - spring_profiles_active=${ENVIRONMENT}
       - SEMILLAS_DB=${SEMILLAS_DB}
@@ -17,6 +17,8 @@ services:
       - DIDI_URL_PROD=${DIDI_URL_PROD}
       - DIDI_USERNAME_PROD=${DIDI_USERNAME_PROD}
       - DIDI_PASSWORD_PROD=${DIDI_PASSWORD_PROD}
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
 
     depends_on:
       - db

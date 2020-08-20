@@ -101,6 +101,7 @@ public class ProviderController {
         return ResponseEntity.ok().body("ok");
     }
 
+
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PatchMapping("/{id}")
     public ResponseEntity<?> updateProvider(@PathVariable @Min(1) Long id,
@@ -115,4 +116,6 @@ public class ProviderController {
 
         return ResponseEntity.ok().body("updated");
     }
+
+
 }

@@ -23,12 +23,16 @@ public class MailService {
     @Value("${mailgun.issuer}")
     private String ISSUER;
 
+    @Value("${mailgun.cc}")
+    private String CC;
+
     private static final String API_URL = "https://api.mailgun.net/v3/";
     private static final String ENDPOINT = "/messages";
     private static final String FROM_PARAM = "from";
     private static final String TO_PARAM = "to";
     private static final String SUBJECT_PARAM = "subject";
     private static final String TEMPLATE_PARAM = "html";
+    private static final String CC_PARAM = "cc";
 
 
     private final OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
@@ -59,6 +63,7 @@ public class MailService {
                 .add(TO_PARAM, email.getTo())
                 .add(SUBJECT_PARAM,email.getSubject())
                 .add(TEMPLATE_PARAM, email.getTemplate())
+                .add(CC_PARAM, CC)
                 .build();
     }
 

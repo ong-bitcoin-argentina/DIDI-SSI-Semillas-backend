@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @Getter
 public class ShareCredentialRequest {
@@ -12,10 +13,13 @@ public class ShareCredentialRequest {
     private String did;
     @NotNull
     private Long dni;
-    @NotNull
-    private Long providerId;
+    private Optional<Long> providerId = Optional.empty();
     @NotNull
     private String phone;
     @NotNull
     private String email;
+    @NotNull
+    private String viewerJWT;
+
+    private Optional<String> customProviderEmail = Optional.empty();
 }

@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.ShareCredentialRequest;
@@ -155,17 +156,23 @@ public class CredentialController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/share")
     public ResponseEntity<?> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
+        if (!shareCredentialRequest.getCustomProviderEmail().isPresent() && !shareCredentialRequest.getProviderId().isPresent())
+            return ResponseEntity.badRequest().body("You must either specify a provider id or an email");
+
         try{
             shareCredentialService.shareCredential(shareCredentialRequest);
         }catch (PersonDoesNotExistsException pdnee){
-            log.error("Person with dni %s does not exist", shareCredentialRequest.getDni());
-            return ResponseEntity.badRequest().body(String.format("person with dni %s not found", shareCredentialRequest.getDni()));
+            log.error("Person with dni "+shareCredentialRequest.getDni()+" does not exist");
+            return ResponseEntity.badRequest().body("person with dni "+shareCredentialRequest.getDni()+" not found");
         }catch (InexistentProviderException ipe){
             log.error("Provider with id %s does not exist", shareCredentialRequest.getProviderId());
-            return ResponseEntity.badRequest().body(String.format("provider with id %s not found", shareCredentialRequest.getProviderId()));
-        } catch (Exception ex){
-            log.error("Could not send email message: %s", ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getMessage());
+            return ResponseEntity.badRequest().body("provider with id "+shareCredentialRequest.getProviderId()+" not found" );
+        }catch (CredentialNotExistsException credEx){
+            log.warn("There are no Benefit credentials emitted for the specified beneficiary and credit holder");
+            return ResponseEntity.badRequest().body(credEx.getMessage());
+        }catch (Exception ex){
+            log.error("Could not send email message:" + ex.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getStackTrace());
         }
 
         return ResponseEntity.ok().body("shared.");

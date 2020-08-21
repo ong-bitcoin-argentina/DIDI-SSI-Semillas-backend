@@ -143,7 +143,7 @@ public class ShareCredentialService {
             himselfOrFamiliar = HIMSELF_TEXT;
         }
 
-        parameters.put(PROVIDER_NAME_PARAM, name);
+        parameters.put(PROVIDER_NAME_PARAM, " "+name);
         parameters.put(BENEFICIARY_NAME_PARAM, person.getFirstName());
         parameters.put(BENEFICIARY_LASTNAME_PARAM, person.getLastName() );
         parameters.put(BENEFICIARY_DNI_PARAM ,person.getDocumentNumber().toString());

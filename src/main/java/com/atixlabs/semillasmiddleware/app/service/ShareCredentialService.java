@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.EmailNotSentException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
@@ -19,6 +20,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Service;
 import org.springframework.util.FileCopyUtils;
 
+import javax.security.auth.login.CredentialException;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.charset.StandardCharsets;
@@ -40,9 +42,6 @@ public class ShareCredentialService {
         this.credentialService = credentialService;
     }
 
-    @Value("${frontend.url}")
-    private String frontendUrl;
-
     private static final String TEMPLATE_NAME = "share_credentials_template.html";
     private static final String PROVIDER_NAME_PARAM ="{providerName}";
     private static final String BENEFICIARY_NAME_PARAM ="{name}";
@@ -56,9 +55,8 @@ public class ShareCredentialService {
     private static final String OWNER_LASTNAME_PARAM ="{lastnameOwner}";
     //not yet implemented
     // private static final String EXPIRE_DATE_PARAM ="{expireDate}";
-    private static final String BENEFICIARY_CREDENTIAL_ID_PARAM ="{credentialId}";
+    private static final String SHARED_CREDENTIAL_LINK_PARAM ="{sharedLink}";
     private static final String HIMSELF_OR_FAMILIAR_PARAM ="{himselfOrFamiliar}";
-    private static final String FRONTEND_URL_PARAM ="{frontendUrl}";
 
 
     private static final String FAMILY_BENEFIT_TEXT = "Integrante del grupo familiar";
@@ -84,7 +82,8 @@ public class ShareCredentialService {
     }
 
     private String getTo(ShareCredentialRequest credentialRequest){
-        return providerService.findById(credentialRequest.getProviderId()).getEmail();
+        return credentialRequest.getCustomProviderEmail()
+                .orElseGet(() -> providerService.findById(credentialRequest.getProviderId().get()).getEmail());
     }
 
 
@@ -118,7 +117,10 @@ public class ShareCredentialService {
     private Map<String, String> getTemplateParameters(ShareCredentialRequest credentialRequest ){
         Map<String, String> parameters = new HashMap<>();
 
-        Provider provider = providerService.findById(credentialRequest.getProviderId());
+        String name = credentialRequest.getProviderId()
+                .map(provId -> providerService.findById(provId).getName())
+                .orElse("");
+
         Person person = personService.findByDocumentNumber(credentialRequest.getDni()).orElseThrow(() -> new PersonDoesNotExistsException(""));
 
         CredentialFilterDto credentialFilterDto = CredentialFilterDto
@@ -129,7 +131,7 @@ public class ShareCredentialService {
                 .build();
 
         List<Credential> credentials = credentialService.findAll(credentialFilterDto);
-        Credential cred = credentials.stream().findFirst().orElseThrow(RuntimeException::new);
+        Credential cred = credentials.stream().findFirst().orElseThrow(() -> new CredentialNotExistsException("There are no Benefit credentials emitted for the specified beneficiary and credit holder."));
 
         String character;
         String himselfOrFamiliar;
@@ -141,7 +143,7 @@ public class ShareCredentialService {
             himselfOrFamiliar = HIMSELF_TEXT;
         }
 
-        parameters.put(PROVIDER_NAME_PARAM, provider.getName());
+        parameters.put(PROVIDER_NAME_PARAM, name);
         parameters.put(BENEFICIARY_NAME_PARAM, person.getFirstName());
         parameters.put(BENEFICIARY_LASTNAME_PARAM, person.getLastName() );
         parameters.put(BENEFICIARY_DNI_PARAM ,person.getDocumentNumber().toString());
@@ -152,8 +154,7 @@ public class ShareCredentialService {
         parameters.put(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().get().getCreditHolderLastName());
         parameters.put( BENEFICIARY_CHARACTER_PARAM, character);
         parameters.put(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar);
-        parameters.put(BENEFICIARY_CREDENTIAL_ID_PARAM, cred.getIdDidiCredential());
-        parameters.put(FRONTEND_URL_PARAM, frontendUrl);
+        parameters.put(SHARED_CREDENTIAL_LINK_PARAM, credentialRequest.getViewerJWT());
 
         return parameters;
     }

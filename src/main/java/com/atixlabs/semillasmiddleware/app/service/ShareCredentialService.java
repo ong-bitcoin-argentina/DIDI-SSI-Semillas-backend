@@ -42,6 +42,9 @@ public class ShareCredentialService {
         this.credentialService = credentialService;
     }
 
+    @Value("${frontend.url}")
+    private String frontendUrl;
+
     private static final String TEMPLATE_NAME = "share_credentials_template.html";
     private static final String PROVIDER_NAME_PARAM ="{providerName}";
     private static final String BENEFICIARY_NAME_PARAM ="{name}";
@@ -57,6 +60,7 @@ public class ShareCredentialService {
     // private static final String EXPIRE_DATE_PARAM ="{expireDate}";
     private static final String SHARED_CREDENTIAL_LINK_PARAM ="{sharedLink}";
     private static final String HIMSELF_OR_FAMILIAR_PARAM ="{himselfOrFamiliar}";
+    private static final String FRONTEND_URL_PARAM ="{frontendUrl}";
 
 
     private static final String FAMILY_BENEFIT_TEXT = "Integrante del grupo familiar";
@@ -118,7 +122,7 @@ public class ShareCredentialService {
         Map<String, String> parameters = new HashMap<>();
 
         String name = credentialRequest.getProviderId()
-                .map(provId -> providerService.findById(provId).getName())
+                .map(provId -> " "+providerService.findById(provId).getName())
                 .orElse("");
 
         Person person = personService.findByDocumentNumber(credentialRequest.getDni()).orElseThrow(() -> new PersonDoesNotExistsException(""));
@@ -143,7 +147,7 @@ public class ShareCredentialService {
             himselfOrFamiliar = HIMSELF_TEXT;
         }
 
-        parameters.put(PROVIDER_NAME_PARAM, " "+name);
+        parameters.put(PROVIDER_NAME_PARAM, name);
         parameters.put(BENEFICIARY_NAME_PARAM, person.getFirstName());
         parameters.put(BENEFICIARY_LASTNAME_PARAM, person.getLastName() );
         parameters.put(BENEFICIARY_DNI_PARAM ,person.getDocumentNumber().toString());
@@ -155,6 +159,7 @@ public class ShareCredentialService {
         parameters.put( BENEFICIARY_CHARACTER_PARAM, character);
         parameters.put(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar);
         parameters.put(SHARED_CREDENTIAL_LINK_PARAM, credentialRequest.getViewerJWT());
+        parameters.put(FRONTEND_URL_PARAM, frontendUrl);
 
         return parameters;
     }

@@ -138,9 +138,9 @@ class ProviderServiceTest {
         return ProviderCreateRequest
                 .builder()
                 .email("provider@test.com")
-                .benefit(59)
+                .benefit(Optional.of(59))
                 .categoryId(providerCategory)
-                .phone("+5411111111")
+                .phone(Optional.of("+5411111111"))
                 .name("Provider")
                 .speciality("Speciality")
                 .build();

@@ -46,10 +46,11 @@ public class ProviderService{
         provider.setProviderCategory(category);
         provider.setEmail(providerCreateRequest.getEmail());
         provider.setName(providerCreateRequest.getName());
-        provider.setPhone(providerCreateRequest.getPhone());
-        provider.setBenefit(providerCreateRequest.getBenefit());
-        provider.setWhatsappNumber(providerCreateRequest.getWhatsappNumber());
+        providerCreateRequest.getPhone().ifPresent(provider::setPhone);
+        providerCreateRequest.getBenefit().ifPresent(provider::setBenefit);
+        providerCreateRequest.getWhatsappNumber().ifPresent(provider::setWhatsappNumber);
         provider.setSpeciality(providerCreateRequest.getSpeciality());
+        provider.setDescription(providerCreateRequest.getDescription());
 
         return providerRepository.save(provider);
     }

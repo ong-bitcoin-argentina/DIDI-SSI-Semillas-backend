@@ -30,6 +30,9 @@ public class Provider extends AuditableEntity {
     private String whatsappNumber;
     private String email;
 
+    @Column(length = 1024)
+    private String description;
+
     @Min(0)
     @Max(100)
     private Integer benefit;

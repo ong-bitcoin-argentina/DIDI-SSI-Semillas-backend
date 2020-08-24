@@ -39,7 +39,7 @@ public class IdentityValidationRequestController {
         return ResponseEntity.accepted().body("created.");
     }
 
-    @GetMapping()
+    @GetMapping
     @ResponseStatus(HttpStatus.OK)
     public Page<IdentityValidationRequest> findAllProvidersFiltered(@RequestParam("page") @Min(0) int page){
         return identityValidationRequestService.findAll(page);

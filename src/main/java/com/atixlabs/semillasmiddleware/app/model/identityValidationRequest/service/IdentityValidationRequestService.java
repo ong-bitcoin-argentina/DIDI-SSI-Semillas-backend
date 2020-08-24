@@ -27,7 +27,7 @@ public class IdentityValidationRequestService {
                         identityValidationRequestDto.getPhone(),
                         identityValidationRequestDto.getName(),
                         identityValidationRequestDto.getLastName(),
-                        RequestState.STATE_IN_PROGRESS,
+                        RequestState.IN_PROGRESS,
                         LocalDate.now(),
                         identityValidationRequestDto.getRevocationReason());
 

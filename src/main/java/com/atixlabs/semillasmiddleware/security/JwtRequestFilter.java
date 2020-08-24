@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.security;
 
 import com.atixlabs.semillasmiddleware.security.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +19,7 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
+import java.util.stream.Collectors;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
@@ -32,8 +34,9 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        logger.info("doFilterInternal");
-
+        logger.info("URI ["+request.getRequestURI()+"]");
+        logger.info("Method ["+request.getMethod()+"]");
+        logger.info("Body: "+request.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
         try {
             String username = null;
             String jwtToken = this.getJwtFromRequest(request);
@@ -46,7 +49,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
 
             logger.info("username " + username);
-            logger.info("auth " + SecurityContextHolder.getContext().getAuthentication());
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
                 logger.info("loadUserByUsername");
                 UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);

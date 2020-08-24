@@ -15,5 +15,6 @@ public class ProviderDto implements Serializable {
     private String whatsappNumber;
     private String phone;
     private String speciality;
+    private String description;
     private ProviderCategoryDto providerCategoryDto;
 }

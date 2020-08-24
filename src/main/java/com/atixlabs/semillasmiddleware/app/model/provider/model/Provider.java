@@ -73,6 +73,7 @@ public class Provider extends AuditableEntity {
                         .id(this.providerCategory.getId())
                         .name(this.providerCategory.getName())
                         .build())
+                .description(this.description)
                 .build();
     }
 }

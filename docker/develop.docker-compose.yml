@@ -1,0 +1,26 @@
+
+version: "3"
+services:
+  database_sem:
+    image: postgres:11.1
+    container_name: database_sem
+    ports:
+      - "5437:5432"
+    volumes:
+      - ../database:/docker-entrypoint-initdb.d/database
+      - ../database/create_database.sh:/docker-entrypoint-initdb.d/create_database.sh
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+
+  pgadmin_sem:
+    image: dpage/pgadmin4
+    container_name: pgadmin_sem
+    ports:
+      - "8087:80"
+    depends_on:
+      - database_sem
+    environment:
+      - PGADMIN_DEFAULT_EMAIL=semillas@atixlabs.com
+      - PGADMIN_DEFAULT_PASSWORD=semillas
+

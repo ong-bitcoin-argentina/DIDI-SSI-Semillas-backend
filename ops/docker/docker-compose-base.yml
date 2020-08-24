@@ -1,0 +1,76 @@
+version: "3"
+services:
+  backend:
+    image: docker.atixlabs.com/semillas/semillas-middleware:0.0.1-SNAPSHOT-987a5a1a
+    environment:
+      - spring_profiles_active=${ENVIRONMENT}
+      - SEMILLAS_DB=${SEMILLAS_DB}
+      - SEMILLAS_DB_USER=${SEMILLAS_DB_USER}
+      - SEMILLAS_DB_PASSWORD=${SEMILLAS_DB_PASSWORD}
+      - BONDAREA_KEY=${BONDAREA_ACCESS_KEY}
+      - BONDAREA_URL=${BONDAREA_BASE_URL}
+      - BONDAREA_TOKEN=${BONDAREA_ACCESS_TOKEN}
+      - BONDAREA_IDM=${BONDAREA_IDM}
+      - DIDI_URL=${DIDI_URL}
+      - DIDI_USERNAME=${DIDI_USERNAME}
+      - DIDI_PASSWORD=${DIDI_PASSWORD}
+      - DIDI_URL_PROD=${DIDI_URL_PROD}
+      - DIDI_USERNAME_PROD=${DIDI_USERNAME_PROD}
+      - DIDI_PASSWORD_PROD=${DIDI_PASSWORD_PROD}
+      - MAILGUN_API_KEY=${MAILGUN_API_KEY}
+      - MAILGUN_DOMAIN=${MAILGUN_DOMAIN}
+
+    depends_on:
+      - db
+    labels:
+      - "traefik.enable=true"
+      - "traefik.http.routers.backend.rule=Host(`${BACKEND_URL}`)"
+      - "traefik.http.routers.backend.entrypoints=web-secure"
+      - "traefik.http.routers.backend.tls=true"
+      - "traefik.http.routers.backend.tls.certresolver=le"
+    volumes:
+      - "/var/log/semillas:/var/log/semillas"
+
+  proxy:
+    image: traefik:v2.2.0
+    command:
+      - "--api.insecure=true"
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web-secure.address=:443"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.web.http.redirections.entryPoint.to=web-secure"
+      - "--entrypoints.web.http.redirections.entryPoint.scheme=https"
+      - "--certificatesResolvers.le.acme.email=info@atixlabs.com"
+      - "--certificatesResolvers.le.acme.storage=/certs/acme.json"
+      - "--certificatesResolvers.le.acme.httpChallenge.entrypoint=web"
+    ports:
+      - "80:80"
+      - "443:443"
+      - "127.0.0.1:8080:8080"
+    volumes:
+      # - ./trafeik-${ENVIRONMENT}.toml:/etc/traefik/traefik.toml
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "/home/app/certs/:/certs"
+    depends_on:
+      - backend
+     # - frontend
+  db:
+    image: postgres:11.7
+    environment:
+      - POSTGRES_USER=${SEMILLAS_DB_USER}
+      - POSTGRES_PASSWORD=${SEMILLAS_DB_PASSWORD}
+      - POSTGRES_DB=${SEMILLAS_DB}
+    volumes:
+      - "/db-data:/var/lib/postgresql/data"
+    ports:
+      - "127.0.0.1:5432:5432"
+  monitoring:
+    image: google/cadvisor:latest
+    volumes:
+      - "/:/rootfs:ro"
+      - "/var/run:/var/run:rw"
+      - "/sys:/sys:ro"
+      - "/var/lib/docker/:/var/lib/docker:ro"
+    ports:
+      - "127.0.0.1:9000:8080"

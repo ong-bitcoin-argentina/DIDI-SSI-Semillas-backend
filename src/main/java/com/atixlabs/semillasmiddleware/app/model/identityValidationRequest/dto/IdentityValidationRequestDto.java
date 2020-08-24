@@ -12,4 +12,5 @@ public class IdentityValidationRequestDto {
     private String phone;
     private String name;
     private String lastName;
+    private String revocationReason;
 }

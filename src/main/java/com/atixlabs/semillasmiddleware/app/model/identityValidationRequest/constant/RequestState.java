@@ -7,17 +7,15 @@ import java.util.Optional;
 
 public enum RequestState {
 
-    STATE_IN_PROGRESS(0,"IN PROGRESS"),
-    STATE_SUCCESS(1,"SUCCESS"),
-    STATE_FAILURE(2,"FAILURE");
+    IN_PROGRESS(0),
+    SUCCESS(1),
+    FAILURE(2);
 
 
     private Integer id;
-    private String description;
 
-    RequestState(Integer id, String description) {
+    RequestState(Integer id) {
         this.id = id;
-        this.description = description;
     }
 
     public static Optional<RequestState> valueOf(int value) {

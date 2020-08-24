@@ -28,6 +28,8 @@ public class IdentityValidationRequest {
 
     private LocalDate date;
 
+    private String revocationReason;
+
     protected IdentityValidationRequest(){}
 
     public IdentityValidationRequest(Long dni,
@@ -35,13 +37,19 @@ public class IdentityValidationRequest {
                                      String email,
                                      String phone,
                                      String name,
-                                     String lastName){
+                                     String lastName,
+                                     RequestState requestState,
+                                     LocalDate date,
+                                     String revocationReason){
         this.dni = dni;
         this.did = did;
         this.email = email;
         this.phone = phone;
         this.name = name;
         this.lastName = lastName;
+        this.requestState = requestState;
+        this.date = date;
+        this.revocationReason = revocationReason;
     }
 
 }

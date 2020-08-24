@@ -36,7 +36,6 @@ public class JwtRequestFilter extends OncePerRequestFilter {
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
         logger.info("URI ["+request.getRequestURI()+"]");
         logger.info("Method ["+request.getMethod()+"]");
-        logger.info("Body: "+request.getReader().lines().collect(Collectors.joining(System.lineSeparator())));
         try {
             String username = null;
             String jwtToken = this.getJwtFromRequest(request);

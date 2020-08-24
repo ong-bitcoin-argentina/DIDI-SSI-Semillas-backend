@@ -97,6 +97,7 @@ public class ProviderService{
         providerUpdateRequest.getBenefit().ifPresent(provider::setBenefit);
         providerUpdateRequest.getEmail().ifPresent(provider::setEmail);
         providerUpdateRequest.getPhone().ifPresent(provider::setPhone);
+        providerUpdateRequest.getWhatsappNumber().ifPresent(provider::setWhatsappNumber);
         providerUpdateRequest.getSpeciality().ifPresent(provider::setSpeciality);
         providerUpdateRequest.getCategoryId().ifPresent( catId -> provider.setProviderCategory(providerCategoryService.findById(catId)));
 

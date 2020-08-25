@@ -63,7 +63,7 @@ public class IdentityValidationRequestService {
                                    RequestState state,
                                    Optional<String> revocationReason)throws InexistentIdentityValidationRequestException {
 
-        log.info("Changing identity validation request state, request id["+idValidationRequest+"], state["+state.toString()+"], revocation reason["+revocationReason.get()+"]");
+        log.info("Changing identity validation request state, request id["+idValidationRequest+"], state["+state.toString()+"], revocation reason["+revocationReason.orElse("")+"]");
         IdentityValidationRequest identityValidationRequest = this.findById(idValidationRequest)
                 .orElseThrow(InexistentIdentityValidationRequestException::new);
 

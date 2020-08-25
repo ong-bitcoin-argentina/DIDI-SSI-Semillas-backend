@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
+import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -27,7 +28,7 @@ class IdentityValidationRequestServiceTest {
     void whenChangingStateOfInexistentExpectToThrowInexistentRequestException() {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
-        assertThrows(InexistentIdentityValidationRequestException.class, () -> identityValidationRequestService.changeRequestState(Long.MAX_VALUE, RequestState.FAILURE));
+        assertThrows(InexistentIdentityValidationRequestException.class, () -> identityValidationRequestService.changeRequestState(Long.MAX_VALUE, RequestState.FAILURE, Optional.of("reason")));
     }
 
     @Test
@@ -35,7 +36,7 @@ class IdentityValidationRequestServiceTest {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
         try {
-            identityValidationRequestService.changeRequestState(1l, RequestState.SUCCESS);
+            identityValidationRequestService.changeRequestState(1l, RequestState.SUCCESS, Optional.empty());
             Assert.assertEquals(RequestState.SUCCESS,identityValidationRequestRepository.findById(1l).get().getRequestState());
         }catch (InexistentIdentityValidationRequestException ex){
             fail();

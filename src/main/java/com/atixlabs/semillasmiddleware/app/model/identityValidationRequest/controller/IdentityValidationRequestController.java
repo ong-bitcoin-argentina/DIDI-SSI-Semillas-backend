@@ -53,15 +53,13 @@ public class IdentityValidationRequestController {
     public ResponseEntity<String> updateRequest(@PathVariable @Min(1) Long id, @RequestBody @Valid StatusChangeDto statusChangeDto
                                                 ){
 
-        Optional<RequestState> requestState = RequestState.valueOf(statusChangeDto.getIdRequestState());
-        if(!requestState.isPresent())
-            return ResponseEntity.badRequest().body("The provided id of request state is invalid");
+        RequestState requestState = RequestState.valueOf(statusChangeDto.getRequestState());
 
-        if (!statusChangeDto.getRevocationReason().isPresent() && requestState.get().equals(RequestState.FAILURE))
+        if (!statusChangeDto.getRevocationReason().isPresent() && requestState.equals(RequestState.FAILURE))
             return ResponseEntity.badRequest().body("You must specify a revocation reason");
 
         try{
-            identityValidationRequestService.changeRequestState(id, requestState.get(), statusChangeDto.getRevocationReason());
+            identityValidationRequestService.changeRequestState(id, requestState, statusChangeDto.getRevocationReason());
         }catch (InexistentIdentityValidationRequestException iivr){
             return ResponseEntity.badRequest().body("An identity validation request corresponding with provided id does not exist");
         }

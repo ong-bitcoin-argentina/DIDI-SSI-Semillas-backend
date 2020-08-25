@@ -9,8 +9,7 @@ import java.util.Optional;
 @Getter
 public class StatusChangeDto {
     @NotNull
-    @Min(1)
-    private Integer idRequestState;
+    private String requestState;
 
     private Optional<String> revocationReason = Optional.empty();
 }

@@ -50,14 +50,15 @@ public class IdentityValidationRequestController {
 
     @PatchMapping("/{id}")
     public ResponseEntity<String> createRequest(@PathVariable @Min(1) Long id,
-                                                @Min(1) Integer idRequestState){
+                                                @Min(1) Integer idRequestState,
+                                                Optional<String> revocationReason){
 
         Optional<RequestState> requestState = RequestState.valueOf(idRequestState);
         if(!requestState.isPresent())
             return ResponseEntity.badRequest().body("The provided id of request state is invalid");
 
         try{
-            identityValidationRequestService.changeRequestState(id, requestState.get());
+            identityValidationRequestService.changeRequestState(id, requestState.get(), revocationReason);
         }catch (InexistentIdentityValidationRequestException iivr){
             return ResponseEntity.badRequest().body("An identity validation request corresponding with provided id does not exist");
         }

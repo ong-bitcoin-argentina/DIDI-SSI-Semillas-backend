@@ -49,7 +49,7 @@ public class MailService {
         Call call = okHttpClient.newCall(request);
         try{
             Response response = call.execute();
-            log.info("Succesfully sent email response status["+response.code()+"] msg["+response.message()+"]");
+            log.info("Successfully sent email response status["+response.code()+"] msg["+response.message()+"]");
         }catch (IOException ioe){
             log.error(ioe.getMessage());
             throw new EmailNotSentException(ioe.getMessage());

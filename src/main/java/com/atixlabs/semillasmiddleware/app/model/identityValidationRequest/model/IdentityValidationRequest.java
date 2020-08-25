@@ -54,4 +54,19 @@ public class IdentityValidationRequest {
         this.revocationReason = revocationReason;
     }
 
+    @Override
+    public String toString() {
+        return "IdentityValidationRequest{" +
+                "id=" + id +
+                ", dni=" + dni +
+                ", did='" + did + '\'' +
+                ", email='" + email + '\'' +
+                ", phone='" + phone + '\'' +
+                ", name='" + name + '\'' +
+                ", lastName='" + lastName + '\'' +
+                ", requestState=" + requestState +
+                ", date=" + date +
+                ", revocationReason='" + revocationReason + '\'' +
+                '}';
+    }
 }

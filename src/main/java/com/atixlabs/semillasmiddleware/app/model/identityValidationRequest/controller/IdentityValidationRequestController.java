@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.cont
 
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service.IdentityValidationRequestService;
@@ -49,19 +50,18 @@ public class IdentityValidationRequestController {
 
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> createRequest(@PathVariable @Min(1) Long id,
-                                                @Min(1) Integer idRequestState,
-                                                Optional<String> revocationReason){
+    public ResponseEntity<String> updateRequest(@PathVariable @Min(1) Long id, @RequestBody @Valid StatusChangeDto statusChangeDto
+                                                ){
 
-        Optional<RequestState> requestState = RequestState.valueOf(idRequestState);
+        Optional<RequestState> requestState = RequestState.valueOf(statusChangeDto.getIdRequestState());
         if(!requestState.isPresent())
             return ResponseEntity.badRequest().body("The provided id of request state is invalid");
 
-        if (!revocationReason.isPresent() && requestState.get().equals(RequestState.FAILURE))
+        if (!statusChangeDto.getRevocationReason().isPresent() && requestState.get().equals(RequestState.FAILURE))
             return ResponseEntity.badRequest().body("You must specify a revocation reason");
 
         try{
-            identityValidationRequestService.changeRequestState(id, requestState.get(), revocationReason);
+            identityValidationRequestService.changeRequestState(id, requestState.get(), statusChangeDto.getRevocationReason());
         }catch (InexistentIdentityValidationRequestException iivr){
             return ResponseEntity.badRequest().body("An identity validation request corresponding with provided id does not exist");
         }

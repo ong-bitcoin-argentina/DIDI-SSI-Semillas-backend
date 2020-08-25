@@ -57,6 +57,9 @@ public class IdentityValidationRequestController {
         if(!requestState.isPresent())
             return ResponseEntity.badRequest().body("The provided id of request state is invalid");
 
+        if (!revocationReason.isPresent() && requestState.get().equals(RequestState.FAILURE))
+            return ResponseEntity.badRequest().body("You must specify a revocation reason");
+
         try{
             identityValidationRequestService.changeRequestState(id, requestState.get(), revocationReason);
         }catch (InexistentIdentityValidationRequestException iivr){

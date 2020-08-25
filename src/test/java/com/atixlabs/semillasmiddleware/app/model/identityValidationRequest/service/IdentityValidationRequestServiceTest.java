@@ -5,8 +5,15 @@ import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.contr
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
+import com.atixlabs.semillasmiddleware.app.service.MailService;
 import org.junit.Assert;
+import org.junit.Before;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -15,14 +22,23 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
+@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest
 class IdentityValidationRequestServiceTest {
 
-    @Autowired
     private IdentityValidationRequestService identityValidationRequestService;
 
     @Autowired
     private IdentityValidationRequestRepository identityValidationRequestRepository;
+
+    @Mock
+    ShareStateChangeService shareStateChangeService;
+
+    //todo: try to change this to use before so it is called once in this test class
+    @BeforeEach
+    void setUp() {
+        identityValidationRequestService = new IdentityValidationRequestService(identityValidationRequestRepository, shareStateChangeService);
+    }
 
     @Test
     void whenChangingStateOfInexistentExpectToThrowInexistentRequestException() {

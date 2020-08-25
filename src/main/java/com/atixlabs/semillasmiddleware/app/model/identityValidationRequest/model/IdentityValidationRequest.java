@@ -3,11 +3,13 @@ package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.mode
 
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import lombok.Getter;
+import lombok.Setter;
 
 import javax.persistence.*;
 import java.time.LocalDate;
 
 @Getter
+@Setter
 @Table(name = "identity_validation")
 @Entity
 public class IdentityValidationRequest {

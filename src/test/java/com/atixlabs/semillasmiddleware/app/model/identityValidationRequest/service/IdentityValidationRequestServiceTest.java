@@ -36,7 +36,7 @@ class IdentityValidationRequestServiceTest {
 
     //todo: try to change this to use before so it is called once in this test class
     @BeforeEach
-    void setUp() {
+    public void setUp() {
         identityValidationRequestService = new IdentityValidationRequestService(identityValidationRequestRepository, shareStateChangeService);
     }
 

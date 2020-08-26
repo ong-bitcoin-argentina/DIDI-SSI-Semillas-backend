@@ -18,13 +18,16 @@ public class ProviderCreateRequest {
     @NotNull
     private String name;
 
-    private Optional<String> phone;
+    @Builder.Default
+    private Optional<String> phone = Optional.empty();
     @NotNull
     private String email;
 
-    private Optional<String> whatsappNumber;
+    @Builder.Default
+    private Optional<String> whatsappNumber = Optional.empty();
 
-    private Optional<Integer> benefit;
+    @Builder.Default
+    private Optional<Integer> benefit = Optional.empty();
 
     @NotNull
     @Builder.Default

@@ -1,6 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.controller;
 
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service.IdentityValidationRequestService;
 import com.atixlabs.semillasmiddleware.app.model.provider.controller.ProviderController;
@@ -21,7 +24,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping(IdentityValidationRequestController.URL_MAPPING)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
 public class IdentityValidationRequestController {
 
     public static final String URL_MAPPING = "/identityValidationRequests";
@@ -41,7 +44,27 @@ public class IdentityValidationRequestController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<IdentityValidationRequest> findAllProvidersFiltered(@RequestParam("page") @Min(0) int page){
+    public Page<IdentityValidationRequest> findAllRequests(@RequestParam("page") @Min(0) int page){
         return identityValidationRequestService.findAll(page);
+    }
+
+
+    @PatchMapping("/{id}")
+    public ResponseEntity<String> updateRequest(@PathVariable @Min(1) Long id, @RequestBody @Valid StatusChangeDto statusChangeDto
+                                                ){
+
+        RequestState requestState = RequestState.valueOf(statusChangeDto.getRequestState());
+
+        if (!statusChangeDto.getRevocationReason().isPresent() && requestState.equals(RequestState.FAILURE))
+            return ResponseEntity.badRequest().body("You must specify a revocation reason");
+
+        try{
+            identityValidationRequestService.changeRequestState(id, requestState, statusChangeDto.getRevocationReason());
+        }catch (InexistentIdentityValidationRequestException iivr){
+            return ResponseEntity.badRequest().body("An identity validation request corresponding with provided id does not exist");
+        }
+
+        return ResponseEntity.ok().body("ok.");
+
     }
 }

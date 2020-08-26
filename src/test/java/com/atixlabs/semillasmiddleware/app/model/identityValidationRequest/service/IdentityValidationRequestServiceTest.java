@@ -13,6 +13,7 @@ import org.junit.jupiter.api.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
 import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -22,9 +23,8 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@RunWith(MockitoJUnitRunner.class)
 @SpringBootTest
-class IdentityValidationRequestServiceTest {
+public class IdentityValidationRequestServiceTest {
 
     private IdentityValidationRequestService identityValidationRequestService;
 
@@ -32,9 +32,8 @@ class IdentityValidationRequestServiceTest {
     private IdentityValidationRequestRepository identityValidationRequestRepository;
 
     @Mock
-    ShareStateChangeService shareStateChangeService;
+    private ShareStateChangeService shareStateChangeService;
 
-    //todo: try to change this to use before so it is called once in this test class
     @BeforeEach
     public void setUp() {
         identityValidationRequestService = new IdentityValidationRequestService(identityValidationRequestRepository, shareStateChangeService);

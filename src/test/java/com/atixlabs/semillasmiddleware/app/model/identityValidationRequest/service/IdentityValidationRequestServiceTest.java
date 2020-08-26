@@ -41,14 +41,14 @@ class IdentityValidationRequestServiceTest {
     }
 
     @Test
-    void whenChangingStateOfInexistentExpectToThrowInexistentRequestException() {
+    public void whenChangingStateOfInexistentExpectToThrowInexistentRequestException() {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
         assertThrows(InexistentIdentityValidationRequestException.class, () -> identityValidationRequestService.changeRequestState(Long.MAX_VALUE, RequestState.FAILURE, Optional.of("reason")));
     }
 
     @Test
-    void whenChangingStateOfValidRequestExpectToBeSaved() {
+    public void whenChangingStateOfValidRequestExpectToBeSaved() {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
         try {

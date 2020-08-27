@@ -20,23 +20,12 @@ public class ApiResponse {
     }
 
     @Builder.Default
-    private int code = HttpStatus.OK.value();
-
-    @Builder.Default
     private String result = Result.SUCCESS.description;
     private String body;
     private String userMessage;
 
-    public static ApiResponse badRequest(){
+    public static ApiResponse error(){
         return ApiResponse.builder()
-                .code(HttpStatus.BAD_REQUEST.value())
-                .result(Result.ERROR.description)
-                .build();
-    }
-
-    public static ApiResponse internalError(){
-        return ApiResponse.builder()
-                .code(HttpStatus.INTERNAL_SERVER_ERROR.value())
                 .result(Result.ERROR.description)
                 .build();
     }

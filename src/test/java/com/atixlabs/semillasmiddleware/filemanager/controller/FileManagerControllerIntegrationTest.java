@@ -39,7 +39,7 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
     @Ignore
     public void fileEmptyException() throws IOException {
 
-        String token = loginAndGetToken(JwtRequest.builder().username("adminia@atixlabs.com").password("admin").build());
+        String token = loginAndGetToken(JwtRequest.builder().username("admin@atixlabs.com").password("admin").build());
 
         Response response  = given()
                 .headers("Authorization", "Bearer " + token)

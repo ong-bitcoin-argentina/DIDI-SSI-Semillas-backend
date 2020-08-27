@@ -1,7 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service;
 
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
@@ -43,8 +45,7 @@ public class IdentityValidationRequestService {
                         identityValidationRequestDto.getName(),
                         identityValidationRequestDto.getLastName(),
                         RequestState.IN_PROGRESS,
-                        LocalDate.now(),
-                        identityValidationRequestDto.getRevocationReason());
+                        LocalDate.now());
 
         log.info("Create Identity validation request: \n "+ idr.toString());
         return identityValidationRequestRepository.save(idr);
@@ -59,17 +60,21 @@ public class IdentityValidationRequestService {
         return identityValidationRequestRepository.findById(idValidationRequest);
     }
 
-    public void changeRequestState(Long idValidationRequest,
-                                   RequestState state,
-                                   Optional<String> revocationReason)throws InexistentIdentityValidationRequestException {
+    public void changeRequestState(Long idValidationRequest, StatusChangeDto statusChangeDto)throws InexistentIdentityValidationRequestException {
+        Optional<String> rejectionObservations = statusChangeDto.getRejectionObservations();
+        log.info("Changing identity validation request state, request id["+idValidationRequest+"], state["+statusChangeDto.getRequestState()+"], revocation reason["+rejectionObservations.orElse("")+"]");
 
-        log.info("Changing identity validation request state, request id["+idValidationRequest+"], state["+state.toString()+"], revocation reason["+revocationReason.orElse("")+"]");
+        RequestState requestState = RequestState.valueOf(statusChangeDto.getRequestState());
+        Optional<RejectReason> rejectReason = statusChangeDto.getRejectReason().map(RejectReason::valueOf);
+
         IdentityValidationRequest identityValidationRequest = this.findById(idValidationRequest)
                 .orElseThrow(InexistentIdentityValidationRequestException::new);
 
         log.info("Request found");
-        identityValidationRequest.setRequestState(state);
-        revocationReason.ifPresent(identityValidationRequest::setRevocationReason);
+        identityValidationRequest.setReviewDate(LocalDate.now());
+        identityValidationRequest.setRequestState(requestState);
+        rejectReason.ifPresent(identityValidationRequest::setRejectReason);
+        rejectionObservations.ifPresent(identityValidationRequest::setRejectionObservations);
         log.info("Final request state: \n "+ identityValidationRequest.toString());
 
         identityValidationRequestRepository.save(identityValidationRequest);

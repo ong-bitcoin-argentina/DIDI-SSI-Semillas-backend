@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model;
 
 
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import lombok.Getter;
 import lombok.Setter;
@@ -27,10 +28,13 @@ public class IdentityValidationRequest {
 
     @Enumerated(value = EnumType.STRING)
     private RequestState requestState;
+    @Enumerated(value = EnumType.STRING)
+    private RejectReason rejectReason;
 
     private LocalDate date;
+    private LocalDate reviewDate;
 
-    private String revocationReason;
+    private String rejectionObservations;
 
     protected IdentityValidationRequest(){}
 
@@ -41,8 +45,7 @@ public class IdentityValidationRequest {
                                      String name,
                                      String lastName,
                                      RequestState requestState,
-                                     LocalDate date,
-                                     String revocationReason){
+                                     LocalDate date){
         this.dni = dni;
         this.did = did;
         this.email = email;
@@ -51,7 +54,6 @@ public class IdentityValidationRequest {
         this.lastName = lastName;
         this.requestState = requestState;
         this.date = date;
-        this.revocationReason = revocationReason;
     }
 
     @Override
@@ -65,8 +67,9 @@ public class IdentityValidationRequest {
                 ", name='" + name + '\'' +
                 ", lastName='" + lastName + '\'' +
                 ", requestState=" + requestState +
+                ", rejectReason=" + rejectReason +
                 ", date=" + date +
-                ", revocationReason='" + revocationReason + '\'' +
+                ", rejectionObservations='" + rejectionObservations + '\'' +
                 '}';
     }
 }

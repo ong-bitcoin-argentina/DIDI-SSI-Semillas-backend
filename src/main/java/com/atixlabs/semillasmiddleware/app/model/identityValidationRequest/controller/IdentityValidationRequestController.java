@@ -1,25 +1,21 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.controller;
 
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service.IdentityValidationRequestService;
-import com.atixlabs.semillasmiddleware.app.model.provider.controller.ProviderController;
-import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
-import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
-import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -50,16 +46,13 @@ public class IdentityValidationRequestController {
 
 
     @PatchMapping("/{id}")
-    public ResponseEntity<String> updateRequest(@PathVariable @Min(1) Long id, @RequestBody @Valid StatusChangeDto statusChangeDto
-                                                ){
+    public ResponseEntity<String> updateRequest(@PathVariable @Min(1) Long id, @RequestBody @Valid StatusChangeDto statusChangeDto){
 
-        RequestState requestState = RequestState.valueOf(statusChangeDto.getRequestState());
-
-        if (!statusChangeDto.getRevocationReason().isPresent() && requestState.equals(RequestState.FAILURE))
-            return ResponseEntity.badRequest().body("You must specify a revocation reason");
+        if (!statusChangeDto.getRejectReason().isPresent() && RequestState.valueOf(statusChangeDto.getRequestState()).equals(RequestState.FAILURE))
+            return ResponseEntity.badRequest().body("You must specify a rejection reason");
 
         try{
-            identityValidationRequestService.changeRequestState(id, requestState, statusChangeDto.getRevocationReason());
+            identityValidationRequestService.changeRequestState(id, statusChangeDto);
         }catch (InexistentIdentityValidationRequestException iivr){
             return ResponseEntity.badRequest().body("An identity validation request corresponding with provided id does not exist");
         }

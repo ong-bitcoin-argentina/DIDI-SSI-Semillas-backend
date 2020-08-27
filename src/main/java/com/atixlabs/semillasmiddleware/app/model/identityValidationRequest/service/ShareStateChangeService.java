@@ -53,7 +53,7 @@ public class ShareStateChangeService {
         Map<String, String> parameters = new HashMap<>();
 
         if(identityValidationRequest.getRequestState().equals(RequestState.FAILURE)){
-            parameters.put(REJECT_REASON_PARAM, identityValidationRequest.getRevocationReason());
+            parameters.put(REJECT_REASON_PARAM, identityValidationRequest.getRejectReason().getDescription());
         }
 
         return parameters;

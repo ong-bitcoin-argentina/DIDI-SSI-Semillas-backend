@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.serv
 
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.controller.IdentityValidationRequestController;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
@@ -43,7 +44,8 @@ public class IdentityValidationRequestServiceTest {
     public void whenChangingStateOfInexistentExpectToThrowInexistentRequestException() {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
-        assertThrows(InexistentIdentityValidationRequestException.class, () -> identityValidationRequestService.changeRequestState(Long.MAX_VALUE, RequestState.FAILURE, Optional.of("reason")));
+        StatusChangeDto statusChangeDto = new StatusChangeDto("FAILURE", Optional.empty(), Optional.of("reason"));
+        assertThrows(InexistentIdentityValidationRequestException.class, () -> identityValidationRequestService.changeRequestState(Long.MAX_VALUE, statusChangeDto));
     }
 
     @Test
@@ -51,7 +53,8 @@ public class IdentityValidationRequestServiceTest {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
         try {
-            identityValidationRequestService.changeRequestState(1l, RequestState.SUCCESS, Optional.empty());
+            StatusChangeDto statusChangeDto = new StatusChangeDto("SUCCESS", Optional.empty(), Optional.empty());
+            identityValidationRequestService.changeRequestState(1l, statusChangeDto);
             Assert.assertEquals(RequestState.SUCCESS,identityValidationRequestRepository.findById(1l).get().getRequestState());
         }catch (InexistentIdentityValidationRequestException ex){
             fail();
@@ -66,7 +69,6 @@ public class IdentityValidationRequestServiceTest {
                 "name",
                 "last name",
                 RequestState.IN_PROGRESS,
-                LocalDate.now(),
-                "");
+                LocalDate.now());
     }
 }

@@ -18,5 +18,5 @@ public class IdentityValidationRequestDto {
     private String name;
     @NotNull
     private String lastName;
-    private String revocationReason;
+    private String rejectionObservations;
 }

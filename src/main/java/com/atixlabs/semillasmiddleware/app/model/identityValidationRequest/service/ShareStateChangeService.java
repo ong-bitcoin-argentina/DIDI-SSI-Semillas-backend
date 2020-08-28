@@ -24,7 +24,8 @@ public class ShareStateChangeService {
     private static final String APPROVED_TEMPLATE = "approved_identity_request_template.html";
     private static final String REJECTED_TEMPLATE = "rejected_identity_request_template.html";
 
-    private static final String REJECT_REASON_PARAM ="{detail}";
+    private static final String REJECT_REASON_PARAM ="{rejectReason}";
+    private static final String REJECT_OBSERVATIONS_PARAM ="{rejectionObservations}";
 
     public void shareStateChange(IdentityValidationRequest identityValidationRequest){
         log.info("Send email to requester of the identity status.");
@@ -54,6 +55,7 @@ public class ShareStateChangeService {
 
         if(identityValidationRequest.getRequestState().equals(RequestState.FAILURE)){
             parameters.put(REJECT_REASON_PARAM, identityValidationRequest.getRejectReason().getDescription());
+            parameters.put(REJECT_OBSERVATIONS_PARAM, identityValidationRequest.getRejectionObservations() == null ? "-" : identityValidationRequest.getRejectionObservations());
         }
 
         return parameters;

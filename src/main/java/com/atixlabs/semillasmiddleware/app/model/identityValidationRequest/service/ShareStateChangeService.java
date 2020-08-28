@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 @Service
 @Slf4j
@@ -55,7 +56,8 @@ public class ShareStateChangeService {
 
         if(identityValidationRequest.getRequestState().equals(RequestState.FAILURE)){
             parameters.put(REJECT_REASON_PARAM, identityValidationRequest.getRejectReason().getDescription());
-            parameters.put(REJECT_OBSERVATIONS_PARAM, identityValidationRequest.getRejectionObservations() == null ? "-" : identityValidationRequest.getRejectionObservations());
+            Optional<String> observations = Optional.ofNullable(identityValidationRequest.getRejectionObservations());
+            parameters.put(REJECT_OBSERVATIONS_PARAM, observations.orElse("-"));
         }
 
         return parameters;

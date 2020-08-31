@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.serv
 
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationFilter;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
@@ -14,10 +15,13 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import javax.persistence.criteria.*;
+import java.util.stream.Stream;
 
 @Service
 @Slf4j
@@ -51,9 +55,9 @@ public class IdentityValidationRequestService {
         return identityValidationRequestRepository.save(idr);
     }
 
-    public Page<IdentityValidationRequest> findAll(Integer page){
+    public Page<IdentityValidationRequest> findAll(Integer page, IdentityValidationFilter identityValidationFilter){
         Pageable pageRequest = PageRequest.of(page, Integer.valueOf(size), Sort.by("date").ascending());
-        return identityValidationRequestRepository.findAll(pageRequest);
+        return identityValidationRequestRepository.findAll(getIdentityRequestSpecification(identityValidationFilter), pageRequest);
     }
 
     public Optional<IdentityValidationRequest> findById(Long idValidationRequest){
@@ -82,5 +86,23 @@ public class IdentityValidationRequestService {
 
     }
 
+     private Specification<IdentityValidationRequest> getIdentityRequestSpecification(IdentityValidationFilter identityValidationFilter) {
+        return (Specification<IdentityValidationRequest>) (root, query, cb) -> {
+            Stream<Predicate> predicates = Stream.of(
+                    identityValidationFilter.getDateFrom().map(value -> cb.greaterThanOrEqualTo(root.get("date"), value)),
+                    identityValidationFilter.getDateTo().map(value -> cb.lessThanOrEqualTo(root.get("date"), value)),
+                    identityValidationFilter.getRejectReason().map(value -> cb.equal(root.get("rejectReason"), value)),
+                    identityValidationFilter.getCriteriaQuery().map(value -> {
+                        String criteria = "%" + value.toUpperCase() + "%";
+                        return cb.or(
+                                cb.like(cb.upper(root.get("name")), criteria),
+                                cb.like(cb.upper(root.get("lastName")), criteria),
+                                cb.like(cb.upper(root.get("dni").as(String.class)), criteria)
+                        );
+                    })
+            ).flatMap(Optional::stream);
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+    }
 }
 

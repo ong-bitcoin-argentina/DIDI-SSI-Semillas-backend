@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.cont
 
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationFilter;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
@@ -10,12 +11,15 @@ import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.servi
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
+import java.time.LocalDate;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -40,8 +44,14 @@ public class IdentityValidationRequestController {
 
     @GetMapping
     @ResponseStatus(HttpStatus.OK)
-    public Page<IdentityValidationRequest> findAllRequests(@RequestParam("page") @Min(0) int page){
-        return identityValidationRequestService.findAll(page);
+    public Page<IdentityValidationRequest> findAllRequests(@RequestParam @Min(0) int page,
+                                                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> dateFrom,
+                                                           @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> dateTo,
+                                                           @RequestParam Optional<String> criteriaQuery,  //name and surname  dni
+                                                           @RequestParam("requestState") Optional<RejectReason> rejectReason){
+
+        IdentityValidationFilter identityValidationFilter = new IdentityValidationFilter(dateFrom, dateTo, criteriaQuery, rejectReason);
+        return identityValidationRequestService.findAll(page, identityValidationFilter);
     }
 
 

@@ -91,7 +91,7 @@ public class IdentityValidationRequestService {
             Stream<Predicate> predicates = Stream.of(
                     identityValidationFilter.getDateFrom().map(value -> cb.greaterThanOrEqualTo(root.get("date"), value)),
                     identityValidationFilter.getDateTo().map(value -> cb.lessThanOrEqualTo(root.get("date"), value)),
-                    identityValidationFilter.getRejectReason().map(value -> cb.equal(root.get("rejectReason"), value)),
+                    identityValidationFilter.getRequestState().map(value -> cb.equal(root.get("requestState"), value)),
                     identityValidationFilter.getCriteriaQuery().map(value -> {
                         String criteria = "%" + value.toUpperCase() + "%";
                         return cb.or(

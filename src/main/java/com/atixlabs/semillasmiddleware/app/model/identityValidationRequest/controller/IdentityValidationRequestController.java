@@ -48,9 +48,9 @@ public class IdentityValidationRequestController {
                                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> dateFrom,
                                                            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) Optional<LocalDate> dateTo,
                                                            @RequestParam Optional<String> criteriaQuery,  //name and surname  dni
-                                                           @RequestParam("requestState") Optional<RejectReason> rejectReason){
+                                                           @RequestParam Optional<RequestState> requestState){
 
-        IdentityValidationFilter identityValidationFilter = new IdentityValidationFilter(dateFrom, dateTo, criteriaQuery, rejectReason);
+        IdentityValidationFilter identityValidationFilter = new IdentityValidationFilter(dateFrom, dateTo, criteriaQuery, requestState);
         return identityValidationRequestService.findAll(page, identityValidationFilter);
     }
 

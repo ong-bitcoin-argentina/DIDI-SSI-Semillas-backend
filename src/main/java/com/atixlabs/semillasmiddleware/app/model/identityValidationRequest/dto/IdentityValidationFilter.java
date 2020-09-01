@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto;
 
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 
@@ -13,5 +14,5 @@ public class IdentityValidationFilter {
     private Optional<LocalDate> dateFrom;
     private Optional<LocalDate> dateTo;
     private Optional<String> criteriaQuery;
-    private Optional<RejectReason> rejectReason;
+    private Optional<RequestState> requestState;
 }

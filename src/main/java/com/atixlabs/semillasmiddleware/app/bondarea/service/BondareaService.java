@@ -389,7 +389,7 @@ public class BondareaService {
                     Loan loanToUpdate = opLoanToUpdate.get();
                     Loan loanToSave = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
 
-                    log.info("--- loanToSave Creatriondate " + loanToSave.getCreationDate());
+                    log.info("--- loanToSave creation date " + loanToSave.getCreationDate());
 
                     if (!loanToUpdate.equals(loanToSave)) {
                         log.info("Updating credit " + loanDtoToSave.getIdBondareaLoan());
@@ -760,6 +760,8 @@ public class BondareaService {
         }
 
         Long daysOfFisrt = firstFeeDate.until(today, DAYS);
+        if(daysOfFisrt < 0) return 0;
+
         Double tcDays = this.getTcDays(loanDto.getFeeDuration());
 
         if(tcDays==null || tcDays < 1){

@@ -7,12 +7,18 @@ import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategory
 import com.atixlabs.semillasmiddleware.filemanager.exception.EmptyFileException;
 import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @RestController
@@ -46,6 +52,13 @@ public class FileManagerController {
 
         return ResponseEntity.ok(processExcelFileResult);
         //return(ResponseEntity.ok().build());
+    }
+
+    @GetMapping("/pdf/download")
+    public @ResponseBody byte[] downloadDocument(@RequestParam String fileName) throws IOException {
+
+        InputStream in = new FileInputStream(fileManagerService.getPdfFromTmp(fileName));
+        return IOUtils.toByteArray(in);
     }
 
 

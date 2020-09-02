@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.filemanager.service;
 
 import com.atixlabs.semillasmiddleware.filemanager.configuration.FileManagerConfigurationProperties;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
+import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -9,14 +10,22 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.LocalDate;
 
 @Service
 @Slf4j
 public class FileManagerService {
 
-    @Autowired
     private FileManagerConfigurationProperties fileManagerConfigurationProperties;
+    private PdfParserService pdfParserService;
+
+    public FileManagerService(FileManagerConfigurationProperties fileManagerConfigurationProperties, PdfParserService pdfParserService){
+        this.fileManagerConfigurationProperties = fileManagerConfigurationProperties;
+        this.pdfParserService = pdfParserService;
+    }
 
     public File getWorkFolder() throws FileManagerException, IOException {
         File workFolder = new File(fileManagerConfigurationProperties.getWorkPathDirectory());
@@ -43,4 +52,10 @@ public class FileManagerService {
             throw new FileManagerException("Error creating file.");
         }
     }
+
+    public File getPdfFromTmp(String fileName){
+        String tmpPath = System.getProperty("java.io.tmpdir");
+        return new File(tmpPath + "/" + fileName);
+    }
+
 }

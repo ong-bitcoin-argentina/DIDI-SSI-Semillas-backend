@@ -17,7 +17,7 @@ public enum PersonQuestion implements CategoryQuestion {
         }
     },
     GENDER("GENERO"),
-    BIRTHDATE("FECHA DE NACIMIENTO"){
+    BIRTH_DATE("FECHA DE NACIMIENTO"){
         @Override
         public Class<?> getDataType() {
             return LocalDate.class;
@@ -28,7 +28,43 @@ public enum PersonQuestion implements CategoryQuestion {
         public boolean isRequired() {
             return false;
         }
-    };
+    },
+    OCCUPATION("OCUPACION"),
+    STUDIES("ESTUDIA"),
+    WORKS("TRABAJA"),
+    AGE("EDAD"){
+        @Override
+        public Class<?> getDataType() {
+            return Long.class;
+        }
+    },
+    RESIDENCE_TIME_IN_COUNTRY("TIEMPO DE RESIDENCIA EN EL PAIS"){
+        @Override
+        public Class<?> getDataType() {
+            return Long.class;
+        }
+    },
+    FACEBOOK("FACEBOOK"),
+    ADDRESS("DIRECCION"),
+    BETWEEN_STREETS("ENTRE CALLES"),
+    NEIGHBORHOOD("BARRIO"),
+    ZONE("PARTIDO"),
+    LOCALITY("LOCALIDAD"),
+    REFERENCE_CONTACT_NAME("NOMBRE DE CONTACTO"),
+    REFERENCE_CONTACT_SURNAME("APELLIDO DE CONTACTO"),
+    REFERENCE_CONTACT_PHONE("TELEFONO"),
+    NATIONALITY("NACIONALIDAD"),
+    PRIMARY("PRIMARIA"),
+    HIGH_SCHOOL("SECUNDARIA"),
+    TERTIARY("TERCIARIO"),
+    UNIVERSITY("UNIVERSITARIO"),
+    WORKSHOPS("TALLERES"),
+    COURSES("CURSOS"),
+    LAND_LINE("TELEFONO FIJO"),
+    CELLPHONE("TELEFONO CELULAR"),
+    CIVIL_STATUS("ESTADO CIVIL"),
+    EMAIL("CORREO ELECTRONICO");
+
 
     private String questionName;
     static final Map<String, PersonQuestion> questionsMap = Arrays.stream(values()).collect(Collectors.toMap(PersonQuestion::getQuestionName, q->q));

@@ -72,6 +72,7 @@ public class SurveyForm {
             category.loadData(answerRow, processExcelFileResult);
     }
 
+    //OBTENGO A PARTIR DE UN STRING DE CATEGORIA LA CATEGORIA
     public Category getCategoryByUniqueName(String categoryToFind, ProcessExcelFileResult processExcelFileResult) {
 
         if (categoryToFind == null)

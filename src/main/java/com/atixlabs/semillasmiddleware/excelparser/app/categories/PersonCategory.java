@@ -32,6 +32,33 @@ public class PersonCategory implements Category {
     private AnswerDto birthDate;
     private AnswerDto relation;
     private PersonType personType;
+    private AnswerDto occupation;
+    private AnswerDto studies;
+    private AnswerDto works;
+    private AnswerDto age;
+
+    private AnswerDto residenceTimeInCountry;
+    private AnswerDto facebook;
+    private AnswerDto address;
+    private AnswerDto betweenStreets;
+    private AnswerDto neighborhood;
+    private AnswerDto zone;
+    private AnswerDto locality;
+    private AnswerDto referenceContactName;
+    private AnswerDto referenceContactSurname;
+    private AnswerDto referenceContactRelation;
+    private AnswerDto referenceContactPhone;
+    private AnswerDto nationality;
+    private AnswerDto primary;
+    private AnswerDto highSchool;
+    private AnswerDto tertiary;
+    private AnswerDto university;
+    private AnswerDto workshops;
+    private AnswerDto courses;
+    private AnswerDto landLine;
+    private AnswerDto cellPhone;
+    private AnswerDto civilStatus;
+    private AnswerDto email;
 
     public PersonCategory(String categoryUniqueName){
         this.name = new AnswerDto(PersonQuestion.NAME);
@@ -39,8 +66,35 @@ public class PersonCategory implements Category {
         this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
         this.documentNumber = new AnswerDto(PersonQuestion.ID_NUMBER);
         this.gender = new AnswerDto(PersonQuestion.GENDER);
-        this.birthDate = new AnswerDto(PersonQuestion.BIRTHDATE);
+        this.birthDate = new AnswerDto(PersonQuestion.BIRTH_DATE);
         this.relation = new AnswerDto(PersonQuestion.RELATION);
+        this.occupation = new AnswerDto(PersonQuestion.OCCUPATION);
+        this.studies = new AnswerDto(PersonQuestion.STUDIES);
+        this.works = new AnswerDto(PersonQuestion.WORKS);
+        this.age = new AnswerDto(PersonQuestion.AGE);
+
+        this.residenceTimeInCountry = new AnswerDto(PersonQuestion.RESIDENCE_TIME_IN_COUNTRY);
+        this.facebook = new AnswerDto(PersonQuestion.FACEBOOK);
+        this.address = new AnswerDto(PersonQuestion.ADDRESS);
+        this.betweenStreets = new AnswerDto(PersonQuestion.BETWEEN_STREETS);
+        this.neighborhood = new AnswerDto(PersonQuestion.NEIGHBORHOOD);
+        this.zone = new AnswerDto(PersonQuestion.ZONE);
+        this.locality = new AnswerDto(PersonQuestion.LOCALITY);
+        this.referenceContactName = new AnswerDto(PersonQuestion.REFERENCE_CONTACT_NAME);
+        this.referenceContactSurname = new AnswerDto(PersonQuestion.REFERENCE_CONTACT_SURNAME);
+        this.referenceContactRelation = new AnswerDto(PersonQuestion.RELATION);
+        this.referenceContactPhone = new AnswerDto(PersonQuestion.REFERENCE_CONTACT_PHONE);
+        this.nationality = new AnswerDto(PersonQuestion.NATIONALITY);
+        this.primary = new AnswerDto(PersonQuestion.PRIMARY);
+        this.highSchool = new AnswerDto(PersonQuestion.HIGH_SCHOOL);
+        this.tertiary = new AnswerDto(PersonQuestion.TERTIARY);
+        this.university = new AnswerDto(PersonQuestion.UNIVERSITY);
+        this.workshops = new AnswerDto(PersonQuestion.WORKSHOPS);
+        this.courses = new AnswerDto(PersonQuestion.COURSES);
+        this.landLine = new AnswerDto(PersonQuestion.LAND_LINE);
+        this.cellPhone = new AnswerDto(PersonQuestion.CELLPHONE);
+        this.civilStatus = new AnswerDto(PersonQuestion.CIVIL_STATUS);
+        this.email = new AnswerDto(PersonQuestion.EMAIL);
 
         this.categoryUniqueName = categoryUniqueName;
         this.categoryName = Categories.BENEFICIARY_CATEGORY_NAME;//TODO:CREAR TIPO PERSONA O RESOLVER AGRUPACION
@@ -79,11 +133,87 @@ public class PersonCategory implements Category {
             case GENDER:
                 this.gender.setAnswer(answerRow, processExcelFileResult);
                 break;
-            case BIRTHDATE:
+            case BIRTH_DATE:
                 this.birthDate.setAnswer(answerRow, processExcelFileResult);
                 break;
             case RELATION:
                 this.relation.setAnswer(answerRow, processExcelFileResult);
+                this.referenceContactRelation.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case OCCUPATION:
+                this.occupation.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case WORKS:
+                this.works.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case STUDIES:
+                this.studies.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case AGE:
+                this.age.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case RESIDENCE_TIME_IN_COUNTRY:
+                this.residenceTimeInCountry.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case FACEBOOK:
+                this.facebook.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ADDRESS:
+                this.address.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case BETWEEN_STREETS:
+                this.betweenStreets.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case NEIGHBORHOOD:
+                this.neighborhood.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ZONE:
+                this.zone.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case LOCALITY:
+                this.locality.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case REFERENCE_CONTACT_NAME:
+                this.referenceContactName.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case REFERENCE_CONTACT_SURNAME:
+                this.referenceContactSurname.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case REFERENCE_CONTACT_PHONE:
+                this.referenceContactPhone.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case NATIONALITY:
+                this.nationality.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case PRIMARY:
+                this.primary.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case HIGH_SCHOOL:
+                this.highSchool.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case TERTIARY:
+                this.tertiary.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case UNIVERSITY:
+                this.university.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case WORKSHOPS:
+                this.workshops.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case COURSES:
+                this.courses.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case LAND_LINE:
+                this.landLine.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case CELLPHONE:
+                this.cellPhone.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case CIVIL_STATUS:
+                this.civilStatus.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case EMAIL:
+                this.email.setAnswer(answerRow, processExcelFileResult);
                 break;
         }
     }
@@ -105,6 +235,10 @@ public class PersonCategory implements Category {
         answers.add(this.gender);
         answers.add(this.birthDate);
         answers.add(this.relation);
+        answers.add(this.occupation);
+        answers.add(this.works);
+        answers.add(this.studies);
+        answers.add(this.age);
 
         List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryUniqueName)).collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
@@ -160,15 +294,20 @@ public class PersonCategory implements Category {
     @Override
     public String toString() {
         return "PersonCategory{" +
-                "categoryOriginalName='" + categoryUniqueName + '\'' +
+                "categoryUniqueName='" + categoryUniqueName + '\'' +
+                ", categoryName=" + categoryName +
                 ", name=" + name +
                 ", surname=" + surname +
                 ", idType=" + idType +
-                ", idNumber=" + documentNumber +
+                ", documentNumber=" + documentNumber +
                 ", gender=" + gender +
                 ", birthDate=" + birthDate +
                 ", relation=" + relation +
                 ", personType=" + personType +
+                ", occupation=" + occupation +
+                ", studies=" + studies +
+                ", works=" + works +
+                ", age=" + age +
                 '}';
     }
 }

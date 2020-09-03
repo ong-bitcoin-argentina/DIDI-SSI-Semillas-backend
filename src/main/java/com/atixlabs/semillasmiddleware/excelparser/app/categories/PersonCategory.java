@@ -12,6 +12,8 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -310,4 +312,13 @@ public class PersonCategory implements Category {
                 ", age=" + age +
                 '}';
     }
+
+    @Override
+    public List<AnswerDto> getAnswersList(){
+        return Arrays.asList(name, surname, idType, documentNumber, gender, birthDate, relation,
+                occupation, studies, works, age, residenceTimeInCountry, facebook, address, betweenStreets, neighborhood,
+                zone, locality, referenceContactName, referenceContactSurname, referenceContactRelation, referenceContactPhone,
+                nationality, primary, highSchool, tertiary, university, workshops, courses, landLine, cellPhone, civilStatus, email);
+    }
+
 }

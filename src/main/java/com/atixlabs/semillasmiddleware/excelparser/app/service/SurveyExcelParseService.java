@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
+import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +34,9 @@ public class SurveyExcelParseService extends ExcelParseService {
 
     @Autowired
     private AnswerCategoryFactory answerCategoryFactory;
+
+    @Autowired
+    PdfParserService pdfParserService;
 
     private SurveyForm currentForm;
     private List<SurveyForm> surveyFormList;
@@ -104,9 +108,9 @@ public class SurveyExcelParseService extends ExcelParseService {
         boolean allFormValid = true;
 
         for (SurveyForm surveyForm : surveyFormList) {
+            processExcelFileResult.addPdfName(pdfParserService.generatePdfFromSurvey(surveyForm));
             if (!surveyForm.isValid(processExcelFileResult))
                 allFormValid = false;
-            //log.info(surveyForm.toString());
         }
 
         if(allFormValid) {

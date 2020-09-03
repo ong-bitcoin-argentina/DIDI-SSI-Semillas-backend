@@ -18,12 +18,13 @@ public class PdfParserService {
     private static final String QUESTION_PARAM = "{{question}}";
     private static final String ANSWER_PARAM = "{{answer}}";
 
-    private String rowTemplate = "        <tr border=\"1\">\n" +
+    private static final String style = "style=\"border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px\"\"";
+    private String rowTemplate = "        <tr "+style+">\n" +
                                  "            <td>{{question}}</td>\n" +
                                  "            <td>{{answer}}</td>\n" +
                                  "        </tr>";
 
-    private String headerTemplate = "        <tr border=\"1\">\n" +
+    private String headerTemplate = "        <tr "+style+">\n" +
                                     "            <th colspan=\"2\">\n" +
                                     "                <br />"+CATEGORY_NAME_PARAM+"\n" +
                                     "            </th>\n" +

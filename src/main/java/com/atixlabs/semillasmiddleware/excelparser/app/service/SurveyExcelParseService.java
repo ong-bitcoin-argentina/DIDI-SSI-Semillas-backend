@@ -108,7 +108,6 @@ public class SurveyExcelParseService extends ExcelParseService {
         boolean allFormValid = true;
 
         for (SurveyForm surveyForm : surveyFormList) {
-            processExcelFileResult.addPdfName(pdfParserService.generatePdfFromSurvey(surveyForm));
             if (!surveyForm.isValid(processExcelFileResult))
                 allFormValid = false;
         }
@@ -116,6 +115,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
+                processExcelFileResult.addPdfName(pdfParserService.generatePdfFromSurvey(surveyForm));
                 credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
         }

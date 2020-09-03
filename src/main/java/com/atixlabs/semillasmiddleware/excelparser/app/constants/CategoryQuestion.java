@@ -6,7 +6,4 @@ public interface CategoryQuestion {
     String getQuestionName();
     String name();
 
-    default public boolean isEmpty() {
-        return false;
-    }
 }

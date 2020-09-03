@@ -22,6 +22,7 @@ public class ProcessExcelFileResult {
     private int totalEmptyRows = 0;
     private int totalProcessedForms = 0;
     private String fileName = null;
+    private List<String> pdfNames = new ArrayList<>();
 
     private List<ExcelErrorDetail> errorRows = new ArrayList<>();
     @JsonIgnore
@@ -48,6 +49,10 @@ public class ProcessExcelFileResult {
 
     public void addRowDebug(String errorHeader, String errorBody){
         this.debugRows.add(new ExcelErrorDetail(errorHeader, errorBody));
+    }
+
+    public void addPdfName(String name){
+        this.pdfNames.add(name);
     }
 
     @Override

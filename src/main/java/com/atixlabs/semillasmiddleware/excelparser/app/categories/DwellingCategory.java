@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 
+import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -192,6 +193,13 @@ public class DwellingCategory implements Category {
 
     public String getDistrict(){
         return (String) this.district.getAnswer();
+    }
+
+    @Override
+    public List<AnswerDto> getAnswersList(){
+        return Arrays.asList( brick,  lock,  wood,  paperBoard,  district,  dwellingCondition,  holdingType,
+                dwellingType,  lightInstallation,  generalConditions,  neighborhoodType,  basicServicies,  gas,
+                carafe,  water,  watterWell,  antiquity,  numberOfEnvironments,  rental);
     }
 
     @Override

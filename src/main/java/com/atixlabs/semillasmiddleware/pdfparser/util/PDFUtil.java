@@ -11,7 +11,7 @@ import java.io.*;
 
 public class PDFUtil {
 
-    public static String createTemporaryPdf(String prefixName, String html) throws PdfCannotBeCreatedException{
+    public static String createTemporaryPdf(String prefixName, String html){
         File file;
         try{
             file = File.createTempFile(prefixName, ".pdf");

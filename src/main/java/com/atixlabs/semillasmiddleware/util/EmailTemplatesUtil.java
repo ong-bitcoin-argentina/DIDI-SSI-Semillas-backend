@@ -22,7 +22,7 @@ public class EmailTemplatesUtil {
             InputStream inputStream = resource.getInputStream();
             byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
             String data = new String(bdata, StandardCharsets.UTF_8);
-            log.info("Template read correctly");
+            log.info("Template ["+templateName+"] read correctly");
             return data;
         }catch (IOException ioe){
             throw new EmailNotSentException(ioe.getMessage());

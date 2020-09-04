@@ -268,6 +268,13 @@ public class PersonCategory implements Category {
         return (String) name.getAnswer();
     }
 
+    public String getFullName(){
+        return new StringBuilder((String) name.getAnswer())
+                .append('_')
+                .append((String) surname.getAnswer())
+                .toString();
+    }
+
     public String getSurname() {
         return (String) surname.getAnswer();
     }

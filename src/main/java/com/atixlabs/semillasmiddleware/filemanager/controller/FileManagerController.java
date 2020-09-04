@@ -57,7 +57,7 @@ public class FileManagerController {
     @GetMapping("/pdf/download")
     public @ResponseBody byte[] downloadDocument(@RequestParam String fileName) throws IOException {
 
-        InputStream in = new FileInputStream(fileManagerService.getPdfFromTmp(fileName));
+        InputStream in = new FileInputStream(fileManagerService.getFileFromTmp(fileName));
         return IOUtils.toByteArray(in);
     }
 

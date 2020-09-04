@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
+import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
 import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -36,8 +37,12 @@ public class SurveyExcelParseService extends ExcelParseService {
     private AnswerCategoryFactory answerCategoryFactory;
 
     @Autowired
-    PdfParserService pdfParserService;
+    private PdfParserService pdfParserService;
 
+    @Autowired
+    private FileManagerService fileManagerService;
+
+    private static final String ZIP_SUFFIX = "survey_form";
     private SurveyForm currentForm;
     private List<SurveyForm> surveyFormList;
 
@@ -102,6 +107,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         surveyFormList.add(currentForm);
     }
     private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
+        List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
 
@@ -115,9 +121,10 @@ public class SurveyExcelParseService extends ExcelParseService {
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
-                processExcelFileResult.addPdfName(pdfParserService.generatePdfFromSurvey(surveyForm));
+                pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
                 credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
+            processExcelFileResult.setZipName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
         }
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");

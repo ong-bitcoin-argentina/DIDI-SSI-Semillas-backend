@@ -7,28 +7,53 @@ import java.util.stream.Collectors;
 
 public enum PersonQuestion implements CategoryQuestion {
 
-    NAME("NOMBRE"),
-    SURNAME("APELLIDO"),
-    ID_TYPE("TIPO DOCUMENTO"),
+    NAME("NOMBRE"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
+    SURNAME("APELLIDO"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
+    ID_TYPE("TIPO DOCUMENTO"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
     ID_NUMBER("NUMERO DE DOCUMENTO"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+
         @Override
         public Class<?> getDataType() {
             return Long.class;
         }
     },
-    GENDER("GENERO"),
+    GENDER("GENERO"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
     BIRTH_DATE("FECHA DE NACIMIENTO"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+
         @Override
         public Class<?> getDataType() {
             return LocalDate.class;
         }
     },
-    RELATION("PARENTESCO"){
-        @Override
-        public boolean isRequired() {
-            return false;
-        }
-    },
+    RELATION("PARENTESCO"),
     OCCUPATION("OCUPACION"),
     STUDIES("ESTUDIA"),
     WORKS("TRABAJA"),
@@ -82,7 +107,7 @@ public enum PersonQuestion implements CategoryQuestion {
     }
 
     public boolean isRequired(){
-        return true;
+        return false;
     }
 
     public Class<?> getDataType() { return String.class; }

@@ -9,10 +9,25 @@ public enum DidiSyncStatus implements CategoryQuestion {
     LOCK("CHAPA"),
     WOOD("MADERA"),
     PAPERBOARD("CARTON"),
-    DISTRICT("DISTRITO DE RESIDENCIA"),
+    DISTRICT("DISTRITO DE RESIDENCIA"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
     DWELLING_CONDITION("CONDICIONES DE VIVIENDA"),
-    HOLDING_TYPE("TIPO DE TENENCIA"),
-    DWELLING_TYPE("VIVIENDA"),
+    HOLDING_TYPE("TIPO DE TENENCIA"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
+    DWELLING_TYPE("VIVIENDA"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
+    },
     LIGHT_INSTALLATION("INSTALACION DE LUZ"),
     GENERAL_CONDITIONS("CONDICIONES GRALES"),
     NEIGHBORHOOD_TYPE("TIPO DE BARRIO"),
@@ -56,7 +71,7 @@ public enum DidiSyncStatus implements CategoryQuestion {
     }
 
     public boolean isRequired() {
-        return true;
+        return false;
     }
 
     public Class<?> getDataType() { return String.class; }

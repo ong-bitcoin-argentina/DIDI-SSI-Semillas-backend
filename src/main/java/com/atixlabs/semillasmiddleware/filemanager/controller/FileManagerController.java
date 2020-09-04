@@ -54,7 +54,7 @@ public class FileManagerController {
         //return(ResponseEntity.ok().build());
     }
 
-    @GetMapping("/pdf/download")
+    @GetMapping("/download")
     public @ResponseBody byte[] downloadDocument(@RequestParam String fileName) throws IOException {
 
         InputStream in = new FileInputStream(fileManagerService.getFileFromTmp(fileName));

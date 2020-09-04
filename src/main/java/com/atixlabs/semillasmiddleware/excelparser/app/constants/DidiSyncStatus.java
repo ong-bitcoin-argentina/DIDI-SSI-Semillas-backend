@@ -39,13 +39,13 @@ public enum DidiSyncStatus implements CategoryQuestion {
     ANTIQUITY("¿DESDE QUE ANO VIVIS EN ESTA VIVIENDA?"){
         @Override
         public Class<?> getDataType() {
-            return Integer.class;
+            return Long.class;
         }
     },
     NUMBER_OF_ENVIRONMENTS("CANTIDAD DE AMBIENTES"){
         @Override
         public Class<?> getDataType() {
-            return Integer.class;
+            return Long.class;
         }
     },
     RENTAL("MONTO ALQUILER"){

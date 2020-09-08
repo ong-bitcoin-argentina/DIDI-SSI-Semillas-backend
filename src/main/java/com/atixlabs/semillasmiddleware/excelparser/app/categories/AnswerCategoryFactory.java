@@ -56,7 +56,7 @@ public class AnswerCategoryFactory {
 
         if (categoryEnum.getAmount() == 1){
             try {
-                categoryList.add((Category) categoryClass.getConstructor(String.class).newInstance(categoryEnum.getCode()));
+                categoryList.add((Category) categoryClass.getConstructor(String.class, Categories.class).newInstance(categoryEnum.getCode(), categoryEnum));
             } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                 log.error("No existe archivo de clase asociada a la categoria recibida, no se puede vincular con constructor: "+e.getMessage());
             }
@@ -64,7 +64,7 @@ public class AnswerCategoryFactory {
         else {
             for (int i = 1; i<categoryEnum.getAmount()+1; i++) {
                 try {
-                    categoryList.add((Category) categoryClass.getConstructor(String.class).newInstance(categoryEnum.getCode()+" "+i));
+                    categoryList.add((Category) categoryClass.getConstructor(String.class, Categories.class).newInstance(categoryEnum.getCode()+" "+i, categoryEnum));
                 } catch (InstantiationException | IllegalAccessException | InvocationTargetException | NoSuchMethodException e) {
                     log.error("No existe archivo de clase asociada a la categoria recibida, no se puede vincular con constructor: "+e.getMessage());
                 }

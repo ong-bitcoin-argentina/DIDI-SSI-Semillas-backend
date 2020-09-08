@@ -19,8 +19,8 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Slf4j
-@Getter
 @Setter
+@Getter
 public class PersonCategory implements Category {
 
     String categoryUniqueName;
@@ -62,7 +62,8 @@ public class PersonCategory implements Category {
     private AnswerDto civilStatus;
     private AnswerDto email;
 
-    public PersonCategory(String categoryUniqueName){
+    //RECIBIR CATEGORIA
+    public PersonCategory(String categoryUniqueName, Categories category){
         this.name = new AnswerDto(PersonQuestion.NAME);
         this.surname = new AnswerDto(PersonQuestion.SURNAME);
         this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
@@ -99,7 +100,7 @@ public class PersonCategory implements Category {
         this.email = new AnswerDto(PersonQuestion.EMAIL);
 
         this.categoryUniqueName = categoryUniqueName;
-        this.categoryName = Categories.BENEFICIARY_CATEGORY_NAME;//TODO:CREAR TIPO PERSONA O RESOLVER AGRUPACION
+        this.categoryName = category;//TODO:CREAR TIPO PERSONA O RESOLVER AGRUPACION
 
         String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryUniqueName.replaceAll("DATOS|DEL","")));
 
@@ -298,7 +299,6 @@ public class PersonCategory implements Category {
     public String getRelation() {
         return (String) relation.getAnswer();
     }
-
 
     @Override
     public String toString() {

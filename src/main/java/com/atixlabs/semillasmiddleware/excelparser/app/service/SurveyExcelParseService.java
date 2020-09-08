@@ -124,7 +124,11 @@ public class SurveyExcelParseService extends ExcelParseService {
                 pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
                 credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
-            processExcelFileResult.setZipName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
+
+            if(pdfsGenerated.size() > 1)
+                processExcelFileResult.setDownloadableFileName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
+            else
+                processExcelFileResult.setDownloadableFileName(pdfsGenerated.get(0));
         }
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");

@@ -1,9 +1,13 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.*;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -40,25 +44,6 @@ public enum Categories {
         @Override
         public Class<?> getLinkedClass() {
             return DwellingCategory.class;
-        }
-    },
-
-    PATRIMONIAL_SITUATION_CATEGORY_NAME("SITUACION PATRIMONIAL"){
-        @Override
-        public Class<?> getLinkedClass() {
-            return PatrimonialSituationCategory.class;
-        }
-    },
-    FAMILIAR_FINANCE_CATEGORY_NAME("FINANZAS FAMILIARES"){
-        @Override
-        public Class<?> getLinkedClass() {
-            return FamiliarFinanceCategory.class;
-        }
-    },
-    FINANCIAL_SITUATION_CATEGORY_NAME("SITUACION CREDITICIA"){
-        @Override
-        public Class<?> getLinkedClass() {
-            return FinancialSituationCategory.class;
         }
     };
 

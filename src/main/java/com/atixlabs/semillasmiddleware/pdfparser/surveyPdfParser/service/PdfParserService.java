@@ -1,7 +1,6 @@
 package com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
@@ -41,16 +40,6 @@ public class PdfParserService {
         log.info("Creating pdf from survey form");
         Stack<Category> categoriesStack = new Stack<>();
         //top down order
-
-        //Financial situation
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.FINANCIAL_SITUATION_CATEGORY_NAME.getCode(), null));
-        //Entrepreneurship
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.ENTREPRENEURSHIP_CATEGORY_NAME.getCode(), null));
-        //Familiar finance
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.FAMILIAR_FINANCE_CATEGORY_NAME.getCode(), null));
-        //Patrimonial situation
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.PATRIMONIAL_SITUATION_CATEGORY_NAME.getCode(), null));
-
         categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.DWELLING_CATEGORY_NAME.getCode(), null));
 
         PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);

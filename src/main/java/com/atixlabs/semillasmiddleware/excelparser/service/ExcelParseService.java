@@ -32,7 +32,7 @@ public abstract class ExcelParseService {
     FileUtil fileUtil;
 
 
-    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials) throws Exception {
         log.info("Validation for file "+filePath+" begins");
 
         File xlsxFile = fileUtil.getFileByPath(filePath);
@@ -52,7 +52,7 @@ public abstract class ExcelParseService {
             rowsIterator.next();
 
         while (rowsIterator.hasNext()) {
-            processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
+            processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult, createCredentials);
         }
 
         fileInput.close();
@@ -61,6 +61,6 @@ public abstract class ExcelParseService {
     }
 
 
-    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws Exception;
+    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials) throws Exception;
 
 }

@@ -65,7 +65,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult){
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
 
         AnswerRow answerRow = null;
         try {
@@ -95,7 +95,7 @@ public class SurveyExcelParseService extends ExcelParseService {
             }
         }
         if(!hasNext)
-            endOfFileHandler(processExcelFileResult);
+            endOfFileHandler(processExcelFileResult, createCredentials);
 
         return processExcelFileResult;
     }
@@ -106,7 +106,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult){
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
         List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
@@ -122,7 +122,8 @@ public class SurveyExcelParseService extends ExcelParseService {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
                 pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
-                credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                if (createCredentials)
+                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
             processExcelFileResult.setZipName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
         }

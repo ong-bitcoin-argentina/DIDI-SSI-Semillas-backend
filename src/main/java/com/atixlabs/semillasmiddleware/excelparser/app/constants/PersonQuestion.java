@@ -63,12 +63,7 @@ public enum PersonQuestion implements CategoryQuestion {
             return Long.class;
         }
     },
-    RESIDENCE_TIME_IN_COUNTRY("TIEMPO DE RESIDENCIA EN EL PAIS"){
-        @Override
-        public Class<?> getDataType() {
-            return Long.class;
-        }
-    },
+    RESIDENCE_TIME_IN_COUNTRY("TIEMPO DE RESIDENCIA EN EL PAIS"),
     FACEBOOK("FACEBOOK"),
     ADDRESS("DIRECCION"),
     BETWEEN_STREETS("ENTRE CALLES"),

@@ -16,7 +16,7 @@ import java.util.Stack;
 public class PdfParserService {
 
     private static final String TEMPLATE_NAME = "excell_survey_data.html";
-    private static final String PDF_SUFFIX = "survey_";
+    private static final String PDF_SUFFIX = "Encuesta_";
     private static final String CATEGORY_NAME_PARAM = "{{categoryName}}";
     private static final String TABLE_CONTENT_PARAM = "{{tableContent}}";
     private static final String QUESTION_PARAM = "{{question}}";

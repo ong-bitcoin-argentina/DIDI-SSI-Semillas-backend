@@ -38,7 +38,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) {
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials) {
 
         if (this.checkIfRowIsEmpty(currentRow)){
             log.debug("row {} is empty",currentRow.getRowNum());
@@ -89,12 +89,12 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
 
     @Override
-    public ProcessExcelFileResult processSingleSheetFile(String filePath) throws Exception {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials) throws Exception {
         log.info("Sancor Salud processSingleSheetFile");
         this.cleanSancorPolicies();
         ProcessExcelFileResult processExcelFileResult = null;
         try {
-            processExcelFileResult = super.processSingleSheetFile(filePath);
+            processExcelFileResult = super.processSingleSheetFile(filePath, true);
         }finally {
             this.cleanSancorPolicies();
         }
@@ -114,7 +114,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
         ProcessExcelFileResult processExcelFileResult = null;
         try {
-            processExcelFileResult = super.processSingleSheetFile(filePath);
+            processExcelFileResult = super.processSingleSheetFile(filePath, true);
             log.info("Sancor policies to save {}", (sancorPolicys != null ? sancorPolicys.size() : 0));
 
             for (SancorPolicy sancorPolicy : sancorPolicys) {

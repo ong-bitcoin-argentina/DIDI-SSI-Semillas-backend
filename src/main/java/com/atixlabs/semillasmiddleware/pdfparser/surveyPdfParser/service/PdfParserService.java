@@ -71,7 +71,6 @@ public class PdfParserService {
             String rows = category.getHtmlFromTemplate(rowTemplate, QUESTION_PARAM, ANSWER_PARAM);
             htmlStack += header+rows;
         }
-        String a = "ao";
         return htmlStack;
     }
 }

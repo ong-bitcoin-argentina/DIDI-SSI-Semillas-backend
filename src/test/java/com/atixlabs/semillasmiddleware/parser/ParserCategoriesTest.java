@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.parser;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
@@ -184,7 +185,7 @@ public class ParserCategoriesTest {
     @Test
     public void entrepreneurshipCategoryIsNotValidIfNameAndTypeAreMissing() {
         ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
-        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory("EMPRENDIMIENTO");
+        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory("EMPRENDIMIENTO", Categories.ENTREPRENEURSHIP_CATEGORY_NAME);
 
         /*
         TYPE("TIPO DE EMPRENDIMIENTO"),
@@ -208,7 +209,7 @@ public class ParserCategoriesTest {
     @Test
     public void entrepreneurshipCategoryIsValidIfOptionalEndingDateIsMissing() throws InvalidRowException {
         ProcessExcelFileResult excelFileResult = new ProcessExcelFileResult();
-        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory("EMPRENDIMIENTO");
+        EntrepreneurshipCategory entrepreneurshipCategory = new EntrepreneurshipCategory("EMPRENDIMIENTO", Categories.ENTREPRENEURSHIP_CATEGORY_NAME);
 
         answerCell3.setCellValue("");
         answerRowActivityEndingDate = new AnswerRow(row3);

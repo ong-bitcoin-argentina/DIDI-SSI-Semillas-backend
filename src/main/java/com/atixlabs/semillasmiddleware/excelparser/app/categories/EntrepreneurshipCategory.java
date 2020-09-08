@@ -29,7 +29,7 @@ public class EntrepreneurshipCategory implements Category {
     private AnswerDto address;
     private AnswerDto activityEndingDate;
 
-    public EntrepreneurshipCategory(String categoryOriginalName) {
+    public EntrepreneurshipCategory(String categoryUniqueName, Categories category) {
         this.type = new AnswerDto(EntrepreneurshipQuestion.TYPE);
         this.activityStartDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_START_DATE);
         this.mainActivity = new AnswerDto(EntrepreneurshipQuestion.MAIN_ACTIVITY);
@@ -37,8 +37,8 @@ public class EntrepreneurshipCategory implements Category {
         this.address = new AnswerDto(EntrepreneurshipQuestion.ADDRESS);
         this.activityEndingDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_ENDING_DATE);
 
-        this.categoryOriginalName = categoryOriginalName;
-        this.categoryName = Categories.ENTREPRENEURSHIP_CATEGORY_NAME;
+        this.categoryOriginalName = categoryUniqueName;
+        this.categoryName = category;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){

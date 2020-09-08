@@ -75,6 +75,15 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Tipo de Tenencia", credential.getPossessionType()));
         cert.add(new DidiCredentialDataElem("Tipo de Vivienda", credential.getDwellingType()));
         cert.add(new DidiCredentialDataElem("Distrito de Residencia", credential.getDwellingAddress()));
+
+        cert.add(new DidiCredentialDataElem("Instalacion de luz", credential.getLightInstallation()));
+        cert.add(new DidiCredentialDataElem("Condiciones grales", credential.getGeneralConditions()));
+        cert.add(new DidiCredentialDataElem("Tipo de barrio", credential.getNeighborhoodType()));
+        cert.add(new DidiCredentialDataElem("Red de gas", credential.getGas().toString()));
+        cert.add(new DidiCredentialDataElem("Garrafa", credential.getCarafe().toString()));
+        cert.add(new DidiCredentialDataElem("Red de agua", credential.getWater().toString()));
+        cert.add(new DidiCredentialDataElem("Pozo/Bomba", credential.getWatterWell().toString()));
+
     }
 
     private void buildDidiCredentialDataFromEntrepreneurship(CredentialEntrepreneurship credential){

@@ -38,6 +38,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -893,6 +894,20 @@ public class CredentialService {
         credentialDwelling.setDwellingType(entrepreneurshipCategory.getDwellingType());
         credentialDwelling.setDwellingAddress(entrepreneurshipCategory.getDistrict());
         credentialDwelling.setPossessionType(entrepreneurshipCategory.getHoldingType());
+        credentialDwelling.setBrick(entrepreneurshipCategory.getBrick());
+        credentialDwelling.setLock(entrepreneurshipCategory.getLock());
+        credentialDwelling.setWood(entrepreneurshipCategory.getWood());
+        credentialDwelling.setPaperBoard(entrepreneurshipCategory.getPaperBoard());
+        credentialDwelling.setLightInstallation(entrepreneurshipCategory.getLightInstallation());
+        credentialDwelling.setGeneralConditions(entrepreneurshipCategory.getGeneralConditions());
+        credentialDwelling.setNeighborhoodType(entrepreneurshipCategory.getNeighborhoodType());
+        credentialDwelling.setGas(entrepreneurshipCategory.getGas());
+        credentialDwelling.setCarafe(entrepreneurshipCategory.getCarafe());
+        credentialDwelling.setWater(entrepreneurshipCategory.getWater());
+        credentialDwelling.setWatterWell(entrepreneurshipCategory.getWatterWell());
+        credentialDwelling.setAntiquity(entrepreneurshipCategory.getAntiquity());
+        credentialDwelling.setNumberOfEnvironments(entrepreneurshipCategory.getNumberOfEnvironments());
+        credentialDwelling.setRental(entrepreneurshipCategory.getRental());
 
         credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
         credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());

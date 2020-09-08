@@ -38,4 +38,12 @@ public interface Category {
      default List<AnswerDto> getAnswersList(){
           return new ArrayList<>();
      }
+
+     default Boolean getBooleanFromAnswer(AnswerDto answerDto){
+          if (answerDto.getAnswer() == null) return null;
+          String answer = (String) answerDto.getAnswer();
+          if (answer.equalsIgnoreCase("si")) return true;
+          if (answer.equalsIgnoreCase("no")) return false;
+          return null;
+     }
 }

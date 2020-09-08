@@ -37,7 +37,7 @@ public class DwellingCategory implements Category {
     AnswerDto numberOfEnvironments; //cantidad de ambientes
     AnswerDto rental; //monto alquiler
 
-    public DwellingCategory(String categoryOriginalName){
+    public DwellingCategory(String categoryUniqueName, Categories category){
         this.brick= new AnswerDto(DidiSyncStatus.BRICK);
         this.lock= new AnswerDto(DidiSyncStatus.LOCK);
         this.wood= new AnswerDto(DidiSyncStatus.WOOD);
@@ -58,7 +58,7 @@ public class DwellingCategory implements Category {
         this.numberOfEnvironments= new AnswerDto(DidiSyncStatus.NUMBER_OF_ENVIRONMENTS);
         this.rental= new AnswerDto(DidiSyncStatus.RENTAL);
 
-        this.categoryOriginalName = categoryOriginalName;
+        this.categoryOriginalName = categoryUniqueName;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
@@ -193,6 +193,65 @@ public class DwellingCategory implements Category {
 
     public String getDistrict(){
         return (String) this.district.getAnswer();
+    }
+
+    public Boolean getBrick() {
+        return getBooleanFromAnswer(this.brick);
+    }
+
+    public Boolean getLock() {
+        return getBooleanFromAnswer(this.lock);
+    }
+
+    public Boolean getWood() {
+        return getBooleanFromAnswer(this.wood);
+    }
+
+    public Boolean getPaperBoard() {
+        return getBooleanFromAnswer(this.paperBoard);
+    }
+
+    public String getLightInstallation() {
+        return (String) this.lightInstallation.getAnswer();
+    }
+
+    public String getGeneralConditions() {
+        return (String) this.generalConditions.getAnswer();
+    }
+
+    public String getNeighborhoodType() {
+        return (String) this.neighborhoodType.getAnswer();
+    }
+
+    public Boolean getGas() {
+        return getBooleanFromAnswer(this.gas);
+    }
+
+    public Boolean getCarafe() {
+        return getBooleanFromAnswer(this.carafe);
+    }
+
+    public Boolean getWater() {
+        return getBooleanFromAnswer(this.water);
+    }
+
+    public Boolean getWatterWell() {
+        return getBooleanFromAnswer(this.watterWell);
+    }
+
+    public Integer getAntiquity() {
+        if(this.antiquity.getAnswer() == null) return null;
+        return ((Long) this.antiquity.getAnswer()).intValue();
+    }
+
+    public Integer getNumberOfEnvironments() {
+        if(this.numberOfEnvironments.getAnswer() == null) return null;
+        return ((Long) this.numberOfEnvironments.getAnswer()).intValue();
+    }
+
+    public Long getRental() {
+        if(this.rental.getAnswer() == null) return null;
+        return (Long) this.rental.getAnswer();
     }
 
     @Override

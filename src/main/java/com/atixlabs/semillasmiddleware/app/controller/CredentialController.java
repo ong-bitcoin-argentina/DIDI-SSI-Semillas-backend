@@ -179,7 +179,7 @@ public class CredentialController {
         }catch (CredentialNotExistsException credEx){
             log.error("There are no Benefit credentials emitted for the specified beneficiary and credit holder");
             return ResponseEntity.badRequest().body(ApiResponse.error()
-                    .setBody("You must either specify a provider id or an email")
+                    .setBody("There are no Benefit credentials emitted for the specified beneficiary and credit holder")
                     .setUserMessage("Ocurrió un error al compartir tu credencial de Identidad Semillas con el Prestador del Servicio. Por favor, contactate con tu asesor de Programa Semillas."));
 
         }catch (Exception ex){

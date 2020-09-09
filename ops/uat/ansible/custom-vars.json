@@ -5,6 +5,9 @@
     },
     {
       "key": "{{ lookup('file', './gitlabci.pub') }}"
+    },
+    {
+      "key": "{{ lookup('file', '../uat/ansible/ssh-keys/eric-stoppel.pub') }}"
     }
   ]
 }

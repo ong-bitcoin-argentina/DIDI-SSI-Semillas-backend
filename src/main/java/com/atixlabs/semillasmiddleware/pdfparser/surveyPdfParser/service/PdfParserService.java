@@ -27,8 +27,8 @@ public class PdfParserService {
 
     private static final String style = "style=\"border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px\"\"";
     private String rowTemplate = "        <tr "+style+">\n" +
-                                 "            <td>{{question}}</td>\n" +
-                                 "            <td>{{answer}}</td>\n" +
+                                 "            <td style=\"width:100%\">{{question}}</td>\n" +
+                                 "            <td style=\"width:100%\">{{answer}}</td>\n" +
                                  "        </tr>";
 
     private String subCategoryTemplate = "   <tr style=\"background-color:  #d8d8d8;\">\n" +

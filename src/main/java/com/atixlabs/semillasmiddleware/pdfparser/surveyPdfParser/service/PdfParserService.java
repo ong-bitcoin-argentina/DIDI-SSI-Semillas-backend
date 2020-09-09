@@ -9,6 +9,9 @@ import com.atixlabs.semillasmiddleware.pdfparser.util.PDFUtil;
 import com.atixlabs.semillasmiddleware.util.EmailTemplatesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.Stack;
 
 
@@ -41,20 +44,9 @@ public class PdfParserService {
         log.info("Creating pdf from survey form");
         Stack<Category> categoriesStack = new Stack<>();
         //top down order
-
-        //Financial situation
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.FINANCIAL_SITUATION_CATEGORY_NAME.getCode(), null));
-        //Entrepreneurship
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.ENTREPRENEURSHIP_CATEGORY_NAME.getCode(), null));
-        //Familiar finance
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.FAMILIAR_FINANCE_CATEGORY_NAME.getCode(), null));
-        //Patrimonial situation
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.PATRIMONIAL_SITUATION_CATEGORY_NAME.getCode(), null));
-
-        categoriesStack.push(surveyForm.getCategoryByUniqueName(Categories.DWELLING_CATEGORY_NAME.getCode(), null));
+        fillStack(categoriesStack, Categories.getCodeList(), surveyForm);
 
         PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
-        categoriesStack.push(beneficiaryCategory);
 
         String html = generateHtmlFromCategories(categoriesStack);
         String template = EmailTemplatesUtil.getTemplate(TEMPLATE_NAME).replace(TABLE_CONTENT_PARAM, html);
@@ -66,11 +58,20 @@ public class PdfParserService {
         String htmlStack = "";
         while (!categoriesStack.empty()){
             Category category = categoriesStack.pop();
+            if (category == null) continue;
             log.info("Create html from category: "+category.getCategoryName());
             String header = headerTemplate.replace(CATEGORY_NAME_PARAM, category.getCategoryUniqueName());
             String rows = category.getHtmlFromTemplate(rowTemplate, QUESTION_PARAM, ANSWER_PARAM);
             htmlStack += header+rows;
         }
         return htmlStack;
+    }
+
+    private void fillStack(Stack<Category> categoriesStack, List<Categories> categories, SurveyForm surveyForm){
+        categories.forEach( cat -> {
+            Optional.ofNullable(surveyForm.getCategoryByUniqueName(cat.getCode(), null))
+                .ifPresent(categoriesStack::push);
+        });
+
     }
 }

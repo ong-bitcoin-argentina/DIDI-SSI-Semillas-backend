@@ -25,6 +25,7 @@ public class PdfParserService {
     private static final String TABLE_CONTENT_PARAM = "{{tableContent}}";
     private static final String QUESTION_PARAM = "{{question}}";
     private static final String ANSWER_PARAM = "{{answer}}";
+    private static final String SUBCATEGORY_PARAM = "{{subCategory}}";
 
     private static final String style = "style=\"border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px\"\"";
     private String rowTemplate = "        <tr "+style+">\n" +
@@ -32,6 +33,10 @@ public class PdfParserService {
                                  "            <td>{{answer}}</td>\n" +
                                  "        </tr>";
 
+    private String subCategoryTemplate = "   <tr style=\"background-color:  #d8d8d8;\">\n" +
+            "            <th colspan=\"2\">\n" +
+            "              {{subCategory}}</th>\n" +
+            "        </tr>";
     private String headerTemplate = "        <tr "+style+">\n" +
                                     "            <th colspan=\"2\">\n" +
                                     "                <br />"+CATEGORY_NAME_PARAM+"\n" +
@@ -61,7 +66,7 @@ public class PdfParserService {
             if (category == null) continue;
             log.info("Create html from category: "+category.getCategoryName());
             String header = headerTemplate.replace(CATEGORY_NAME_PARAM, category.getCategoryUniqueName());
-            String rows = category.getHtmlFromTemplate(rowTemplate, QUESTION_PARAM, ANSWER_PARAM);
+            String rows = category.getHtmlFromTemplate(rowTemplate, subCategoryTemplate, SUBCATEGORY_PARAM, QUESTION_PARAM, ANSWER_PARAM);
             htmlStack += header+rows;
         }
         return htmlStack;

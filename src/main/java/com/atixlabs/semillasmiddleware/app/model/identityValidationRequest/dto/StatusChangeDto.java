@@ -1,5 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto;
 
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -11,13 +13,13 @@ import java.util.Optional;
 @Setter
 public class StatusChangeDto {
     @NotNull
-    private String requestState;
+    private RequestState requestState;
 
-    private Optional<String> rejectReason = Optional.empty();
+    private Optional<RejectReason> rejectReason = Optional.empty();
 
     private Optional<String> rejectionObservations = Optional.empty();
 
-    public StatusChangeDto(String requestState, Optional<String> rejectReason, Optional<String> rejectionObservations ){
+    public StatusChangeDto(RequestState requestState, Optional<RejectReason> rejectReason, Optional<String> rejectionObservations ){
         this.requestState = requestState;
         this.rejectReason = rejectReason;
         this.rejectionObservations = rejectionObservations;

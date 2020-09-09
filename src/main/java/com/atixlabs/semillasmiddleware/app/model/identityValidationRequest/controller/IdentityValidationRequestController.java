@@ -58,7 +58,7 @@ public class IdentityValidationRequestController {
     @PatchMapping("/{id}")
     public ResponseEntity<String> updateRequest(@PathVariable @Min(1) Long id, @RequestBody @Valid StatusChangeDto statusChangeDto){
 
-        if (!statusChangeDto.getRejectReason().isPresent() && RequestState.valueOf(statusChangeDto.getRequestState()).equals(RequestState.FAILURE))
+        if (!statusChangeDto.getRejectReason().isPresent() && statusChangeDto.getRequestState().equals(RequestState.FAILURE))
             return ResponseEntity.badRequest().body("You must specify a rejection reason");
 
         try{

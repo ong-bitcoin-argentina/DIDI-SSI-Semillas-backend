@@ -26,7 +26,7 @@ public class FinancialSituationCategory implements Category {
     private AnswerDto reason;
     private AnswerDto year;
 
-    public FinancialSituationCategory(String categoryOriginalName) {
+    public FinancialSituationCategory(String categoryUniqueName, Categories category) {
 
         this.previousCredits = new AnswerDto(FinancialSituationQuestion.PREVIOUS_CREDITS);
         this.previousUnpaidCredit = new AnswerDto(FinancialSituationQuestion.PREVIOUS_UNPAID_CREDIT);
@@ -34,8 +34,8 @@ public class FinancialSituationCategory implements Category {
         this.reason = new AnswerDto(FinancialSituationQuestion.REASON);
         this.year = new AnswerDto(FinancialSituationQuestion.YEAR);
 
-        this.categoryOriginalName = categoryOriginalName;
-        this.categoryName = Categories.FINANCIAL_SITUATION_CATEGORY_NAME;
+        this.categoryOriginalName = categoryUniqueName;
+        this.categoryName = category;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){

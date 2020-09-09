@@ -10,9 +10,7 @@ import com.atixlabs.semillasmiddleware.util.EmailTemplatesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 
 @Service
@@ -73,6 +71,7 @@ public class PdfParserService {
     }
 
     private void fillStack(Stack<Category> categoriesStack, List<Categories> categories, SurveyForm surveyForm){
+        Collections.reverse(categories);
         categories.forEach( cat -> {
             Optional.ofNullable(surveyForm.getCategoryByUniqueName(cat.getCode(), null))
                 .ifPresent(categoriesStack::push);

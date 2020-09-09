@@ -10,7 +10,9 @@ import lombok.Getter;
 import lombok.Setter;
 
 import java.util.Arrays;
+import java.util.LinkedList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Setter
 @Getter
@@ -27,7 +29,7 @@ public class PatrimonialSituationCategory implements Category {
     private AnswerDto property;
     private AnswerDto total;
 
-    public PatrimonialSituationCategory(String categoryOriginalName) {
+    public PatrimonialSituationCategory(String categoryUniqueName, Categories category) {
 
         this.patrimonyData = new AnswerDto(PatrimonialSituationQuestion.PATRIMONY_DATA);
         this.cash = new AnswerDto(PatrimonialSituationQuestion.CASH);
@@ -37,8 +39,8 @@ public class PatrimonialSituationCategory implements Category {
         this.property = new AnswerDto(PatrimonialSituationQuestion.PROPERTY);
         this.total = new AnswerDto(PatrimonialSituationQuestion.TOTAL);
 
-        this.categoryOriginalName = categoryOriginalName;
-        this.categoryName = Categories.PATRIMONIAL_SITUATION_CATEGORY_NAME;
+        this.categoryOriginalName = categoryUniqueName;
+        this.categoryName = category;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){

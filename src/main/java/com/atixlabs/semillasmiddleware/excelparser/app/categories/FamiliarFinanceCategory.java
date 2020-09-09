@@ -49,7 +49,7 @@ public class FamiliarFinanceCategory implements Category {
     private AnswerDto totalMonthlyExit2;
     private AnswerDto totalMonthlyFamiliarSurplus;
 
-    public FamiliarFinanceCategory(String categoryOriginalName) {
+    public FamiliarFinanceCategory(String categoryUniqueName, Categories category) {
 
         this.monthlyEntries = new AnswerDto(FamiliarFinanceQuestion.MONTHLY_ENTRIES);
         this.monthlyExits = new AnswerDto(FamiliarFinanceQuestion.MONTHLY_EXITS);
@@ -81,8 +81,8 @@ public class FamiliarFinanceCategory implements Category {
         this.totalMonthlyExit2 = new AnswerDto(FamiliarFinanceQuestion.TOTAL_MONTHLY_EXIT_2);
         this.totalMonthlyFamiliarSurplus = new AnswerDto(FamiliarFinanceQuestion.TOTAL_MONTHLY_FAMILIAR_SURPLUS);
 
-        this.categoryOriginalName = categoryOriginalName;
-        this.categoryName = Categories.FAMILIAR_FINANCE_CATEGORY_NAME;
+        this.categoryOriginalName = categoryUniqueName;
+        this.categoryName = category;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {

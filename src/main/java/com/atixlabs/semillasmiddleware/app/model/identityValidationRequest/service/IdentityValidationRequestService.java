@@ -68,17 +68,16 @@ public class IdentityValidationRequestService {
         Optional<String> rejectionObservations = statusChangeDto.getRejectionObservations();
         log.info("Changing identity validation request state, request id["+idValidationRequest+"], state["+statusChangeDto.getRequestState()+"], revocation reason["+rejectionObservations.orElse("")+"]");
 
-        RequestState requestState = RequestState.valueOf(statusChangeDto.getRequestState());
-        Optional<RejectReason> rejectReason = statusChangeDto.getRejectReason().map(RejectReason::valueOf);
-
         IdentityValidationRequest identityValidationRequest = this.findById(idValidationRequest)
                 .orElseThrow(InexistentIdentityValidationRequestException::new);
 
         log.info("Request found");
         identityValidationRequest.setReviewDate(LocalDate.now());
-        identityValidationRequest.setRequestState(requestState);
-        rejectReason.ifPresent(identityValidationRequest::setRejectReason);
-        rejectionObservations.ifPresent(identityValidationRequest::setRejectionObservations);
+        identityValidationRequest.setRequestState(statusChangeDto.getRequestState());
+        if (statusChangeDto.getRequestState().equals(RequestState.FAILURE)) {
+            statusChangeDto.getRejectReason().ifPresent(identityValidationRequest::setRejectReason);
+            rejectionObservations.ifPresent(identityValidationRequest::setRejectionObservations);
+        }
         log.info("Final request state: \n "+ identityValidationRequest.toString());
 
         identityValidationRequestRepository.save(identityValidationRequest);

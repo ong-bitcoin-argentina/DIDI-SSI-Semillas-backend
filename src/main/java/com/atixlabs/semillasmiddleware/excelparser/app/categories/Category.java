@@ -20,15 +20,19 @@ public interface Category {
      boolean isEmpty();
      boolean isRequired();
 
-     default String getHtmlFromTemplate(String template, String questionParam, String answerParam) {
+     default String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
           String html="";
 
           List<AnswerDto> answerDtos = this.getAnswersList();
 
           for (AnswerDto answer : answerDtos){
-               if (answer.getQuestion() != null && answer.getAnswer() != null)
+               if (answer.getAnswer() == "SUBCATEGORY") {
+                    html += subCategoryTemplate
+                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
+               }
+               else if (answer.getQuestion() != null && answer.getAnswer() != null)
 
-                    html += template
+                    html += rowTemplate
                             .replace(questionParam, answer.getQuestion().getQuestionName())
                             .replace(answerParam, answer.getAnswer().toString());
           }

@@ -52,6 +52,7 @@ public class PatrimonialSituationCategory implements Category {
 
         switch (questionMatch) {
             case PATRIMONY_DATA:
+                answerRow.setAnswer("SUBCATEGORY");
                 this.patrimonyData.setAnswer(answerRow, processExcelFileResult);
                 break;
             case CASH:

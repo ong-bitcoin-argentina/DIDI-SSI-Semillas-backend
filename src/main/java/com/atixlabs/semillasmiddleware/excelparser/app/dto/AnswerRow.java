@@ -138,6 +138,10 @@ public class AnswerRow extends ExcelRow {
     return null;
     }
 
+    public void setAnswer(String answer) {
+        this.answer = answer;
+    }
+
     @Override
     public String toString() {
         return "["+this.rowNum +"]{" +

@@ -44,7 +44,7 @@ public class IdentityValidationRequestServiceTest {
     public void whenChangingStateOfInexistentExpectToThrowInexistentRequestException() {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
-        StatusChangeDto statusChangeDto = new StatusChangeDto("FAILURE", Optional.empty(), Optional.of("reason"));
+        StatusChangeDto statusChangeDto = new StatusChangeDto(RequestState.FAILURE, Optional.empty(), Optional.of("reason"));
         assertThrows(InexistentIdentityValidationRequestException.class, () -> identityValidationRequestService.changeRequestState(Long.MAX_VALUE, statusChangeDto));
     }
 
@@ -53,7 +53,7 @@ public class IdentityValidationRequestServiceTest {
         identityValidationRequestRepository.save(getNewRequest());
         identityValidationRequestService.findById(1l).orElseGet(() -> fail());
         try {
-            StatusChangeDto statusChangeDto = new StatusChangeDto("SUCCESS", Optional.empty(), Optional.empty());
+            StatusChangeDto statusChangeDto = new StatusChangeDto(RequestState.SUCCESS, Optional.empty(), Optional.empty());
             identityValidationRequestService.changeRequestState(1l, statusChangeDto);
             Assert.assertEquals(RequestState.SUCCESS,identityValidationRequestRepository.findById(1l).get().getRequestState());
         }catch (InexistentIdentityValidationRequestException ex){

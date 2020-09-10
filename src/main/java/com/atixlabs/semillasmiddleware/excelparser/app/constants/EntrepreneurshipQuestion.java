@@ -23,7 +23,7 @@ public enum EntrepreneurshipQuestion implements CategoryQuestion {
     ACTIVITY_START_DATE("FECHA DE INICIO"){
         @Override
         public Class<?> getDataType() {
-            return Long.class;
+            return Integer.class;
         }
     },
     MAIN_ACTIVITY("ACTIVIDAD PRINCIPAL"),

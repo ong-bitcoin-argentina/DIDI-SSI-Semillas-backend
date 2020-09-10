@@ -340,8 +340,8 @@ public class EntrepreneurshipCategory implements Category {
     public String getType(){
         return (String) this.type.getAnswer();
     }
-    public LocalDate getActivityStartDate(){
-        return (LocalDate) this.activityStartDate.getAnswer();
+    public Integer getActivityStartDate(){
+        return (Integer) this.activityStartDate.getAnswer();
     }
     public String getMainActivity(){
         return (String) this.mainActivity.getAnswer();

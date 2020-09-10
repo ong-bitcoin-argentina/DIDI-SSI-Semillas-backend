@@ -26,7 +26,7 @@ public interface Category {
           List<AnswerDto> answerDtos = this.getAnswersList();
 
           for (AnswerDto answer : answerDtos){
-               if (answer.getAnswer() == "SUBCATEGORY") {
+               if (answer.getAnswer().equals("SUBCATEGORY")) {
                     html += subCategoryTemplate
                             .replace(subcategoryParam, answer.getQuestion().getQuestionName());
                }

@@ -84,6 +84,10 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Red de agua", credential.getWater().toString()));
         cert.add(new DidiCredentialDataElem("Pozo/Bomba", credential.getWatterWell().toString()));
 
+        cert.add(new DidiCredentialDataElem("Localidad", ""));
+        cert.add(new DidiCredentialDataElem("Barrio", ""));
+        cert.add(new DidiCredentialDataElem("Direccion", ""));
+
     }
 
     private void buildDidiCredentialDataFromEntrepreneurship(CredentialEntrepreneurship credential){

@@ -5,8 +5,6 @@ import com.atixlabs.semillasmiddleware.app.dto.ActionFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
-import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
-import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.repository.ActionLogRepository;
 import com.atixlabs.semillasmiddleware.security.util.AuthUtil;
 import com.atixlabs.semillasmiddleware.util.DateUtil;

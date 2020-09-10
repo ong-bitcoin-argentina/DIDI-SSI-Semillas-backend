@@ -6,7 +6,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum PersonQuestion implements CategoryQuestion {
+    // Headers
+    FIRST_LAST_NAME("NOMBRE Y APELLIDO"),
+    INSTITUTION_LEVEL("NIVEL DE INSTITUCION"),
+    ADDRESS_DATA_1("DATOS DOMICILIO 1"),
+    PHONE_DATA("DATOS TELEFONO"),
+    REFERENCE_CONTACT("CONTACTO DE REFERENCIA"),
+    EDUCATION_LEVEL("NIVEL EDUCATIVO"),
 
+    //Questions
     NAME("NOMBRE"){
         @Override
         public boolean isRequired() {

@@ -19,6 +19,8 @@ public class FamiliarFinanceCategory implements Category {
     private String categoryOriginalName;
     private Categories categoryName;
 
+    private AnswerDto monthlyEntries;
+    private AnswerDto monthlyExits;
     private AnswerDto entryEntrepreneurship;
     private AnswerDto entryApplicant;
     private AnswerDto entryFamily;
@@ -47,8 +49,10 @@ public class FamiliarFinanceCategory implements Category {
     private AnswerDto totalMonthlyExit2;
     private AnswerDto totalMonthlyFamiliarSurplus;
 
-    public FamiliarFinanceCategory(String categoryOriginalName) {
+    public FamiliarFinanceCategory(String categoryUniqueName, Categories category) {
 
+        this.monthlyEntries = new AnswerDto(FamiliarFinanceQuestion.MONTHLY_ENTRIES);
+        this.monthlyExits = new AnswerDto(FamiliarFinanceQuestion.MONTHLY_EXITS);
         this.entryEntrepreneurship = new AnswerDto(FamiliarFinanceQuestion.ENTRY_ENTREPRENEURSHIP);
         this.entryApplicant = new AnswerDto(FamiliarFinanceQuestion.ENTRY_APPLICANT);
         this.entryFamily = new AnswerDto(FamiliarFinanceQuestion.ENTRY_FAMILY);
@@ -77,8 +81,8 @@ public class FamiliarFinanceCategory implements Category {
         this.totalMonthlyExit2 = new AnswerDto(FamiliarFinanceQuestion.TOTAL_MONTHLY_EXIT_2);
         this.totalMonthlyFamiliarSurplus = new AnswerDto(FamiliarFinanceQuestion.TOTAL_MONTHLY_FAMILIAR_SURPLUS);
 
-        this.categoryOriginalName = categoryOriginalName;
-        this.categoryName = Categories.FAMILIAR_FINANCE_CATEGORY_NAME;
+        this.categoryOriginalName = categoryUniqueName;
+        this.categoryName = category;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
@@ -91,6 +95,14 @@ public class FamiliarFinanceCategory implements Category {
             return;
 
         switch (questionMatch) {
+            case MONTHLY_ENTRIES:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.monthlyEntries.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case MONTHLY_EXITS:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.monthlyExits.setAnswer(answerRow, processExcelFileResult);
+                break;
             case ENTRY_ENTREPRENEURSHIP:
                 this.entryEntrepreneurship.setAnswer(answerRow, processExcelFileResult);
                 break;
@@ -237,10 +249,11 @@ public class FamiliarFinanceCategory implements Category {
     @Override
     public List<AnswerDto> getAnswersList() {
         return Arrays.asList(
-                entryEntrepreneurship, entryApplicant, entryFamily, totalMonthlyEntry, familiarSurplusFortnight, exitFeeding, exitGas,
-                exitEducation, exitTransport, exitWater, exitElectricity, exitPhone, exitFit, exitTaxes, exitClothing, exitRent, exitOil,
-                exitCredits, exitLeisure, exitGambling, exitTv, exitInternet, exitOthers, totalMonthlyExit, totalMonthlyEntry2, totalMonthlyExit2,
-                totalMonthlyFamiliarSurplus
+                monthlyEntries, entryEntrepreneurship, entryApplicant, entryFamily, totalMonthlyEntry,
+                familiarSurplusFortnight,
+                monthlyExits, exitFeeding, exitGas, exitEducation, exitTransport, exitWater, exitElectricity, exitPhone, exitFit, exitTaxes, exitClothing, exitRent,
+                exitOil, exitCredits, exitLeisure, exitGambling, exitTv, exitInternet, exitOthers, totalMonthlyExit,
+                totalMonthlyEntry2, totalMonthlyExit2, totalMonthlyFamiliarSurplus
         );
     }
 }

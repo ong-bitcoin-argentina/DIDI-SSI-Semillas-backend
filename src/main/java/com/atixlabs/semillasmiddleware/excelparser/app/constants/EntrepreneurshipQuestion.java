@@ -8,7 +8,17 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum EntrepreneurshipQuestion implements CategoryQuestion {
-    // Entrepreneurship data
+    // headers
+    ENTREPRENEURSHIP_DATA("DATOS EMPRENDIMIENTO"),
+    ACTIVITY_DEV("DESARROLLO DE LA ACTIVIDAD"),
+    WORK_TIME("TIEMPO DE TRABAJO"),
+    ENTRY_PER_FORTNIGHT("INGRESOS POR QUINCENA"),
+    ENTRY_PER_WEEK("INGRESOS POR SEMANA"),
+    ENTRIES("INGRESOS"),
+    EXITS("EGRESOS"),
+    ENTRIES_EXITS_RELATIONSHIP("RELACION - IGRESOS / EGRESOS MES"),
+
+    // questions
     TYPE("TIPO DE EMPRENDIMIENTO"),
     ACTIVITY_START_DATE("FECHA DE INICIO"){
         @Override

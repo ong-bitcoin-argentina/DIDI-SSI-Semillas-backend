@@ -20,20 +20,22 @@ public class FinancialSituationCategory implements Category {
     private String categoryOriginalName;
     private Categories categoryName;
 
+    private AnswerDto previousCredits;
     private AnswerDto previousUnpaidCredit;
     private AnswerDto name;
     private AnswerDto reason;
     private AnswerDto year;
 
-    public FinancialSituationCategory(String categoryOriginalName) {
+    public FinancialSituationCategory(String categoryUniqueName, Categories category) {
 
+        this.previousCredits = new AnswerDto(FinancialSituationQuestion.PREVIOUS_CREDITS);
         this.previousUnpaidCredit = new AnswerDto(FinancialSituationQuestion.PREVIOUS_UNPAID_CREDIT);
         this.name = new AnswerDto(FinancialSituationQuestion.NAME);
         this.reason = new AnswerDto(FinancialSituationQuestion.REASON);
         this.year = new AnswerDto(FinancialSituationQuestion.YEAR);
 
-        this.categoryOriginalName = categoryOriginalName;
-        this.categoryName = Categories.FINANCIAL_SITUATION_CATEGORY_NAME;
+        this.categoryOriginalName = categoryUniqueName;
+        this.categoryName = category;
     }
 
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
@@ -46,6 +48,10 @@ public class FinancialSituationCategory implements Category {
             return;
 
         switch (questionMatch) {
+            case PREVIOUS_CREDITS:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.previousCredits.setAnswer(answerRow, processExcelFileResult);
+                break;
             case PREVIOUS_UNPAID_CREDIT:
                 this.previousUnpaidCredit.setAnswer(answerRow, processExcelFileResult);
                 break;
@@ -86,6 +92,7 @@ public class FinancialSituationCategory implements Category {
     public String toString() {
         return "FinancialSituationCategory{" +
                 "categoryOriginalName='" + categoryOriginalName + '\'' +
+                ", previousCredits=" + previousCredits +
                 ", previousUnpaidCredit=" + previousUnpaidCredit +
                 ", name=" + name +
                 ", reason=" + reason +
@@ -94,6 +101,6 @@ public class FinancialSituationCategory implements Category {
     }
     @Override
     public List<AnswerDto> getAnswersList() {
-        return Arrays.asList(previousUnpaidCredit, name, reason, year);
+        return Arrays.asList(previousCredits, previousUnpaidCredit, name, reason, year);
     }
 }

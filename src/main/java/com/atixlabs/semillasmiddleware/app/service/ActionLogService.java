@@ -1,9 +1,12 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.dto.ActionDto;
+import com.atixlabs.semillasmiddleware.app.dto.ActionFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
+import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderFilterDto;
+import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.repository.ActionLogRepository;
 import com.atixlabs.semillasmiddleware.security.util.AuthUtil;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -14,13 +17,17 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
+import javax.persistence.criteria.Predicate;
+import javax.swing.*;
 import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 @Slf4j
 @Service
@@ -36,31 +43,33 @@ public class ActionLogService {
         this.authUtil = authUtil;
     }
 
+    private Specification<ActionLog> getActionSpecification (ActionFilterDto actionFilterDto) {
+        return (Specification<ActionLog>) (root, query, cb) -> {
+            Stream<Predicate> predicates = Stream.of(
+                    actionFilterDto.getLevel().map(value -> cb.equal(root.get("level"), value)),
+                    actionFilterDto.getActionType().map(value -> cb.equal(root.get("actionType"), value)),
+                    actionFilterDto.getUsername().map(value -> {
+                    String username = "%" + value + "%";
+                        return cb.like(root.get("userName"), username);
+                    }),
+                    actionFilterDto.getMessage().map(value -> {
+                        String message = "%" + value + "%";
+                        return cb.like(cb.upper(root.get("message")), message);
+                    }),
+                    actionFilterDto.getDateFrom().map(value -> cb.greaterThanOrEqualTo(root.get("executionDateTime"), value)),
+                    actionFilterDto.getDateTo().map(value ->cb.lessThanOrEqualTo(root.get("executionDateTime"), value))
+            ).flatMap(Optional::stream);
+            return cb.and(predicates.toArray(Predicate[]::new));
+        };
+    }
 
     @Value("${app.pageSize}")
     private String size;
 
-    public Page<ActionDto>  find(Integer page, String username, Integer level, Integer actionType, String message, Instant dateFrom, Instant dateTo){
-
-        Page<ActionLog> actions;
-        Pageable pageable = null;
-        if (page != null && page >= 0 && this.size != null)
-           pageable = PageRequest.of(page, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "executionDateTime"));
-        else
-            pageable = PageRequest.of(0, 20, Sort.by(Sort.Direction.ASC, "executionDateTime"));
-
-        actions = actionLogRepository.find(pageable, username, this.getActionLevelEnumByValue(level), this.getActionTypeEnumByValue(actionType),message, dateFrom, dateTo);
-                //this.getListMockActions();
-
-        //return new PageImpl<ActionDto>(actionDtos, pageable, 2);
-
-        Page<ActionDto> pageDto = actions.map(ActionDto::new);
-
-        return pageDto;
-
-        //CredentialPage credentialSet = new CredentialPage(pageDto, credentials.getNumberOfElements());
-
-      //  return pageDto;
+    public Page<ActionDto>  find(Integer page, ActionFilterDto actionFilterDto){
+        Pageable pageable = PageRequest.of(page, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "executionDateTime"));
+        return actionLogRepository.findAll(getActionSpecification(actionFilterDto), pageable)
+                .map(ActionDto::new);
     }
 
     private ActionLevelEnum getActionLevelEnumByValue(Integer value){

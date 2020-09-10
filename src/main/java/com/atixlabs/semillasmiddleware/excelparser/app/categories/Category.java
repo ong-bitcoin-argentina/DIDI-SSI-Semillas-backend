@@ -25,16 +25,15 @@ public interface Category {
 
           List<AnswerDto> answerDtos = this.getAnswersList();
 
-          for (AnswerDto answer : answerDtos){
-               if (answer.getAnswer().equals("SUBCATEGORY")) {
-                    html += subCategoryTemplate
-                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
+          for (AnswerDto answer : answerDtos) {
+               if (answer.getQuestion() != null && answer.getAnswer() != null) {
+                    if (answer.getAnswer().equals("SUBCATEGORY")) {
+                         html += subCategoryTemplate
+                                 .replace(subcategoryParam, answer.getQuestion().getQuestionName());
+                    } else html += rowTemplate
+                                 .replace(questionParam, answer.getQuestion().getQuestionName())
+                                 .replace(answerParam, answer.getAnswer().toString());
                }
-               else if (answer.getQuestion() != null && answer.getAnswer() != null)
-
-                    html += rowTemplate
-                            .replace(questionParam, answer.getQuestion().getQuestionName())
-                            .replace(answerParam, answer.getAnswer().toString());
           }
           return html;
      }

@@ -178,7 +178,7 @@ public class EntrepreneurshipCategory implements Category {
                 this.exits.setAnswer(answerRow, processExcelFileResult);
                 break;
             case ENTRIES_EXITS_RELATIONSHIP:
-                //answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer("SUBCATEGORY");
                 this.entriesExitsRelationship.setAnswer(answerRow, processExcelFileResult);
                 break;
             //Questions

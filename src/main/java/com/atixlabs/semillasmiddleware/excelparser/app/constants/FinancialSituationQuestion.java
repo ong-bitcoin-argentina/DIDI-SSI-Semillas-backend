@@ -5,6 +5,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum FinancialSituationQuestion implements CategoryQuestion {
+    //Headers
+    PREVIOUS_CREDITS("CREDITOS ANTERIORES IMPAGOS"),
+
+    // Questions
     PREVIOUS_UNPAID_CREDIT("¿TIENE ALGUN CREDITO ANTERIOR IMPAGO?"),
     NAME("NOMBRE DE ENTIDAD FINANCIERA"),
     REASON("MOTIVO"),

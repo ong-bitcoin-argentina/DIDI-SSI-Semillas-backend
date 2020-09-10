@@ -5,7 +5,10 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 public enum PatrimonialSituationQuestion implements CategoryQuestion {
+    //Headers
     PATRIMONY_DATA("DATOS PATRIMONIO"),
+
+    //Questions
     CASH("EFECTIVO"),
     SPUN("FIADO"),
     STOCK("STOCK"),

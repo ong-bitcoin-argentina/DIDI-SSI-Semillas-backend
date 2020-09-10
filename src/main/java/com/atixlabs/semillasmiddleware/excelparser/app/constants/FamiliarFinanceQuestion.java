@@ -6,6 +6,10 @@ import java.util.stream.Collectors;
 
 public enum FamiliarFinanceQuestion implements CategoryQuestion {
 
+    //Headers
+    MONTHLY_ENTRIES("INGRESOS MENSUALES"),
+    MONTHLY_EXITS("EGRESOS MENSUALES"),
+        //Questions
     ENTRY_ENTREPRENEURSHIP("INGRESOS - EMPRENDIMIENTO"),
     ENTRY_APPLICANT("INGRESOS - SOLICITANTE"),
     ENTRY_FAMILY("INGRESOS - FAMILIARES"),

@@ -26,6 +26,13 @@ public class PersonCategory implements Category {
     String categoryUniqueName;
     private Categories categoryName;
 
+    private AnswerDto firstLastName;
+    private AnswerDto institutionLevel;
+    private AnswerDto addressData1;
+    private AnswerDto phoneData;
+    private AnswerDto referenceContact;
+    private AnswerDto educationLevel;
+
     private AnswerDto name;
     private AnswerDto surname;
     private AnswerDto idType;
@@ -64,6 +71,12 @@ public class PersonCategory implements Category {
 
     //RECIBIR CATEGORIA
     public PersonCategory(String categoryUniqueName, Categories category){
+        this.firstLastName = new AnswerDto(PersonQuestion.FIRST_LAST_NAME);
+        this.institutionLevel = new AnswerDto(PersonQuestion.INSTITUTION_LEVEL);
+        this.addressData1 = new AnswerDto(PersonQuestion.ADDRESS_DATA_1);
+        this.phoneData = new AnswerDto(PersonQuestion.PHONE_DATA);
+        this.referenceContact = new AnswerDto(PersonQuestion.REFERENCE_CONTACT);
+        this.educationLevel = new AnswerDto(PersonQuestion.EDUCATION_LEVEL);
         this.name = new AnswerDto(PersonQuestion.NAME);
         this.surname = new AnswerDto(PersonQuestion.SURNAME);
         this.idType = new AnswerDto(PersonQuestion.ID_TYPE);
@@ -121,6 +134,30 @@ public class PersonCategory implements Category {
             return;
 
         switch (questionMatch) {
+            case FIRST_LAST_NAME:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.firstLastName.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case INSTITUTION_LEVEL:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.institutionLevel.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ADDRESS_DATA_1:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.addressData1.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case PHONE_DATA:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.phoneData.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case REFERENCE_CONTACT:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.referenceContact.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case EDUCATION_LEVEL:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.educationLevel.setAnswer(answerRow, processExcelFileResult);
+                break;
             case ID_TYPE:
                 this.idType.setAnswer(answerRow, processExcelFileResult);
                 break;
@@ -304,6 +341,12 @@ public class PersonCategory implements Category {
     public String toString() {
         return "PersonCategory{" +
                 "categoryUniqueName='" + categoryUniqueName + '\'' +
+                "firstLastName='" + firstLastName + '\'' +
+                "institutionLevel='" + institutionLevel + '\'' +
+                "addressData1='" + addressData1 + '\'' +
+                "phoneData='" + phoneData + '\'' +
+                "referenceContact='" + referenceContact + '\'' +
+                "educationLevel='" + educationLevel + '\'' +
                 ", categoryName=" + categoryName +
                 ", name=" + name +
                 ", surname=" + surname +
@@ -322,10 +365,14 @@ public class PersonCategory implements Category {
 
     @Override
     public List<AnswerDto> getAnswersList(){
-        return Arrays.asList(name, surname, idType, documentNumber, gender, birthDate, relation,
-                occupation, studies, works, age, residenceTimeInCountry, facebook, address, betweenStreets, neighborhood,
-                zone, locality, referenceContactName, referenceContactSurname, referenceContactRelation, referenceContactPhone,
-                nationality, primary, highSchool, tertiary, university, workshops, courses, landLine, cellPhone, civilStatus, email);
+        return Arrays.asList(
+                firstLastName, name, surname, birthDate,nationality, idType, documentNumber, relation, gender,
+                institutionLevel, primary, highSchool, tertiary, university,
+                addressData1, address, locality, zone,
+                phoneData, cellPhone, facebook, email,
+                referenceContact, referenceContactName, referenceContactSurname, referenceContactRelation, referenceContactPhone, residenceTimeInCountry,
+                educationLevel,  workshops, courses
+        );
     }
 
 }

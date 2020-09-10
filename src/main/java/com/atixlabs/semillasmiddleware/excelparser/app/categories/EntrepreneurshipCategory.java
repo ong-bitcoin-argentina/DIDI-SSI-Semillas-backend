@@ -23,6 +23,15 @@ public class EntrepreneurshipCategory implements Category {
     private String categoryOriginalName;
     private Categories categoryName;
 
+    private AnswerDto entrepreneurshipData;
+    private AnswerDto activityDev;
+    private AnswerDto workTime;
+    private AnswerDto entryPerFortnight;
+    private AnswerDto entryPerWeek;
+    private AnswerDto entries;
+    private AnswerDto exits;
+    private AnswerDto entriesExitsRelationship;
+
     private AnswerDto type;
     private AnswerDto activityStartDate;
     private AnswerDto mainActivity;
@@ -72,6 +81,16 @@ public class EntrepreneurshipCategory implements Category {
 
 
     public EntrepreneurshipCategory(String categoryUniqueName, Categories category) {
+
+        this.entrepreneurshipData = new AnswerDto(EntrepreneurshipQuestion.ENTREPRENEURSHIP_DATA);
+        this.activityDev = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_DEV);
+        this.workTime = new AnswerDto(EntrepreneurshipQuestion.WORK_TIME);
+        this.entryPerFortnight = new AnswerDto(EntrepreneurshipQuestion.ENTRY_PER_FORTNIGHT);
+        this.entryPerWeek = new AnswerDto(EntrepreneurshipQuestion.ENTRY_PER_WEEK);
+        this.entries = new AnswerDto(EntrepreneurshipQuestion.ENTRIES);
+        this.exits = new AnswerDto(EntrepreneurshipQuestion.EXITS);
+        this.entriesExitsRelationship = new AnswerDto(EntrepreneurshipQuestion.ENTRIES_EXITS_RELATIONSHIP);
+
         this.type = new AnswerDto(EntrepreneurshipQuestion.TYPE);
         this.activityStartDate = new AnswerDto(EntrepreneurshipQuestion.ACTIVITY_START_DATE);
         this.mainActivity = new AnswerDto(EntrepreneurshipQuestion.MAIN_ACTIVITY);
@@ -129,6 +148,40 @@ public class EntrepreneurshipCategory implements Category {
             return;
 
         switch (questionMatch){
+            //headers
+            case ENTREPRENEURSHIP_DATA:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.entrepreneurshipData.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ACTIVITY_DEV:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.activityDev.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case WORK_TIME:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.workTime.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ENTRY_PER_FORTNIGHT:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.entryPerFortnight.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ENTRY_PER_WEEK:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.entryPerWeek.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ENTRIES:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.entries.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case EXITS:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.exits.setAnswer(answerRow, processExcelFileResult);
+                break;
+            case ENTRIES_EXITS_RELATIONSHIP:
+                answerRow.setAnswer("SUBCATEGORY");
+                this.entriesExitsRelationship.setAnswer(answerRow, processExcelFileResult);
+                break;
+            //Questions
             case TYPE:
                 this.type.setAnswer(answerRow, processExcelFileResult);
                 break;
@@ -287,8 +340,8 @@ public class EntrepreneurshipCategory implements Category {
     public String getType(){
         return (String) this.type.getAnswer();
     }
-    public LocalDate getActivityStartDate(){
-        return (LocalDate) this.activityStartDate.getAnswer();
+    public Integer getActivityStartDate(){
+        return (Integer) this.activityStartDate.getAnswer();
     }
     public String getMainActivity(){
         return (String) this.mainActivity.getAnswer();
@@ -307,6 +360,14 @@ public class EntrepreneurshipCategory implements Category {
     public String toString() {
         return "EntrepreneurshipCategory{" +
                 "categoryOriginalName='" + categoryOriginalName + '\'' +
+                "entrepreneurshipData='" + entrepreneurshipData + '\'' +
+                "activityDev='" + activityDev + '\'' +
+                "workTime='" + workTime + '\'' +
+                "entryPerFortnight='" + entryPerFortnight + '\'' +
+                "entryPerWeek='" + entryPerWeek + '\'' +
+                "entries='" + entries + '\'' +
+                "entries='" + exits + '\'' +
+                "entries='" + entriesExitsRelationship + '\'' +
                 ", type=" + type +
                 ", activityStartDate=" + activityStartDate +
                 ", mainActivity=" + mainActivity +
@@ -352,12 +413,18 @@ public class EntrepreneurshipCategory implements Category {
 
     @Override
     public List<AnswerDto> getAnswersList(){
-        return Arrays.asList(type, activityStartDate, mainActivity, name, address, activityEndingDate, phone, reset, seniority, outpatient,
-                fair, storeOrHome, daysPerWeek, hoursPerWeek, firstFortnight, secondFortnight, totalMonthlyEntry,
-                entryWeek1, entryWeek2, entryWeek3, entryWeek4, entryPerMonth, exitRent, exitWater, exitElectricity,
-                exitShopping, exitPhone, exitTaxes, exitTransport, exitMaintenance, exitEmployees, exitOthers,
-                totalExit, totalEntry, totalExitRel, entryExitRelationship, entryExitRelationshipFortnight,
-                projection, facebook, photo
+        return Arrays.asList(
+                reset,
+                exits, exitRent, exitWater, exitElectricity, exitShopping, exitPhone, exitTaxes, exitTransport, exitMaintenance, exitEmployees, exitOthers, totalExit,
+                entries, entryPerMonth,
+                entrepreneurshipData, name, address, phone, seniority,
+                entryPerFortnight, firstFortnight, secondFortnight, totalMonthlyEntry,
+                type, facebook,
+                activityDev, outpatient, fair, storeOrHome, activityStartDate, photo, projection,
+                entryExitRelationshipFortnight,
+                entryPerWeek, entryWeek1, entryWeek2, entryWeek3, entryWeek4, totalMonthlyEntry,
+                workTime, daysPerWeek, hoursPerWeek,
+                entriesExitsRelationship, totalEntry, totalExit, entriesExitsRelationship
         );
     }
 }

@@ -10,9 +10,7 @@ import com.atixlabs.semillasmiddleware.util.EmailTemplatesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.Stack;
+import java.util.*;
 
 
 @Service
@@ -25,14 +23,20 @@ public class PdfParserService {
     private static final String TABLE_CONTENT_PARAM = "{{tableContent}}";
     private static final String QUESTION_PARAM = "{{question}}";
     private static final String ANSWER_PARAM = "{{answer}}";
+    private static final String SUBCATEGORY_PARAM = "{{subCategory}}";
 
-    private static final String style = "style=\"border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px\"\"";
-    private String rowTemplate = "        <tr "+style+">\n" +
-                                 "            <td>{{question}}</td>\n" +
-                                 "            <td>{{answer}}</td>\n" +
+    private static final String rowStyle = "style=\"border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px;\"\"";
+    private static final String categoryStyle = "style=\"background-color: #A8A8A8; border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px;\"\"";
+    private String rowTemplate = "        <tr "+rowStyle+">\n" +
+                                 "            <td style=\"width:100%\">{{question}}</td>\n" +
+                                 "            <td style=\"width:100%\">{{answer}}</td>\n" +
                                  "        </tr>";
 
-    private String headerTemplate = "        <tr "+style+">\n" +
+    private String subCategoryTemplate = "   <tr style=\"background-color:  #d8d8d8;\">\n" +
+            "            <th colspan=\"2\">\n" +
+            "              {{subCategory}}</th>\n" +
+            "        </tr>";
+    private String headerTemplate = "        <tr "+categoryStyle+">\n" +
                                     "            <th colspan=\"2\">\n" +
                                     "                <br />"+CATEGORY_NAME_PARAM+"\n" +
                                     "            </th>\n" +
@@ -61,13 +65,14 @@ public class PdfParserService {
             if (category == null) continue;
             log.info("Create html from category: "+category.getCategoryName());
             String header = headerTemplate.replace(CATEGORY_NAME_PARAM, category.getCategoryUniqueName());
-            String rows = category.getHtmlFromTemplate(rowTemplate, QUESTION_PARAM, ANSWER_PARAM);
+            String rows = category.getHtmlFromTemplate(rowTemplate, subCategoryTemplate, SUBCATEGORY_PARAM, QUESTION_PARAM, ANSWER_PARAM);
             htmlStack += header+rows;
         }
         return htmlStack;
     }
 
     private void fillStack(Stack<Category> categoriesStack, List<Categories> categories, SurveyForm surveyForm){
+        Collections.reverse(categories);
         categories.forEach( cat -> {
             Optional.ofNullable(surveyForm.getCategoryByUniqueName(cat.getCode(), null))
                 .ifPresent(categoriesStack::push);

@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.dto.ActionDto;
+import com.atixlabs.semillasmiddleware.app.dto.ActionFilterDto;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLevelEnum;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
 import com.atixlabs.semillasmiddleware.app.model.action.ActionTypeEnum;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.Instant;
 import java.time.LocalDateTime;
+import java.util.Optional;
 
 @Slf4j
 @RestController
@@ -51,20 +53,26 @@ public class ActionController {
      * [DIDI] - ERROR - Error de conexión con DIDI.
      */
     public Page<ActionDto> findAuditLog(@RequestParam(required = false)  @DefaultValue("0") Integer page,
-                                        @RequestParam(required = false) String username,
-                                        @RequestParam(required = false) Integer level,
-                                        @RequestParam(required = false) Integer actionType,
-                                        @RequestParam(required = false) String message,
-                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dateFrom,
-                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Instant dateTo
+                                        @RequestParam(required = false) Optional<String> username,
+                                        @RequestParam(required = false) Optional<Integer> level,
+                                        @RequestParam(required = false) Optional<Integer> actionType,
+                                        @RequestParam(required = false) Optional<String> message,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Optional<Instant> dateFrom,
+                                        @RequestParam(required = false) @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) Optional<Instant> dateTo
                                           ) {
+        ActionFilterDto actionFilterDto = ActionFilterDto.builder()
+                .username(username)
+                .level(level)
+                .actionType(actionType)
+                .message(message)
+                .dateFrom(dateFrom)
+                .dateTo(dateTo)
+                .build();
 
         Page<ActionDto> actions;
         try {
             log.info(String.format("find actions user &s, level %s, actiontType %s, message %s, dateFrom %s, dateTo %s", username, level, actionType, message, (dateFrom!=null ? dateFrom.toString():""), (dateTo!=null ? dateTo.toString():"")));
-
-            actions = this.actionLogService.find(page, username, level, actionType, message, dateFrom, dateTo);
-
+            actions = this.actionLogService.find(page, actionFilterDto);
         } catch (Exception e) {
             log.error("There has been an error searching for action log with the filters ", e);
             return null;

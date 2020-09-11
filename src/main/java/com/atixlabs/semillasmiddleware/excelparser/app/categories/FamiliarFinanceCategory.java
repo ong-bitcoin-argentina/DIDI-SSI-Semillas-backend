@@ -11,6 +11,7 @@ import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -93,97 +94,72 @@ public class FamiliarFinanceCategory implements Category {
 
         if (questionMatch == null)
             return;
+        Optional<AnswerDto> optionalAnswer = getAnswerType(questionMatch, answerRow);
+        optionalAnswer.ifPresent(param -> param.setAnswer(answerRow, processExcelFileResult));
+    }
 
+    private Optional<AnswerDto> getAnswerType(FamiliarFinanceQuestion questionMatch, AnswerRow answerRow) {
         switch (questionMatch) {
             case MONTHLY_ENTRIES:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.monthlyEntries.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.monthlyEntries);
             case MONTHLY_EXITS:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.monthlyExits.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.monthlyExits);
             case ENTRY_ENTREPRENEURSHIP:
-                this.entryEntrepreneurship.setAnswer(answerRow, processExcelFileResult);
-                break;
-            case ENTRY_APPLICANT:
-                this.entryApplicant.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryEntrepreneurship);
             case ENTRY_FAMILY:
-                this.entryFamily.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryFamily);
             case TOTAL_MONTHLY_ENTRY:
-                this.totalMonthlyEntry.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalMonthlyEntry);
             case FAMILIAR_SURPLUS_FORTNIGHT:
-                this.familiarSurplusFortnight.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.familiarSurplusFortnight);
             case EXIT_FEEDING:
-                this.exitFeeding.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitFeeding);
             case EXIT_GAS:
-                this.exitGas.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitGas);
             case EXIT_EDUCATION:
-                this.exitEducation.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitEducation);
             case EXIT_TRANSPORT:
-                this.exitTransport.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitTransport);
             case EXIT_WATER:
-                this.exitWater.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitWater);
             case EXIT_ELECTRICITY:
-                this.exitElectricity.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitElectricity);
             case EXIT_PHONE:
-                this.exitPhone.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitPhone);
             case EXIT_FIT:
-                this.exitFit.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitFit);
             case EXIT_TAXES:
-                this.exitTaxes.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitTaxes);
             case EXIT_CLOTHING:
-                this.exitClothing.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitClothing);
             case EXIT_RENT:
-                this.exitRent.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitRent);
             case EXIT_OIL:
-                this.exitOil.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitOil);
             case EXIT_CREDITS:
-                this.exitCredits.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitCredits);
             case EXIT_LEISURE:
-                this.exitLeisure.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitLeisure);
             case EXIT_GAMBLING:
-                this.exitGambling.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitGambling);
             case EXIT_TV:
-                this.exitTv.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitTv);
             case EXIT_INTERNET:
-                this.exitInternet.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitInternet);
             case EXIT_OTHERS:
-                this.exitOthers.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitOthers);
             case TOTAL_MONTHLY_EXIT:
-                this.totalMonthlyExit.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalMonthlyExit);
             case TOTAL_MONTHLY_ENTRY_2:
-                this.totalMonthlyEntry2.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalMonthlyEntry2);
             case TOTAL_MONTHLY_EXIT_2:
-                this.totalMonthlyExit2.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalMonthlyExit2);
             case TOTAL_MONTHLY_FAMILIAR_SURPLUS:
-                this.totalMonthlyFamiliarSurplus.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalMonthlyFamiliarSurplus);
+            default:
+                return Optional.empty();
         }
     }
 
@@ -250,9 +226,9 @@ public class FamiliarFinanceCategory implements Category {
     public List<AnswerDto> getAnswersList() {
         return Arrays.asList(
                 monthlyEntries, entryEntrepreneurship, entryApplicant, entryFamily, totalMonthlyEntry,
-                familiarSurplusFortnight,
                 monthlyExits, exitFeeding, exitGas, exitEducation, exitTransport, exitWater, exitElectricity, exitPhone, exitFit, exitTaxes, exitClothing, exitRent,
                 exitOil, exitCredits, exitLeisure, exitGambling, exitTv, exitInternet, exitOthers, totalMonthlyExit,
+                familiarSurplusFortnight,
                 totalMonthlyEntry2, totalMonthlyExit2, totalMonthlyFamiliarSurplus
         );
     }

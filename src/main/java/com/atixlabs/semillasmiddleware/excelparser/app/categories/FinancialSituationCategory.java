@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.FinancialSituationQuestion;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.PatrimonialSituationQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -12,6 +11,7 @@ import lombok.Setter;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -46,24 +46,25 @@ public class FinancialSituationCategory implements Category {
 
         if (questionMatch==null)
             return;
+        Optional<AnswerDto> optionalAnswer = getAnswerType(questionMatch, answerRow);
+        optionalAnswer.ifPresent(param -> param.setAnswer(answerRow, processExcelFileResult));
+    }
 
+    private Optional<AnswerDto> getAnswerType(FinancialSituationQuestion questionMatch, AnswerRow answerRow) {
         switch (questionMatch) {
             case PREVIOUS_CREDITS:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.previousCredits.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.previousCredits);
             case PREVIOUS_UNPAID_CREDIT:
-                this.previousUnpaidCredit.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.previousUnpaidCredit);
             case NAME:
-                this.name.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.name);
             case REASON:
-                this.reason.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.reason);
             case YEAR:
-                this.year.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.year);
+            default:
+                return Optional.empty();
         }
     }
 

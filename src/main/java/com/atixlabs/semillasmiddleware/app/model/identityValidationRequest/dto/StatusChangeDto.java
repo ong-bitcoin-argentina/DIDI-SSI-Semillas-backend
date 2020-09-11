@@ -15,13 +15,15 @@ public class StatusChangeDto {
     @NotNull
     private RequestState requestState;
 
-    private Optional<RejectReason> rejectReason = Optional.empty();
+    private Optional<RejectReason> rejectReason;
+    private Optional<String> rejectionObservations;
+    private Optional<Long> dni;
 
-    private Optional<String> rejectionObservations = Optional.empty();
 
-    public StatusChangeDto(RequestState requestState, Optional<RejectReason> rejectReason, Optional<String> rejectionObservations ){
+    public StatusChangeDto(RequestState requestState, Optional<RejectReason> rejectReason, Optional<String> rejectionObservations, Optional<Long> dni ){
         this.requestState = requestState;
         this.rejectReason = rejectReason;
         this.rejectionObservations = rejectionObservations;
+        this.dni = dni;
     }
 }

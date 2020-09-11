@@ -78,6 +78,7 @@ public class IdentityValidationRequestService {
             statusChangeDto.getRejectReason().ifPresent(identityValidationRequest::setRejectReason);
             rejectionObservations.ifPresent(identityValidationRequest::setRejectionObservations);
         }
+        statusChangeDto.getDni().ifPresent(identityValidationRequest::setDni);
         log.info("Final request state: \n "+ identityValidationRequest.toString());
 
         identityValidationRequestRepository.save(identityValidationRequest);

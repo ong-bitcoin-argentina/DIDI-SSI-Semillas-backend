@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto;
 
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -13,6 +12,7 @@ import java.util.Optional;
 public class IdentityValidationFilter {
     private Optional<LocalDate> dateFrom;
     private Optional<LocalDate> dateTo;
-    private Optional<String> criteriaQuery;
+    private Optional<String> name;
+    private Optional<Long> dni;
     private Optional<RequestState> requestState;
 }

@@ -91,12 +91,12 @@ public class IdentityValidationRequestService {
                     identityValidationFilter.getDateFrom().map(value -> cb.greaterThanOrEqualTo(root.get("date"), value)),
                     identityValidationFilter.getDateTo().map(value -> cb.lessThanOrEqualTo(root.get("date"), value)),
                     identityValidationFilter.getRequestState().map(value -> cb.equal(root.get("requestState"), value)),
-                    identityValidationFilter.getCriteriaQuery().map(value -> {
+                    identityValidationFilter.getDni().map(value -> cb.like(root.get("dni").as(String.class), "%" + value.toString() + "%")),
+                    identityValidationFilter.getName().map(value -> {
                         String criteria = "%" + value.toUpperCase() + "%";
                         return cb.or(
                                 cb.like(cb.upper(root.get("name")), criteria),
-                                cb.like(cb.upper(root.get("lastName")), criteria),
-                                cb.like(cb.upper(root.get("dni").as(String.class)), criteria)
+                                cb.like(cb.upper(root.get("lastName")), criteria)
                         );
                     })
             ).flatMap(Optional::stream);

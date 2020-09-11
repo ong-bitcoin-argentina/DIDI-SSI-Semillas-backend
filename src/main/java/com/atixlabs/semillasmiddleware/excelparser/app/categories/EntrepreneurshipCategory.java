@@ -9,10 +9,13 @@ import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
+import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 
 @Setter
@@ -146,162 +149,120 @@ public class EntrepreneurshipCategory implements Category {
 
         if (questionMatch==null)
             return;
+        Optional<AnswerDto> optionalAnswer = getAnswerType(questionMatch, answerRow);
+        optionalAnswer.ifPresent(param -> param.setAnswer(answerRow, processExcelFileResult));
+    }
 
+    private Optional<AnswerDto> getAnswerType(EntrepreneurshipQuestion questionMatch, AnswerRow answerRow){
         switch (questionMatch){
             //headers
             case ENTREPRENEURSHIP_DATA:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.entrepreneurshipData.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entrepreneurshipData);
             case ACTIVITY_DEV:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.activityDev.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.activityDev);
             case WORK_TIME:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.workTime.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.workTime);
             case ENTRY_PER_FORTNIGHT:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.entryPerFortnight.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryPerFortnight);
             case ENTRY_PER_WEEK:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.entryPerWeek.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryPerWeek);
             case ENTRIES:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.entries.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entries);
             case EXITS:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.exits.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exits);
             case ENTRIES_EXITS_RELATIONSHIP:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.entriesExitsRelationship.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entriesExitsRelationship);
             //Questions
             case TYPE:
-                this.type.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.type);
             case ACTIVITY_START_DATE:
                 //possible data: dd/mm/yyyy or only date: 2020
-                this.activityStartDate.setAnswer(answerRow, processExcelFileResult);
-               // this.activityStartDate.setAnswer();
-                break;
+                return Optional.of(this.activityStartDate);
             case MAIN_ACTIVITY:
-                this.mainActivity.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.mainActivity);
             case NAME:
-                this.name.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.name);
             case ADDRESS:
-                this.address.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.address);
             //check final form
             case ACTIVITY_ENDING_DATE:
-                this.activityEndingDate.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.activityEndingDate);
             case PHONE:
-                this.phone.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.phone);
             case RESET:
-                this.reset.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.reset);
             case SENIORITY:
-                this.seniority.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.seniority);
             case OUTPATIENT:
-                this.outpatient.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.outpatient);
             case STORE_OR_HOME:
-                this.storeOrHome.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.storeOrHome);
             case DAYS_PER_WEEK:
-                this.daysPerWeek.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.daysPerWeek);
             case HOURS_PER_WEEK:
-                this.hoursPerWeek.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.hoursPerWeek);
             case FIRST_FORTNIGHT:
-                this.firstFortnight.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.firstFortnight);
             case SECOND_FORTNIGHT:
-                this.secondFortnight.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.secondFortnight);
             case TOTAL_MONTHLY_ENTRY:
-                this.totalMonthlyEntry.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalMonthlyEntry);
             case ENTRY_WEEK_1:
-                this.entryWeek1.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryWeek1);
             case ENTRY_WEEK_2:
-                this.entryWeek2.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryWeek2);
             case ENTRY_WEEK_3:
-                this.entryWeek3.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryWeek3);
             case ENTRY_WEEK_4:
-                this.entryWeek4.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryWeek4);
             case ENTRY_PER_MONTH:
-                this.entryPerMonth.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryPerMonth);
             case EXIT_RENT:
-                this.exitRent.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitRent);
             case EXIT_WATER:
-                this.exitWater.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitWater);
             case EXIT_ELECTRICITY:
-                this.exitElectricity.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitElectricity);
             case EXIT_SHOPPING:
-                this.exitShopping.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitShopping);
             case EXIT_PHONE:
-                this.exitPhone.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitPhone);
             case EXIT_TAXES:
-                this.exitTaxes.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitTaxes);
             case EXIT_TRANSPORT:
-                this.exitTransport.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitTransport);
             case EXIT_MAINTENANCE:
-                this.exitMaintenance.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitMaintenance);
             case EXIT_EMPLOYEES:
-                this.exitEmployees.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitEmployees);
             case EXIT_OTHERS:
-                this.exitOthers.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.exitOthers);
             case TOTAL_EXIT:
-                this.totalExit.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalExit);
             case TOTAL_ENTRY:
-                this.totalEntry.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalEntry);
             case TOTAL_EXIT_REL:
-                this.totalExitRel.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.totalExitRel);
             case ENTRY_EXIT_RELATIONSHIP:
-                this.entryExitRelationship.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryExitRelationship);
             case ENTRY_EXIT_RELATIONSHIP_FORTNIGHT:
-                this.entryExitRelationshipFortnight.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.entryExitRelationshipFortnight);
             case PROJECTION:
-                this.projection.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.projection);
             case FACEBOOK:
-                this.facebook.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.facebook);
             case PHOTO:
-                this.photo.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.photo);
+            default:
+                return Optional.empty();
         }
     }
 
@@ -414,17 +375,15 @@ public class EntrepreneurshipCategory implements Category {
     @Override
     public List<AnswerDto> getAnswersList(){
         return Arrays.asList(
-                reset,
-                exits, exitRent, exitWater, exitElectricity, exitShopping, exitPhone, exitTaxes, exitTransport, exitMaintenance, exitEmployees, exitOthers, totalExit,
-                entries, entryPerMonth,
-                entrepreneurshipData, name, address, phone, seniority,
-                entryPerFortnight, firstFortnight, secondFortnight, totalMonthlyEntry,
-                type, facebook,
-                activityDev, outpatient, fair, storeOrHome, activityStartDate, photo, projection,
-                entryExitRelationshipFortnight,
-                entryPerWeek, entryWeek1, entryWeek2, entryWeek3, entryWeek4, totalMonthlyEntry,
+                entrepreneurshipData, type, name, address, phone, mainActivity, activityStartDate, reset, seniority,
+                activityDev, outpatient, fair, storeOrHome,
                 workTime, daysPerWeek, hoursPerWeek,
-                entriesExitsRelationship, totalEntry, totalExit, entriesExitsRelationship
+                entryPerFortnight, firstFortnight, secondFortnight, totalMonthlyEntry,
+                entryPerWeek, entryWeek1, entryWeek2, entryWeek3, entryWeek4, totalMonthlyEntry,
+                entries, entryPerMonth,
+                exits, exitRent, exitWater, exitElectricity, exitShopping, exitPhone, exitTaxes, exitTransport, exitMaintenance, exitEmployees, exitOthers, totalExit,
+                entriesExitsRelationship, totalEntry, totalExit, entriesExitsRelationship, entryExitRelationshipFortnight,
+                projection, facebook, photo
         );
     }
 }

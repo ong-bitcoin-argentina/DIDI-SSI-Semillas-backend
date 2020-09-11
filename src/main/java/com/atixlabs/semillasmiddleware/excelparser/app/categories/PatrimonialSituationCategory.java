@@ -12,6 +12,7 @@ import lombok.Setter;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Setter
@@ -43,39 +44,38 @@ public class PatrimonialSituationCategory implements Category {
         this.categoryName = category;
     }
 
-    public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult){
+    public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
         PatrimonialSituationQuestion questionMatch = null;
 
         questionMatch = PatrimonialSituationQuestion.getEnumByStringValue(question);
 
-        if (questionMatch==null)
+        if (questionMatch == null)
             return;
+        Optional<AnswerDto> optionalAnswer = getAnswerType(questionMatch, answerRow);
+        optionalAnswer.ifPresent(param -> param.setAnswer(answerRow, processExcelFileResult));
+    }
 
+    private Optional<AnswerDto> getAnswerType(PatrimonialSituationQuestion questionMatch, AnswerRow answerRow){
         switch (questionMatch) {
             case PATRIMONY_DATA:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.patrimonyData.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.patrimonyData);
             case CASH:
-                this.cash.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.cash);
             case SPUN:
-                this.spun.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.spun);
             case STOCK:
-                this.stock.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.stock);
             case MACHINERY:
-                this.machinery.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.machinery);
             //check final form
             case PROPERTY:
-                this.property.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.property);
             case TOTAL:
-                this.total.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.total);
+            default:
+                return Optional.empty();
         }
     }
 

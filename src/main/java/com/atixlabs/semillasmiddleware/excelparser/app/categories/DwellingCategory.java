@@ -10,6 +10,7 @@ import com.atixlabs.semillasmiddleware.util.StringUtil;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class DwellingCategory implements Category {
@@ -65,67 +66,54 @@ public class DwellingCategory implements Category {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
 
         DidiSyncStatus questionMatch = DidiSyncStatus.getEnumByStringValue(question);
-
         if(questionMatch==null)
             return;
+        Optional<AnswerDto> optionalAnswer = getAnswerType(questionMatch);
+        optionalAnswer.ifPresent(param -> param.setAnswer(answerRow, processExcelFileResult));
+    }
 
-        switch (questionMatch){
+    public Optional<AnswerDto> getAnswerType(DidiSyncStatus questionMatch) {
+        switch (questionMatch) {
             case BRICK:
-                this.brick.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.brick);
             case LOCK:
-                this.lock.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.lock);
             case WOOD:
-                this.wood.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.wood);
             case PAPERBOARD:
-                this.paperBoard.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.paperBoard);
             case DISTRICT:
-                this.district.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.district);
             case DWELLING_CONDITION:
-                this.dwellingCondition.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.dwellingCondition);
             case HOLDING_TYPE:
-                this.holdingType.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.holdingType);
             case DWELLING_TYPE:
-                this.dwellingType.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.dwellingType);
             case LIGHT_INSTALLATION:
-                this.lightInstallation.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.lightInstallation);
             case GENERAL_CONDITIONS:
-                this.generalConditions.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.generalConditions);
             case NEIGHBORHOOD_TYPE:
-                this.neighborhoodType.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.neighborhoodType);
             case BASIC_SERVICES:
-                this.basicServicies.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.basicServicies);
             case GAS:
-                this.gas.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.gas);
             case CARAFE:
-                this.carafe.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.carafe);
             case WATER:
-                this.water.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.water);
             case WATTER_WELL:
-                this.watterWell.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.watterWell);
             case ANTIQUITY:
-                this.antiquity.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.antiquity);
             case NUMBER_OF_ENVIRONMENTS:
-                this.numberOfEnvironments.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.numberOfEnvironments);
             case RENTAL:
-                this.rental.setAnswer(answerRow, processExcelFileResult);
+                return Optional.of(this.rental);
+            default:
+                return Optional.empty();
 
         }
     }

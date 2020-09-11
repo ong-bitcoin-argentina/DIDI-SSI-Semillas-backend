@@ -12,10 +12,7 @@ import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.LinkedList;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Slf4j
@@ -132,129 +129,97 @@ public class PersonCategory implements Category {
 
         if (questionMatch == null)
             return;
+        Optional<AnswerDto> optionalAnswer = getAnswerType(questionMatch, answerRow);
+        optionalAnswer.ifPresent(param -> param.setAnswer(answerRow, processExcelFileResult));
+    }
+
+    private Optional<AnswerDto> getAnswerType(PersonQuestion questionMatch, AnswerRow answerRow){
 
         switch (questionMatch) {
             case FIRST_LAST_NAME:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.firstLastName.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.firstLastName);
             case INSTITUTION_LEVEL:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.institutionLevel.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.institutionLevel);
             case ADDRESS_DATA_1:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.addressData1.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.addressData1);
             case PHONE_DATA:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.phoneData.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.phoneData);
             case REFERENCE_CONTACT:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.referenceContact.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.referenceContact);
             case EDUCATION_LEVEL:
                 answerRow.setAnswer("SUBCATEGORY");
-                this.educationLevel.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.educationLevel);
             case ID_TYPE:
-                this.idType.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.idType);
             case ID_NUMBER:
-                this.documentNumber.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.documentNumber);
             case NAME:
-                this.name.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.name);
             case SURNAME:
-                this.surname.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.surname);
             case GENDER:
-                this.gender.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.gender);
             case BIRTH_DATE:
-                this.birthDate.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.birthDate);
             case RELATION:
-                this.relation.setAnswer(answerRow, processExcelFileResult);
-                this.referenceContactRelation.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.relation);
             case OCCUPATION:
-                this.occupation.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.occupation);
             case WORKS:
-                this.works.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.works);
             case STUDIES:
-                this.studies.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.studies);
             case AGE:
-                this.age.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.age);
             case RESIDENCE_TIME_IN_COUNTRY:
-                this.residenceTimeInCountry.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.residenceTimeInCountry);
             case FACEBOOK:
-                this.facebook.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.facebook);
             case ADDRESS:
-                this.address.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.address);
             case BETWEEN_STREETS:
-                this.betweenStreets.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.betweenStreets);
             case NEIGHBORHOOD:
-                this.neighborhood.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.neighborhood);
             case ZONE:
-                this.zone.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.zone);
             case LOCALITY:
-                this.locality.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.locality);
             case REFERENCE_CONTACT_NAME:
-                this.referenceContactName.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.referenceContactName);
             case REFERENCE_CONTACT_SURNAME:
-                this.referenceContactSurname.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.referenceContactSurname);
             case REFERENCE_CONTACT_PHONE:
-                this.referenceContactPhone.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.referenceContactPhone);
             case NATIONALITY:
-                this.nationality.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.nationality);
             case PRIMARY:
-                this.primary.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.primary);
             case HIGH_SCHOOL:
-                this.highSchool.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.highSchool);
             case TERTIARY:
-                this.tertiary.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.tertiary);
             case UNIVERSITY:
-                this.university.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.university);
             case WORKSHOPS:
-                this.workshops.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.workshops);
             case COURSES:
-                this.courses.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.courses);
             case LAND_LINE:
-                this.landLine.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.landLine);
             case CELLPHONE:
-                this.cellPhone.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.cellPhone);
             case CIVIL_STATUS:
-                this.civilStatus.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.civilStatus);
             case EMAIL:
-                this.email.setAnswer(answerRow, processExcelFileResult);
-                break;
+                return Optional.of(this.email);
+            default:
+                return Optional.empty();
         }
     }
 
@@ -366,7 +331,7 @@ public class PersonCategory implements Category {
     @Override
     public List<AnswerDto> getAnswersList(){
         return Arrays.asList(
-                firstLastName, name, surname, birthDate,nationality, idType, documentNumber, relation, gender,
+                firstLastName, name, surname, birthDate,nationality, idType, documentNumber, civilStatus, gender,
                 institutionLevel, primary, highSchool, tertiary, university,
                 addressData1, address, locality, zone,
                 phoneData, cellPhone, facebook, email,

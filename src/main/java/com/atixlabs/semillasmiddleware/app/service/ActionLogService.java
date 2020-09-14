@@ -65,7 +65,7 @@ public class ActionLogService {
     private String size;
 
     public Page<ActionDto>  find(Integer page, ActionFilterDto actionFilterDto){
-        Pageable pageable = PageRequest.of(page, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "executionDateTime"));
+        Pageable pageable = PageRequest.of(page, Integer.parseInt(size), Sort.by("executionDateTime").descending());
         return actionLogRepository.findAll(getActionSpecification(actionFilterDto), pageable)
                 .map(ActionDto::new);
     }

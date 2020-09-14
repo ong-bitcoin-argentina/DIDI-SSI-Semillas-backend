@@ -16,6 +16,7 @@ public class ProviderUpdateRequest {
     private Optional<String> phone;
     private Optional<String> whatsappNumber;
     private Optional<String> email;
+    private Optional<String> description;
 
     @Min(0)
     @Max(100)

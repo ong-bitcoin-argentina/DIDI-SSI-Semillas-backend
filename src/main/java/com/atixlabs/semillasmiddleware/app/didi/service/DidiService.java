@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.model.RetrofitBuilder;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
@@ -14,28 +15,20 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.Revoc
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CertTemplateService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import com.atixlabs.semillasmiddleware.enpoint.DidiEndpoint;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.asm.Advice;
-import okhttp3.OkHttpClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Lazy;
 import org.springframework.stereotype.Service;
 import retrofit2.Call;
 import retrofit2.Response;
-import retrofit2.Retrofit;
-import retrofit2.converter.gson.GsonConverterFactory;
-import retrofit2.converter.scalars.ScalarsConverterFactory;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-//import retrofit2.GsonConverterFactory;
 
 @Slf4j
 @Service
@@ -133,37 +126,10 @@ public class DidiService {
 
     private void setUpRetrofitForDidiAndGetToken() {
         if (this.endpointInterface == null)
-            this.endpointInterface = (DidiEndpoint) endpointInterfaceBuilder(DidiEndpoint.class);
+            this.endpointInterface = (DidiEndpoint) RetrofitBuilder.endpointInterfaceBuilder(DidiEndpoint.class, didiBaseUrl);
         if (didiAuthToken == null)
             this.didiAuthToken = getAuthToken();
     }
-
-    private Object endpointInterfaceBuilder(Class<?> classToCreateEndpoint) {
-        log.info("endpointInterfaceBuilder - setting up retrofit configuration:");
-
-        //contains json converter and date format configuration
-        Gson gson = new GsonBuilder()
-                .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
-                .create();
-
-        OkHttpClient okHttpClient = new OkHttpClient().newBuilder()
-                .connectTimeout(60, TimeUnit.SECONDS)
-                .readTimeout(60, TimeUnit.SECONDS)
-                .writeTimeout(60, TimeUnit.SECONDS)
-                .build();
-
-        //ScalarsConverterFactory - allows String response for debug purposes.
-        //GsonConverterFactory - decodes response into final target object
-        Retrofit retrofit = new Retrofit.Builder()
-                .baseUrl(didiBaseUrl)
-                .addConverterFactory(ScalarsConverterFactory.create())
-                .addConverterFactory(GsonConverterFactory.create(gson))
-                .client(okHttpClient)
-                .build();
-
-        return retrofit.create(classToCreateEndpoint);
-    }
-
 
     public String getAuthToken() {
         log.info("getAuthToken:");

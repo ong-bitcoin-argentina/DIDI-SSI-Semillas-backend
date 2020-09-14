@@ -1,11 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service;
 
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.controller.IdentityValidationRequestController;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
+import com.atixlabs.semillasmiddleware.app.service.DidiServerService;
 import com.atixlabs.semillasmiddleware.app.service.MailService;
 import org.junit.Assert;
 import org.junit.Before;
@@ -33,11 +35,14 @@ public class IdentityValidationRequestServiceTest {
     private IdentityValidationRequestRepository identityValidationRequestRepository;
 
     @Mock
+    private DidiServerService didiServerService;
+
+    @Mock
     private ShareStateChangeService shareStateChangeService;
 
     @BeforeEach
     public void setUp() {
-        identityValidationRequestService = new IdentityValidationRequestService(identityValidationRequestRepository, shareStateChangeService);
+        identityValidationRequestService = new IdentityValidationRequestService(identityValidationRequestRepository, shareStateChangeService, didiServerService);
     }
 
     @Test

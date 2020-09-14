@@ -690,8 +690,7 @@ public class CredentialService {
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("buildAllCredentialsFromForm: " + this.toString());
-        if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
-            saveAllCredentialsFromForm(surveyForm);
+        saveAllCredentialsFromForm(surveyForm);
     }
 
 

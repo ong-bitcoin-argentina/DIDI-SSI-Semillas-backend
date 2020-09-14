@@ -102,8 +102,7 @@ public class ProviderService{
     public Provider update(Long id, ProviderUpdateRequest providerUpdateRequest){
         Provider provider = this.findById(id);
         providerUpdateRequest.getName().ifPresent(provider::setName);
-        providerUpdateRequest.getBenefit().ifPresentOrElse(value -> provider.setBenefit(value),
-                () -> provider.setBenefit(null));
+        provider.setBenefit(providerUpdateRequest.getBenefit().orElse(null));
         providerUpdateRequest.getEmail().ifPresent(provider::setEmail);
         providerUpdateRequest.getPhone().ifPresent(provider::setPhone);
         providerUpdateRequest.getWhatsappNumber().ifPresent(provider::setWhatsappNumber);

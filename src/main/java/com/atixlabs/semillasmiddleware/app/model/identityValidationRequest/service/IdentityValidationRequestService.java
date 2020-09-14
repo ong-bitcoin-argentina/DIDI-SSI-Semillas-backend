@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service;
 
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationFilter;
@@ -8,6 +9,7 @@ import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.S
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
+import com.atixlabs.semillasmiddleware.app.service.DidiServerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -29,9 +31,11 @@ public class IdentityValidationRequestService {
 
     @Autowired
     public IdentityValidationRequestService(IdentityValidationRequestRepository identityValidationRequestRepository,
-                                            ShareStateChangeService shareStateChangeService){
+                                            ShareStateChangeService shareStateChangeService,
+                                            DidiServerService didiServerService){
         this.identityValidationRequestRepository = identityValidationRequestRepository;
         this.shareStateChangeService = shareStateChangeService;
+        this.didiServerService = didiServerService;
     }
 
     @Value("${app.pageSize}")
@@ -39,6 +43,7 @@ public class IdentityValidationRequestService {
 
     private IdentityValidationRequestRepository identityValidationRequestRepository;
     private ShareStateChangeService shareStateChangeService;
+    private DidiServerService didiServerService;
 
     public IdentityValidationRequest create(IdentityValidationRequestDto identityValidationRequestDto){
         IdentityValidationRequest idr =
@@ -81,6 +86,7 @@ public class IdentityValidationRequestService {
         statusChangeDto.getDni().ifPresent(identityValidationRequest::setDni);
         log.info("Final request state: \n "+ identityValidationRequest.toString());
 
+        didiServerService.updateIdentityRequest(identityValidationRequest);
         identityValidationRequestRepository.save(identityValidationRequest);
         shareStateChangeService.shareStateChange(identityValidationRequest);
 

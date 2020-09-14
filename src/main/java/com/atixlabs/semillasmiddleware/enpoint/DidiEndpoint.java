@@ -1,4 +1,4 @@
-package com.atixlabs.semillasmiddleware.app.didi.service;
+package com.atixlabs.semillasmiddleware.enpoint;
 
 import com.atixlabs.semillasmiddleware.app.didi.dto.*;
 import retrofit2.Call;

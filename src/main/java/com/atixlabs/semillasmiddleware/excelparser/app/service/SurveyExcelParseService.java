@@ -42,7 +42,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     @Autowired
     private FileManagerService fileManagerService;
 
-    private static final String ZIP_SUFFIX = "survey_form";
+    private static final String ZIP_SUFFIX = "Encuesta_form";
     private SurveyForm currentForm;
     private List<SurveyForm> surveyFormList;
 

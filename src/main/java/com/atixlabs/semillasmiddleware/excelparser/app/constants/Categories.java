@@ -30,16 +30,18 @@ public enum Categories {
             return 3;
         }
     },
-    ENTREPRENEURSHIP_CATEGORY_NAME("EMPRENDIMIENTO"){
-        @Override
-        public Class<?> getLinkedClass() {
-            return EntrepreneurshipCategory.class;
-        }
-    },
+
     DWELLING_CATEGORY_NAME("VIVIENDA"){
         @Override
         public Class<?> getLinkedClass() {
             return DwellingCategory.class;
+        }
+    },
+
+    ENTREPRENEURSHIP_CATEGORY_NAME("EMPRENDIMIENTO"){
+        @Override
+        public Class<?> getLinkedClass() {
+            return EntrepreneurshipCategory.class;
         }
     },
 

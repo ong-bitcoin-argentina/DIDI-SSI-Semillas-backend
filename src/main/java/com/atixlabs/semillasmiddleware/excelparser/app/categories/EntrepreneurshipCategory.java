@@ -203,6 +203,8 @@ public class EntrepreneurshipCategory implements Category {
                 return Optional.of(this.seniority);
             case OUTPATIENT:
                 return Optional.of(this.outpatient);
+            case FAIR:
+                return Optional.of(this.fair);
             case STORE_OR_HOME:
                 return Optional.of(this.storeOrHome);
             case DAYS_PER_WEEK:

@@ -42,7 +42,7 @@ public class PersonCategory implements Category {
     private AnswerDto studies;
     private AnswerDto works;
     private AnswerDto age;
-
+    private AnswerDto childrenQuantity;
     private AnswerDto residenceTimeInCountry;
     private AnswerDto facebook;
     private AnswerDto address;
@@ -50,15 +50,17 @@ public class PersonCategory implements Category {
     private AnswerDto neighborhood;
     private AnswerDto zone;
     private AnswerDto locality;
+    private AnswerDto address2;
     private AnswerDto referenceContactName;
     private AnswerDto referenceContactSurname;
-    private AnswerDto referenceContactRelation;
     private AnswerDto referenceContactPhone;
     private AnswerDto nationality;
     private AnswerDto primary;
     private AnswerDto highSchool;
     private AnswerDto tertiary;
     private AnswerDto university;
+    private AnswerDto others;
+    private AnswerDto lastStudyYear;
     private AnswerDto workshops;
     private AnswerDto courses;
     private AnswerDto landLine;
@@ -85,6 +87,7 @@ public class PersonCategory implements Category {
         this.studies = new AnswerDto(PersonQuestion.STUDIES);
         this.works = new AnswerDto(PersonQuestion.WORKS);
         this.age = new AnswerDto(PersonQuestion.AGE);
+        this.childrenQuantity = new AnswerDto(PersonQuestion.CHILDREN_QUANTITY);
 
         this.residenceTimeInCountry = new AnswerDto(PersonQuestion.RESIDENCE_TIME_IN_COUNTRY);
         this.facebook = new AnswerDto(PersonQuestion.FACEBOOK);
@@ -93,15 +96,18 @@ public class PersonCategory implements Category {
         this.neighborhood = new AnswerDto(PersonQuestion.NEIGHBORHOOD);
         this.zone = new AnswerDto(PersonQuestion.ZONE);
         this.locality = new AnswerDto(PersonQuestion.LOCALITY);
+        this.address2 = new AnswerDto(PersonQuestion.ADDRESS_2);
         this.referenceContactName = new AnswerDto(PersonQuestion.REFERENCE_CONTACT_NAME);
         this.referenceContactSurname = new AnswerDto(PersonQuestion.REFERENCE_CONTACT_SURNAME);
-        this.referenceContactRelation = new AnswerDto(PersonQuestion.RELATION);
         this.referenceContactPhone = new AnswerDto(PersonQuestion.REFERENCE_CONTACT_PHONE);
         this.nationality = new AnswerDto(PersonQuestion.NATIONALITY);
         this.primary = new AnswerDto(PersonQuestion.PRIMARY);
         this.highSchool = new AnswerDto(PersonQuestion.HIGH_SCHOOL);
         this.tertiary = new AnswerDto(PersonQuestion.TERTIARY);
         this.university = new AnswerDto(PersonQuestion.UNIVERSITY);
+        this.others = new AnswerDto(PersonQuestion.OTHERS);
+        this.lastStudyYear = new AnswerDto(PersonQuestion.LAST_STUDY_YEAR);
+
         this.workshops = new AnswerDto(PersonQuestion.WORKSHOPS);
         this.courses = new AnswerDto(PersonQuestion.COURSES);
         this.landLine = new AnswerDto(PersonQuestion.LAND_LINE);
@@ -154,6 +160,8 @@ public class PersonCategory implements Category {
             case EDUCATION_LEVEL:
                 answerRow.setAnswer("SUBCATEGORY");
                 return Optional.of(this.educationLevel);
+            case OCCUPATION:
+                return Optional.of(this.occupation);
             case ID_TYPE:
                 return Optional.of(this.idType);
             case ID_NUMBER:
@@ -168,8 +176,6 @@ public class PersonCategory implements Category {
                 return Optional.of(this.birthDate);
             case RELATION:
                 return Optional.of(this.relation);
-            case OCCUPATION:
-                return Optional.of(this.occupation);
             case WORKS:
                 return Optional.of(this.works);
             case STUDIES:
@@ -178,6 +184,8 @@ public class PersonCategory implements Category {
                 return Optional.of(this.age);
             case RESIDENCE_TIME_IN_COUNTRY:
                 return Optional.of(this.residenceTimeInCountry);
+            case CHILDREN_QUANTITY:
+                return Optional.of(this.childrenQuantity);
             case FACEBOOK:
                 return Optional.of(this.facebook);
             case ADDRESS:
@@ -190,6 +198,8 @@ public class PersonCategory implements Category {
                 return Optional.of(this.zone);
             case LOCALITY:
                 return Optional.of(this.locality);
+            case ADDRESS_2:
+                return Optional.of(this.address2);
             case REFERENCE_CONTACT_NAME:
                 return Optional.of(this.referenceContactName);
             case REFERENCE_CONTACT_SURNAME:
@@ -206,6 +216,10 @@ public class PersonCategory implements Category {
                 return Optional.of(this.tertiary);
             case UNIVERSITY:
                 return Optional.of(this.university);
+            case OTHERS:
+                return Optional.of(this.others);
+            case LAST_STUDY_YEAR:
+                return Optional.of(this.lastStudyYear);
             case WORKSHOPS:
                 return Optional.of(this.workshops);
             case COURSES:
@@ -331,12 +345,12 @@ public class PersonCategory implements Category {
     @Override
     public List<AnswerDto> getAnswersList(){
         return Arrays.asList(
-                firstLastName, name, surname, birthDate,nationality, idType, documentNumber, civilStatus, gender,
-                institutionLevel, primary, highSchool, tertiary, university,
-                addressData1, address, locality, zone,
-                phoneData, cellPhone, facebook, email,
-                referenceContact, referenceContactName, referenceContactSurname, referenceContactRelation, referenceContactPhone, residenceTimeInCountry,
-                educationLevel,  workshops, courses
+                firstLastName, name, surname, age, birthDate, occupation, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
+                institutionLevel, primary, highSchool, tertiary, university, workshops, courses, others, lastStudyYear,
+                addressData1, address, betweenStreets, neighborhood, zone, locality, address2,
+                phoneData, landLine, cellPhone, facebook, email,
+                referenceContact, referenceContactName, referenceContactSurname, relation, referenceContactPhone,
+                occupation, studies, works
         );
     }
 

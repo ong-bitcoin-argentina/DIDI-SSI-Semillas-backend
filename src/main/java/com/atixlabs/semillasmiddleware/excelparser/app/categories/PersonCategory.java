@@ -333,7 +333,7 @@ public class PersonCategory implements Category {
         return Arrays.asList(
                 firstLastName, name, surname, birthDate,nationality, idType, documentNumber, civilStatus, gender,
                 institutionLevel, primary, highSchool, tertiary, university,
-                addressData1, address, locality, zone,
+                addressData1, address, betweenStreets, neighborhood, zone, locality,
                 phoneData, cellPhone, facebook, email,
                 referenceContact, referenceContactName, referenceContactSurname, referenceContactRelation, referenceContactPhone, residenceTimeInCountry,
                 educationLevel,  workshops, courses

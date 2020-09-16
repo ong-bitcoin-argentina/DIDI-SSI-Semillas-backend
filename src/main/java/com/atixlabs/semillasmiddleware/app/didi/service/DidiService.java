@@ -275,7 +275,7 @@ public class DidiService {
                 this.saveCredentialOnPending(credential);
             }
         } else {
-            log.error("didiSync: fallo la creacion de la certificado");
+            log.error("didiSync: fallo la creacion de la certificado, msg["+didiCreateCredentialResponse.getMessage()+"] body["+didiCreateCredentialResponse.getData()+"]");
             this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
             this.saveCredentialOnPending(credential);
         }

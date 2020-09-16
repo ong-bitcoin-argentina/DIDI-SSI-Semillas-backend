@@ -220,7 +220,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialIdentityService.save(credentialIdentity)).thenReturn(credentialIdentity);
 
         syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);

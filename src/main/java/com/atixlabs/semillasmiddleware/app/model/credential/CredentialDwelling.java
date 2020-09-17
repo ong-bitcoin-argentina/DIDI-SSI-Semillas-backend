@@ -34,6 +34,9 @@ public class CredentialDwelling extends Credential {
     private Integer antiquity; //antiguedad
     private Integer numberOfEnvironments; //cantidad de ambientes
     private Long rental; //monto alquiler
+    private String address;
+    private String location;
+    private String neighborhood;
 
     public CredentialDwelling(CredentialDwelling credentialDwelling){
         super(credentialDwelling);

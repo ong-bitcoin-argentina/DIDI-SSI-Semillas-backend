@@ -109,6 +109,7 @@ public class ProviderService{
         providerUpdateRequest.getSpeciality().ifPresent(provider::setSpeciality);
         providerUpdateRequest.getDescription().ifPresent(provider::setDescription);
         providerUpdateRequest.getCategoryId().ifPresent( catId -> provider.setProviderCategory(providerCategoryService.findById(catId)));
+        providerUpdateRequest.getActive().ifPresent(provider::setActive);
 
         return providerRepository.save(provider);
     }

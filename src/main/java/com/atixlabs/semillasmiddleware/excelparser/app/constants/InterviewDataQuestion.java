@@ -9,7 +9,7 @@ public enum InterviewDataQuestion implements CategoryQuestion {
     GENERAL_DATA("DATOS GENERALES"),
 
     //Questions
-    SOLIDARITY_GROUP("GRUPO SOLIDARIO"),
+    SOLIDARITY_GROUP("GRUPO SOLIDIARIO"),
     ADVISER("ASESOR/ASESORA");
     private String questionName;
     static final Map<String, InterviewDataQuestion> questionsMap = Arrays.stream(values()).collect(Collectors.toMap(InterviewDataQuestion::getQuestionName, p->p));

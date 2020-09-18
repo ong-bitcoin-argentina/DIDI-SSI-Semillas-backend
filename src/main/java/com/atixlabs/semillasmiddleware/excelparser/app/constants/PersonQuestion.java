@@ -38,11 +38,6 @@ public enum PersonQuestion implements CategoryQuestion {
         public boolean isRequired() {
             return true;
         }
-
-        @Override
-        public Class<?> getDataType() {
-            return Long.class;
-        }
     },
     GENDER("GENERO"){
         @Override
@@ -54,11 +49,6 @@ public enum PersonQuestion implements CategoryQuestion {
         @Override
         public boolean isRequired() {
             return true;
-        }
-
-        @Override
-        public Class<?> getDataType() {
-            return LocalDate.class;
         }
     },
     RELATION("PARENTESCO"),

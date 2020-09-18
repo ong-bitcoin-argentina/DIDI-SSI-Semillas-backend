@@ -64,7 +64,11 @@ public class InterviewDataCategory implements Category {
 
     @Override
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        return true;
+        List<AnswerDto> answers = new LinkedList<>();
+        answers.add(this.solidarityGroup);
+        answers.add(this.adviser);
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
+        return validations.stream().allMatch(v->v);
     }
 
     @Override
@@ -72,7 +76,7 @@ public class InterviewDataCategory implements Category {
 
     @Override
     public boolean isRequired() {
-        return false;
+        return true;
     }
 
     @Override

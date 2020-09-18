@@ -16,6 +16,12 @@ import java.util.stream.Collectors;
 //Person AGRUPA BENEFICIARY/SPOUSE/CHILD/RELATIVE
 //PERSON_CATEGORY_NAME("PERSONA"),
 public enum Categories {
+    INTERVIEW_DATA_CATEGORY_NAME("DATOS ENTREVISTA"){
+        @Override
+        public Class<?> getLinkedClass() {
+            return InterviewDataCategory.class;
+        }
+    },
     BENEFICIARY_CATEGORY_NAME("DATOS DEL BENEFICIARIO"),
     SPOUSE_CATEGORY_NAME("DATOS DEL CONYUGE"),
     CHILD_CATEGORY_NAME("DATOS HIJO"){

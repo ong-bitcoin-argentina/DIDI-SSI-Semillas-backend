@@ -5,18 +5,18 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCod
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
-import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
@@ -29,11 +29,6 @@ import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
@@ -60,24 +55,22 @@ public class CredentialService {
 
     private CredentialRepository credentialRepository;
     private CredentialCreditRepository credentialCreditRepository;
-    private CredentialIdentityRepository credentialIdentityRepository;
+    private CredentialIdentityService credentialIdentityService;
     private CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository;
     private CredentialDwellingRepository credentialDwellingRepository;
     private PersonRepository personRepository;
     private LoanRepository loanRepository;
     private CredentialBenefitsRepository credentialBenefitsRepository;
-    private DIDHistoricRepository didHistoricRepository;
     private CredentialStateRepository credentialStateRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
-    private AnswerCategoryFactory answerCategoryFactory;
     private DidiService didiService;
     private RevocationReasonRepository revocationReasonRepository;
     private LoanService loanService;
     private ProcessControlService processControlService;
-    private PersonService personService;
     private CredentialBenefitService credentialBenefitService;
     private CredentialStateService credentialStateService;
     private CredentialBenefitSancorService credentialBenefitSancorService;
+    private DidiAppUserService didiAppUserService;
 
     @Value("${credentials.pageSize}")
     private String size;
@@ -90,35 +83,32 @@ public class CredentialService {
             PersonRepository personRepository,
             LoanRepository loanRepository,
             CredentialBenefitsRepository credentialBenefitsRepository,
-            DIDHistoricRepository didHistoricRepository,
             CredentialStateRepository credentialStateRepository,
-            AnswerCategoryFactory answerCategoryFactory,
-            CredentialIdentityRepository credentialIdentityRepository,
+            CredentialIdentityService credentialIdentityService,
             CredentialEntrepreneurshipRepository credentialEntrepreneurshipRepository,
             CredentialDwellingRepository credentialDwellingRepository,
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
-            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService,PersonService personService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
+            DidiAppUserService didiAppUserService,
+            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
         this.loanRepository = loanRepository;
         this.credentialBenefitsRepository = credentialBenefitsRepository;
-        this.didHistoricRepository = didHistoricRepository;
         this.credentialStateRepository = credentialStateRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
-        this.answerCategoryFactory = answerCategoryFactory;
-        this.credentialIdentityRepository = credentialIdentityRepository;
+        this.credentialIdentityService = credentialIdentityService;
         this.credentialEntrepreneurshipRepository = credentialEntrepreneurshipRepository;
         this.credentialDwellingRepository = credentialDwellingRepository;
         this.didiService = didiService;
         this.revocationReasonRepository = revocationReasonRepository;
         this.loanService = loanService;
         this.processControlService = processControlService;
-        this.personService = personService;
         this.credentialBenefitService = credentialBenefitService;
         this.credentialStateService = credentialStateService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
+        this.didiAppUserService = didiAppUserService;
     }
 
 
@@ -154,12 +144,10 @@ public class CredentialService {
             try {
                 List<Loan> loansDefaultToReview = this.handleDefaultCredits(lastTimeProcessRun);
                 List<Loan> loansActiveToReview = this.handleActiveCredits(lastTimeProcessRun);
-                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun); //TODO add sancor
-                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);//TODO add sancor
+                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun);
+                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);
                 List<Loan> loansNewToReview = this.handleNewCredits();
 
-            } catch (PersonDoesNotExistsException ex) {
-                log.error(ex.getMessage());
             } catch (Exception ex) {
                 log.error("Error updating credentials credit ! " + ex.getMessage(), ex);
                 processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.FAIL.getCode());
@@ -439,46 +427,51 @@ public class CredentialService {
 
 
     /**
-     * Si finalizó un credito
-     * Si el Credito estaba Activo
-     * Revoco beneficios asociados al titular y familiares, solo si es el unico credito activo para el titular, queda credencial crediticia vigente
+     * Si el credito esta activo
+     *  Cred Credito
+     *      Cargo fecha de finalizacion a la credencial, no modifico su estado
+     *  Beneficio
+     *      Si es el unico credito activo para el titular
+     *          Revoco beneficios asociados al titular y familiares, si estan vigentes o pendientes de didi
+     *      Si no es el unico credito activo
+     *          No hago nada
+     *  Sancor
+     *      Si es el unico credito, revoco la credencial
+     *      si tiene mas creditos no hago nada
      * Si el Credito estaba en Mora (se supone credenciales revocadas)
-     * Doy de baja el credito en Mora parael Titular
-     * Verifico el estado del Titular
-     * Reactivo sus beneficios de otros creditos activos de los que sea Titular en estado Pendiente de Didi
-     * Reactivo los beneficios de los familiares relacionados con el Titular para ese Credito en estado Pendiente de Didi
-     *
+     *      Quito el credito del listado de mora del titularCred Credito
+     *      Cargo fecha de finalizacion a la credencial, no modifico su estadoCred
+     *  Beneficio
+     *      Si es el unico credito activo para el titular
+     *          No hago nada, se supone que todas las credenciales estan revocadas
+     *      Si Tiene mas creditos
+     *          Marco los demas creditos para revision en el próximo proceso y que verifique segun su estado lo que deben hacer conlas credenciales
+     *  Sancor
+     *      Si es el unico credito, revoco la credencial si es necesario
+     *      Si tiene mas creditos no hago nada
      * @param lastTimeProcessRun
      * @return
      * @throws PersonDoesNotExistsException
      */
-    private List<Loan> handleFinalizeCredits(LocalDateTime lastTimeProcessRun) throws PersonDoesNotExistsException {
+    private List<Loan> handleFinalizeCredits(LocalDateTime lastTimeProcessRun) {
 
         List<Loan> loansModifiedFinalized = loanService.findLastLoansModifiedFinalized(lastTimeProcessRun);
-        List<Loan> loansToreview = new ArrayList<Loan>();
-
-        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+        HashSet<Loan> loansToreview = new HashSet<Loan>();
 
         for (Loan loan : loansModifiedFinalized) {
 
             Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
             if (opCredit.isPresent()) {
                 try {
+
+                    List<Loan> otherLoansActiveForHolder = this.getOthersLoansActivesForHolder(loan);
+
+                    loansToreview.addAll(credentialBenefitService.handleLoanFinalized(loan, otherLoansActiveForHolder));
+                    loansToreview.addAll(credentialBenefitSancorService.handleLoanFinalized(loan, otherLoansActiveForHolder));
+
                     this.closeCredit(opCredit.get(), loan);
                     log.info("Credential Credit is set to FINALIZE, for credential id historic" + opCredit.get().getIdHistorical());
 
-
-                    //TODO manejar beneficios
-                    List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(loan.getDniPerson(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
-                    //there have to be only 1. The holder only have at max 1 holder benefits.
-                    if (benefitsHolder.size() > 0) {
-                        if (this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode()))
-                            log.info("The credential has been set to finish successfully");
-                        else
-                            log.error("The credential was not set to finish");
-                    } else {
-                        log.info("THERE IS NO ACTIVE OR PENDING BENEFITS OF THE HOLDER TO BE REVOKED");
-                    }
                 } catch (Exception e) {
                     loansToreview.add(loan);
                 }
@@ -487,8 +480,12 @@ public class CredentialService {
             }
         }
 
-        return loansToreview;
+        return  new ArrayList<Loan>(loansToreview);
 
+    }
+
+    public List<Loan> getOthersLoansActivesForHolder(Loan loan){
+        return this.loanService.findOthersLoansActivesForHolder(loan);
     }
 
     private void closeCredit(CredentialCredit credentialCredit, Loan loan) {
@@ -522,49 +519,57 @@ public class CredentialService {
      */
     private List<Loan> handleCancelledCredits(LocalDateTime lastTimeProcessRun) {
 
-        List<Loan> loansModifiedFinalized = loanService.findLastLoansModifiedCancelled(lastTimeProcessRun);
+        List<Loan> loansModifiedCancelled = loanService.findLastLoansModifiedCancelled(lastTimeProcessRun);
+        HashSet<Loan> loansToreview = new HashSet<Loan>();
 
-        List<Loan> loansToreview = new ArrayList<Loan>();
-
-        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-
-        for (Loan loan : loansModifiedFinalized) {
+        for (Loan loan : loansModifiedCancelled) {
 
             Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
-            CredentialCredit updateCredit = opCredit.get();
-            try {
-                if (loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())) {
-                    this.closeCredit(opCredit.get(), loan);
-                    log.info("Credential Credit is set to CANCEL, for credential id historic" + updateCredit.getIdHistorical());
+            if (opCredit.isPresent()) {
+                try {
 
-                    //Revoke credential credit
-                    boolean haveRevokeOk = this.revokeComplete(updateCredit, RevocationReasonsCodes.CANCELLED.getCode());
+                    List<Loan> otherLoansActiveForHolder = this.getOthersLoansActivesForHolder(loan);
 
-                    List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
+                    loansToreview.addAll(credentialBenefitService.handleLoanFinalized(loan, otherLoansActiveForHolder));
+                    loansToreview.addAll(credentialBenefitSancorService.handleLoanFinalized(loan, otherLoansActiveForHolder));
 
-                    //there have to be only 1. The holder only have at max 1 holder benefits.
-                    if (benefitsHolder.size() > 0) {
-                        //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
-                        boolean result = this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode());
-                        haveRevokeOk = haveRevokeOk && result;
-                    } else
-                        log.info("There is no active or pending benefits of the holder to be revoked");
+                    this.cancelCredit(opCredit.get(), loan);
+                    log.info("Credential Credit is set to CANCELLED, for credential id historic" + opCredit.get().getIdHistorical());
 
-                    //check results
-                    if (haveRevokeOk)
-                        log.info("The credential has been set to cancel successfully");
-                    else
-                        log.error("The credential was not set to cancel");
-
+                } catch (Exception e) {
+                    loansToreview.add(loan);
                 }
-            } catch (CredentialException e) {
-                log.error("Error to handle credential exception", e);
-                loansToreview.add(loan);
+            } else {
+                log.info("Loan " + loan.getIdBondareaLoan() + " dont have credential, nothing to do");
             }
         }
-        return loansToreview;
+
+        return  new ArrayList<Loan>(loansToreview);
+
     }
 
+    private void cancelCredit(CredentialCredit credentialCredit, Loan loan) throws CredentialException {
+
+        credentialCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
+        if(isCredentialRevoked(credentialCredit)){
+            credentialCreditRepository.save(credentialCredit);
+        }else
+            this.revokeComplete(credentialCredit, RevocationReasonsCodes.CANCELLED);
+
+        Optional<Person> holder = personRepository.findByDocumentNumber(credentialCredit.getCreditHolderDni());
+
+        if (holder.isPresent()) {
+            if (holder.get().isInDefault()) {
+                if (holder.get().removeLoanInDefault(loan)) {
+                    personRepository.save(holder.get());
+                    log.info("Loan " + loan.getIdBondareaLoan() + "in default remove for holder " + holder.get().getDocumentNumber());
+                }
+            }
+        }
+
+        log.info("Credential Credit for loan {} cancelled", loan.getIdBondareaLoan());
+
+    }
 
     /**
      *     Si existe el titular como persona registrada y el credito posee credenciales previas creadas (sino pasa al flujo de creditos nuevos)
@@ -681,14 +686,8 @@ public class CredentialService {
     }
 
 
-/*
-    private void createCredentialCredit(Loan loan) throws PersonDoesNotExistsException {
-        this.createNewCreditCredentials(loan);//TODO <-refactor this, one type of credential for method, and create de familiy benefits
-        //TODO EMMIT DIDI
-    }*/
 
-
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
             saveAllCredentialsFromForm(surveyForm);
@@ -762,7 +761,7 @@ public class CredentialService {
         return true;
     }
 
-    private void saveAllCredentialsFromForm(SurveyForm surveyForm) {
+    private void saveAllCredentialsFromForm(SurveyForm surveyForm) throws CredentialException {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
@@ -781,10 +780,13 @@ public class CredentialService {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:
+                credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
+                break;
             case CHILD_CATEGORY_NAME:
             case SPOUSE_CATEGORY_NAME:
             case KINSMAN_CATEGORY_NAME:
-                credentialIdentityRepository.save(buildIdentityCredential(category, creditHolder));
+                CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
+                this.createCredentialIdentityKinsman(credentialIdentity);
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
                 credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
@@ -830,8 +832,10 @@ public class CredentialService {
         credentialStateOptional.ifPresent(credential::setCredentialState);
     }
 
-    //todo move into credential type class
-    private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder) {
+    //todo move into credentia{}
+    //
+    // l type class
+    private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder)  {
         PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
         Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
         beneficiary = savePersonIfNew(beneficiary);
@@ -853,17 +857,32 @@ public class CredentialService {
         switch (beneficiaryPersonCategory.getPersonType()) {
             case BENEFICIARY:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY.getCode());
-                credentialIdentity.setRelationWithCreditHolder("titular");//todo parar a enum
+                credentialIdentity.setRelationWithCreditHolder(CredentialRelationHolderType.HOLDER.getCode());
                 break;
             case SPOUSE:
             case CHILD:
             case OTHER_KINSMAN:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILY.getCode());
-                credentialIdentity.setRelationWithCreditHolder("familiar");//todo pasar a enum
+                credentialIdentity.setRelationWithCreditHolder(CredentialRelationHolderType.HOLDER.getCode());
+
                 break;
         }
 
         return credentialIdentity;
+    }
+
+    private void createCredentialIdentityKinsman(CredentialIdentity credentialIdentity) throws CredentialException {
+
+        log.info("verify credential kinsman type for beneficiary {}  and holder {}", credentialIdentity.getBeneficiaryDni(), credentialIdentity.getCreditHolderDni());
+
+        Optional<DidiAppUser> didiAppUser = didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
+
+        if(didiAppUser.isPresent()){
+            if(!this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(credentialIdentity.getCreditHolderDni(), credentialIdentity.getBeneficiaryDni())) {
+                CredentialIdentity newCredentialidentityAsKinsmanType = this.credentialIdentityService.buildNewOnPendidgDidiAsKinsmanType(credentialIdentity, didiAppUser.get());
+                this.credentialIdentityService.save(newCredentialidentityAsKinsmanType);
+            }
+        }
     }
 
     //todo move into credential type class
@@ -1000,53 +1019,6 @@ public class CredentialService {
 
     }
 
-    /**
-     * This will try to create a new benefit credential for the beneficiary.
-     * The benefits familiar depends on if he has his OWN credential credit (so he download the app)
-     */
-   /* public void createNewBenefitsCredential(CredentialIdentity identity) {
-        //check if person is valid to create a benefit of the type required.
-        if (this.isValidPersonForNewBenefits(identity.getCreditHolder(), identity.getBeneficiary())) {
-
-            log.info("Creating Credential Benefits");
-            CredentialBenefits benefits = null;
-            if (identity.getCreditHolderDni().equals(identity.getBeneficiaryDni()))
-                benefits = this.buildBenefitsCredential(identity.getBeneficiary(), PersonTypesCodes.HOLDER);
-            else
-                benefits = this.buildBenefitsCredential(identity.getBeneficiary(), PersonTypesCodes.FAMILY);
-
-            if (benefits != null) {
-                credentialBenefitsRepository.save(benefits);
-                log.info("Credential benefits created for dni: " + identity.getBeneficiary().getDocumentNumber());
-            }
-        }
-    }*/
-    private boolean isValidPersonForNewBenefits(Person holder, Person beneficiary) {
-        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-
-        Long holderDni = holder.getDocumentNumber();
-        Long beneficiaryDni = beneficiary.getDocumentNumber();
-        //is holder
-        if (holderDni.equals(beneficiaryDni)) {
-            //get actual benefits of the holder
-            Optional<CredentialBenefits> opBenefits = credentialBenefitsRepository.findByBeneficiaryDniAndCredentialStateInAndBeneficiaryType(beneficiaryDni, pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
-
-            //if he doesnt have a credential benefits, is valid to create
-            if (opBenefits.isEmpty())
-                return true;
-        } else {
-            //is familiar
-            List<CredentialIdentity> identitiesFamiliar = credentialIdentityRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
-            //this mean, the beneficiary familiar, have his own identity because he download the app, and the identity familiar created by the survey.
-            if (identitiesFamiliar.size() == 2) {
-                //validate if he doesnt have a benefit with this holder dni
-                Optional<CredentialBenefits> opCredentialBenefit = credentialBenefitsRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(holderDni, beneficiaryDni, pendingAndActiveState);
-                return opCredentialBenefit.isEmpty();
-            }
-        }
-        return false;
-    }
-
 
     /**
      * Set holder in default and
@@ -1154,7 +1126,7 @@ public class CredentialService {
                 case CREDENTIAL_IDENTITY:
                     //find all the identities that the dni of the holder is into. (with state active or pending)
                     List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialIdentity> holderIdentities = credentialIdentityRepository.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
+                    List<CredentialIdentity> holderIdentities = credentialIdentityService.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
 
                     if (holderIdentities.size() == 0) {
                         log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
@@ -1169,7 +1141,7 @@ public class CredentialService {
                 case CREDENTIAL_IDENTITY_FAMILY:
                     //revoke the identities of the familiar: the one created by the survey and if it exists, the one created because the person download the app. (with state active or pending)
                     activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialIdentity> familiarIdentities = credentialIdentityRepository.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(),
+                    List<CredentialIdentity> familiarIdentities = credentialIdentityService.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(),
                             credentialToRevoke.getBeneficiaryDni(), activePendingStates);
 
                     if (familiarIdentities.size() == 0) {

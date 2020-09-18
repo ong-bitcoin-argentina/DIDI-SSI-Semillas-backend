@@ -79,7 +79,6 @@ public class DidiController {
     @GetMapping("/didi/sync")
     @ResponseStatus(HttpStatus.OK)
     public String didiCredentialSync() {
-
         return didiService.didiCredentialSync();
     }
 

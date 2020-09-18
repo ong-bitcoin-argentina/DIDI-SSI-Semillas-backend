@@ -7,12 +7,19 @@ import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategory
 import com.atixlabs.semillasmiddleware.filemanager.exception.EmptyFileException;
 import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.util.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.bind.DefaultValue;
+import org.springframework.core.io.Resource;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
 
 @Slf4j
 @RestController
@@ -32,7 +39,7 @@ public class FileManagerController {
 
     @PostMapping("/upload")
     @ResponseBody
-    public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file) throws Exception, InvalidCategoryException {
+    public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(required = false, defaultValue = "true") boolean createCredentials ) throws Exception, InvalidCategoryException {
 
         log.info("uploadFile executed");
 
@@ -42,10 +49,17 @@ public class FileManagerController {
 
         File receivedFile = fileManagerService.uploadFile(file);
 
-        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath());
+        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath(), createCredentials);
 
         return ResponseEntity.ok(processExcelFileResult);
         //return(ResponseEntity.ok().build());
+    }
+
+    @GetMapping("/download")
+    public @ResponseBody byte[] downloadDocument(@RequestParam String fileName) throws IOException {
+
+        InputStream in = new FileInputStream(fileManagerService.getFileFromTmp(fileName));
+        return IOUtils.toByteArray(in);
     }
 
 
@@ -61,7 +75,7 @@ public class FileManagerController {
 
         File receivedFile = fileManagerService.uploadFile(file);
 
-        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processSingleSheetFile(receivedFile.getPath());
+        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processSingleSheetFile(receivedFile.getPath(), true);
 
         return ResponseEntity.ok(processExcelFileResult);
 

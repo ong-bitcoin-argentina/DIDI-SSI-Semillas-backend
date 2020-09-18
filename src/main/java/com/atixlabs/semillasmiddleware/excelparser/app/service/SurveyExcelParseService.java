@@ -8,6 +8,8 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
+import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
+import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,13 @@ public class SurveyExcelParseService extends ExcelParseService {
     @Autowired
     private AnswerCategoryFactory answerCategoryFactory;
 
+    @Autowired
+    private PdfParserService pdfParserService;
+
+    @Autowired
+    private FileManagerService fileManagerService;
+
+    private static final String ZIP_SUFFIX = "Encuesta_form";
     private SurveyForm currentForm;
     private List<SurveyForm> surveyFormList;
 
@@ -57,7 +66,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
 
         AnswerRow answerRow = null;
         try {
@@ -87,7 +96,7 @@ public class SurveyExcelParseService extends ExcelParseService {
             }
         }
         if(!hasNext)
-            endOfFileHandler(processExcelFileResult);
+            endOfFileHandler(processExcelFileResult, createCredentials);
 
         return processExcelFileResult;
     }
@@ -98,7 +107,8 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult) throws CredentialException {
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
+        List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
 
@@ -107,14 +117,20 @@ public class SurveyExcelParseService extends ExcelParseService {
         for (SurveyForm surveyForm : surveyFormList) {
             if (!surveyForm.isValid(processExcelFileResult))
                 allFormValid = false;
-            //log.info(surveyForm.toString());
         }
 
         if(allFormValid) {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
-                credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
+                if (createCredentials)
+                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
             }
+
+            if(pdfsGenerated.size() > 1)
+                processExcelFileResult.setDownloadableFileName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
+            else
+                processExcelFileResult.setDownloadableFileName(pdfsGenerated.get(0));
         }
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");

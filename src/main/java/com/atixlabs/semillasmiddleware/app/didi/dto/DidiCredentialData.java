@@ -4,8 +4,10 @@ import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.ss.formula.functions.T;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
 @Slf4j
 @Getter
@@ -75,6 +77,18 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Tipo de Tenencia", credential.getPossessionType()));
         cert.add(new DidiCredentialDataElem("Tipo de Vivienda", credential.getDwellingType()));
         cert.add(new DidiCredentialDataElem("Distrito de Residencia", credential.getDwellingAddress()));
+
+        cert.add(new DidiCredentialDataElem("Instalacion de luz", credential.getLightInstallation()));
+        cert.add(new DidiCredentialDataElem("Condiciones grales", credential.getGeneralConditions()));
+        cert.add(new DidiCredentialDataElem("Tipo de barrio", credential.getNeighborhoodType()));
+        Optional.ofNullable(credential.getGas()).ifPresent(gas -> cert.add(new DidiCredentialDataElem("Red de gas", gas.toString())));
+        Optional.ofNullable(credential.getCarafe()).ifPresent(carafe -> cert.add(new DidiCredentialDataElem("Garrafa", carafe.toString())));
+        Optional.ofNullable(credential.getWater()).ifPresent(water -> cert.add(new DidiCredentialDataElem("Red de agua", water.toString())));
+        Optional.ofNullable(credential.getWatterWell()).ifPresent(waterWell -> cert.add(new DidiCredentialDataElem("Pozo/Bomba", waterWell.toString())));
+        cert.add(new DidiCredentialDataElem("Localidad", ""));
+        cert.add(new DidiCredentialDataElem("Barrio", ""));
+        cert.add(new DidiCredentialDataElem("Direccion", ""));
+
     }
 
     private void buildDidiCredentialDataFromEntrepreneurship(CredentialEntrepreneurship credential){

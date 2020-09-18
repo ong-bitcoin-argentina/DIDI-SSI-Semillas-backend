@@ -134,8 +134,14 @@ public class AnswerRow extends ExcelRow {
                 return getAnswerAsDate("dd/MM/yyyy");
             case "java.lang.Long":
                 return getAnswerAsLong();
+            case "java.lang.Integer":
+                return getAnswerAsInteger();
         }
     return null;
+    }
+
+    public void setAnswer(String answer) {
+        this.answer = answer;
     }
 
     @Override

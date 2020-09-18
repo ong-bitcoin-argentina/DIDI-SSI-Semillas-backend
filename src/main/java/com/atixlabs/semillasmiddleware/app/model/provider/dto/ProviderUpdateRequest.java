@@ -14,8 +14,10 @@ public class ProviderUpdateRequest {
     private Optional<Long> categoryId;
     private Optional<String> name;
     private Optional<String> phone;
+    private Optional<String> whatsappNumber;
     private Optional<String> email;
-
+    private Optional<String> description;
+    private Optional<Boolean> active;
     @Min(0)
     @Max(100)
     private Optional<Integer> benefit;

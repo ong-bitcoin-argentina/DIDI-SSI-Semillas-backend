@@ -30,6 +30,9 @@ public class Provider extends AuditableEntity {
     private String whatsappNumber;
     private String email;
 
+    @Column(length = 1024)
+    private String description;
+
     @Min(0)
     @Max(100)
     private Integer benefit;
@@ -66,10 +69,12 @@ public class Provider extends AuditableEntity {
                 .phone(this.phone)
                 .speciality(this.speciality)
                 .whatsappNumber(this.whatsappNumber)
+                .active(this.active)
                 .providerCategoryDto(ProviderCategoryDto.builder()
                         .id(this.providerCategory.getId())
                         .name(this.providerCategory.getName())
                         .build())
+                .description(this.description)
                 .build();
     }
 }

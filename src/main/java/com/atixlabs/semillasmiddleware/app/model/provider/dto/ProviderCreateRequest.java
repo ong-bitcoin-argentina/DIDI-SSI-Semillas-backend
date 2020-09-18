@@ -7,6 +7,7 @@ import lombok.Setter;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
+import java.util.Optional;
 
 @Setter
 @Getter
@@ -16,17 +17,22 @@ public class ProviderCreateRequest {
     private Long categoryId;
     @NotNull
     private String name;
-    @NotNull
-    private String phone;
+
+    @Builder.Default
+    private Optional<String> phone = Optional.empty();
     @NotNull
     private String email;
 
-    private String whatsappNumber;
+    @Builder.Default
+    private Optional<String> whatsappNumber = Optional.empty();
+
+    @Builder.Default
+    private Optional<Integer> benefit = Optional.empty();
 
     @NotNull
-    @Min(0)
-    @Max(100)
-    private Integer benefit;
+    @Builder.Default
+    private String description = "";
+
     @NotNull
     private String speciality;
 

@@ -9,6 +9,10 @@ import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.dto.ProviderCreateRequest;
 import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderRepository;
 import com.google.common.collect.Lists;
+import com.itextpdf.text.Document;
+import com.itextpdf.text.DocumentException;
+import com.itextpdf.text.pdf.PdfWriter;
+import com.itextpdf.tool.xml.XMLWorkerHelper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
@@ -18,6 +22,10 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import javax.persistence.criteria.*;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -46,10 +54,11 @@ public class ProviderService{
         provider.setProviderCategory(category);
         provider.setEmail(providerCreateRequest.getEmail());
         provider.setName(providerCreateRequest.getName());
-        provider.setPhone(providerCreateRequest.getPhone());
-        provider.setBenefit(providerCreateRequest.getBenefit());
-        provider.setWhatsappNumber(providerCreateRequest.getWhatsappNumber());
+        providerCreateRequest.getPhone().ifPresent(provider::setPhone);
+        providerCreateRequest.getBenefit().ifPresent(provider::setBenefit);
+        providerCreateRequest.getWhatsappNumber().ifPresent(provider::setWhatsappNumber);
         provider.setSpeciality(providerCreateRequest.getSpeciality());
+        provider.setDescription(providerCreateRequest.getDescription());
 
         return providerRepository.save(provider);
     }
@@ -93,14 +102,15 @@ public class ProviderService{
     public Provider update(Long id, ProviderUpdateRequest providerUpdateRequest){
         Provider provider = this.findById(id);
         providerUpdateRequest.getName().ifPresent(provider::setName);
-        providerUpdateRequest.getBenefit().ifPresent(provider::setBenefit);
+        provider.setBenefit(providerUpdateRequest.getBenefit().orElse(null));
         providerUpdateRequest.getEmail().ifPresent(provider::setEmail);
         providerUpdateRequest.getPhone().ifPresent(provider::setPhone);
+        providerUpdateRequest.getWhatsappNumber().ifPresent(provider::setWhatsappNumber);
         providerUpdateRequest.getSpeciality().ifPresent(provider::setSpeciality);
+        providerUpdateRequest.getDescription().ifPresent(provider::setDescription);
         providerUpdateRequest.getCategoryId().ifPresent( catId -> provider.setProviderCategory(providerCategoryService.findById(catId)));
+        providerUpdateRequest.getActive().ifPresent(provider::setActive);
 
         return providerRepository.save(provider);
     }
-
-
 }

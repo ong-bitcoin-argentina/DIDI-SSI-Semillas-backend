@@ -67,8 +67,8 @@ public enum PersonQuestion implements CategoryQuestion {
     WORKS("TRABAJA"),
     AGE("EDAD"){
         @Override
-        public Class<?> getDataType() {
-            return Long.class;
+        public boolean isRequired() {
+            return true;
         }
     },
     CHILDREN_QUANTITY("CANTIDAD DE HIJOS"),

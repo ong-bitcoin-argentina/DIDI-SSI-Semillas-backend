@@ -22,6 +22,7 @@ public class ProcessExcelFileResult {
     private int totalEmptyRows = 0;
     private int totalProcessedForms = 0;
     private String fileName = null;
+    private String downloadableFileName;
 
     private List<ExcelErrorDetail> errorRows = new ArrayList<>();
     @JsonIgnore

@@ -5,4 +5,5 @@ public interface CategoryQuestion {
     boolean isRequired();
     String getQuestionName();
     String name();
+
 }

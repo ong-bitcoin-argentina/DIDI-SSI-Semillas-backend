@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
+import com.atixlabs.semillasmiddleware.app.dto.ApiResponse;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
@@ -157,25 +158,38 @@ public class CredentialController {
     @PostMapping("/share")
     public ResponseEntity<?> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
         if (!shareCredentialRequest.getCustomProviderEmail().isPresent() && !shareCredentialRequest.getProviderId().isPresent())
-            return ResponseEntity.badRequest().body("You must either specify a provider id or an email");
+            return ResponseEntity.badRequest().body(ApiResponse.error()
+                    .setBody("You must either specify a provider id or an email")
+                    .setUserMessage("Ocurrió un error al enviar el correo electrónico del Servicio que deseas utilizar. De persistir el problema, contactate con tu asesor de Programa Semillas."));
 
         try{
             shareCredentialService.shareCredential(shareCredentialRequest);
         }catch (PersonDoesNotExistsException pdnee){
             log.error("Person with dni "+shareCredentialRequest.getDni()+" does not exist");
-            return ResponseEntity.badRequest().body("person with dni "+shareCredentialRequest.getDni()+" not found");
+            return ResponseEntity.badRequest().body(ApiResponse.error()
+                    .setBody("person with dni "+shareCredentialRequest.getDni()+" not found")
+                    .setUserMessage("Ocurrió un error al compartir la credencial de Beneficios Semillas con el Prestador del Servicio. Por favor, contactate con tu asesor de Programa Semillas."));
+
         }catch (InexistentProviderException ipe){
             log.error("Provider with id %s does not exist", shareCredentialRequest.getProviderId());
-            return ResponseEntity.badRequest().body("provider with id "+shareCredentialRequest.getProviderId()+" not found" );
+            return ResponseEntity.badRequest().body(ApiResponse.error()
+                    .setBody("Provider with id "+shareCredentialRequest.getProviderId()+" does not exist")
+                    .setUserMessage("El Servicio seleccionado ya no se encuentra activo en Programa Semillas. Disculpá las molestias..."));
+
         }catch (CredentialNotExistsException credEx){
-            log.warn("There are no Benefit credentials emitted for the specified beneficiary and credit holder");
-            return ResponseEntity.badRequest().body(credEx.getMessage());
+            log.error("There are no Benefit credentials emitted for the specified beneficiary and credit holder");
+            return ResponseEntity.badRequest().body(ApiResponse.error()
+                    .setBody("There are no Benefit credentials emitted for the specified beneficiary and credit holder")
+                    .setUserMessage("Ocurrió un error al compartir tu credencial de Identidad Semillas con el Prestador del Servicio. Por favor, contactate con tu asesor de Programa Semillas."));
+
         }catch (Exception ex){
             log.error("Could not send email message:" + ex.getMessage());
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ex.getStackTrace());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(ApiResponse.error()
+                    .setBody(ex.getMessage())
+                    .setUserMessage("Ocurrió un error al compartir la credencial de Beneficios Semillas con el Prestador del Servicio. Por favor, contactate con tu asesor de Programa Semillas."));
         }
 
-        return ResponseEntity.ok().body("shared.");
+        return ResponseEntity.ok().body(ApiResponse.builder().body("shared.").build());
     }
 
 }

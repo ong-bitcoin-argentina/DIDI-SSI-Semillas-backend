@@ -251,7 +251,7 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential identity id {} holder {} beneficiary {}",credentialIdentity.getId(), credentialIdentity.getCreditHolderDni(), credentialIdentity.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getCreditHolderDni());
 
         if(didiAppUser.isPresent()) {
             credentialIdentity.setIdDidiReceptor(didiAppUser.get().getDid());

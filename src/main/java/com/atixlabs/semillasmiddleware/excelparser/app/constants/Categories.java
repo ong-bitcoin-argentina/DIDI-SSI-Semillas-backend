@@ -1,13 +1,9 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.*;
 
 import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -34,16 +30,37 @@ public enum Categories {
             return 3;
         }
     },
+
+    DWELLING_CATEGORY_NAME("VIVIENDA"){
+        @Override
+        public Class<?> getLinkedClass() {
+            return DwellingCategory.class;
+        }
+    },
+
     ENTREPRENEURSHIP_CATEGORY_NAME("EMPRENDIMIENTO"){
         @Override
         public Class<?> getLinkedClass() {
             return EntrepreneurshipCategory.class;
         }
     },
-    DWELLING_CATEGORY_NAME("VIVIENDA"){
+
+    PATRIMONIAL_SITUATION_CATEGORY_NAME("SITUACION PATRIMONIAL"){
         @Override
         public Class<?> getLinkedClass() {
-            return DwellingCategory.class;
+            return PatrimonialSituationCategory.class;
+        }
+    },
+    FAMILIAR_FINANCE_CATEGORY_NAME("FINANZAS FAMILIARES"){
+        @Override
+        public Class<?> getLinkedClass() {
+            return FamiliarFinanceCategory.class;
+        }
+    },
+    FINANCIAL_SITUATION_CATEGORY_NAME("SITUACION CREDITICIA"){
+        @Override
+        public Class<?> getLinkedClass() {
+            return FinancialSituationCategory.class;
         }
     };
 

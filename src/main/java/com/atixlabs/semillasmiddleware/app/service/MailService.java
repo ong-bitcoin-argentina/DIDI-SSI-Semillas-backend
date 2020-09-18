@@ -4,9 +4,9 @@ import com.atixlabs.semillasmiddleware.app.exceptions.EmailNotSentException;
 import com.atixlabs.semillasmiddleware.app.model.Email;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import okhttp3.*;
-
 import java.io.IOException;
 import java.util.concurrent.TimeUnit;
 
@@ -49,7 +49,10 @@ public class MailService {
         Call call = okHttpClient.newCall(request);
         try{
             Response response = call.execute();
-            log.info("Succesfully sent email response status["+response.code()+"] msg["+response.message()+"]");
+            if(HttpStatus.valueOf(response.code()).is2xxSuccessful())
+                log.info("Successfully sent email response status["+response.code()+"] msg["+response.message()+"]");
+            else
+                log.warn("email not sent response status["+response.code()+"] msg["+response.message()+"]");
         }catch (IOException ioe){
             log.error(ioe.getMessage());
             throw new EmailNotSentException(ioe.getMessage());
@@ -58,13 +61,16 @@ public class MailService {
     }
 
     private FormBody getBody(Email email){
-        return new FormBody.Builder()
-                .add(FROM_PARAM, ISSUER)
-                .add(TO_PARAM, email.getTo())
-                .add(SUBJECT_PARAM,email.getSubject())
-                .add(TEMPLATE_PARAM, email.getTemplate())
-                .add(CC_PARAM, CC)
-                .build();
+        FormBody.Builder body = new FormBody.Builder()
+                    .add(FROM_PARAM, ISSUER)
+                    .add(TO_PARAM, email.getTo())
+                    .add(SUBJECT_PARAM,email.getSubject())
+                    .add(TEMPLATE_PARAM, email.getTemplate());
+
+        if (!CC.isBlank())
+            body.add(CC_PARAM, CC);
+
+        return body.build();
     }
 
     //Returns request from url

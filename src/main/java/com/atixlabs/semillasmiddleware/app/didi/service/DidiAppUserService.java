@@ -41,7 +41,7 @@ public class DidiAppUserService {
     }
 
     public DidiAppUserOperationResult registerNewAppUser(DidiAppUserDto didiAppUserDto) {
-
+        log.info("Register new app user: "+didiAppUserDto.toString());
         Optional<DidiAppUser> opDidiAppUser = didiAppUserRepository.findByDniAndActiveTrue(didiAppUserDto.getDni());
 
         //if DNI is new.
@@ -51,6 +51,7 @@ public class DidiAppUserService {
             DidiAppUser didiAppUser = new DidiAppUser(didiAppUserDto);
             if (opDidiAppUser.get().getDid().equals(didiAppUserDto.getDid())) {
                 //if DID is the same:
+                log.info("DidiSyncStatus: "+ DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus()));
                 switch (DidiSyncStatus.getEnumByStringValue(didiAppUser.getSyncStatus())) {
                     case SYNC_OK:
                     case SYNC_MISSING:

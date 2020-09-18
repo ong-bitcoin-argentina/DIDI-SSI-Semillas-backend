@@ -159,4 +159,16 @@ public abstract class  CredentialCommonService {
         return credential;
 
     }
+
+    public List<CredentialState> getActiveAndPendingDidiStates() throws CredentialException {
+        Optional<CredentialState> activeState = credentialStateService.getCredentialActiveState();
+        CredentialState pendingDidiState = credentialStateService.getCredentialPendingDidiState();
+
+        List<CredentialState> states = new ArrayList<CredentialState>();
+        states.add(activeState.get());
+        states.add(pendingDidiState);
+
+        return states;
+    }
+
 }

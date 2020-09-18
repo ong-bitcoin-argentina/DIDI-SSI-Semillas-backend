@@ -11,6 +11,8 @@ import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import org.slf4j.Logger;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Optional;
 
 public abstract class  CredentialCommonService {
@@ -135,7 +137,20 @@ public abstract class  CredentialCommonService {
         return credentialRepository.findById(id);
     }
 
-    public Credential resetStateOnPendingDidi(Credential credential) throws CredentialException {
+
+    public List<CredentialState> getCredentialActivesStates() throws CredentialException {
+        Optional<CredentialState> activeState = this.credentialStateService.getCredentialActiveState();
+        CredentialState pendingDidieState = this.credentialStateService.getCredentialPendingDidiState();
+
+        List<CredentialState> states = new ArrayList<CredentialState>();
+
+        states.add(activeState.get());
+        states.add(pendingDidieState);
+
+        return  states;
+    }
+
+  public Credential resetStateOnPendingDidi(Credential credential) throws CredentialException {
         credential.setDateOfRevocation(null);
         credential.setRevocationReason(null);
         credential.setCredentialState(this.credentialStateService.getCredentialPendingDidiState());
@@ -144,5 +159,4 @@ public abstract class  CredentialCommonService {
         return credential;
 
     }
-
 }

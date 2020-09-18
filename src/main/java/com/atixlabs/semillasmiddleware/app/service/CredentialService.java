@@ -154,12 +154,10 @@ public class CredentialService {
             try {
                 List<Loan> loansDefaultToReview = this.handleDefaultCredits(lastTimeProcessRun);
                 List<Loan> loansActiveToReview = this.handleActiveCredits(lastTimeProcessRun);
-                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun); //TODO add sancor
-                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);//TODO add sancor
+                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun);
+                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);
                 List<Loan> loansNewToReview = this.handleNewCredits();
 
-            } catch (PersonDoesNotExistsException ex) {
-                log.error(ex.getMessage());
             } catch (Exception ex) {
                 log.error("Error updating credentials credit ! " + ex.getMessage(), ex);
                 processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS.getCode(), ProcessControlStatusCodes.FAIL.getCode());
@@ -439,46 +437,51 @@ public class CredentialService {
 
 
     /**
-     * Si finalizó un credito
-     * Si el Credito estaba Activo
-     * Revoco beneficios asociados al titular y familiares, solo si es el unico credito activo para el titular, queda credencial crediticia vigente
+     * Si el credito esta activo
+     *  Cred Credito
+     *      Cargo fecha de finalizacion a la credencial, no modifico su estado
+     *  Beneficio
+     *      Si es el unico credito activo para el titular
+     *          Revoco beneficios asociados al titular y familiares, si estan vigentes o pendientes de didi
+     *      Si no es el unico credito activo
+     *          No hago nada
+     *  Sancor
+     *      Si es el unico credito, revoco la credencial
+     *      si tiene mas creditos no hago nada
      * Si el Credito estaba en Mora (se supone credenciales revocadas)
-     * Doy de baja el credito en Mora parael Titular
-     * Verifico el estado del Titular
-     * Reactivo sus beneficios de otros creditos activos de los que sea Titular en estado Pendiente de Didi
-     * Reactivo los beneficios de los familiares relacionados con el Titular para ese Credito en estado Pendiente de Didi
-     *
+     *      Quito el credito del listado de mora del titularCred Credito
+     *      Cargo fecha de finalizacion a la credencial, no modifico su estadoCred
+     *  Beneficio
+     *      Si es el unico credito activo para el titular
+     *          No hago nada, se supone que todas las credenciales estan revocadas
+     *      Si Tiene mas creditos
+     *          Marco los demas creditos para revision en el próximo proceso y que verifique segun su estado lo que deben hacer conlas credenciales
+     *  Sancor
+     *      Si es el unico credito, revoco la credencial si es necesario
+     *      Si tiene mas creditos no hago nada
      * @param lastTimeProcessRun
      * @return
      * @throws PersonDoesNotExistsException
      */
-    private List<Loan> handleFinalizeCredits(LocalDateTime lastTimeProcessRun) throws PersonDoesNotExistsException {
+    private List<Loan> handleFinalizeCredits(LocalDateTime lastTimeProcessRun) {
 
         List<Loan> loansModifiedFinalized = loanService.findLastLoansModifiedFinalized(lastTimeProcessRun);
-        List<Loan> loansToreview = new ArrayList<Loan>();
-
-        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+        HashSet<Loan> loansToreview = new HashSet<Loan>();
 
         for (Loan loan : loansModifiedFinalized) {
 
             Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
             if (opCredit.isPresent()) {
                 try {
+
+                    List<Loan> otherLoansActiveForHolder = this.getOthersLoansActivesForHolder(loan);
+
+                    loansToreview.addAll(credentialBenefitService.handleLoanFinalized(loan, otherLoansActiveForHolder));
+                    loansToreview.addAll(credentialBenefitSancorService.handleLoanFinalized(loan, otherLoansActiveForHolder));
+
                     this.closeCredit(opCredit.get(), loan);
                     log.info("Credential Credit is set to FINALIZE, for credential id historic" + opCredit.get().getIdHistorical());
 
-
-                    //TODO manejar beneficios
-                    List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(loan.getDniPerson(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
-                    //there have to be only 1. The holder only have at max 1 holder benefits.
-                    if (benefitsHolder.size() > 0) {
-                        if (this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode()))
-                            log.info("The credential has been set to finish successfully");
-                        else
-                            log.error("The credential was not set to finish");
-                    } else {
-                        log.info("THERE IS NO ACTIVE OR PENDING BENEFITS OF THE HOLDER TO BE REVOKED");
-                    }
                 } catch (Exception e) {
                     loansToreview.add(loan);
                 }
@@ -487,8 +490,12 @@ public class CredentialService {
             }
         }
 
-        return loansToreview;
+        return  new ArrayList<Loan>(loansToreview);
 
+    }
+
+    public List<Loan> getOthersLoansActivesForHolder(Loan loan){
+        return this.loanService.findOthersLoansActivesForHolder(loan);
     }
 
     private void closeCredit(CredentialCredit credentialCredit, Loan loan) {
@@ -522,49 +529,57 @@ public class CredentialService {
      */
     private List<Loan> handleCancelledCredits(LocalDateTime lastTimeProcessRun) {
 
-        List<Loan> loansModifiedFinalized = loanService.findLastLoansModifiedCancelled(lastTimeProcessRun);
+        List<Loan> loansModifiedCancelled = loanService.findLastLoansModifiedCancelled(lastTimeProcessRun);
+        HashSet<Loan> loansToreview = new HashSet<Loan>();
 
-        List<Loan> loansToreview = new ArrayList<Loan>();
-
-        List<CredentialState> pendingAndActiveState = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-
-        for (Loan loan : loansModifiedFinalized) {
+        for (Loan loan : loansModifiedCancelled) {
 
             Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
-            CredentialCredit updateCredit = opCredit.get();
-            try {
-                if (loan.getStatus().equals(LoanStatusCodes.CANCELLED.getCode())) {
-                    this.closeCredit(opCredit.get(), loan);
-                    log.info("Credential Credit is set to CANCEL, for credential id historic" + updateCredit.getIdHistorical());
+            if (opCredit.isPresent()) {
+                try {
 
-                    //Revoke credential credit
-                    boolean haveRevokeOk = this.revokeComplete(updateCredit, RevocationReasonsCodes.CANCELLED.getCode());
+                    List<Loan> otherLoansActiveForHolder = this.getOthersLoansActivesForHolder(loan);
 
-                    List<CredentialBenefits> benefitsHolder = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(updateCredit.getBeneficiaryDni(), pendingAndActiveState, PersonTypesCodes.HOLDER.getCode());
+                    loansToreview.addAll(credentialBenefitService.handleLoanFinalized(loan, otherLoansActiveForHolder));
+                    loansToreview.addAll(credentialBenefitSancorService.handleLoanFinalized(loan, otherLoansActiveForHolder));
 
-                    //there have to be only 1. The holder only have at max 1 holder benefits.
-                    if (benefitsHolder.size() > 0) {
-                        //revoke only the benefits if the holder does not have another credit. And revoke the familiar benefits given by this credit.
-                        boolean result = this.revokeCredential(benefitsHolder.get(0).getId(), RevocationReasonsCodes.CANCELLED.getCode());
-                        haveRevokeOk = haveRevokeOk && result;
-                    } else
-                        log.info("There is no active or pending benefits of the holder to be revoked");
+                    this.cancelCredit(opCredit.get(), loan);
+                    log.info("Credential Credit is set to CANCELLED, for credential id historic" + opCredit.get().getIdHistorical());
 
-                    //check results
-                    if (haveRevokeOk)
-                        log.info("The credential has been set to cancel successfully");
-                    else
-                        log.error("The credential was not set to cancel");
-
+                } catch (Exception e) {
+                    loansToreview.add(loan);
                 }
-            } catch (CredentialException e) {
-                log.error("Error to handle credential exception", e);
-                loansToreview.add(loan);
+            } else {
+                log.info("Loan " + loan.getIdBondareaLoan() + " dont have credential, nothing to do");
             }
         }
-        return loansToreview;
+
+        return  new ArrayList<Loan>(loansToreview);
+
     }
 
+    private void cancelCredit(CredentialCredit credentialCredit, Loan loan) throws CredentialException {
+
+        credentialCredit.setFinishDate(DateUtil.getLocalDateTimeNow().toLocalDate());
+        if(isCredentialRevoked(credentialCredit)){
+            credentialCreditRepository.save(credentialCredit);
+        }else
+            this.revokeComplete(credentialCredit, RevocationReasonsCodes.CANCELLED);
+
+        Optional<Person> holder = personRepository.findByDocumentNumber(credentialCredit.getCreditHolderDni());
+
+        if (holder.isPresent()) {
+            if (holder.get().isInDefault()) {
+                if (holder.get().removeLoanInDefault(loan)) {
+                    personRepository.save(holder.get());
+                    log.info("Loan " + loan.getIdBondareaLoan() + "in default remove for holder " + holder.get().getDocumentNumber());
+                }
+            }
+        }
+
+        log.info("Credential Credit for loan {} cancelled", loan.getIdBondareaLoan());
+
+    }
 
     /**
      *     Si existe el titular como persona registrada y el credito posee credenciales previas creadas (sino pasa al flujo de creditos nuevos)

@@ -405,7 +405,7 @@ public class EntrepreneurshipCategory implements Category {
                 entryPerWeek, entryWeek1, entryWeek2, entryWeek3, entryWeek4, totalMonthlyEntry,
                 entries, entryPerMonth,
                 exits, exitRent, exitWater, exitElectricity, exitShopping, exitPhone, exitTaxes, exitTransport, exitMaintenance, exitEmployees, exitOthers, totalExit,
-                entriesExitsRelationship, totalEntry, totalExit, entriesExitsRelationship, entryExitRelationshipFortnight,
+                entriesExitsRelationship, totalEntry, totalExit, entryExitRelationship, entryExitRelationshipFortnight,
                 projection, facebook, photo
         );
     }

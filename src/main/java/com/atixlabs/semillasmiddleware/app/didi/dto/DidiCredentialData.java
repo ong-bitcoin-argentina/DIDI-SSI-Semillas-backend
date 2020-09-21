@@ -85,9 +85,9 @@ public class DidiCredentialData {
         Optional.ofNullable(credential.getCarafe()).ifPresent(carafe -> cert.add(new DidiCredentialDataElem("Garrafa", carafe.toString())));
         Optional.ofNullable(credential.getWater()).ifPresent(water -> cert.add(new DidiCredentialDataElem("Red de agua", water.toString())));
         Optional.ofNullable(credential.getWatterWell()).ifPresent(waterWell -> cert.add(new DidiCredentialDataElem("Pozo/Bomba", waterWell.toString())));
-        cert.add(new DidiCredentialDataElem("Localidad", ""));
-        cert.add(new DidiCredentialDataElem("Barrio", ""));
-        cert.add(new DidiCredentialDataElem("Direccion", ""));
+        cert.add(new DidiCredentialDataElem("Localidad", credential.getLocation()));
+        cert.add(new DidiCredentialDataElem("Barrio", credential.getNeighborhood()));
+        cert.add(new DidiCredentialDataElem("Direccion", credential.getAddress()));
 
     }
 

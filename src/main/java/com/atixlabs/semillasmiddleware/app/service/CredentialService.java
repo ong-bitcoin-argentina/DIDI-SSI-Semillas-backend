@@ -771,13 +771,12 @@ public class CredentialService {
 
         //4-Now working with each beneficiary
         for (Category category : categoryArrayList) {
-           // log.info("CATEGORY {}, UNIQUE {}",category.getCategoryName(), category.getCategoryUniqueName());
-            saveCredential(category, creditHolder);
+            saveCredential(category, creditHolder, surveyForm);
         }
     }
 
 
-    private void saveCredential(Category category, Person creditHolder) throws CredentialException {
+    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:
@@ -793,7 +792,8 @@ public class CredentialService {
                 credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
                 break;
             case DWELLING_CATEGORY_NAME:
-                credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder));
+                PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+                credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
                 break;
         }
     }
@@ -905,7 +905,7 @@ public class CredentialService {
     }
 
     //todo move into credential type class
-    private CredentialDwelling buildDwellingCredential(Category category, Person creditHolder) {
+    private CredentialDwelling buildDwellingCredential(Category category, Person creditHolder, PersonCategory beneficiary) {
         DwellingCategory entrepreneurshipCategory = (DwellingCategory) category;
 
         CredentialDwelling credentialDwelling = new CredentialDwelling();
@@ -928,6 +928,10 @@ public class CredentialService {
         credentialDwelling.setAntiquity(entrepreneurshipCategory.getAntiquity());
         credentialDwelling.setNumberOfEnvironments(entrepreneurshipCategory.getNumberOfEnvironments());
         credentialDwelling.setRental(entrepreneurshipCategory.getRental());
+
+        credentialDwelling.setAddress(beneficiary.getAddress());
+        credentialDwelling.setLocation(beneficiary.getLocation());
+        credentialDwelling.setNeighborhood(beneficiary.getNeighborhood());
 
         credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
         credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());

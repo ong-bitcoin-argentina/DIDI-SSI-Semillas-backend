@@ -316,6 +316,10 @@ public class PersonCategory implements Category {
         return (String) relation.getAnswer();
     }
 
+    public String getAddress() {return (String) address.getAnswer();}
+    public String getLocation() {return (String) locality.getAnswer();}
+    public String getNeighborhood() {return (String) neighborhood.getAnswer();}
+
     @Override
     public String toString() {
         return "PersonCategory{" +

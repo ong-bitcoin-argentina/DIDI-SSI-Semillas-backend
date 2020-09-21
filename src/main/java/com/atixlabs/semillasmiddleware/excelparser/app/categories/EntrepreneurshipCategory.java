@@ -375,6 +375,27 @@ public class EntrepreneurshipCategory implements Category {
     }
 
     @Override
+    public String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
+        String html="";
+
+        List<AnswerDto> answerDtos = this.getAnswersList();
+
+        for (AnswerDto answer : answerDtos) {
+
+            if (answer.getQuestion() != null) {// && answer.getAnswer() != null) {
+                var _answer = (answer.getAnswer() != null) ? answer.getAnswer() : "";
+                if (_answer.equals("SUBCATEGORY")) {
+                    html += subCategoryTemplate
+                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
+                } else html += rowTemplate
+                        .replace(questionParam, answer.getQuestion().getQuestionName())
+                        .replace(answerParam, _answer.toString());
+            }
+        }
+        return html;
+    }
+
+    @Override
     public List<AnswerDto> getAnswersList(){
         return Arrays.asList(
                 entrepreneurshipData, type, name, address, phone, mainActivity, activityStartDate, reset, seniority,

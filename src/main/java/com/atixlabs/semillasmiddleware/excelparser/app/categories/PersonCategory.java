@@ -363,7 +363,7 @@ public class PersonCategory implements Category {
                 );
             case OTHER_KINSMAN:
                 return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, relation,
-                        occupationSubcategory ,occupation, studies, works
+                        occupationSubcategory, gender,occupation, studies, works
                 );
             default: //BENEFICIARY
                 return Arrays.asList(

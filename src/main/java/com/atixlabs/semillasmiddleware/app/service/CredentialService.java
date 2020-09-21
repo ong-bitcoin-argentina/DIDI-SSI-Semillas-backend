@@ -411,7 +411,7 @@ public class CredentialService {
 
         log.info(String.format(" %d active credits found for evaluate credentials ", (loansModifiedActive != null ? loansModifiedActive.size() : 0)));
 
-        List<Loan> loansToreview = new ArrayList<Loan>();
+        List<Loan> loansToreview = new ArrayList<>();
 
         for (Loan loan : loansModifiedActive) {
             try {
@@ -650,7 +650,8 @@ public class CredentialService {
      */
     //TODO validar si es necesario revocar y crear de neuvo la entidad, porque si falla en beneficio va a retomar el proceso de nuevo
     private void updateCredentialCreditForActiveLoan(Loan loan, Person holder) throws CredentialNotExistsException,CredentialException {
-
+        //this.pruneCreditsFromPreviousFailures(loan);
+        // verificar que haya solo una credencial para ese id bondarea y revocar las viejas.
         Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
 
         if(opCredit.isPresent()) {
@@ -663,7 +664,7 @@ public class CredentialService {
                     CredentialCredit newCredentialCredit = this.buildCreditCredential(loan, holder, currentCredentialCredit);
                     credentialCreditRepository.save(newCredentialCredit);
                 }else {
-                    log.info(String.format("The Credential credit %d not need be upodated for loan %s",currentCredentialCredit.getId(), loan.getIdBondareaLoan()));
+                    log.info(String.format("The Credential credit %d does not have to be updated for loan %s",currentCredentialCredit.getId(), loan.getIdBondareaLoan()));
                 }
 
             } else {
@@ -691,6 +692,17 @@ public class CredentialService {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
             saveAllCredentialsFromForm(surveyForm);
+    }
+
+    //  Si hay màs de una credencial crediticia con mismo ID de credito (por falla de revocación en una ejecucion anterior):
+    //  revoco todas menos la más reciente.
+    private void pruneCreditsFromPreviousFailures(Loan loan){
+        List<CredentialCredit> credentialCredits = credentialCreditRepository.findAllByIdBondareaCreditOrderByCreationDateDesc(loan.getIdBondareaLoan());
+        // sacar la mas reciente
+        CredentialCredit validCredential = credentialCredits.remove(credentialCredits.size()-1);
+        //revocar las restantes
+        credentialCredits.forEach(credentialCredit ->  this.revokeCredential(credentialCredit.getId(), RevocationReasonsCodes.CANCELLED.getCode()));
+
     }
 
 
@@ -1000,7 +1012,7 @@ public class CredentialService {
 
     private Boolean credentialCreditMustBeenUpdate(CredentialCredit credentialCredit, Loan loan){
 
-        boolean areEquals = true;
+        boolean areEquals;
 
         areEquals = credentialCredit.getIdBondareaCredit().equals(loan.getIdBondareaLoan());
         areEquals = areEquals && credentialCredit.getIdGroup().equals(loan.getIdGroup());
@@ -1008,10 +1020,10 @@ public class CredentialService {
         areEquals = areEquals && credentialCredit.getCreditState().equals(loan.getStatus());
         areEquals = areEquals && credentialCredit.getExpiredAmount().equals(loan.getExpiredAmount());
         areEquals = areEquals && credentialCredit.getCreationDate().equals(loan.getCreationDate());
-        areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
-        areEquals = areEquals && credentialCredit.getCurrentCycleNumber().equals(loan.getCurrentInstalmentNumber());
+        //areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
 
-        return areEquals;
+        return areEquals && !credentialCredit.getCurrentCycleNumber().equals(loan.getCurrentInstalmentNumber());
+
 
     }
 

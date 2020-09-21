@@ -358,8 +358,8 @@ public class PersonCategory implements Category {
                         occupationSubcategory,occupation, studies, works
                 );
             case SPOUSE:
-                return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, childrenQuantity,
-                                     occupationSubcategory, occupation, studies, works
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, childrenQuantity,
+                                     occupationSubcategory, gender, occupation, studies, works
                 );
             case OTHER_KINSMAN:
                 return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, relation,

@@ -29,6 +29,7 @@ public class PersonCategory implements Category {
     private AnswerDto phoneData;
     private AnswerDto referenceContact;
     private AnswerDto educationLevel;
+    private AnswerDto occupationSubcategory;
 
     private AnswerDto name;
     private AnswerDto surname;
@@ -120,6 +121,9 @@ public class PersonCategory implements Category {
 
         String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryUniqueName.replaceAll("DATOS|DEL","")));
 
+        this.occupationSubcategory = new AnswerDto(PersonQuestion.OCCUPATION);
+        this.occupationSubcategory.setAnswer("SUBCATEGORY");
+
         try{
             this.personType = PersonType.get(personTypeString);
         } catch (IllegalArgumentException e) {
@@ -163,6 +167,7 @@ public class PersonCategory implements Category {
                 answerRow.setAnswer("SUBCATEGORY");
                 return Optional.of(this.educationLevel);
             case OCCUPATION:
+                if (!this.occupation.answerIsEmpty()) return Optional.empty();
                 return Optional.of(this.occupation);
             case ID_TYPE:
                 return Optional.of(this.idType);
@@ -349,24 +354,25 @@ public class PersonCategory implements Category {
         switch(personType) {
             case CHILD:
                 return Arrays.asList(
-                        firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, occupation, studies, works
+                        firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender,
+                        occupationSubcategory,occupation, studies, works
                 );
             case SPOUSE:
                 return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, childrenQuantity,
-                                     occupation, studies, works
+                                     occupationSubcategory, occupation, studies, works
                 );
             case OTHER_KINSMAN:
                 return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, relation,
-                        occupation, studies, works
+                        occupationSubcategory ,occupation, studies, works
                 );
             default: //BENEFICIARY
                 return Arrays.asList(
-                        firstLastName, name, surname, age, birthDate, occupation, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
+                        firstLastName, name, surname, age, birthDate, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
                         institutionLevel, primary, highSchool, tertiary, university, workshops, courses, others, lastStudyYear,
                         addressData1, address, betweenStreets, neighborhood, zone, locality, address2,
                         phoneData, landLine, cellPhone, facebook, email,
                         referenceContact, referenceContactName, referenceContactSurname, relation, referenceContactPhone,
-                        occupation, studies, works
+                        studies, works
                 );
         }
     }

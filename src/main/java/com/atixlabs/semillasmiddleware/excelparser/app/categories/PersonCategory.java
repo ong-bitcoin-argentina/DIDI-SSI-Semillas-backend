@@ -128,6 +128,8 @@ public class PersonCategory implements Category {
         }
     }
 
+
+
     @Override
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
         String question = StringUtil.toUpperCaseTrimAndRemoveAccents(answerRow.getQuestion());
@@ -343,15 +345,50 @@ public class PersonCategory implements Category {
     }
 
     @Override
-    public List<AnswerDto> getAnswersList(){
-        return Arrays.asList(
-                firstLastName, name, surname, age, birthDate, occupation, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
-                institutionLevel, primary, highSchool, tertiary, university, workshops, courses, others, lastStudyYear,
-                addressData1, address, betweenStreets, neighborhood, zone, locality, address2,
-                phoneData, landLine, cellPhone, facebook, email,
-                referenceContact, referenceContactName, referenceContactSurname, relation, referenceContactPhone,
-                occupation, studies, works
-        );
+    public List<AnswerDto> getAnswersList() {
+        switch(personType) {
+            case CHILD:
+                return Arrays.asList(
+                        firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, occupation, studies, works
+                );
+            case SPOUSE:
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, childrenQuantity,
+                                     occupation, studies, works
+                );
+            case OTHER_KINSMAN:
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, relation,
+                        occupation, studies, works
+                );
+            default: //BENEFICIARY
+                return Arrays.asList(
+                        firstLastName, name, surname, age, birthDate, occupation, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
+                        institutionLevel, primary, highSchool, tertiary, university, workshops, courses, others, lastStudyYear,
+                        addressData1, address, betweenStreets, neighborhood, zone, locality, address2,
+                        phoneData, landLine, cellPhone, facebook, email,
+                        referenceContact, referenceContactName, referenceContactSurname, relation, referenceContactPhone,
+                        occupation, studies, works
+                );
+        }
     }
 
+    @Override
+    public String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
+        String html="";
+
+        List<AnswerDto> answerDtos = this.getAnswersList();
+
+        for (AnswerDto answer : answerDtos) {
+
+            if (answer.getQuestion() != null) {// && answer.getAnswer() != null) {
+                var _answer = (answer.getAnswer() != null) ? answer.getAnswer() : "";
+                if (_answer.equals("SUBCATEGORY")) {
+                    html += subCategoryTemplate
+                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
+                } else html += rowTemplate
+                        .replace(questionParam, answer.getQuestion().getQuestionName())
+                        .replace(answerParam, _answer.toString());
+            }
+        }
+        return html;
+    }
 }

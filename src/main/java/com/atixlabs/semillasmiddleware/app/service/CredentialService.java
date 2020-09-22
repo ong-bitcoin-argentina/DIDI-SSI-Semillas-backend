@@ -650,7 +650,6 @@ public class CredentialService {
      */
     //TODO validar si es necesario revocar y crear de neuvo la entidad, porque si falla en beneficio va a retomar el proceso de nuevo
     private void updateCredentialCreditForActiveLoan(Loan loan, Person holder) throws CredentialNotExistsException,CredentialException {
-        //this.pruneCreditsFromPreviousFailures(loan);
         // verificar que haya solo una credencial para ese id bondarea y revocar las viejas.
         Optional<CredentialCredit> opCredit = credentialCreditRepository.findFirstByIdBondareaCreditOrderByDateOfIssueDesc(loan.getIdBondareaLoan());
 
@@ -692,17 +691,6 @@ public class CredentialService {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
             saveAllCredentialsFromForm(surveyForm);
-    }
-
-    //  Si hay màs de una credencial crediticia con mismo ID de credito (por falla de revocación en una ejecucion anterior):
-    //  revoco todas menos la más reciente.
-    private void pruneCreditsFromPreviousFailures(Loan loan){
-        List<CredentialCredit> credentialCredits = credentialCreditRepository.findAllByIdBondareaCreditOrderByCreationDateDesc(loan.getIdBondareaLoan());
-        // sacar la mas reciente
-        CredentialCredit validCredential = credentialCredits.remove(credentialCredits.size()-1);
-        //revocar las restantes
-        credentialCredits.forEach(credentialCredit ->  this.revokeCredential(credentialCredit.getId(), RevocationReasonsCodes.CANCELLED.getCode()));
-
     }
 
 

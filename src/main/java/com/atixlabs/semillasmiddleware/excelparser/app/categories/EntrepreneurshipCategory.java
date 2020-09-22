@@ -383,13 +383,13 @@ public class EntrepreneurshipCategory implements Category {
         for (AnswerDto answer : answerDtos) {
 
             if (answer.getQuestion() != null) {// && answer.getAnswer() != null) {
-                var _answer = (answer.getAnswer() != null) ? answer.getAnswer() : "";
-                if (_answer.equals("SUBCATEGORY")) {
+                String ans = String.valueOf(Optional.ofNullable(answer.getAnswer()).orElse(""));
+                if (ans.equals("SUBCATEGORY")) {
                     html += subCategoryTemplate
                             .replace(subcategoryParam, answer.getQuestion().getQuestionName());
                 } else html += rowTemplate
                         .replace(questionParam, answer.getQuestion().getQuestionName())
-                        .replace(answerParam, _answer.toString());
+                        .replace(answerParam, ans);
             }
         }
         return html;

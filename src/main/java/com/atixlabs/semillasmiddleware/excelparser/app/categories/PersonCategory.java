@@ -354,15 +354,15 @@ public class PersonCategory implements Category {
         switch(personType) {
             case CHILD:
                 return Arrays.asList(
-                        firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender,
+                        firstLastName, name, surname, age, birthDate, idType, documentNumber, gender,
                         occupationSubcategory,occupation, studies, works
                 );
             case SPOUSE:
-                return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, childrenQuantity,
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, idType, documentNumber, gender, childrenQuantity,
                                      occupationSubcategory, occupation, studies, works
                 );
             case OTHER_KINSMAN:
-                return Arrays.asList(firstLastName, name, surname, age, birthDate, occupation, idType, documentNumber, gender, relation,
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, idType, documentNumber, gender, relation,
                         occupationSubcategory, occupation, studies, works
                 );
             default: //BENEFICIARY

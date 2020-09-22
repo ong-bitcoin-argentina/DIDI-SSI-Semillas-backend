@@ -172,7 +172,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
 
         syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
@@ -270,7 +270,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(didiAppUserService.getDidiAppUserByDni(credentialDwelling.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialDwellingService.save(credentialDwelling)).thenReturn(credentialDwelling);
 
         syncDidiProcessService.emmitCredentialDwelling(credentialDwelling);
@@ -318,7 +318,7 @@ public class SyncDidiProcessServiceTest {
 
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialEntrepreneurshipService.save(credentialEntrepreneurship)).thenReturn(credentialEntrepreneurship);
 
         syncDidiProcessService.emmitCredentialEntrepreneurship(credentialEntrepreneurship);
@@ -378,7 +378,7 @@ public class SyncDidiProcessServiceTest {
         SancorPolicy sancorPolicy = this.getSancorPolicyMock();
 
 
-        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.of(sancorPolicy));
         when(credentialBenefitSancorService.save(credentialBenefitSancor)).thenReturn(credentialBenefitSancor);
 

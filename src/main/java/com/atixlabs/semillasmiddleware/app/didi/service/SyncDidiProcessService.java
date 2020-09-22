@@ -234,7 +234,7 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Benefit id {} holder {} beneficiary {}",credentialBenefit.getId(), credentialBenefit.getCreditHolderDni(), credentialBenefit.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getCreditHolderDni());
 
         if(didiAppUser.isPresent()) {
             credentialBenefit.setIdDidiReceptor(didiAppUser.get().getDid());
@@ -270,7 +270,7 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Dwelling id {} holder {} beneficiary {}",credentialDwelling.getId(), credentialDwelling.getCreditHolderDni(), credentialDwelling.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser  = this.didiAppUserService.getDidiAppUserByDni(credentialDwelling.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser  = this.didiAppUserService.getDidiAppUserByDni(credentialDwelling.getCreditHolderDni());
 
         if(didiAppUser.isPresent()) {
             credentialDwelling.setIdDidiReceptor(didiAppUser.get().getDid());
@@ -289,7 +289,7 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Entrepreneurship id {} holder {} beneficiary {}",credentialEntrepreneurship.getId(), credentialEntrepreneurship.getCreditHolderDni(), credentialEntrepreneurship.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialEntrepreneurship.getCreditHolderDni());
 
         if(didiAppUser.isPresent()) {
             credentialEntrepreneurship.setIdDidiReceptor(didiAppUser.get().getDid());
@@ -307,7 +307,7 @@ public class SyncDidiProcessService {
 
         log.info("Emmiting Credential Benefit Sancor id {} holder {} beneficiary {}",credentialBenefitSancor.getId(), credentialBenefitSancor.getCreditHolderDni(), credentialBenefitSancor.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni());
+        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getCreditHolderDni());
 
 
         if(didiAppUser.isPresent()) {

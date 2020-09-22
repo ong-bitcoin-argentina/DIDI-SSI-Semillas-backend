@@ -417,7 +417,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(0)).didiDeleteCertificate(anyString());
+        verify(didiService, times(0)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -442,7 +442,7 @@ public class CredentialBenefitsServiceTest {
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
-        when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
+        when(didiService.didiDeleteCertificate(anyString(), anyString())).thenReturn(true);
 
         try {
             credentialBenefitsService.revokeHolderCredentialsBenefitsForLoan(holder);
@@ -452,7 +452,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(1)).didiDeleteCertificate(anyString());
+        verify(didiService, times(1)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -547,7 +547,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(0)).didiDeleteCertificate(anyString());
+        verify(didiService, times(0)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -579,7 +579,7 @@ public class CredentialBenefitsServiceTest {
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
-        when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
+        when(didiService.didiDeleteCertificate(anyString(), anyString())).thenReturn(true);
         when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
 
         try {
@@ -590,7 +590,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(1)).didiDeleteCertificate(anyString());
+        verify(didiService, times(1)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }

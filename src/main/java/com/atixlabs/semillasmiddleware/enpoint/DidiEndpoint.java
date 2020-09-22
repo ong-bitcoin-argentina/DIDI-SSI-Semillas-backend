@@ -24,10 +24,12 @@ public interface DidiEndpoint {
 
 
     //http://192.81.218.211:3500/api/1.0/didi_issuer/Cert/5ec5950dd9e6e10f342ba959
-    @DELETE("Cert/{credential_id}")
+    @DELETE("Cert/{credential_id}/{reason_id}")
     Call<DidiEmmitCredentialResponse> deleteCertificate(
             @Header("token") String token,
-            @Path("credential_id") String credential_id);
+            @Path("credential_id") String credential_id,
+            @Path("reason_id") String reason_id);
+
 
     @GET("Cert/all")
     Call<DidiGetAllCredentialResponse> getAllCertificates(

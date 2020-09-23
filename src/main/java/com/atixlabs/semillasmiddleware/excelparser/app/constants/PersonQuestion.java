@@ -38,7 +38,6 @@ public enum PersonQuestion implements CategoryQuestion {
         public boolean isRequired() {
             return true;
         }
-
         @Override
         public Class<?> getDataType() {
             return Long.class;
@@ -66,6 +65,10 @@ public enum PersonQuestion implements CategoryQuestion {
     STUDIES("ESTUDIA"),
     WORKS("TRABAJA"),
     AGE("EDAD"){
+        @Override
+        public boolean isRequired() {
+            return true;
+        }
         @Override
         public Class<?> getDataType() {
             return Long.class;

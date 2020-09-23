@@ -22,13 +22,15 @@ public interface DidiEndpoint {
             @Header("token") String token,
             @Path("credential_id") String credential_id);
 
-
+    //workaround para poder enviar DELETE con body
+    //https://stackoverflow.com/questions/48768586/retrofit-delete-json
     //http://192.81.218.211:3500/api/1.0/didi_issuer/Cert/5ec5950dd9e6e10f342ba959
-    @DELETE("Cert/{credential_id}/{reason_id}")
+    //@DELETE("Cert/{credential_id}")
+    @HTTP(method = "DELETE", path = "Cert/{credential_id}", hasBody = true)
     Call<DidiEmmitCredentialResponse> deleteCertificate(
             @Header("token") String token,
             @Path("credential_id") String credential_id,
-            @Path("reason_id") String reason_id);
+            @Body DidiDeleteCredentialBody body);
 
 
     @GET("Cert/all")

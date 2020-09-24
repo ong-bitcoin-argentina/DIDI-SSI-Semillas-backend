@@ -689,8 +689,7 @@ public class CredentialService {
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
-        if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
-            saveAllCredentialsFromForm(surveyForm);
+        saveAllCredentialsFromForm(surveyForm);
     }
 
 
@@ -700,7 +699,7 @@ public class CredentialService {
      *
      * @param surveyForm
      */
-    private boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("  validateIdentityCredentialFromForm");
 
         //1-get all people data from form, creditHolder will be a beneficiary as well.
@@ -710,6 +709,7 @@ public class CredentialService {
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
 
+        //en cada service crear el si existe o no
         //2-verify each person is new, or his data has not changed.
         boolean allCredentialsNewOrInactive = true;
         for (Category category : categoryArrayList) {
@@ -752,11 +752,11 @@ public class CredentialService {
         if (credentialOptional.isEmpty())
             return false;
         else
-            processExcelFileResult.addRowError(
+            processExcelFileResult.addRowWarn(
                     "Warning CREDENCIAL DUPLICADA",
                     "Ya existe una credencial de tipo " + credentialCategoryCode +
                             " en estado " + credentialOptional.get().getCredentialState().getStateName() +
-                            " para el DNI " + beneficiaryDni + " si desea continuar debe revocarlas manualmente"
+                            " para el DNI " + beneficiaryDni + ", si continua con la creacion estas seran revocadas automaticamente"
             );
         return true;
     }

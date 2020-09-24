@@ -310,7 +310,7 @@ public class CredentialService {
      * If exists and is Pending Didi, revoke only local
      * If exists and is revoked, do nothing
      * If not exists, do nothing
-     * Credencial de Beneficio
+     * Credencial de BenefihandleDefaultCreditscio
      * Titular
      * Si existe y esta activa y emitida, revoco la crendencial en Didi y revoco la credencial localmente,
      * Si existe y esta pendiente de didi, revoco la credencial localmente
@@ -335,9 +335,9 @@ public class CredentialService {
 
         List<Loan> loansModifiedInDefault = loanService.findLastLoansModifiedInDefault(lastTimeProcessRun);
 
-        log.info(String.format(" %d Loans in default founded", (loansModifiedInDefault != null ? loansModifiedInDefault.size() : 0)));
+        log.info(String.format(" %d Loans in default founded",  loansModifiedInDefault.size()));
 
-        List<Loan> loansToReview = new ArrayList<Loan>();
+        List<Loan> loansToReview = new ArrayList<>();
 
         for (Loan defaultLoan : loansModifiedInDefault) {
 
@@ -1023,7 +1023,7 @@ public class CredentialService {
     /**
      * Set holder in default and
      * Credit Credential
-     * If exists and is emitted, revoke complete
+     * If exists and is emitted, revoke complete, create credential on default
      * If exists and is Pending Didi, revoke only local
      * If exists and is revoked, do nothing
      * If not exists, do nothing
@@ -1053,7 +1053,12 @@ public class CredentialService {
             //if credit is in default, only revoke.
             if (loan.getState().equals(LoanStateCodes.DEFAULT.getCode())) {
                 if (this.revokeDefaultCredentialCredit(credit)) {
+                    // create new default credential credit
+                    CredentialCredit defaultCredentialCredit = this.buildCreditCredential(loan, holder, credit);
+                    defaultCredentialCredit.setCredentialState(credentialStateService.getCredentialState(CredentialStatesCodes.DEFAULT_DIDI.getCode()));
+                    credentialCreditRepository.save(defaultCredentialCredit);
                     log.info(String.format("The credential for loan %s has been revoked for default successfully", credit.getIdBondareaCredit()));
+                    log.info("A new credential in Default state has been created: id["+defaultCredentialCredit.getId()+"]");
                     return true;
                 } else
                     log.error(String.format("The credential for loan %s was not set to default", credit.getIdBondareaCredit()));

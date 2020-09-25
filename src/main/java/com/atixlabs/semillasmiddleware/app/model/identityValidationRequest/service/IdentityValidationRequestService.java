@@ -99,13 +99,8 @@ public class IdentityValidationRequestService {
                     identityValidationFilter.getDateTo().map(value -> cb.lessThanOrEqualTo(root.get("date"), value)),
                     identityValidationFilter.getRequestState().map(value -> cb.equal(root.get("requestState"), value)),
                     identityValidationFilter.getDni().map(value -> cb.like(root.get("dni").as(String.class), "%" + value.toString() + "%")),
-                    identityValidationFilter.getName().map(value -> {
-                        String criteria = "%" + value.toUpperCase() + "%";
-                        return cb.or(
-                                cb.like(cb.upper(root.get("name")), criteria),
-                                cb.like(cb.upper(root.get("lastName")), criteria)
-                        );
-                    })
+                    identityValidationFilter.getName().map(value -> cb.like(root.get("name").as(String.class), "%" + value.toString() + "%")),
+                    identityValidationFilter.getSurname().map(value -> cb.like(root.get("lastName").as(String.class), "%" + value.toString() + "%"))
             ).flatMap(Optional::stream);
             return cb.and(predicates.toArray(Predicate[]::new));
         };

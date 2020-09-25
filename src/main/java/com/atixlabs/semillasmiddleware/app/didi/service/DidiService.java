@@ -26,6 +26,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -336,9 +337,25 @@ public class DidiService {
         return null;
     }
 
+    private HashMap<String, String> reasonToCredentialBody(String reason) {
+        HashMap<String, String> body = new HashMap<String, String>();
+        switch (reason) {
+            case "Expiracion de datos":
+                body.put("reason", "EXPIRATION");
+                break;
+
+            case "Desvinculacion":
+                body.put("reason", "UNLINKING");
+                break;
+            default:
+                body.put("reason", "OTHER");
+        }
+        return body;
+    }
+
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId, String reason)  {
         log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi, reason: " + reason);
-        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId, new DidiDeleteCredentialBody(reason));
+        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId, reasonToCredentialBody(reason));
 
         try {
             Response<DidiEmmitCredentialResponse> response = callSync.execute();

@@ -4,6 +4,8 @@ import com.atixlabs.semillasmiddleware.app.didi.dto.*;
 import retrofit2.Call;
 import retrofit2.http.*;
 
+import java.util.HashMap;
+
 public interface DidiEndpoint {
 
     @POST("user/login")
@@ -30,7 +32,7 @@ public interface DidiEndpoint {
     Call<DidiEmmitCredentialResponse> deleteCertificate(
             @Header("token") String token,
             @Path("credential_id") String credential_id,
-            @Body DidiDeleteCredentialBody body);
+            @Body HashMap<String, String> body);
 
 
     @GET("Cert/all")

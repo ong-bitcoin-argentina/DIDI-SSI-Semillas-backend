@@ -71,6 +71,7 @@ public class CredentialService {
     private CredentialStateService credentialStateService;
     private CredentialBenefitSancorService credentialBenefitSancorService;
     private DidiAppUserService didiAppUserService;
+    private CredentialCreditService credentialCreditService;
 
     @Value("${credentials.pageSize}")
     private String size;
@@ -90,7 +91,7 @@ public class CredentialService {
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
             DidiAppUserService didiAppUserService,
-            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
+            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService, CredentialCreditService credentialCreditService) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
@@ -109,6 +110,7 @@ public class CredentialService {
         this.credentialStateService = credentialStateService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
         this.didiAppUserService = didiAppUserService;
+        this.credentialCreditService = credentialCreditService;
     }
 
 
@@ -1050,12 +1052,12 @@ public class CredentialService {
                 return true;
             }
 
-            //if credit is in default, only revoke.
+            //if credit is in default, revoke.
             if (loan.getState().equals(LoanStateCodes.DEFAULT.getCode())) {
                 if (this.revokeDefaultCredentialCredit(credit)) {
                     // create new default credential credit
                     CredentialCredit defaultCredentialCredit = this.buildCreditCredential(loan, holder, credit);
-                    defaultCredentialCredit.setCredentialState(credentialStateService.getCredentialState(CredentialStatesCodes.DEFAULT_DIDI.getCode()));
+                    defaultCredentialCredit.setCreditState(loan.getState());
                     credentialCreditRepository.save(defaultCredentialCredit);
                     log.info(String.format("The credential for loan %s has been revoked for default successfully", credit.getIdBondareaCredit()));
                     log.info("A new credential in Default state has been created: id["+defaultCredentialCredit.getId()+"]");
@@ -1067,7 +1069,6 @@ public class CredentialService {
 
         } else {//If not exists, do nothing
             log.info(String.format("No revoke Credentials credit for Loan %s not exists", loan.getIdBondareaLoan()));
-
         }
 
         return false;
@@ -1308,6 +1309,11 @@ public class CredentialService {
         }
 
         return haveRevoke;
+    }
+
+    public void revokeDefaultCredentialsForLoan(Loan loan){
+        Optional<CredentialCredit> credentialCredit = credentialCreditService.getCredentialCreditsForLoan(loan.getIdBondareaLoan(), LoanStateCodes.DEFAULT);
+        credentialCredit.ifPresent(cred -> this.revokeComplete(cred, RevocationReasonsCodes.UPDATE_INTERNAL));
     }
 
     public Optional<CredentialCredit> getCredentialCreditForLoan(Loan loan) {

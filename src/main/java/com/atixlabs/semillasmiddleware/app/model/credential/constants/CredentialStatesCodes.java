@@ -10,8 +10,7 @@ public enum CredentialStatesCodes {
 
     CREDENTIAL_ACTIVE("Vigente"),
     CREDENTIAL_REVOKE("Revocada"),
-    PENDING_DIDI("Pendiente-didi"),
-    DEFAULT_DIDI("Mora");
+    PENDING_DIDI("Pendiente-didi");
 
 
     private String code;

@@ -65,6 +65,16 @@ public class CredentialDto {
     private String dwellingType;
     private String dwellingAddress;
     private String possessionType;
+    private String district;
+    private String generalConditions;
+    private String lightInstallation;
+    private String neighborhoodType;
+    private Boolean gas;
+    private Boolean carafe;
+    private Boolean water;
+    private String address;
+    private String location;
+    private String neighborhood;
 
     //entrepreneurship
     private String entrepreneurshipType;
@@ -181,6 +191,17 @@ public class CredentialDto {
         this.dwellingType = dwelling.getDwellingType();
         this.dwellingAddress = dwelling.getDwellingAddress();
         this.possessionType = dwelling.getPossessionType();
+        this.district = dwelling.getDistrict();
+        //nuevos campos
+        this.generalConditions = dwelling.getGeneralConditions();
+        this.lightInstallation = dwelling.getLightInstallation();
+        this.neighborhoodType = dwelling.getNeighborhoodType();
+        this.gas = dwelling.getGas();
+        this.carafe = dwelling.getCarafe();
+        this.water = dwelling.getWater();
+        this.address = dwelling.getAddress();
+        this.location = dwelling.getLocation();
+        this.neighborhood = dwelling.getNeighborhood();
     }
 
     public CredentialDto(CredentialEntrepreneurship entrepreneurship){

@@ -338,9 +338,9 @@ public class DidiService {
     }
 
     private String getDidiRevocationReasonCode(String reason) {
-        return RevocationReasonsCodes.getByCode(reason).map(obj -> {
-            return obj.getDidiCode();
-        }).orElse("");
+        return RevocationReasonsCodes.getByCode(reason).map(revocation -> {
+            return revocation.getDidiCode();
+        }).orElseThrow( () -> new RuntimeException("Could not get Didi revocation reason code"));
     }
 
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId, String reason)  {

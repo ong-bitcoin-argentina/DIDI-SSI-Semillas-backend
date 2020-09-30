@@ -338,8 +338,7 @@ public class DidiService {
     }
 
     private String getDidiRevocationReasonCode(String reason) {
-        Optional<RevocationReasonsCodes> revocationReasonCode = RevocationReasonsCodes.getByCode(reason);
-        return revocationReasonCode.map(obj -> {
+        return RevocationReasonsCodes.getByCode(reason).map(obj -> {
             return obj.getDidiCode();
         }).orElse("");
     }

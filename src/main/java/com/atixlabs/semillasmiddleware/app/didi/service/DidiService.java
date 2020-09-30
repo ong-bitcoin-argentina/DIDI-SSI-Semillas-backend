@@ -337,18 +337,16 @@ public class DidiService {
         return null;
     }
 
-    private String getRevocationReasonCode(String reason) {
-        if (reason.equals(RevocationReasonsCodes.EXPIRED_INFO.getCode())) {
-            return "EXPIRATION";
-        } else if (reason.equals(RevocationReasonsCodes.UNLINKING.getCode())) {
-            return "UNLINKING";
-        }
-        return "OTHER";
+    private String getDidiRevocationReasonCode(String reason) {
+        Optional<RevocationReasonsCodes> revocationReasonCode = RevocationReasonsCodes.getByCode(reason);
+        return revocationReasonCode.map(obj -> {
+            return obj.getDidiCode();
+        }).orElse("");
     }
 
     public boolean didiDeleteCertificate(String CredentialToRevokeDidiId, String reason)  {
         HashMap<String, String> certificateDeleteBody = new HashMap<String, String>();
-        certificateDeleteBody.put("reason", getRevocationReasonCode(reason));
+        certificateDeleteBody.put("reason", getDidiRevocationReasonCode(reason));
         log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi, reason: " + reason);
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId, certificateDeleteBody);
 

@@ -125,7 +125,7 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
         cert.add(new DidiCredentialDataElem("Ciclo", credential.getCurrentCycle()));
 
-        if (credential.getCreditState().equals(LoanStateCodes.DEFAULT)){
+        if (credential.getCreditState().equals(LoanStateCodes.DEFAULT.getCode())){
             cert.add(new DidiCredentialDataElem("Estado de Credito", "En mora"));
         }else{
             LoanStatusCodes creditState = LoanStatusCodes.getByCode(credential.getCreditStatus())

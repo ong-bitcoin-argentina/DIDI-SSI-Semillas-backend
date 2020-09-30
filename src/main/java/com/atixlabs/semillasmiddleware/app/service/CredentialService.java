@@ -71,6 +71,7 @@ public class CredentialService {
     private CredentialStateService credentialStateService;
     private CredentialBenefitSancorService credentialBenefitSancorService;
     private DidiAppUserService didiAppUserService;
+    private CredentialCreditService credentialCreditService;
 
     @Value("${credentials.pageSize}")
     private String size;
@@ -90,7 +91,7 @@ public class CredentialService {
             ParameterConfigurationRepository parameterConfigurationRepository,
             DidiService didiService,
             DidiAppUserService didiAppUserService,
-            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService) {
+            RevocationReasonRepository revocationReasonRepository, LoanService loanService, ProcessControlService processControlService, CredentialBenefitService credentialBenefitService, CredentialStateService credentialStateService, CredentialBenefitSancorService credentialBenefitSancorService, CredentialCreditService credentialCreditService) {
         this.credentialCreditRepository = credentialCreditRepository;
         this.credentialRepository = credentialRepository;
         this.personRepository = personRepository;
@@ -109,6 +110,7 @@ public class CredentialService {
         this.credentialStateService = credentialStateService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
         this.didiAppUserService = didiAppUserService;
+        this.credentialCreditService = credentialCreditService;
     }
 
 
@@ -255,14 +257,14 @@ public class CredentialService {
         return credentialRepository.findById(id);
     }
 
-    public Page<CredentialDto> findCredentials(String credentialType, String name, String dniBeneficiary, String dniHolder, String
+    public Page<CredentialDto> findCredentials(String credentialType, String name, String surname, String dniBeneficiary, String dniHolder, String
             idDidiCredential, String lastUpdate, List<String> credentialState, Integer pageNumber) {
         Page<Credential> credentials;
         Pageable pageable = null;
         if (pageNumber != null && pageNumber >= 0 && this.size != null)
             pageable = PageRequest.of(pageNumber, Integer.parseInt(size), Sort.by(Sort.Direction.ASC, "updated"));
 
-        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
+        credentials = credentialRepository.findCredentialsWithFilter(credentialType, name, surname, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState, pageable);
         //total amount of elements using the same filters
         //Long totalAmountOfItems = credentialRepository.getTotalCountWithFilters(credentialType, name, dniBeneficiary, dniHolder, idDidiCredential, lastUpdate, credentialState);
 
@@ -310,7 +312,7 @@ public class CredentialService {
      * If exists and is Pending Didi, revoke only local
      * If exists and is revoked, do nothing
      * If not exists, do nothing
-     * Credencial de Beneficio
+     * Credencial de BenefihandleDefaultCreditscio
      * Titular
      * Si existe y esta activa y emitida, revoco la crendencial en Didi y revoco la credencial localmente,
      * Si existe y esta pendiente de didi, revoco la credencial localmente
@@ -335,9 +337,9 @@ public class CredentialService {
 
         List<Loan> loansModifiedInDefault = loanService.findLastLoansModifiedInDefault(lastTimeProcessRun);
 
-        log.info(String.format(" %d Loans in default founded", (loansModifiedInDefault != null ? loansModifiedInDefault.size() : 0)));
+        log.info(String.format(" %d Loans in default founded",  loansModifiedInDefault.size()));
 
-        List<Loan> loansToReview = new ArrayList<Loan>();
+        List<Loan> loansToReview = new ArrayList<>();
 
         for (Loan defaultLoan : loansModifiedInDefault) {
 
@@ -689,8 +691,7 @@ public class CredentialService {
 
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
-        if (validateAllCredentialsFromForm(surveyForm, processExcelFileResult))
-            saveAllCredentialsFromForm(surveyForm);
+        saveAllCredentialsFromForm(surveyForm);
     }
 
 
@@ -700,7 +701,7 @@ public class CredentialService {
      *
      * @param surveyForm
      */
-    private boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
         log.info("  validateIdentityCredentialFromForm");
 
         //1-get all people data from form, creditHolder will be a beneficiary as well.
@@ -710,6 +711,7 @@ public class CredentialService {
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
 
+        //en cada service crear el si existe o no
         //2-verify each person is new, or his data has not changed.
         boolean allCredentialsNewOrInactive = true;
         for (Category category : categoryArrayList) {
@@ -752,11 +754,11 @@ public class CredentialService {
         if (credentialOptional.isEmpty())
             return false;
         else
-            processExcelFileResult.addRowError(
+            processExcelFileResult.addRowWarn(
                     "Warning CREDENCIAL DUPLICADA",
                     "Ya existe una credencial de tipo " + credentialCategoryCode +
                             " en estado " + credentialOptional.get().getCredentialState().getStateName() +
-                            " para el DNI " + beneficiaryDni + " si desea continuar debe revocarlas manualmente"
+                            " para el DNI " + beneficiaryDni + ", si continua con la creacion estas seran revocadas automaticamente"
             );
         return true;
     }
@@ -1023,7 +1025,7 @@ public class CredentialService {
     /**
      * Set holder in default and
      * Credit Credential
-     * If exists and is emitted, revoke complete
+     * If exists and is emitted, revoke complete, create credential on default
      * If exists and is Pending Didi, revoke only local
      * If exists and is revoked, do nothing
      * If not exists, do nothing
@@ -1050,10 +1052,15 @@ public class CredentialService {
                 return true;
             }
 
-            //if credit is in default, only revoke.
+            //if credit is in default, revoke.
             if (loan.getState().equals(LoanStateCodes.DEFAULT.getCode())) {
                 if (this.revokeDefaultCredentialCredit(credit)) {
+                    // create new default credential credit
+                    CredentialCredit defaultCredentialCredit = this.buildCreditCredential(loan, holder, credit);
+                    defaultCredentialCredit.setCreditState(loan.getState());
+                    credentialCreditRepository.save(defaultCredentialCredit);
                     log.info(String.format("The credential for loan %s has been revoked for default successfully", credit.getIdBondareaCredit()));
+                    log.info("A new credential in Default state has been created: id["+defaultCredentialCredit.getId()+"]");
                     return true;
                 } else
                     log.error(String.format("The credential for loan %s was not set to default", credit.getIdBondareaCredit()));
@@ -1062,7 +1069,6 @@ public class CredentialService {
 
         } else {//If not exists, do nothing
             log.info(String.format("No revoke Credentials credit for Loan %s not exists", loan.getIdBondareaLoan()));
-
         }
 
         return false;
@@ -1303,6 +1309,11 @@ public class CredentialService {
         }
 
         return haveRevoke;
+    }
+
+    public void revokeDefaultCredentialsForLoan(Loan loan){
+        Optional<CredentialCredit> credentialCredit = credentialCreditService.getCredentialCreditsForLoan(loan.getIdBondareaLoan(), LoanStateCodes.DEFAULT);
+        credentialCredit.ifPresent(cred -> this.revokeComplete(cred, RevocationReasonsCodes.UPDATE_INTERNAL));
     }
 
     public Optional<CredentialCredit> getCredentialCreditForLoan(Loan loan) {

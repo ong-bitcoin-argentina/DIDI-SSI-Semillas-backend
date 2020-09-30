@@ -12,6 +12,8 @@ import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfiguratio
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
@@ -19,6 +21,8 @@ import com.atixlabs.semillasmiddleware.app.processControl.model.constant.Process
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
+import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
@@ -57,14 +61,16 @@ public class BondareaService {
     private PersonRepository personRepository;
     private ProcessControlService processControlService;
     private LoanService loanService;
+    private CredentialService credentialService;
 
     @Autowired
-    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, ProcessControlService processControlService, LoanService loanService) {
+    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, ProcessControlService processControlService, LoanService loanService, CredentialService credentialService) {
         this.loanRepository = loanRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.personRepository = personRepository;
         this.processControlService = processControlService;
         this.loanService = loanService;
+        this.credentialService = credentialService;
     }
 
     @Value("${bondarea.base_url}")
@@ -641,7 +647,6 @@ public class BondareaService {
      */
     private BigDecimal sumExpiredAmount(List<Loan> group) {
         BigDecimal amountExpired = BigDecimal.ZERO;
-
         for (Loan credit : group) {
             amountExpired = amountExpired.add(new BigDecimal(credit.getExpiredAmount().toString()));
         }
@@ -712,6 +717,8 @@ public class BondareaService {
                 holder.getDefaults().remove(credit);
                 personRepository.save(holder);
                 log.info("Credit for group " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
+                log.info("Remove credit credentials emmited in default for loan id bondarea["+credit.getIdBondareaLoan()+"]");
+                credentialService.revokeDefaultCredentialsForLoan(credit);
                 break;
             }
         }

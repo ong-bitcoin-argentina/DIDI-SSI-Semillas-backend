@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.didi.dto;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import lombok.Getter;
@@ -78,17 +79,23 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Tipo de Vivienda", credential.getDwellingType()));
         cert.add(new DidiCredentialDataElem("Distrito de Residencia", credential.getDwellingAddress()));
 
-        cert.add(new DidiCredentialDataElem("Instalacion de luz", credential.getLightInstallation()));
-        cert.add(new DidiCredentialDataElem("Condiciones grales", credential.getGeneralConditions()));
-        cert.add(new DidiCredentialDataElem("Tipo de barrio", credential.getNeighborhoodType()));
-        Optional.ofNullable(credential.getGas()).ifPresent(gas -> cert.add(new DidiCredentialDataElem("Red de gas", gas.toString())));
-        Optional.ofNullable(credential.getCarafe()).ifPresent(carafe -> cert.add(new DidiCredentialDataElem("Garrafa", carafe.toString())));
-        Optional.ofNullable(credential.getWater()).ifPresent(water -> cert.add(new DidiCredentialDataElem("Red de agua", water.toString())));
-        Optional.ofNullable(credential.getWatterWell()).ifPresent(waterWell -> cert.add(new DidiCredentialDataElem("Pozo/Bomba", waterWell.toString())));
-        cert.add(new DidiCredentialDataElem("Localidad", credential.getLocation()));
-        cert.add(new DidiCredentialDataElem("Barrio", credential.getNeighborhood()));
-        cert.add(new DidiCredentialDataElem("Direccion", credential.getAddress()));
 
+        addIfNotNull("Instalacion de luz", credential.getLightInstallation());
+        addIfNotNull("Condiciones grales", credential.getGeneralConditions());
+        addIfNotNull("Tipo de barrio", credential.getNeighborhoodType());
+        addIfNotNull("Red de gas", credential.getGas());
+        addIfNotNull("Garrafa", credential.getCarafe());
+        addIfNotNull("Red de agua", credential.getWater());
+        addIfNotNull("Pozo/Bomba", credential.getWatterWell());
+        addIfNotNull("Localidad", credential.getLocation());
+        addIfNotNull("Barrio", credential.getNeighborhood());
+        addIfNotNull("Direccion", credential.getAddress());
+
+    }
+
+    private void addIfNotNull(String param, Object value){
+        Optional.ofNullable(value)
+                .ifPresent(val -> cert.add(new DidiCredentialDataElem(param, val.toString())));
     }
 
     private void buildDidiCredentialDataFromEntrepreneurship(CredentialEntrepreneurship credential){
@@ -117,7 +124,11 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Tipo de Credito", credential.getCreditType()));
         cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
         cert.add(new DidiCredentialDataElem("Ciclo", credential.getCurrentCycle()));
-        cert.add(new DidiCredentialDataElem("Estado de Credito", credential.getCreditState()));
+
+        LoanStatusCodes creditState = LoanStatusCodes.getByCode(credential.getCreditState())
+                .orElseThrow( () -> new RuntimeException("Could not get Loan status code"));
+
+        cert.add(new DidiCredentialDataElem("Estado de Credito", creditState.getDescription()));
         cert.add(new DidiCredentialDataElem("Saldo Vencido", credential.getExpiredAmount().toString()));
         cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycleNumber().toString()));
         cert.add(new DidiCredentialDataElem("Cuotas Totales", String.valueOf(credential.getTotalCycles())));

@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
@@ -15,6 +16,7 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -53,6 +55,10 @@ public class CredentialCreditService extends CredentialCommonService {
         this.resetStateOnPendingDidi(newCredentialCredit);
 
         return newCredentialCredit;
+    }
+
+    public Optional<CredentialCredit> getCredentialCreditsForLoan(String idBondarea, LoanStateCodes code){
+        return credentialCreditRepository.findByIdBondareaCreditAndCreditState(idBondarea, code.getCode());
     }
 
     @Override

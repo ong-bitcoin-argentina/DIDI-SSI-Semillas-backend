@@ -125,15 +125,17 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
         cert.add(new DidiCredentialDataElem("Ciclo", credential.getCurrentCycle()));
 
+        String creditState;
         if (credential.getCreditState().equals(LoanStateCodes.DEFAULT.getCode())){
-            cert.add(new DidiCredentialDataElem("Estado de Credito", "En mora"));
+            creditState = "En mora";
         }else{
-            LoanStatusCodes creditState = LoanStatusCodes.getByCode(credential.getCreditStatus())
+            LoanStatusCodes creditStateEnum = LoanStatusCodes.getByCode(credential.getCreditStatus())
                     .orElseThrow( () -> new RuntimeException("Could not get Loan status code"));
 
-            cert.add(new DidiCredentialDataElem("Estado de Credito", creditState.getDescription()));
+            creditState = creditStateEnum.getDescription();
         }
 
+        cert.add(new DidiCredentialDataElem("Estado de Credito", creditState));
 
         cert.add(new DidiCredentialDataElem("Saldo Vencido", credential.getExpiredAmount().toString()));
         cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycleNumber().toString()));

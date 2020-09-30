@@ -92,7 +92,8 @@ public class DidiController {
         DidiGetAllCredentialResponse didiGetAllCredentialResponse = didiService.didiGetAllCredentials();
 
         for (DidiCredential credential : didiGetAllCredentialResponse.getData()) {
-            didiService.didiDeleteCertificate(credential.get_id());
+            //REASON???
+            didiService.didiDeleteCertificate(credential.get_id(), "OTHER");
         }
 
         log.info("Finalizo el proceso de borrado");

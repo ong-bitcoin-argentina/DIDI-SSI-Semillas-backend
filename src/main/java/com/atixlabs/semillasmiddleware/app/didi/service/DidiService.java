@@ -26,6 +26,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -336,11 +337,18 @@ public class DidiService {
         return null;
     }
 
-    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId)  {
-        log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi");
-        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
+    private String getDidiRevocationReasonCode(String reason) {
+        return RevocationReasonsCodes.getByCode(reason).map(revocation -> {
+            return revocation.getDidiCode();
+        }).orElseThrow( () -> new RuntimeException("Could not get Didi revocation reason code"));
+    }
 
+    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId, String reason)  {
+        HashMap<String, String> certificateDeleteBody = new HashMap<String, String>();
         try {
+            certificateDeleteBody.put("reason", getDidiRevocationReasonCode(reason));
+            log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi, reason: " + reason);
+            Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId, certificateDeleteBody);
             Response<DidiEmmitCredentialResponse> response = callSync.execute();
             log.info("didiSync: deleteCertificate - response:");
             if (response.body() != null)

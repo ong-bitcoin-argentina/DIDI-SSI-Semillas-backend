@@ -31,9 +31,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCatego
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -996,7 +994,8 @@ public class CredentialService {
         credentialCredit.setTotalCycles(loan.getInstalmentTotalQuantity());
 
         credentialCredit.setAmountExpiredCycles(0);
-        credentialCredit.setCreditState(loan.getStatus());
+        credentialCredit.setCreditStatus(loan.getStatus());
+        credentialCredit.setCreditState(loan.getState());
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
 
@@ -1011,7 +1010,7 @@ public class CredentialService {
         areEquals = credentialCredit.getIdBondareaCredit().equals(loan.getIdBondareaLoan());
         areEquals = areEquals && credentialCredit.getIdGroup().equals(loan.getIdGroup());
         areEquals = areEquals && credentialCredit.getCurrentCycle().equals(loan.getCycleDescription());
-        areEquals = areEquals && credentialCredit.getCreditState().equals(loan.getStatus());
+        areEquals = areEquals && credentialCredit.getCreditStatus().equals(loan.getStatus());
         areEquals = areEquals && credentialCredit.getExpiredAmount().equals(loan.getExpiredAmount());
         areEquals = areEquals && credentialCredit.getCreationDate().equals(loan.getCreationDate());
         //areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
@@ -1057,7 +1056,6 @@ public class CredentialService {
                 if (this.revokeDefaultCredentialCredit(credit)) {
                     // create new default credential credit
                     CredentialCredit defaultCredentialCredit = this.buildCreditCredential(loan, holder, credit);
-                    defaultCredentialCredit.setCreditState(loan.getState());
                     credentialCreditRepository.save(defaultCredentialCredit);
                     log.info(String.format("The credential for loan %s has been revoked for default successfully", credit.getIdBondareaCredit()));
                     log.info("A new credential in Default state has been created: id["+defaultCredentialCredit.getId()+"]");

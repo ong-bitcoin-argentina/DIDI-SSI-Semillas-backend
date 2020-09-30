@@ -16,7 +16,6 @@ import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.app.service.*;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.compress.archivers.ar.ArArchiveEntry;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
@@ -24,7 +23,6 @@ import org.mockito.*;
 import org.mockito.invocation.InvocationOnMock;
 import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.expression.spel.ast.OpOr;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -857,7 +855,7 @@ public void whenVerifyCrendentialCreditForNewDidiAppUserAndNotIsActive_thenDoNot
         credentialCredit.setCreditHolder(null);
         credentialCredit.setCreditType("CONAMI 31");
         credentialCredit.setCurrentCycle("1");
-        credentialCredit.setCreditState("Vigente");
+        credentialCredit.setCreditStatus("Vigente");
         credentialCredit.setExpiredAmount(new BigDecimal(9L));
         credentialCredit.setIdBondareaCredit("987654");
         credentialCredit.setIdGroup("idGroup");

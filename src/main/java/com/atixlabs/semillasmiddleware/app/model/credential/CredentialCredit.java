@@ -1,7 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -11,7 +9,6 @@ import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 
 @NoArgsConstructor
@@ -38,6 +35,8 @@ public class CredentialCredit extends Credential {
 
     private int amountExpiredCycles;
 
+    private String creditStatus;
+
     private String creditState;
 
     private LocalDate finishDate;
@@ -56,10 +55,11 @@ public class CredentialCredit extends Credential {
         this.currentCycle = credentialCredit.currentCycle;
         this.totalCycles = credentialCredit.totalCycles;
         this.amountExpiredCycles = credentialCredit.amountExpiredCycles;
-        this.creditState = credentialCredit.creditState;
+        this.creditStatus = credentialCredit.creditStatus;
         this.finishDate = credentialCredit.finishDate;
         this.expiredAmount = credentialCredit.expiredAmount;
         this.currentCycleNumber = credentialCredit.currentCycleNumber;
+        this.creditState =  credentialCredit.creditState;
     }
 
 }

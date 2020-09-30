@@ -1,11 +1,11 @@
 package com.atixlabs.semillasmiddleware.app.didi.dto;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
 
 import java.util.ArrayList;
 import java.util.Optional;
@@ -125,10 +125,16 @@ public class DidiCredentialData {
         cert.add(new DidiCredentialDataElem("Id Grupo", credential.getIdGroup()));
         cert.add(new DidiCredentialDataElem("Ciclo", credential.getCurrentCycle()));
 
-        LoanStatusCodes creditState = LoanStatusCodes.getByCode(credential.getCreditState())
-                .orElseThrow( () -> new RuntimeException("Could not get Loan status code"));
+        if (credential.getCreditState().equals(LoanStateCodes.DEFAULT)){
+            cert.add(new DidiCredentialDataElem("Estado de Credito", "En mora"));
+        }else{
+            LoanStatusCodes creditState = LoanStatusCodes.getByCode(credential.getCreditStatus())
+                    .orElseThrow( () -> new RuntimeException("Could not get Loan status code"));
 
-        cert.add(new DidiCredentialDataElem("Estado de Credito", creditState.getDescription()));
+            cert.add(new DidiCredentialDataElem("Estado de Credito", creditState.getDescription()));
+        }
+
+
         cert.add(new DidiCredentialDataElem("Saldo Vencido", credential.getExpiredAmount().toString()));
         cert.add(new DidiCredentialDataElem("Cuota", credential.getCurrentCycleNumber().toString()));
         cert.add(new DidiCredentialDataElem("Cuotas Totales", String.valueOf(credential.getTotalCycles())));

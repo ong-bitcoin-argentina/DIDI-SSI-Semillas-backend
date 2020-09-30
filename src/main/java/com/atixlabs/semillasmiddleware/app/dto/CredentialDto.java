@@ -7,7 +7,6 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 
 import java.time.LocalDate;
 import java.time.LocalDateTime;
@@ -180,7 +179,7 @@ public class CredentialDto {
         this.currentCycle = credit.getCurrentCycle();
         this.totalCycles = credit.getTotalCycles();
         this.amountExpiredCycles = credit.getAmountExpiredCycles();
-        this.creditState = credit.getCreditState();
+        this.creditState = credit.getCreditStatus();
         this.finishDate = credit.getFinishDate();
         this.expiredAmount = credit.getExpiredAmount().toString();
         this.currentCycleNumber = credit.getCurrentCycleNumber();

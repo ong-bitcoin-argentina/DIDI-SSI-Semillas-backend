@@ -18,13 +18,10 @@ import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -213,7 +210,7 @@ public class SyncDidiProcessServiceIntegrationTest {
         credentialCredit.setCreditHolder(null);
         credentialCredit.setCreditType("CONAMI 31");
         credentialCredit.setCurrentCycle("1");
-        credentialCredit.setCreditState("Vigente");
+        credentialCredit.setCreditStatus("Vigente");
         credentialCredit.setExpiredAmount(new BigDecimal(9L));
         credentialCredit.setIdBondareaCredit("987654");
         credentialCredit.setIdGroup("idGroup");

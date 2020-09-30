@@ -254,8 +254,14 @@ public class DidiService {
 
 
     public void createAndEmmitCertificateDidi(Credential credential) {
+        DidiCreateCredentialResponse didiCreateCredentialResponse;
 
-        DidiCreateCredentialResponse didiCreateCredentialResponse = this.createCertificateDidi(credential);
+        try{
+             didiCreateCredentialResponse = this.createCertificateDidi(credential);
+        }catch (Exception ex){
+            log.error("Error emitting credentials Ex["+ex.getMessage()+"]");
+            return;
+        }
 
         if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals("success")) {
             String id = (String) ((LinkedTreeMap) ((ArrayList) didiCreateCredentialResponse.getData()).get(0)).get("_id");
@@ -266,7 +272,6 @@ public class DidiService {
             if (didiEmmitCredentialResponse!=null)
                 log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
 
-            log.info("didiSync: La credencial fue emitida, persistiendo datos en bd");
             this.saveEmittedCredential(didiEmmitCredentialResponse, credential);
             this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_OK.getCode());
 

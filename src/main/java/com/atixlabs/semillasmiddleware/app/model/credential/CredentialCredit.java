@@ -43,6 +43,8 @@ public class CredentialCredit extends Credential {
 
     private BigDecimal expiredAmount;
 
+    private BigDecimal amount;
+
     @Override
     public boolean isManuallyRevocable(){return false;}
 
@@ -60,6 +62,7 @@ public class CredentialCredit extends Credential {
         this.expiredAmount = credentialCredit.expiredAmount;
         this.currentCycleNumber = credentialCredit.currentCycleNumber;
         this.creditState =  credentialCredit.creditState;
+        this.amount = credentialCredit.amount;
     }
 
 }

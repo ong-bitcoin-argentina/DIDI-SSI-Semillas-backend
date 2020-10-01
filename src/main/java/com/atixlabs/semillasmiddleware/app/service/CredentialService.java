@@ -998,6 +998,7 @@ public class CredentialService {
         credentialCredit.setCreditState(loan.getState());
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
+        credentialCredit.setAmount(loan.getAmount());
 
         return credentialCredit;
 

@@ -57,8 +57,8 @@ public class CredentialCreditService extends CredentialCommonService {
         return newCredentialCredit;
     }
 
-    public Optional<CredentialCredit> getCredentialCreditsForLoan(String idBondarea, LoanStateCodes code){
-        return credentialCreditRepository.findByIdBondareaCreditAndCreditState(idBondarea, code.getCode());
+    public List<CredentialCredit> getCredentialCreditsForLoan(String idBondarea, LoanStateCodes code){
+        return credentialCreditRepository.findByIdBondareaCreditAndCreditStateOrderByUpdatedDesc(idBondarea, code.getCode());
     }
 
     @Override

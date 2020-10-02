@@ -719,6 +719,7 @@ public class BondareaService {
                 log.info("Credit for group " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
                 log.info("Remove credit credentials emmited in default for loan id bondarea["+credit.getIdBondareaLoan()+"]");
                 credentialService.revokeDefaultCredentialsForLoan(credit);
+                credentialService.createNewCreditCredential(credit);
                 break;
             }
         }

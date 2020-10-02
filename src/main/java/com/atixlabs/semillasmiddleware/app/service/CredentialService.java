@@ -210,7 +210,7 @@ public class CredentialService {
 
         Optional<CredentialCredit> opCreditExistence = this.getCredentialCreditForLoan(loan);
 
-        if (opCreditExistence.isEmpty()) {
+        if (opCreditExistence.isEmpty() || opCreditExistence.get().isRevoked()) {
 
             Optional<Person> opBeneficiary = personRepository.findByDocumentNumber(loan.getDniPerson());
 
@@ -1046,8 +1046,8 @@ public class CredentialService {
         if (opCredit.isPresent()) {
             CredentialCredit credit = opCredit.get();
 
-            //If exists and is revoked, do nothing
-            if (credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode())) {
+            //If exists and is revoked, do nothing, if it is default cred do nth
+            if (credit.getCredentialState().getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()) || credit.getCreditState().equals(LoanStateCodes.DEFAULT.getCode())) {
                 log.info(String.format("Credential credit %d is revoked and in default, no need to update, credit %s for holder %d ", credit.getId(), credit.getIdBondareaCredit(), holder.getDocumentNumber()));
                 return true;
             }
@@ -1311,7 +1311,7 @@ public class CredentialService {
     }
 
     public void revokeDefaultCredentialsForLoan(Loan loan){
-        Optional<CredentialCredit> credentialCredit = credentialCreditService.getCredentialCreditsForLoan(loan.getIdBondareaLoan(), LoanStateCodes.DEFAULT);
+        Optional<CredentialCredit> credentialCredit = credentialCreditService.getCredentialCreditsForLoan(loan.getIdBondareaLoan(), LoanStateCodes.DEFAULT).stream().findFirst();
         credentialCredit.ifPresent(cred -> this.revokeComplete(cred, RevocationReasonsCodes.UPDATE_INTERNAL));
     }
 

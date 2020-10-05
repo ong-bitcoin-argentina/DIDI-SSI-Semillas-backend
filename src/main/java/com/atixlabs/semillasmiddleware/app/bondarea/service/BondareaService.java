@@ -591,8 +591,8 @@ public class BondareaService {
 
                         //if the group was not processed..
                         if (!processedGroupLoans.contains(credit.getIdGroup())) {
-                            // get the group to check their expired money
-                            List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
+                            // get the group active loans to check their expired money
+                            List<Loan> oneGroup = loanRepository.findAllByIdGroupAndStatus(credit.getIdGroup(), LoanStatusCodes.ACTIVE.getCode());
                             BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
                             BigDecimal maxAmount = new BigDecimal(config.get().getValue());

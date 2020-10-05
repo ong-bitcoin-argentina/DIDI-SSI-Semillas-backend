@@ -51,7 +51,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByHasCredentialAndStatusAndState(Boolean hasCredential, String status, String state);
 
-    List<Loan> findAllByIdGroup(String idGroup);
+    List<Loan> findAllByIdGroupAndStatus(String idGroup, String status);
 
     List<Loan> findAllByDniPersonAndStatusAndIdBondareaLoanNot(long dniPerson, String status, String idBondareaLoan);
 

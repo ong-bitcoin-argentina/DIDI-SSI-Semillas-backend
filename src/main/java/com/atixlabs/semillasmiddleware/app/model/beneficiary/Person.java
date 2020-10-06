@@ -39,7 +39,7 @@ public class Person {
     @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
-    @ManyToMany
+    @ManyToMany(fetch=FetchType.EAGER)
     protected List<Loan> defaults; //TODO must be a HashSet
 
 

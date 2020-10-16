@@ -71,6 +71,7 @@ public class CredentialDto {
     private Boolean gas;
     private Boolean carafe;
     private Boolean water;
+    private Boolean waterWell;
     private String address;
     private String location;
     private String neighborhood;
@@ -201,6 +202,7 @@ public class CredentialDto {
         this.address = dwelling.getAddress();
         this.location = dwelling.getLocation();
         this.neighborhood = dwelling.getNeighborhood();
+        this.waterWell = dwelling.getWatterWell();
     }
 
     public CredentialDto(CredentialEntrepreneurship entrepreneurship){

@@ -86,7 +86,7 @@ public class ProviderService{
     }
 
     public List<Provider> findAll(){
-        return providerRepository.findAll();
+        return providerRepository.findAll(Sort.by("providerCategory.name").descending().and(Sort.by("name")));
     }
 
     public void disable(Long providerId){

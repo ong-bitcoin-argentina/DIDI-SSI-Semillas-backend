@@ -720,15 +720,15 @@ public class CredentialService {
                 case KINSMAN_CATEGORY_NAME:
                     PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
                     Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
-                    if (isCredentialAlreadyExistent(beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), processExcelFileResult))
+                    if (isCredentialAlreadyExistent(beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber(), processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
                 case ENTREPRENEURSHIP_CATEGORY_NAME:
-                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode(), processExcelFileResult))
+                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode(), null, processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
                 case DWELLING_CATEGORY_NAME:
-                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.DWELLING.getCode(), processExcelFileResult))
+                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.DWELLING.getCode(), null, processExcelFileResult))
                         allCredentialsNewOrInactive = false;
                     break;
             }
@@ -736,28 +736,39 @@ public class CredentialService {
         return allCredentialsNewOrInactive;
     }
 
-    private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, ProcessExcelFileResult processExcelFileResult) {
+
+    private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, Long creditHolderDni, ProcessExcelFileResult processExcelFileResult) {
 
         List<String> statesCodesToFind = new ArrayList<>();
         statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
         statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
 
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
-
-        Optional<Credential> credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
-                beneficiaryDni,
-                credentialCategoryCode,
-                credentialStateActivePending
-        );
+        Optional<Credential> credentialOptional;
+        if (creditHolderDni != null) {
+            credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCreditHolderDniAndCredentialStateIn(
+                    beneficiaryDni,
+                    credentialCategoryCode,
+                    creditHolderDni,
+                    credentialStateActivePending
+            );
+        } else {
+            credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
+                    beneficiaryDni,
+                    credentialCategoryCode,
+                    credentialStateActivePending
+            );
+        }
         if (credentialOptional.isEmpty())
             return false;
         else
-            processExcelFileResult.addRowWarn(
+            processExcelFileResult.addRowError(
                     "Warning CREDENCIAL DUPLICADA",
                     "Ya existe una credencial de tipo " + credentialCategoryCode +
                             " en estado " + credentialOptional.get().getCredentialState().getStateName() +
-                            " para el DNI " + beneficiaryDni + ", si continua con la creacion estas seran revocadas automaticamente"
+                            " para el DNI " + beneficiaryDni + " si desea continuar debe revocarlas manualmente"
             );
+
         return true;
     }
 

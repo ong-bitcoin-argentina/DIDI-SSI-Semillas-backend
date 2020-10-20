@@ -124,7 +124,9 @@ public class SurveyExcelParseService extends ExcelParseService {
             for (SurveyForm surveyForm : surveyFormList) {
                 pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
                 if (createCredentials){
-                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                    if (credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult)) {
+                        credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                    }
                 }else {
                     credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult);
                 }

@@ -77,20 +77,17 @@ public class DidiCredentialData {
     private void buildDidiCredentialDataFromDwelling(CredentialDwelling credential){
         cert.add(new DidiCredentialDataElem("Tipo de Tenencia", credential.getPossessionType()));
         cert.add(new DidiCredentialDataElem("Tipo de Vivienda", credential.getDwellingType()));
-        cert.add(new DidiCredentialDataElem("Distrito de Residencia", credential.getDwellingAddress()));
-
-
-        addIfNotNull("Instalacion de luz", credential.getLightInstallation());
-        addIfNotNull("Condiciones grales", credential.getGeneralConditions());
         addIfNotNull("Tipo de barrio", credential.getNeighborhoodType());
+        cert.add(new DidiCredentialDataElem("Distrito de Residencia", credential.getDwellingAddress()));
+        addIfNotNull("Direccion", credential.getAddress());
+        addIfNotNull("Barrio", credential.getNeighborhood());
+        addIfNotNull("Localidad", credential.getLocation());
+        addIfNotNull("Condiciones grales", credential.getGeneralConditions());
         addIfNotNull("Red de gas", credential.getGas());
         addIfNotNull("Garrafa", credential.getCarafe());
         addIfNotNull("Red de agua", credential.getWater());
         addIfNotNull("Pozo/Bomba", credential.getWatterWell());
-        addIfNotNull("Localidad", credential.getLocation());
-        addIfNotNull("Barrio", credential.getNeighborhood());
-        addIfNotNull("Direccion", credential.getAddress());
-
+        addIfNotNull("Instalacion de luz", credential.getLightInstallation());
     }
 
     private void addIfNotNull(String param, Object value){

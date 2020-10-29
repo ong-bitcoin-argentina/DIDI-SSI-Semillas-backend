@@ -24,6 +24,7 @@ import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -290,12 +291,16 @@ public class BondareaService {
         BondareaLoanResponse bondareaLoanResponse;
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
-            if (response.body() == null || response.body().getLoans() == null) throw  new RuntimeException("No body or loans received in sync, aborting");
+
             if (response.code() == HttpStatus.OK.value()) {
+                if (Strings.isNullOrEmpty(idBondareaLoan)) {
+                    if(response.body() == null || response.body().getLoans() == null || response.body().getLoans().isEmpty()) throw new RuntimeException("No body or loans received in sync, aborting");
+                }
                 bondareaLoanResponse = response.body();
                 log.debug("Bondarea get loans has been successfully executed " + response.body());
             } else {
-                return Collections.emptyList();
+                log.error("Sync call to get Bonadarea Loan Response was not OK", response.errorBody());
+                throw new BondareaSyncroException("Bondarea response was not OK");
             }
 
         } catch (JsonSyntaxException ex) {

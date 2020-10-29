@@ -290,7 +290,7 @@ public class BondareaService {
         BondareaLoanResponse bondareaLoanResponse;
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
-            if(response.body() == null || response.body().getLoans() == null || response.body().getLoans().isEmpty()) throw  new RuntimeException("No body or loans received in sync, aborting");
+            if (response.body() == null || response.body().getLoans() == null) throw  new RuntimeException("No body or loans received in sync, aborting");
             if (response.code() == HttpStatus.OK.value()) {
                 bondareaLoanResponse = response.body();
                 log.debug("Bondarea get loans has been successfully executed " + response.body());

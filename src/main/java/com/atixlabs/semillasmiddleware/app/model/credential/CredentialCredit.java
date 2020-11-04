@@ -42,11 +42,13 @@ public class CredentialCredit extends Credential {
 
     private LocalDate finishDate;
 
+    private LocalDate startDate;
+
     private BigDecimal expiredAmount;
 
     private BigDecimal amount;
 
-    private LocalDateTime expirationDate;
+    private LocalDate expirationDate;
 
     @Override
     public boolean isManuallyRevocable(){return false;}
@@ -62,10 +64,12 @@ public class CredentialCredit extends Credential {
         this.totalCycles = credentialCredit.totalCycles;
         this.amountExpiredCycles = credentialCredit.amountExpiredCycles;
         this.creditStatus = credentialCredit.creditStatus;
+        this.startDate = credentialCredit.startDate;
         this.finishDate = credentialCredit.finishDate;
         this.expiredAmount = credentialCredit.expiredAmount;
         this.currentCycleNumber = credentialCredit.currentCycleNumber;
         this.creditState =  credentialCredit.creditState;
         this.amount = credentialCredit.amount;
+        this.expirationDate = credentialCredit.expirationDate;
     }
 }

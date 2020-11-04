@@ -46,6 +46,7 @@ import java.net.SocketTimeoutException;
 import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalUnit;
 import java.util.*;
@@ -760,9 +761,12 @@ public class BondareaService {
      * @return
      */
 
-    public LocalDateTime calculateExpirationDate(BondareaLoanDto loanDto) {
-        long daysPassed = Duration.between(LocalDateTime.now(), LocalDateTime.parse(loanDto.getDateFirstInstalment())).toDays();
-        LocalDateTime expirationDate = null;
+    public LocalDate calculateExpirationDate(BondareaLoanDto loanDto) throws BondareaSyncroException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate d1 = LocalDate.now();
+        LocalDate d2 = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+        long daysPassed = Period.between(d2, d1).getDays();
+        LocalDate expirationDate = null;
         try {
             double dayPeriodicity = this.getTcDays(loanDto.getFeeDuration());
             double diff;
@@ -771,9 +775,10 @@ public class BondareaService {
             } else {
                 diff = dayPeriodicity - daysPassed;
             }
-            expirationDate = LocalDateTime.now().plusDays((long) diff);
-        } catch (BondareaSyncroException e) {
-            e.printStackTrace();
+            expirationDate = LocalDate.now().plusDays((long) diff);
+        } catch (Exception e) {
+            log.error("Error on calculateFeeNumber {}", e.getMessage(), e);
+            throw new BondareaSyncroException(e.getMessage());
         } finally {
             return expirationDate;
         }

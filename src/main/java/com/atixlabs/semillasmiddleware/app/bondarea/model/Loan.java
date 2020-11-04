@@ -80,9 +80,9 @@ public class Loan extends AuditableEntity {
 
     private Boolean hasCredential;
 
-    private LocalDateTime expirationDate;
+    private LocalDate expirationDate;
 
-    public Loan(BondareaLoanDto loanDto, Integer currentFeeNumber, LocalDateTime expirationDate) {
+    public Loan(BondareaLoanDto loanDto, Integer currentFeeNumber, LocalDate expirationDate) {
         this.dniPerson = loanDto.getDni();
 
         this.idBondareaLoan = loanDto.getIdBondareaLoan();

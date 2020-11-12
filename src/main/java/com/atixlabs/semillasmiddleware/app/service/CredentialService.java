@@ -874,8 +874,7 @@ public class CredentialService {
             case CHILD:
             case OTHER_KINSMAN:
                 credentialIdentity.setCredentialDescription(CredentialTypesCodes.CREDENTIAL_IDENTITY_FAMILY.getCode());
-                credentialIdentity.setRelationWithCreditHolder(CredentialRelationHolderType.HOLDER.getCode());
-
+                credentialIdentity.setRelationWithCreditHolder(CredentialRelationHolderType.KINSMAN.getCode());
                 break;
         }
 

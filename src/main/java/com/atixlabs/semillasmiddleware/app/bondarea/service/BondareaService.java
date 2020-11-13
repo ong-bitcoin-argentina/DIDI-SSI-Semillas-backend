@@ -763,7 +763,7 @@ public class BondareaService {
 
     public LocalDate calculateExpirationDate(BondareaLoanDto loanDto) throws BondareaSyncroException {
         DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        LocalDate d1 = LocalDate.now();
+        LocalDate d1 = DateUtil.getLocalDateNow();
         LocalDate d2 = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
         long daysPassed = Period.between(d2, d1).getDays();
         LocalDate expirationDate = null;
@@ -775,7 +775,7 @@ public class BondareaService {
             } else {
                 diff = dayPeriodicity - daysPassed;
             }
-            expirationDate = LocalDate.now().plusDays((long) diff);
+            expirationDate = d1.plusDays((long) diff);
         } catch (Exception e) {
             log.error("Error on calculateFeeNumber {}", e.getMessage(), e);
             throw new BondareaSyncroException(e.getMessage());

@@ -43,8 +43,10 @@ import retrofit2.Retrofit;
 
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalUnit;
 import java.util.*;
@@ -398,7 +400,7 @@ public class BondareaService {
                 if (opLoanToUpdate.isPresent()) {
                     //update
                     Loan loanToUpdate = opLoanToUpdate.get();
-                    Loan loanToSave = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
+                    Loan loanToSave = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave), this.calculateExpirationDate(loanDtoToSave));
 
                     log.info("--- loanToSave creation date " + loanToSave.getCreationDate());
 
@@ -416,7 +418,7 @@ public class BondareaService {
                     }
                 } else {
                     log.info("new credit " + loanDtoToSave.getIdBondareaLoan());
-                    Loan newLoan = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
+                    Loan newLoan = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave), this.calculateExpirationDate(loanDtoToSave));
                     //set the loan on active
                     newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
                     newLoan.setSynchroTime(startTimeProcess);
@@ -758,6 +760,30 @@ public class BondareaService {
      * @param loanDto
      * @return
      */
+
+    public LocalDate calculateExpirationDate(BondareaLoanDto loanDto) throws BondareaSyncroException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate d1 = DateUtil.getLocalDateNow();
+        LocalDate d2 = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+        long daysPassed = Period.between(d2, d1).getDays();
+        LocalDate expirationDate = null;
+        try {
+            double dayPeriodicity = this.getTcDays(loanDto.getFeeDuration());
+            double diff;
+            if (daysPassed > dayPeriodicity) {
+                diff = daysPassed % dayPeriodicity;
+            } else {
+                diff = dayPeriodicity - daysPassed;
+            }
+            expirationDate = d1.plusDays((long) diff);
+        } catch (Exception e) {
+            log.error("Error on calculateFeeNumber {}", e.getMessage(), e);
+            throw new BondareaSyncroException(e.getMessage());
+        } finally {
+            return expirationDate;
+        }
+    }
+
     public Integer calculateFeeNumber(BondareaLoanDto loanDto) throws BondareaSyncroException {
 
         LocalDate today = DateUtil.getLocalDateNow();

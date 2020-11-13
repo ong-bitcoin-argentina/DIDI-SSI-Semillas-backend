@@ -8,6 +8,7 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -43,6 +44,10 @@ public class CredentialDto {
 
     private LocalDateTime dateOfRevocation;
     private String revocationReason;
+    private  BigDecimal amount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
 
     //beneficiary
     private String beneficiaryType;
@@ -59,6 +64,7 @@ public class CredentialDto {
     private LocalDate finishDate;
     private String expiredAmount;
     private Integer currentCycleNumber;
+    private LocalDate expirationDate;
 
     //dwelling
     private String dwellingType;
@@ -184,6 +190,9 @@ public class CredentialDto {
         this.finishDate = credit.getFinishDate();
         this.expiredAmount = credit.getExpiredAmount().toString();
         this.currentCycleNumber = credit.getCurrentCycleNumber();
+        this.expirationDate = credit.getExpirationDate();
+        this.startDate = credit.getStartDate();
+        this.amount = credit.getAmount();
     }
 
     public CredentialDto(CredentialDwelling dwelling){

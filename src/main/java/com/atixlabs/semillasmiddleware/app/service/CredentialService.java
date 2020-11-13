@@ -1002,6 +1002,7 @@ public class CredentialService {
         credentialCredit.setIdGroup(loan.getIdGroup());
         credentialCredit.setCurrentCycle(loan.getCycleDescription()); // si cambia, se tomara como cambio de ciclo
         credentialCredit.setCurrentCycleNumber(loan.getCurrentInstalmentNumber());
+        credentialCredit.setExpirationDate(loan.getExpirationDate());
         credentialCredit.setTotalCycles(loan.getInstalmentTotalQuantity());
 
         credentialCredit.setAmountExpiredCycles(0);
@@ -1010,6 +1011,7 @@ public class CredentialService {
         credentialCredit.setExpiredAmount(loan.getExpiredAmount());
         credentialCredit.setCreationDate(loan.getCreationDate());
         credentialCredit.setAmount(loan.getAmount());
+        credentialCredit.setStartDate(loan.getDateFirstInstalment());
 
         return credentialCredit;
 
@@ -1025,11 +1027,11 @@ public class CredentialService {
         areEquals = areEquals && credentialCredit.getCreditStatus().equals(loan.getStatus());
         areEquals = areEquals && credentialCredit.getExpiredAmount().equals(loan.getExpiredAmount());
         areEquals = areEquals && credentialCredit.getCreationDate().equals(loan.getCreationDate());
-        //areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
-
-        return areEquals && !credentialCredit.getCurrentCycleNumber().equals(loan.getCurrentInstalmentNumber());
-
-
+        //Since this is a calculated field, it is not considered to identify if credential must be updated
+        //areEquals = areEquals && credentialCredit.getExpirationDate().equals(loan.getExpirationDate());
+        areEquals = areEquals && !credentialCredit.getCurrentCycleNumber().equals(loan.getCurrentInstalmentNumber());
+        areEquals = areEquals && credentialCredit.getBeneficiaryDni().equals(loan.getDniPerson());
+        return areEquals;
     }
 
 

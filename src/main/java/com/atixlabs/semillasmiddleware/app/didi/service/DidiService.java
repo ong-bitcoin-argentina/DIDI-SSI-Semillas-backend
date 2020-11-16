@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.exceptions.DidiEmmitCredentialException;
 import com.atixlabs.semillasmiddleware.app.model.RetrofitBuilder;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
@@ -267,19 +268,32 @@ public class DidiService {
             String id = (String) ((LinkedTreeMap) ((ArrayList) didiCreateCredentialResponse.getData()).get(0)).get("_id");
 
             log.info("didiSync: certificateId to emmit: "+ id);
-            DidiEmmitCredentialResponse didiEmmitCredentialResponse = emmitCertificateDidi(id);
 
-            if (didiEmmitCredentialResponse!=null)
-                log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
+            try {
+                DidiEmmitCredentialResponse didiEmmitCredentialResponse = emmitCertificateDidi(id);
+                if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals("success")) {
+                    log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
+                } else {
+                    log.info("didiSync: emmitCertificate Didn't respond success");
+                    rollbackCredentialCreation(id);
+                }
 
-            this.saveEmittedCredential(didiEmmitCredentialResponse, credential);
-            this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_OK.getCode());
-
+                this.saveEmittedCredential(didiEmmitCredentialResponse, credential);
+                this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_OK.getCode());
+            } catch (DidiEmmitCredentialException e) {
+                rollbackCredentialCreation(id);
+                e.printStackTrace();
+            }
         } else {
-            log.error("didiSync: fallo la creacion de la certificado, ["+(didiCreateCredentialResponse != null ? didiCreateCredentialResponse.getData() : "Error no manejado") +"]");
+            log.error("didiSync: fallo la creacion del certificado, ["+(didiCreateCredentialResponse != null ? didiCreateCredentialResponse.getData() : "Error no manejado") +"]");
             this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
             this.saveCredentialOnPending(credential);
         }
+    }
+
+    private void rollbackCredentialCreation(String id) {
+        log.error("didiSync: fallo la emisión de la credencial, se hace rollback de la creación de la misma.");
+        this.didiDeleteCertificate(id, RevocationReasonsCodes.DEFAULT.getCode());
     }
 
     //todo must be use a transaction to rollback
@@ -337,9 +351,8 @@ public class DidiService {
             return response.body();
         } catch (Exception ex) {
             log.error("didiSync: emmitCertificateDidi: Request error", ex);
+            throw new DidiEmmitCredentialException(ex);
         }
-
-        return null;
     }
 
     private String getDidiRevocationReasonCode(String reason) {

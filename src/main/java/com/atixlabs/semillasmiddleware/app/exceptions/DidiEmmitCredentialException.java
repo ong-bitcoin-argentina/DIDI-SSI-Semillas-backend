@@ -1,6 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.exceptions;
 
-public class DidiEmmitCredentialException extends Exception {
+public class DidiEmmitCredentialException extends RuntimeException {
     public DidiEmmitCredentialException(String s) {
         super(s);
     }

@@ -339,7 +339,7 @@ public class DidiService {
     }
 
 
-    private DidiEmmitCredentialResponse emmitCertificateDidi(String didiCredentialId) throws DidiEmmitCredentialException {
+    private DidiEmmitCredentialResponse emmitCertificateDidi(String didiCredentialId) {
 
         Call<DidiEmmitCredentialResponse> callSync = endpointInterface.emmitCertificate(didiAuthToken, didiCredentialId);
 

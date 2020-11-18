@@ -75,8 +75,8 @@ public class CredentialController {
             log.info("find credentials "+credentialType+" "+name+" "+surname+" "+dniBeneficiary+" "+idDidiCredential+" "+lastUpdate+" "+credentialState.get(0));
             credentials = credentialService.findCredentials(credentialType, name, surname, dniBeneficiary, creditHolderDni, idDidiCredential, lastUpdate, credentialState, page);
         } catch (Exception e) {
-            log.info("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
-                    credentialState.toString() + " " + e);
+            log.error("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
+                    credentialState.toString(), e);
             return null;
         }
         return credentials;
@@ -147,7 +147,7 @@ public class CredentialController {
             credentialService.generateCreditAndBenefitsCredentialsByLoans();
         }
         catch (InvalidProcessException ex){
-            log.error("Could not get the process ! "+ ex.getMessage());
+            log.error("Could not get the process ! ", ex);
             return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
         }
 

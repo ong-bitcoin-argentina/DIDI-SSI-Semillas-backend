@@ -5,6 +5,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
+import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.PrimaryKeyJoinColumn;
 import java.math.BigDecimal;
@@ -44,6 +45,7 @@ public class CredentialCredit extends Credential {
 
     private LocalDate startDate;
 
+    @Column(nullable = false)
     private BigDecimal expiredAmount;
 
     private BigDecimal amount;

@@ -179,6 +179,7 @@ public class Loan extends AuditableEntity {
         this.currentInstalmentNumber = loanToUpdate.getCurrentInstalmentNumber();
         this.InstalmentTotalQuantity = loanToUpdate.getInstalmentTotalQuantity();
         this.InstalmentType = loanToUpdate.getInstalmentType();
+        this.dniPerson = loanToUpdate.getDniPerson();
     }
 
 

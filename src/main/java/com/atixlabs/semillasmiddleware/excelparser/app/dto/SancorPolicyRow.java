@@ -48,6 +48,10 @@ public class SancorPolicyRow extends ExcelRow {
         super(row);
     }
 
+    public boolean isEmpty() {
+        return this.certificateClient == null;
+    }
+
     @Override
     protected void parseRow(Row row) {
         this.branchDescription = this.getCellStringValue(row, 0, "Descripción Ramo");

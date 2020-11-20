@@ -744,28 +744,28 @@ public class CredentialService {
         statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
 
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
-        Optional<Credential> credentialOptional;
+        List<Credential> credentialsOptional;
         if (creditHolderDni != null) {
-            credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCreditHolderDniAndCredentialStateIn(
+            credentialsOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCreditHolderDniAndCredentialStateIn(
                     beneficiaryDni,
                     credentialCategoryCode,
                     creditHolderDni,
                     credentialStateActivePending
             );
         } else {
-            credentialOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
+            credentialsOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                     beneficiaryDni,
                     credentialCategoryCode,
                     credentialStateActivePending
             );
         }
-        if (credentialOptional.isEmpty())
+        if (credentialsOptional.isEmpty())
             return false;
         else
             processExcelFileResult.addRowError(
                     "Warning CREDENCIAL DUPLICADA",
-                    "Ya existe una credencial de tipo " + credentialCategoryCode +
-                            " en estado " + credentialOptional.get().getCredentialState().getStateName() +
+                    "Existe al menos una credencial de tipo " + credentialCategoryCode +
+                            " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
                             " para el DNI " + beneficiaryDni + " si desea continuar debe revocarlas manualmente"
             );
 

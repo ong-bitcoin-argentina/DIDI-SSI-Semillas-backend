@@ -272,7 +272,7 @@ public class PersonCategory implements Category {
 
     @Override
     public boolean isEmpty(){
-        return documentNumber.answerIsEmpty();
+        return documentNumber.answerIsEmpty() && name.answerIsEmpty() && surname.answerIsEmpty();
     }
 
     @Override

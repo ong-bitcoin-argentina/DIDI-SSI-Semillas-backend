@@ -175,7 +175,7 @@ public class DwellingCategory implements Category {
 
     @Override
     public boolean isRequired() {
-        return true;
+        return false;
     }
 
     public String getDwellingType(){

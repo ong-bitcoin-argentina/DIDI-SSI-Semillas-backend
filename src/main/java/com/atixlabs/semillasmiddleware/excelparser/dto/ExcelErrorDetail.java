@@ -11,14 +11,17 @@ public class ExcelErrorDetail {
 
     private String errorHeader;
     private String errorBody;
+    private ExcelErrorType excelErrorType;
+    private String data;
 
     public ExcelErrorDetail(String errorHeader, String errorBody){
+        this(errorHeader, errorBody, ExcelErrorType.OTHER, "");
+    }
+    public ExcelErrorDetail(String errorHeader, String errorBody, ExcelErrorType excelErrorType, String data){
         this.errorHeader = errorHeader;
         this.errorBody = errorBody;
-    }
-    public ExcelErrorDetail(String errorBody){
-        this.errorHeader = "";
-        this.errorBody = errorBody;
+        this.excelErrorType = excelErrorType;
+        this.data = data;
     }
 
     @Override

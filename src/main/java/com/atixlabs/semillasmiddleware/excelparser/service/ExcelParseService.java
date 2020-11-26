@@ -55,12 +55,13 @@ public abstract class ExcelParseService {
             while (rowsIterator.hasNext()) {
                 processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult, createCredentials);
             }
-
-            fileInput.close();
             return processExcelFileResult;
         } catch (NotOfficeXmlFileException c) {
+            log.error("Invalid file format: " + filePath);
             processExcelFileResult.addRowError("Error en el archivo", "Formato de archivo inválido. Por favor, verificá que la extensión del archivo sea xlsx.");
             return processExcelFileResult;
+        } finally {
+            fileInput.close();
         }
     }
 

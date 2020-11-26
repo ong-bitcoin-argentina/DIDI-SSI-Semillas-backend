@@ -33,6 +33,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
@@ -46,6 +47,8 @@ import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
+
+import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
 
 @Slf4j
 @Service
@@ -706,75 +709,88 @@ public class CredentialService {
         ArrayList<Category> categoryArrayList = surveyForm.getAllCompletedCategories();
 
         //2-get creditHolder Data
-        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
 
         //en cada service crear el si existe o no
         //2-verify each person is new, or his data has not changed.
         boolean allCredentialsNewOrInactive = true;
+        List<String> statesCodesToFind = new ArrayList<>();
+        statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
+        statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
+        String beneficiaryAddress = "";
         for (Category category : categoryArrayList) {
-            switch (category.getCategoryName()) {
-                case BENEFICIARY_CATEGORY_NAME:
-                case SPOUSE_CATEGORY_NAME:
-                case CHILD_CATEGORY_NAME:
-                case KINSMAN_CATEGORY_NAME:
-                    PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
-                    Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
-                    if (isCredentialAlreadyExistent(beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber(), processExcelFileResult))
-                        allCredentialsNewOrInactive = false;
-                    break;
-                case ENTREPRENEURSHIP_CATEGORY_NAME:
-                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode(), null, processExcelFileResult))
-                        allCredentialsNewOrInactive = false;
-                    break;
-                case DWELLING_CATEGORY_NAME:
-                    if (isCredentialAlreadyExistent(creditHolder.getDocumentNumber(), CredentialCategoriesCodes.DWELLING.getCode(), null, processExcelFileResult))
-                        allCredentialsNewOrInactive = false;
-                    break;
+            List<Credential> credentialsOptional = new ArrayList<>();
+            Categories categoryName = category.getCategoryName();
+
+            if (categoryName.equals(BENEFICIARY_CATEGORY_NAME) || categoryName.equals(SPOUSE_CATEGORY_NAME)
+                || categoryName.equals(CHILD_CATEGORY_NAME) || categoryName.equals(KINSMAN_CATEGORY_NAME)) {
+                PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
+                Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
+                credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
+                if (categoryName.equals(BENEFICIARY_CATEGORY_NAME)) {
+                    beneficiaryAddress = beneficiaryPersonCategory.getAddress();
+                }
+            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME)) {
+                EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
+                credentialsOptional = getEntrepreneurCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), entrepreneurshipCategory.getName());
+            } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
+                credentialsOptional = getDwellingCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), beneficiaryAddress);
+            }
+
+            if (!credentialsOptional.isEmpty()) {
+                processExcelFileResult.addRowError(
+                        "Warning CREDENCIAL DUPLICADA",
+                        "Existe al menos una credencial de tipo " + credentialsOptional.get(0).getCredentialCategory() +
+                                " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
+                                " para el DNI " + credentialsOptional.get(0).getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente"
+                        , ExcelErrorType.DUPLICATED_CREDENTIAL, credentialsOptional.get(0).getId().toString()
+                );
+                allCredentialsNewOrInactive = false;
             }
         }
         return allCredentialsNewOrInactive;
     }
 
 
-    private boolean isCredentialAlreadyExistent(Long beneficiaryDni, String credentialCategoryCode, Long creditHolderDni, ProcessExcelFileResult processExcelFileResult) {
+    private List<Credential> getIdentityCredentials(List<CredentialState> credentialStateActivePending, Long beneficiaryDni, String credentialCategoryCode, Long creditHolderDni) {
 
-        List<String> statesCodesToFind = new ArrayList<>();
-        statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
-        statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
-
-        List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
-        List<Credential> credentialsOptional;
         if (creditHolderDni != null) {
-            credentialsOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCreditHolderDniAndCredentialStateIn(
+            return credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCreditHolderDniAndCredentialStateIn(
                     beneficiaryDni,
                     credentialCategoryCode,
                     creditHolderDni,
                     credentialStateActivePending
             );
         } else {
-            credentialsOptional = credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
+            return credentialRepository.findByBeneficiaryDniAndCredentialCategoryAndCredentialStateIn(
                     beneficiaryDni,
                     credentialCategoryCode,
                     credentialStateActivePending
             );
         }
-        if (credentialsOptional.isEmpty())
-            return false;
-        else
-            processExcelFileResult.addRowError(
-                    "Warning CREDENCIAL DUPLICADA",
-                    "Existe al menos una credencial de tipo " + credentialCategoryCode +
-                            " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
-                            " para el DNI " + beneficiaryDni + " si desea continuar debe revocarlas manualmente"
-            );
+    }
 
-        return true;
+    private List<Credential> getDwellingCredentials(List<CredentialState> credentialStateActivePending, Long creditHolderDni, String dwellingAddress) {
+        return credentialDwellingRepository.findByCreditHolderDniAndAddressAndCredentialStateIn(
+                creditHolderDni,
+                dwellingAddress,
+                credentialStateActivePending
+        );
+    }
+
+    private List<Credential> getEntrepreneurCredentials(List<CredentialState> credentialStateActivePending, Long creditHolderDni, String entrepreneurName) {
+        return credentialEntrepreneurshipRepository.findByCreditHolderDniAndEntrepreneurshipNameAndCredentialStateIn(
+                creditHolderDni,
+                entrepreneurName,
+                credentialStateActivePending
+        );
     }
 
     private void saveAllCredentialsFromForm(SurveyForm surveyForm) throws CredentialException {
         //1-get creditHolder Data
-        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
 
         //1-get all data from form
@@ -803,7 +819,7 @@ public class CredentialService {
                 credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
                 break;
             case DWELLING_CATEGORY_NAME:
-                PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+                PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
                 credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
                 break;
         }

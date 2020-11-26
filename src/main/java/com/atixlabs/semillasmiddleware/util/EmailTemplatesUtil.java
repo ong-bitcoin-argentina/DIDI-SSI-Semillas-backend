@@ -15,14 +15,28 @@ import java.util.Map;
 public class EmailTemplatesUtil {
 
     private static final String TEMPLATES_ROUTE = "classpath:templates/";
+    private static final String STYLE_SHEET_ROUTE = "classpath:css/";
+    private static final String IMAGES_ROUTE = "classpath:img/";
 
     public static String getTemplate(String templateName){
-        Resource resource = new DefaultResourceLoader().getResource(TEMPLATES_ROUTE+templateName);
+        return getFile(templateName, TEMPLATES_ROUTE);
+    }
+
+    public static String getStyleSheet(String styleSheetName){
+        return getFile(styleSheetName, STYLE_SHEET_ROUTE);
+    }
+
+    public static String getImage(String imageName){
+        return getFile(imageName, IMAGES_ROUTE);
+    }
+
+    private static String getFile(String fileName, String route) {
+        Resource resource = new DefaultResourceLoader().getResource(route+fileName);
         try {
             InputStream inputStream = resource.getInputStream();
             byte[] bdata = FileCopyUtils.copyToByteArray(inputStream);
             String data = new String(bdata, StandardCharsets.UTF_8);
-            log.info("Template ["+templateName+"] read correctly");
+            log.info("Template ["+fileName+"] read correctly");
             return data;
         }catch (IOException ioe){
             throw new EmailNotSentException(ioe.getMessage());

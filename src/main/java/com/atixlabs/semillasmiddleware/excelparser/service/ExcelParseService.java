@@ -4,6 +4,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -42,22 +43,26 @@ public abstract class ExcelParseService {
 
         FileInputStream fileInput = new FileInputStream(xlsxFile);
 
-        Workbook workbook = new XSSFWorkbook(fileInput);
+        try {
+            Workbook workbook = new XSSFWorkbook(fileInput);
+            Sheet sheet = workbook.getSheetAt(0);
+            Iterator<Row> rowsIterator = sheet.rowIterator();
 
-        Sheet sheet = workbook.getSheetAt(0);
-        Iterator<Row> rowsIterator = sheet.rowIterator();
+            //está eliminando la linea de cabeceras que por ahora quiero ver:
+            if (rowsIterator.hasNext())
+                rowsIterator.next();
 
-        //está eliminando la linea de cabeceras que por ahora quiero ver:
-        if (rowsIterator.hasNext())
-            rowsIterator.next();
-
-        while (rowsIterator.hasNext()) {
-            processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult, createCredentials);
+            while (rowsIterator.hasNext()) {
+                processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult, createCredentials);
+            }
+            return processExcelFileResult;
+        } catch (NotOfficeXmlFileException c) {
+            log.error("Invalid file format: " + filePath);
+            processExcelFileResult.addRowError("Error en el archivo", "Formato de archivo inválido. Por favor, verificá que la extensión del archivo sea xlsx.");
+            return processExcelFileResult;
+        } finally {
+            fileInput.close();
         }
-
-        fileInput.close();
-
-        return processExcelFileResult;
     }
 
 

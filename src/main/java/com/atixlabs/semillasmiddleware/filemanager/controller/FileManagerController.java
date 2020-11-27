@@ -52,7 +52,6 @@ public class FileManagerController {
         ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath(), createCredentials);
 
         return ResponseEntity.ok(processExcelFileResult);
-        //return(ResponseEntity.ok().build());
     }
 
     @GetMapping("/download")

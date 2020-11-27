@@ -46,6 +46,11 @@ public class ProcessExcelFileResult {
         this.totalErrorsRows++;
     }
 
+    public void addRowError(String errorHeader, String errorBody, ExcelErrorType excelErrorType, String data){
+        this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody, excelErrorType, data));
+        this.totalErrorsRows++;
+    }
+
     public void addTotalReadRow(){
         this.totalReadRows++;
     }

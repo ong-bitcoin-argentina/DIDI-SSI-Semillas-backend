@@ -741,7 +741,7 @@ public class CredentialService {
 
             if (!credentialsOptional.isEmpty()) {
                 processExcelFileResult.addRowError(
-                        "Warning CREDENCIAL DUPLICADA",
+                        "Advertencia CREDENCIAL DUPLICADA",
                         "Existe al menos una credencial de tipo " + credentialsOptional.get(0).getCredentialCategory() +
                                 " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
                                 " para el DNI " + credentialsOptional.get(0).getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente"

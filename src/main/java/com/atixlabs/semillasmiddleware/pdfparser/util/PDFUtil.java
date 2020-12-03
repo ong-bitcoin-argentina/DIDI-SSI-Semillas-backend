@@ -1,13 +1,11 @@
 package com.atixlabs.semillasmiddleware.pdfparser.util;
 
 import com.atixlabs.semillasmiddleware.pdfparser.exception.PdfCannotBeCreatedException;
-import com.atixlabs.semillasmiddleware.util.EmailTemplatesUtil;
-import com.itextpdf.text.Document;
+import com.itextpdf.html2pdf.ConverterProperties;
+import com.itextpdf.html2pdf.HtmlConverter;
 import com.itextpdf.text.DocumentException;
-import com.itextpdf.text.pdf.PdfWriter;
-import com.itextpdf.tool.xml.XMLWorkerHelper;
-
 import java.io.*;
+
 
 public class PDFUtil {
 
@@ -22,17 +20,9 @@ public class PDFUtil {
         return file.getName();
     }
 
-
-    private static void writePdfFromHtml(File file, String html) throws DocumentException, IOException{
-        Document document = new Document();
-        PdfWriter writer = PdfWriter.getInstance(document,
-                new FileOutputStream(file));
-        document.open();
-
-        XMLWorkerHelper.getInstance().parseXHtml(writer, document,
-                new ByteArrayInputStream(html.getBytes()));
-
-        document.close();
+    private static void writePdfFromHtml(File file, String html) throws DocumentException, IOException {
+        ConverterProperties converterProperties = new ConverterProperties();
+        HtmlConverter.convertToPdf(new ByteArrayInputStream(html.getBytes()), new FileOutputStream(file), converterProperties);
     }
 
 }

@@ -18,44 +18,47 @@ import java.util.*;
 public class PdfParserService {
 
     private static final String TEMPLATE_NAME = "excell_survey_data.html";
+    private static final String IMG_LOGO_NAME = "logo-semillas.svg";
     private static final String PDF_SUFFIX = "Encuesta_";
     private static final String CATEGORY_NAME_PARAM = "{{categoryName}}";
     private static final String TABLE_CONTENT_PARAM = "{{tableContent}}";
+    private static final String SEMILLAS_IMAGE_BASE64_PARAM = "{{semillasImgB64}}";
     private static final String QUESTION_PARAM = "{{question}}";
     private static final String ANSWER_PARAM = "{{answer}}";
     private static final String SUBCATEGORY_PARAM = "{{subCategory}}";
 
-    private static final String rowStyle = "style=\"border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px;\"\"";
-    private static final String categoryStyle = "style=\"background-color: #A8A8A8; border: 1px solid #FFFFFF ; border-collapse: collapse; padding: 5px;\"\"";
-    private String rowTemplate = "        <tr "+rowStyle+">\n" +
-                                 "            <td style=\"width:100%\">{{question}}</td>\n" +
-                                 "            <td style=\"width:100%\">{{answer}}</td>\n" +
+    private String rowTemplate = "        <tr>\n" +
+                                 "            <td >{{question}}</td>\n" +
+                                 "            <td >{{answer}}</td>\n" +
                                  "        </tr>";
 
-    private String subCategoryTemplate = "   <tr style=\"background-color:  #d8d8d8;\">\n" +
+    private String subCategoryTemplate = "   <tr>\n" +
             "            <th colspan=\"2\">\n" +
             "              {{subCategory}}</th>\n" +
             "        </tr>";
-    private String headerTemplate = "        <tr "+categoryStyle+">\n" +
+    private String headerTemplate = "        <tr>\n" +
                                     "            <th colspan=\"2\">\n" +
                                     "                <br />"+CATEGORY_NAME_PARAM+"\n" +
                                     "            </th>\n" +
                                     "        </tr>\n" +
                                     "        <th>PREGUNTA</th>\n" +
                                     "        <th>RESPUESTA</th>\n";
-
-    public String generatePdfFromSurvey(SurveyForm surveyForm){
+   
+    public String generatePdfFromSurvey(SurveyForm surveyForm) {
         log.info("Creating pdf from survey form");
         Stack<Category> categoriesStack = new Stack<>();
-        //top down order
+        // top down order
         fillStack(categoriesStack, Categories.getCodeList(), surveyForm);
 
-        PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
+        PersonCategory beneficiaryCategory = (PersonCategory) surveyForm
+                .getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
 
         String html = generateHtmlFromCategories(categoriesStack);
-        String template = EmailTemplatesUtil.getTemplate(TEMPLATE_NAME).replace(TABLE_CONTENT_PARAM, html);
+        String template = EmailTemplatesUtil.getTemplate(TEMPLATE_NAME).replace(TABLE_CONTENT_PARAM, html)
+                .replace(SEMILLAS_IMAGE_BASE64_PARAM, "data:image/svg+xml;base64,"
+                        + Base64.getEncoder().encodeToString(EmailTemplatesUtil.getImage(IMG_LOGO_NAME).getBytes()));
 
-        return PDFUtil.createTemporaryPdf(PDF_SUFFIX+beneficiaryCategory.getFullName(), template);
+        return PDFUtil.createTemporaryPdf(PDF_SUFFIX + beneficiaryCategory.getFullName(), template);
     }
 
     private String generateHtmlFromCategories(Stack<Category> categoriesStack){

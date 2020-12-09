@@ -112,7 +112,7 @@ public class SyncDidiProcessServiceIntegrationTest {
         when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
 
-        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
+        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits, false);
 
         //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
 
@@ -131,7 +131,7 @@ public class SyncDidiProcessServiceIntegrationTest {
         when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialIdentityService.save(credentialIdentity)).thenReturn(credentialIdentity);
 
-        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);
+        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity, false);
 
         //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
 

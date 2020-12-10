@@ -389,15 +389,13 @@ public class DidiService {
             if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())) {
                 if (pendingCredential.getBeneficiaryDni().equals(pendingCredential.getCreditHolderDni())) {
                     //Es una credencial de titular
-                    pendingCredential.setIdDidiCredential(credentialDidiId);
                     setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), pendingCredential);
-                    credentialRepository.save(pendingCredential);
                 } else {
                     //Es una credencial de familiar
-                    pendingCredential.setIdDidiCredential(credentialDidiId);
                     setCredentialState(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode(), pendingCredential);
-                    credentialRepository.save(pendingCredential);
                 }
+                pendingCredential.setIdDidiCredential(credentialDidiId);
+                credentialRepository.save(pendingCredential);
             } else if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode())) {
                 //actualizo cuando es una credencial activada por el titular, y el familiar pendiente.
                 pendingCredential.setIdDidiCredential(credentialDidiId);

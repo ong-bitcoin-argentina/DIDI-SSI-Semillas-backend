@@ -222,6 +222,12 @@ private CertTemplateRepository certTemplateRepository;
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));
         }
 
+       String holderActiveKinsmanPendingCode = CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode();
+       Optional<CredentialState> credentialHolderActiveKinsmanPending = credentialStateRepository.findByStateName(holderActiveKinsmanPendingCode);
+        if (credentialStatePending.isEmpty()) {
+           credentialStateRepository.save(new CredentialState(holderActiveKinsmanPendingCode));
+        }
+
         if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
             configuration.setValue("500");

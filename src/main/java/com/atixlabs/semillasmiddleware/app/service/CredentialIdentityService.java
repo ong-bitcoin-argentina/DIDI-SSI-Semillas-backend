@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialIdentityRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
@@ -32,8 +33,12 @@ public class CredentialIdentityService extends CredentialCommonService {
 
     public List<CredentialIdentity> getCredentialIdentityOnPendindDidiState() throws CredentialException {
         CredentialState pendingDidiState = credentialStateService.getCredentialPendingDidiState();
-
         return  credentialIdentityRepository.findByCredentialState(pendingDidiState);
+    }
+
+    public List<CredentialIdentity> getCredentialIdentityOnHolderActiveKinsmanPendingtate() throws CredentialException {
+        CredentialState holderActiveKinsmanPending = credentialStateService.getCredentialHolderActiveKinsmanPendingState();
+        return credentialIdentityRepository.findByCredentialState(holderActiveKinsmanPending);
     }
 
 

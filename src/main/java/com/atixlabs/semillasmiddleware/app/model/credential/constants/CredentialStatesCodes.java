@@ -10,6 +10,7 @@ public enum CredentialStatesCodes {
 
     CREDENTIAL_ACTIVE("Vigente"),
     CREDENTIAL_REVOKE("Revocada"),
+    HOLDER_ACTIVE_KINSMAN_PENDING("Titular_vigente-Familiar_pendiente"),
     PENDING_DIDI("Pendiente-didi");
 
 

@@ -387,7 +387,17 @@ public class DidiService {
 
             //todo: ACA ESTOY HACIENDO UN UPDATE QUE SOLO ESTA BIEN SI ES PRE-CREDENCIAL
             if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())) {
-                //actualizo cuando es una pre-credencial en estado PENDING_DIDI sino doy de alta una nueva.
+                if (pendingCredential.getBeneficiaryDni().equals(pendingCredential.getCreditHolderDni())) {
+                    //Es una credencial de titular
+                    setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), pendingCredential);
+                } else {
+                    //Es una credencial de familiar
+                    setCredentialState(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode(), pendingCredential);
+                }
+                pendingCredential.setIdDidiCredential(credentialDidiId);
+                credentialRepository.save(pendingCredential);
+            } else if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode())) {
+                //actualizo cuando es una credencial activada por el titular, y el familiar pendiente.
                 pendingCredential.setIdDidiCredential(credentialDidiId);
                 setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), pendingCredential);
                 credentialRepository.save(pendingCredential);

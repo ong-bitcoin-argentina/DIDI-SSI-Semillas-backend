@@ -139,7 +139,7 @@ public class SyncDidiProcessServiceTest {
 
         when(credentialBenefitService.getCredentialBenefitsOnPendindDidiState()).thenReturn(new ArrayList<CredentialBenefits>());
 
-        syncDidiProcessService.emmitCredentialsBenefit();
+        syncDidiProcessService.emmitCredentialsBenefit(false);
 
         verify(didiService, times(0)).createAndEmmitCertificateDidi(any());
 
@@ -155,7 +155,7 @@ public class SyncDidiProcessServiceTest {
 
         when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.empty());
 
-        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
+        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits, false);
 
         Assert.assertNull(credentialBenefits.getIdDidiReceptor());
 
@@ -173,7 +173,26 @@ public class SyncDidiProcessServiceTest {
         when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
 
-        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits);
+        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits, false);
+
+        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
+
+
+    }
+
+    @Test
+    public void whenBeneficiaryHaveDIDRegisterAndCredentialBenefitPendindDidi_thenEmmitCredentialBenefit() {
+
+
+        CredentialBenefits credentialBenefits = this.getCredentialBenefitsMock();
+        credentialBenefits.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
+
+        syncDidiProcessService.emmitCredentialBenefit(credentialBenefits, true);
 
         verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
 
@@ -186,7 +205,7 @@ public class SyncDidiProcessServiceTest {
 
         when(credentialIdentityService.getCredentialIdentityOnPendindDidiState()).thenReturn(new ArrayList<CredentialIdentity>());
 
-        syncDidiProcessService.emmitCredentialsIdentity();
+        syncDidiProcessService.emmitCredentialsIdentity(false);
 
         verify(didiService, times(0)).createAndEmmitCertificateDidi(any());
 
@@ -202,7 +221,7 @@ public class SyncDidiProcessServiceTest {
 
         when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(Optional.empty());
 
-        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);
+        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity, false);
 
         Assert.assertNull(credentialIdentity.getIdDidiReceptor());
 
@@ -221,7 +240,26 @@ public class SyncDidiProcessServiceTest {
         when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialIdentityService.save(credentialIdentity)).thenReturn(credentialIdentity);
 
-        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity);
+        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity, false);
+
+        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialIdentity);
+
+
+    }
+
+    @Test
+    public void whenBeneficiaryHaveDIDRegisterAndCredentialIdentityPendindDidi_thenEmmitCredentialIdentity() {
+
+
+        CredentialIdentity credentialIdentity = this.getCredentialIdentityMock();
+        credentialIdentity.setIdDidiReceptor(null);
+
+        DidiAppUser didiAppUser = this.getDidiAppUserMock();
+
+        when(didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
+        when(credentialIdentityService.save(credentialIdentity)).thenReturn(credentialIdentity);
+
+        syncDidiProcessService.emmitCredentialIdentity(credentialIdentity, true);
 
         verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialIdentity);
 

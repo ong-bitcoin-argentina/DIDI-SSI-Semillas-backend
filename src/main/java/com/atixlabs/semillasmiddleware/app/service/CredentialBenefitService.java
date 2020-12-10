@@ -326,6 +326,12 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
         return  credentialBenefitsRepository.findByCredentialState(pendingDidiState);
     }
 
+    public List<CredentialBenefits> getCredentialIdentityOnHolderActiveKinsmanPendingState() throws CredentialException {
+        CredentialState activeHolderPendingKinsman = credentialStateService.getCredentialHolderActiveKinsmanPendingState();
+
+        return credentialBenefitsRepository.findByCredentialState(activeHolderPendingKinsman);
+    }
+
     public CredentialBenefits save(CredentialBenefits credentialBenefits){
         return credentialBenefitsRepository.save(credentialBenefits);
     }

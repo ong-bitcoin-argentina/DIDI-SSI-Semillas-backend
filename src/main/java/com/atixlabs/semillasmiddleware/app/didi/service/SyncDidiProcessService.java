@@ -60,7 +60,8 @@ public class SyncDidiProcessService {
         Map<CredentialCategoriesCodes, String> response = new HashMap<CredentialCategoriesCodes, String>();
 
         try {
-            this.emmitCredentialsIdentity();
+            this.emmitCredentialsIdentity(false);
+            this.emmitCredentialsIdentity(true);
         } catch (CredentialException e) {
             log.error("Error emmiting Identity credentials : {} ",e.getMessage(), e);
             response.put(CredentialCategoriesCodes.IDENTITY,e.getMessage());
@@ -88,7 +89,8 @@ public class SyncDidiProcessService {
         }
 
         try {
-            this.emmitCredentialsBenefit();
+            this.emmitCredentialsBenefit(false);
+            this.emmitCredentialsBenefit(true);
         } catch (CredentialException e) {
             log.error("Error emmiting Benefit credentials : {} ",e.getMessage(), e);
             response.put(CredentialCategoriesCodes.BENEFIT,e.getMessage());
@@ -121,9 +123,14 @@ public class SyncDidiProcessService {
         }
     }
 
-    public void emmitCredentialsBenefit() throws CredentialException {
+    public void emmitCredentialsBenefit(boolean kinsmanCredential) throws CredentialException {
 
-        List<CredentialBenefits> credentialBenefitsToEmmit = this.credentialBenefitService.getCredentialBenefitsOnPendindDidiState();
+        List<CredentialBenefits> credentialBenefitsToEmmit=null;
+        if (kinsmanCredential) {
+            credentialBenefitsToEmmit = this.credentialBenefitService.getCredentialIdentityOnHolderActiveKinsmanPendingState();
+        } else {
+            credentialBenefitsToEmmit = this.credentialBenefitService.getCredentialBenefitsOnPendindDidiState();
+        }
 
         if(credentialBenefitsToEmmit==null || credentialBenefitsToEmmit.isEmpty()){
             log.info("No benefits credentials to emmit were found");
@@ -132,27 +139,29 @@ public class SyncDidiProcessService {
             log.info(" {} Credential Benefits to emmit", credentialBenefitsToEmmit.size());
 
             for(CredentialBenefits credentialBenefits : credentialBenefitsToEmmit){
-                this.emmitCredentialBenefit(credentialBenefits);
+                this.emmitCredentialBenefit(credentialBenefits, kinsmanCredential);
             }
 
         }
     }
 
 
-    public void emmitCredentialsIdentity() throws CredentialException {
+    public void emmitCredentialsIdentity(boolean kinsmanCredential) throws CredentialException {
 
-        List<CredentialIdentity> credentialsIdentityToEmmit = this.credentialIdentityService.getCredentialIdentityOnPendindDidiState();
+        List<CredentialIdentity> credentialsIdentityToEmmit=null;
+        if (kinsmanCredential) {
+            credentialsIdentityToEmmit = this.credentialIdentityService.getCredentialIdentityOnHolderActiveKinsmanPendingtate();
+        } else {
+            credentialsIdentityToEmmit = this.credentialIdentityService.getCredentialIdentityOnPendindDidiState();
+        }
 
         if(credentialsIdentityToEmmit==null || credentialsIdentityToEmmit.isEmpty()){
             log.info("No Identity credentials to emmit were found");
-        }else{
-
+        } else {
             log.info(" {} Credential Identity to emmit", credentialsIdentityToEmmit.size());
-
             for(CredentialIdentity credentialIdentity : credentialsIdentityToEmmit){
-                this.emmitCredentialIdentity(credentialIdentity);
+                this.emmitCredentialIdentity(credentialIdentity, kinsmanCredential);
             }
-
         }
     }
 
@@ -230,11 +239,16 @@ public class SyncDidiProcessService {
 
     }
 
-    public void emmitCredentialBenefit(CredentialBenefits credentialBenefit){
+    public void emmitCredentialBenefit(CredentialBenefits credentialBenefit, boolean kinsmanCredential){
 
         log.info("Emmiting Credential Benefit id {} holder {} beneficiary {}",credentialBenefit.getId(), credentialBenefit.getCreditHolderDni(), credentialBenefit.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getCreditHolderDni());
+        Optional<DidiAppUser> didiAppUser;
+        if (kinsmanCredential) {
+            didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getBeneficiaryDni());
+        } else {
+            didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialBenefit.getCreditHolderDni());
+        }
 
         if(didiAppUser.isPresent()) {
             credentialBenefit.setIdDidiReceptor(didiAppUser.get().getDid());
@@ -248,11 +262,16 @@ public class SyncDidiProcessService {
 
     }
 
-    public void emmitCredentialIdentity(CredentialIdentity credentialIdentity){
+    public void emmitCredentialIdentity(CredentialIdentity credentialIdentity, boolean kinsmanCredential){
 
         log.info("Emmiting Credential identity id {} holder {} beneficiary {}",credentialIdentity.getId(), credentialIdentity.getCreditHolderDni(), credentialIdentity.getBeneficiaryDni());
 
-        Optional<DidiAppUser> didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getCreditHolderDni());
+        Optional<DidiAppUser> didiAppUser;
+        if (kinsmanCredential) {
+            didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
+        } else {
+            didiAppUser = this.didiAppUserService.getDidiAppUserByDni(credentialIdentity.getCreditHolderDni());
+        }
 
         if(didiAppUser.isPresent()) {
             credentialIdentity.setIdDidiReceptor(didiAppUser.get().getDid());
@@ -260,7 +279,7 @@ public class SyncDidiProcessService {
 
             didiService.createAndEmmitCertificateDidi(credentialIdentity);
 
-        }else{
+        } else {
             log.info("Id Didi for Beneficiary {} not exist, Credential Identity {} not emmited", credentialIdentity.getCreditHolderDni(), credentialIdentity.getId());
         }
 

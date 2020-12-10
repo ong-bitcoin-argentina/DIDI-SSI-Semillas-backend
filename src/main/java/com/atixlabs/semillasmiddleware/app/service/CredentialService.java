@@ -718,6 +718,7 @@ public class CredentialService {
         List<String> statesCodesToFind = new ArrayList<>();
         statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
         statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        statesCodesToFind.add(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode());
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(statesCodesToFind);
         String beneficiaryAddress = "";
         for (Category category : categoryArrayList) {

@@ -254,6 +254,9 @@ private CertTemplateRepository certTemplateRepository;
 
             RevocationReason defaultReason = new RevocationReason(RevocationReasonsCodes.DEFAULT.getCode());
             revocationReasonRepository.save(defaultReason);
+
+            RevocationReason manualUpdateReason = new RevocationReason(RevocationReasonsCodes.MANUAL_UPDATE.getCode());
+            revocationReasonRepository.save(manualUpdateReason);
         }
 
         if(processControlRepository.findByProcessName(ProcessNamesCodes.BONDAREA.getCode()).isEmpty()){

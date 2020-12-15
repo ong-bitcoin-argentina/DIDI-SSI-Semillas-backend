@@ -288,6 +288,12 @@ public class CredentialService {
         else
             log.error("Error getting unlinking reason of revocation");
 
+        Optional<RevocationReason> manualUpdateReason = revocationReasonRepository.findByReason(RevocationReasonsCodes.MANUAL_UPDATE.getCode());
+        if (manualUpdateReason.isPresent())
+            revocationReasons.put(manualUpdateReason.get().getId(), manualUpdateReason.get().getReason());
+        else
+            log.error("Error getting manual_update reason of revocation");
+
         return revocationReasons;
     }
 

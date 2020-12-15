@@ -1,9 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.credentialState.constants;
 
 import java.util.Arrays;
-import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 public enum RevocationReasonsCodes {
 
@@ -13,7 +11,8 @@ public enum RevocationReasonsCodes {
     DEFAULT("DEFAULT", "OTHER"),
     //----
     EXPIRED_INFO("Expiracion de datos", "EXPIRATION"),
-    UNLINKING("Desvinculacion", "UNLINKING");
+    UNLINKING("Desvinculacion", "UNLINKING"),
+    MANUAL_UPDATE("Actualizacion Manual", "MANUAL_UPDATE");
 
 
     private String code;

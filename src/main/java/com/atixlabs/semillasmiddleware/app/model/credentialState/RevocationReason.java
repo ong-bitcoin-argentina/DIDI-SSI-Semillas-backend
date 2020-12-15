@@ -20,10 +20,6 @@ public class RevocationReason extends AuditableEntity {
 
     private String reason;
 
-    public String getReason() {
-        return reason;
-    }
-
     public RevocationReason(String reason) {
        this.reason = reason;
     }

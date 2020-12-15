@@ -8,10 +8,9 @@ public enum RevocationReasonsCodes {
     //this reasons are internal reasons
     UPDATE_INTERNAL("UPDATE", "OTHER"),
     CANCELLED("CANCELLED", "OTHER"),
-    DEFAULT("DEFAULT", "OTHER"),
-    //----
     EXPIRED_INFO("Expiracion de datos", "EXPIRATION"),
     UNLINKING("Desvinculacion", "UNLINKING"),
+    DEFAULT("DEFAULT", "OTHER"),
     MANUAL_UPDATE("Actualizacion Manual", "MANUAL_UPDATE");
 
 

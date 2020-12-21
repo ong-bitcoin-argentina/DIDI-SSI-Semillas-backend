@@ -140,16 +140,16 @@ public class CredentialService {
 
             LocalDateTime lastTimeProcessRun = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CREDENTIALS.getCode());
 
-            ProcessControl processCrendentialControl = processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS, ProcessControlStatusCodes.RUNNING);
+            processControlService.setStatusToProcess(ProcessNamesCodes.CREDENTIALS, ProcessControlStatusCodes.RUNNING);
 
             log.info(String.format("Generate Credential and Benefits Credential form %s", lastTimeProcessRun.toString()));
 
             try {
-                List<Loan> loansDefaultToReview = this.handleDefaultCredits(lastTimeProcessRun);
-                List<Loan> loansActiveToReview = this.handleActiveCredits(lastTimeProcessRun);
-                List<Loan> loansFinalizedToReview = this.handleFinalizeCredits(lastTimeProcessRun);
-                List<Loan> loansCancelledToReview = this.handleCancelledCredits(lastTimeProcessRun);
-                List<Loan> loansNewToReview = this.handleNewCredits();
+                this.handleDefaultCredits(lastTimeProcessRun);
+                this.handleActiveCredits(lastTimeProcessRun);
+                this.handleFinalizeCredits(lastTimeProcessRun);
+                this.handleCancelledCredits(lastTimeProcessRun);
+                this.handleNewCredits();
 
             } catch (Exception ex) {
                 log.error("Error updating credentials credit ! " + ex.getMessage(), ex);

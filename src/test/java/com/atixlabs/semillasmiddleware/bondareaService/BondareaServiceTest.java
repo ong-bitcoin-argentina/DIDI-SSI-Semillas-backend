@@ -264,8 +264,9 @@ public class BondareaServiceTest {
      */
     @Test
     public void updateAllLoans() throws InvalidProcessException {
-        when(loanRepository.findByIdBondareaLoan(ID_LOAN_DEFAULT)).thenReturn(Optional.of(loans.get(1)));
-        when(loanRepository.findByIdBondareaLoan(ID_LOAN_NON_DEFAULT)).thenReturn(Optional.of(loans.get(2)));
+        initializeLoans();
+        when(loanRepository.findByIdBondareaLoan(ID_LOAN_DEFAULT)).thenReturn(Optional.of(loans.get(0)));
+        when(loanRepository.findByIdBondareaLoan(ID_LOAN_NON_DEFAULT)).thenReturn(Optional.of(loans.get(1)));
         when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.empty());
         when(loanRepository.updateStateBySynchroTimeLessThanAndActive(any(), eq(LoanStatusCodes.PENDING.getCode()), eq(LoanStatusCodes.ACTIVE.getCode()))).thenReturn(0);
 

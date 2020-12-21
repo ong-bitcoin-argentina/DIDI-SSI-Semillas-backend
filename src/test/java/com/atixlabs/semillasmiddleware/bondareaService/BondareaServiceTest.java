@@ -4,17 +4,24 @@ package com.atixlabs.semillasmiddleware.bondareaService;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
+import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
+import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
+import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
+import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Assert;
-import org.junit.Before;
-import org.junit.Ignore;
-import org.junit.Test;
+import org.junit.*;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
@@ -45,11 +52,27 @@ public class BondareaServiceTest {
     @Captor
     private ArgumentCaptor<Loan> captor;
 
+    @Mock
+    private LoanService loanService;
+
+    @Mock
+    private ProcessControlService processControlService;
+
+    @Mock
+    private ParameterConfigurationRepository parameterConfigurationRepository;
+
+    @Mock
+    private PersonRepository personRepository;
 
     @Before
     public void setupMocks(){
         MockitoAnnotations.initMocks(this);
     }
+
+    public static final String ID_GROUP = "idGroup";
+    public static final String ID_LOAN_NON_DEFAULT = "nonDefaultLoanId";
+    public static final String ID_LOAN_DEFAULT = "defaultLoanId";
+    public List<Loan> loans = new ArrayList<>();
 
     public BondareaLoanDto getMockBondareaLoan(){
         BondareaLoanDto loan = new BondareaLoanDto();
@@ -64,14 +87,10 @@ public class BondareaServiceTest {
         return loan;
     }
 
-    public Loan getMockLoan(){
+    private Loan getMockLoan(){
         Loan loan = new Loan();
         loan.setDniPerson(123456L);
-        loan.setIdBondareaLoan("1a");
-        //loan.setStatus(LoanStatusCodes.ACTIVE.getCode());
-        loan.setExpiredAmount(BigDecimal.valueOf(0));
         loan.setCreationDate(DateUtil.getLocalDateTimeNow().toLocalDate());
-
         return loan;
     }
 
@@ -96,47 +115,31 @@ public class BondareaServiceTest {
         return loans;
     }
 
-    private  List<Loan> firstLoansData(){
-        List<Loan> loans = new ArrayList<>();
-
-        Loan loan = getMockLoan();
-        loans.add(loan);
+    private void initializeLoans(){
+        Loan loan1 = getMockLoan();
+        loan1.setDniPerson(22222222L);
+        loan1.setIdBondareaLoan(ID_LOAN_NON_DEFAULT);
+        loan1.setIdProductLoan("prod1");
+        loan1.setIdGroup(ID_GROUP);
+        loan1.setUserId("user1");
+        loan1.setStatus(LoanStatusCodes.ACTIVE.getCode());
+        loan1.setState(LoanStateCodes.OK.getCode());
+        loan1.setCycleDescription("cycle2");
+        loan1.setExpiredAmount(new BigDecimal(0));
+        loans.add(loan1);
 
         Loan loan2 = getMockLoan();
-        loan2.setDniPerson(22222222L);
-        loan2.setIdBondareaLoan("2a");
+        loan2.setDniPerson(33333333L);
+        loan2.setIdBondareaLoan(ID_LOAN_DEFAULT);
+        loan2.setTagBondareaLoan("nuevo tag");
         loan2.setIdProductLoan("prod2");
-        loan2.setIdGroup("idgroup2");
+        loan2.setIdGroup(ID_GROUP);
         loan2.setUserId("user2");
         loan2.setStatus(LoanStatusCodes.ACTIVE.getCode());
-        loan2.setCycleDescription("cycle2");
-        loan2.setExpiredAmount(new BigDecimal(0));
+        loan2.setState(LoanStateCodes.OK.getCode());
+        loan2.setCycleDescription("cycle3");
+        loan2.setExpiredAmount(new BigDecimal(1500));
         loans.add(loan2);
-
-        Loan loan3 = getMockLoan();
-        loan3.setDniPerson(33333333L);
-        loan3.setIdBondareaLoan("3a");
-        loan3.setTagBondareaLoan("nuevo tag");
-        loan3.setIdProductLoan("prod3");
-        loan3.setIdGroup("idgroup3");
-        loan3.setUserId("user3");
-        loan3.setStatus(LoanStatusCodes.ACTIVE.getCode());
-        loan3.setCycleDescription("cycle3");
-        loan3.setExpiredAmount(new BigDecimal(0));
-        loans.add(loan3);
-
-        Loan loan4 = getMockLoan();
-        loan4.setDniPerson(44444444L);
-        loan4.setIdBondareaLoan("4a");
-        loan4.setIdProductLoan("prod4");
-        loan4.setIdGroup("idgroup4");
-        loan4.setUserId("user4");
-        loan4.setStatus(LoanStatusCodes.ACTIVE.getCode());
-        loan4.setCycleDescription("cycle4");
-        loan4.setExpiredAmount(BigDecimal.valueOf(100));
-        loans.add(loan4);
-
-        return loans;
     }
 
     private  List<BondareaLoanDto> secondLoansData(){
@@ -217,31 +220,24 @@ public class BondareaServiceTest {
         return loans;
     }
 
-    /*private  List<Loan> secondLoansDataAllExpired(){
-        List<Loan> loans = new ArrayList<>();
+    @Test
+    public void loansInDefaultFromExpiredAmount() throws Exception {
+        initializeLoans();
+        when(processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA)).thenReturn(true);
+        when(processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS)).thenReturn(false);
+        ProcessControl processControlMock = Mockito.mock(ProcessControl.class);
+        when(processControlService.setStatusToProcess(Mockito.any(ProcessNamesCodes.class), Mockito.any())).thenReturn(processControlMock);
+        when(loanService.findLastLoansModified(Mockito.any(), Mockito.any())).thenReturn(loans);
+        ParameterConfiguration maxAmountParameterConfiguration = new ParameterConfiguration();
+        maxAmountParameterConfiguration.setValue("800");
+        Optional<ParameterConfiguration> opParameterConfiguration = Optional.of(maxAmountParameterConfiguration);
+        when(parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode())).thenReturn(opParameterConfiguration);
+        when(loanRepository.findAllByIdGroupAndStatus(ID_GROUP, LoanStatusCodes.ACTIVE.getCode())).thenReturn(loans);
 
-        Loan loan = getMockBondareaLoan();
-        loan.setExpiredAmount((float) 100);
-        loans.add(loan);
-
-        Loan loan2 = getMockBondareaLoan();
-        loan2.setIdBondareaLoan("2a");
-        loan2.setExpiredAmount((float) 100);
-        loans.add(loan2);
-
-        Loan loan3 = getMockBondareaLoan();
-        loan3.setIdBondareaLoan("3a");
-        loan3.setExpiredAmount((float) 100);
-        loans.add(loan3);
-
-        Loan loan4 = getMockBondareaLoan();
-        loan4.setIdBondareaLoan("4a");
-        loan4.setExpiredAmount((float) 100);
-        loans.add(loan4);
-
-        return loans;
-    }*/
-
+        Assertions.assertTrue(loans.stream().allMatch(m -> !m.isDefault()));
+        bondareaService.checkCreditsForDefault();
+        Assertions.assertTrue(loans.stream().allMatch(m -> m.isDefault()));
+    }
 
 
     @Test
@@ -267,13 +263,10 @@ public class BondareaServiceTest {
      * Mix of all the different conditions
      */
     @Test
-    @Ignore
     public void updateAllLoans() throws InvalidProcessException {
-        when(loanRepository.findByIdBondareaLoan("2a")).thenReturn(Optional.of(firstLoansData().get(1)));
-        when(loanRepository.findByIdBondareaLoan("3a")).thenReturn(Optional.of(firstLoansData().get(2)));
-        when(loanRepository.findByIdBondareaLoan("4a")).thenReturn(Optional.of(firstLoansData().get(3)));
+        when(loanRepository.findByIdBondareaLoan(ID_LOAN_DEFAULT)).thenReturn(Optional.of(loans.get(1)));
+        when(loanRepository.findByIdBondareaLoan(ID_LOAN_NON_DEFAULT)).thenReturn(Optional.of(loans.get(2)));
         when(loanRepository.findByIdBondareaLoan("5a")).thenReturn(Optional.empty());
-
         when(loanRepository.updateStateBySynchroTimeLessThanAndActive(any(), eq(LoanStatusCodes.PENDING.getCode()), eq(LoanStatusCodes.ACTIVE.getCode()))).thenReturn(0);
 
         List<BondareaLoanDto> loans = secondLoansData();
@@ -287,10 +280,6 @@ public class BondareaServiceTest {
         Assertions.assertTrue(loansSaves.size() == firstBondareaLoansData().size());
         Assertions.assertEquals(LoanStatusCodes.ACTIVE.getCode(), loansSaves.get(3).getStatus());
         Assertions.assertFalse(loansSaves.get(1).getTagBondareaLoan().equals(firstBondareaLoansData().get(2).getTagBondareaLoan()));
-
-       // List<Loan> pendingLoans = loansSaves.stream().filter(loan -> loan.getStatus().equals(LoanStatusCodes.PENDING.getCode())).collect(Collectors.toList());
-      //  Assertions.assertEquals(1, pendingLoans.size() );
-
     }
 
     @Test

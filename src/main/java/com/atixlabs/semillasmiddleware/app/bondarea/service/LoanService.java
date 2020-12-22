@@ -41,12 +41,6 @@ public class LoanService {
         return modifiedCredits;
     }
 
-    public List<Loan> findLastLoansModified(LocalDateTime credentialProcessLastTime, String status) {
-        //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
-        List<Loan> modifiedCredits = loanRepository.findAllByUpdateTimeGreaterThanAndStatus(credentialProcessLastTime, status);
-        return modifiedCredits;
-    }
-
     public List<Loan> findLastLoansModifiedInDefault(LocalDateTime credentialProcessLastTime) {
         //get the modified credits: the credits that modified in the last sync and (if exits) the credits that had been modified before that last sync.
         return loanRepository.findAllByUpdateTimeGreaterThanAndStatusAndState(credentialProcessLastTime, LoanStatusCodes.ACTIVE.getCode(), LoanStateCodes.DEFAULT.getCode());

@@ -3,6 +3,8 @@ package com.atixlabs.semillasmiddleware.excelparser.app.service;
 import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
@@ -60,7 +62,12 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
         } catch (InvalidRowException e) {
             log.info(String.format("The row %s is invalid", currentRow.getRowNum()), e);
-            processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader(String.valueOf(currentRow.getRowNum()))
+                    .errorBody(e.toString())
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
         }
 
         return processExcelFileResult;
@@ -77,7 +84,12 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     private void addErrors(ProcessExcelFileResult processExcelFileResult, List<String> errors, SancorPolicyRow sancorPolicyRow){
 
         for(String error : errors){
-            processExcelFileResult.addRowError(sancorPolicyRow.getRowNum(), error);
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader(String.valueOf(sancorPolicyRow.getRowNum()))
+                    .errorBody(error)
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
         }
     }
 

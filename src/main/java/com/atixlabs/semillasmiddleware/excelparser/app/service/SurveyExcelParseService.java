@@ -5,6 +5,8 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
@@ -72,7 +74,12 @@ public class SurveyExcelParseService extends ExcelParseService {
         try {
             answerRow = new AnswerRow(currentRow);
         } catch (InvalidRowException e) {
-            processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader(String.valueOf(currentRow.getRowNum()))
+                    .errorBody(e.toString())
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
         }
 
         if (answerRow != null) {

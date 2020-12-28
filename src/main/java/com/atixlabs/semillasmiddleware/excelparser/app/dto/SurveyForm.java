@@ -1,6 +1,8 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
@@ -84,8 +86,14 @@ public class SurveyForm {
             if (value.getCategoryUniqueName().equals(categoryToFind))
                 return value;
         }
-        if (processExcelFileResult!=null)
-            processExcelFileResult.addRowDebug("Categoría "+categoryToFind, "No fue definida en meta-data: será ignorada");
+        if (processExcelFileResult!=null) {
+            processExcelFileResult.addRowDebug(ExcelErrorDetail.builder()
+                    .errorHeader("Categoría "+categoryToFind)
+                    .errorBody("No fue definida en meta-data: será ignorada")
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
+        }
         return null;
     }
 
@@ -100,7 +108,12 @@ public class SurveyForm {
                 if (category.isRequired()) {
                     allValid = false;
                     msg = "Empty and Required";
-                    processExcelFileResult.addRowError(String.format("Categoría %s",category.getCategoryUniqueName()), "la categoria esta vacia o no completa y es obligatoria :"+ category.toString());
+                    processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                            .errorHeader(String.format("Categoría %s",category.getCategoryUniqueName()))
+                            .errorBody("la categoria esta vacia o no completa y es obligatoria :"+ category.toString())
+                            .errorType(ExcelErrorType.OTHER)
+                            .build()
+                    );
                 }
                 else
                     msg = "Empty but not Required";

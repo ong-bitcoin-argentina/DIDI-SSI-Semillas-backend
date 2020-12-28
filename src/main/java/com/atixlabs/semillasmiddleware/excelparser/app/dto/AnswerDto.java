@@ -2,6 +2,8 @@ package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.CategoryQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidAnswerCastException;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +28,12 @@ public class AnswerDto {
             this.answer = answerRow.getAnswerAs(question.getDataType());
         }
         catch (InvalidAnswerCastException e){
-            processExcelFileResult.addRowError("Celda "+cellLocation, "Pregunta: "+question.getQuestionName() +" - "+ e.getMessage());
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader("Celda "+cellLocation)
+                    .errorBody("Pregunta: "+question.getQuestionName() +" - "+ e.getMessage())
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
             log.info(e.getMessage());
         }
     }
@@ -36,11 +43,20 @@ public class AnswerDto {
         if (question.isRequired() && answerIsEmpty()){
             //If the question does not exist in the form:
             if (cellLocation == null){
-                processExcelFileResult.addRowError(String.format("Categoría %s",categoryBeingChecked), String.format("la pregunta %s no existe y es obligatoria", question.getQuestionName()));
+                processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                        .errorHeader(String.format("Categoría %s", categoryBeingChecked))
+                        .errorBody(String.format("la pregunta %s no existe y es obligatoria", question.getQuestionName()))
+                        .build()
+                );
             }
             //If the question does exists in the form but its answer is empty:
             else{
-                processExcelFileResult.addRowError("Celda "+cellLocation, String.format("la pregunta %s esta vacía y es obligatoria", question.getQuestionName()));
+                processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                        .errorHeader("Celda "+cellLocation)
+                        .errorBody(String.format("la pregunta %s esta vacía y es obligatoria", question.getQuestionName()))
+                        .errorType(ExcelErrorType.OTHER)
+                        .build()
+                );
             }
             return false;
         }

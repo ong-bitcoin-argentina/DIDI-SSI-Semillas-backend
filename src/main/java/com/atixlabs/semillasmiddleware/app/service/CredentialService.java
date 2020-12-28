@@ -21,7 +21,6 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
-import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
@@ -33,6 +32,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -748,11 +748,18 @@ public class CredentialService {
 
             if (!credentialsOptional.isEmpty()) {
                 processExcelFileResult.addRowError(
-                        "Advertencia CREDENCIAL DUPLICADA",
-                        "Existe al menos una credencial de tipo " + credentialsOptional.get(0).getCredentialCategory() +
+                        ExcelErrorDetail.builder()
+                        .errorHeader("Advertencia CREDENCIAL DUPLICADA")
+                        .errorBody("Existe al menos una credencial de tipo " + credentialsOptional.get(0).getCredentialCategory() +
                                 " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
-                                " para el DNI " + credentialsOptional.get(0).getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente"
-                        , ExcelErrorType.DUPLICATED_CREDENTIAL, credentialsOptional.get(0).getId().toString()
+                                " para el DNI " + credentialsOptional.get(0).getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente")
+                        .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
+                        .credentialId(credentialsOptional.get(0).getId())
+                        .category(credentialsOptional.get(0).getCredentialCategory())
+                        .documentNumber(credentialsOptional.get(0).getCreditHolderDni())
+                        .name(credentialsOptional.get(0).getCreditHolderFirstName())
+                        .lastName(credentialsOptional.get(0).getCreditHolderLastName())
+                        .build()
                 );
                 allCredentialsNewOrInactive = false;
             }

@@ -1,5 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.service;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
@@ -58,7 +60,12 @@ public abstract class ExcelParseService {
             return processExcelFileResult;
         } catch (NotOfficeXmlFileException c) {
             log.error("Invalid file format: " + filePath);
-            processExcelFileResult.addRowError("Error en el archivo", "Por favor, verificá que el formato del archivo sea correcto.");
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader("Error en el archivo")
+                    .errorBody("Por favor, verificá que el formato del archivo sea correcto.")
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
             return processExcelFileResult;
         } finally {
             fileInput.close();

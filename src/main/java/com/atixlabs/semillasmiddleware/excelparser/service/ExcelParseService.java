@@ -58,7 +58,7 @@ public abstract class ExcelParseService {
             return processExcelFileResult;
         } catch (NotOfficeXmlFileException c) {
             log.error("Invalid file format: " + filePath);
-            processExcelFileResult.addRowError("Error en el archivo", "Formato de archivo inválido. Por favor, verificá que la extensión del archivo sea xlsx.");
+            processExcelFileResult.addRowError("Error en el archivo", "Por favor, verificá que el formato del archivo sea correcto.");
             return processExcelFileResult;
         } finally {
             fileInput.close();

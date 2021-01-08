@@ -739,14 +739,6 @@ public class CredentialService {
                 if (categoryName.equals(BENEFICIARY_CATEGORY_NAME)) {
                     beneficiaryAddress = beneficiaryPersonCategory.getAddress();
                 }
-            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME)) {
-                EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
-                Boolean isModification = entrepreneurshipCategory.getIsModification();
-                if (!isModification) {
-                    continue;
-                } else {
-                    credentialsOptional = getEntrepreneurCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), entrepreneurshipCategory.getName());
-                }
             } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
                 DwellingCategory dwellingCategory = (DwellingCategory) category;
                 Boolean isModification = dwellingCategory.isModification();
@@ -758,12 +750,11 @@ public class CredentialService {
             }
 
             if (!credentialsOptional.isEmpty()) {
+                log.info(bodyLog(credentialsOptional.get(0)));
                 processExcelFileResult.addRowError(
                         ExcelErrorDetail.builder()
                         .errorHeader("Advertencia CREDENCIAL DUPLICADA")
-                        .errorBody("Existe al menos una credencial de tipo " + credentialsOptional.get(0).getCredentialCategory() +
-                                " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
-                                " para el DNI " + credentialsOptional.get(0).getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente")
+                        .errorBody(bodyLog(credentialsOptional.get(0)))
                         .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
                         .credentialId(credentialsOptional.get(0).getId())
                         .category(credentialsOptional.get(0).getCredentialCategory())
@@ -776,6 +767,12 @@ public class CredentialService {
             }
         }
         return allCredentialsNewOrInactive;
+    }
+
+    private String bodyLog(Credential credential) {
+        return "Existe al menos una credencial de tipo " + credential.getCredentialCategory() +
+                " en estado " + credential.getCredentialState().getStateName() +
+                " para el DNI " + credential.getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente";
     }
 
 

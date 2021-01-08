@@ -34,9 +34,10 @@ public enum DidiSyncStatus implements CategoryQuestion {
     LIGHT_INSTALLATION("INSTALACION DE LUZ"),
     GENERAL_CONDITIONS("CONDICIONES GRALES"),
     NEIGHBORHOOD_TYPE("TIPO DE BARRIO"),
-    IS_MODIFICATION("¿ES MODIFICACION?") {
+    IS_MODIFICATION("¿HUBO CAMBIOS RESPECTO DEL ULTIMO RELEVAMIENTO?") {
         @Override
         public boolean isRequired() { return true; }
+
     },
     BASIC_SERVICES("SERVICIOS BASICOS"),
     GAS("RED DE GAS"),

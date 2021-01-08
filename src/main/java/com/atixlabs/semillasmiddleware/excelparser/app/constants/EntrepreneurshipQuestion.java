@@ -80,9 +80,10 @@ public enum EntrepreneurshipQuestion implements CategoryQuestion {
     // Others
     PROJECTION("¿PROYECCION?"),
     FACEBOOK("FACEBOOK DEL EMPRENDIMIENTO"),
-    IS_MODIFICATION("¿ES MODIFICACION?") {
+    IS_MODIFICATION("¿CAMBIO LA ACTIVIDAD PRINCIPAL?") {
         @Override
         public boolean isRequired() { return true; }
+
     },
     PHOTO("FOTO DEL EMPRENDIMIENTO");
 

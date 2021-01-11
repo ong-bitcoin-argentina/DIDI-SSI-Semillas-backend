@@ -458,7 +458,7 @@ public class CredentialServiceTest {
         answerRowArrayList.add(new AnswerRow(createRowMock("EMPRENDIMIENTO", "FIN DE LA ACTIVIDAD", "03/04/2020")));
         answerRowArrayList.add(new AnswerRow(createRowMock("EMPRENDIMIENTO", "NOMBRE EMPRENDIMIENTO", "Panaderia pepe")));
         answerRowArrayList.add(new AnswerRow(createRowMock("EMPRENDIMIENTO", "TIPO DE EMPRENDIMIENTO", "Producto")));
-        answerRowArrayList.add(new AnswerRow(createRowMock("EMPRENDIMIENTO", "¿ES MODIFICACION?", "Si")));
+        answerRowArrayList.add(new AnswerRow(createRowMock("EMPRENDIMIENTO", "¿Cambio la actividad principal?", "Si")));
 
         answerRowArrayList.add(new AnswerRow(createRowMock("DATOS DEL BENEFICIARIO", "NOMBRE", "Pedro")));
         answerRowArrayList.add(new AnswerRow(createRowMock("DATOS DEL BENEFICIARIO", "APELLIDO", "Picapiedra")));
@@ -470,7 +470,7 @@ public class CredentialServiceTest {
         answerRowArrayList.add(new AnswerRow(createRowMock("VIVIENDA", "VIVIENDA", "Casa")));
         answerRowArrayList.add(new AnswerRow(createRowMock("VIVIENDA", "TIPO DE TENENCIA", "Picapiedra")));
         answerRowArrayList.add(new AnswerRow(createRowMock("VIVIENDA", "DISTRITO DE RESIDENCIA", "Barrio 31")));
-        answerRowArrayList.add(new AnswerRow(createRowMock("VIVIENDA", "¿ES MODIFICACION?", "Si")));
+        answerRowArrayList.add(new AnswerRow(createRowMock("VIVIENDA", "¿Hubo cambios respecto del ultimo relevamiento?", "Si")));
 
         return answerRowArrayList;
     }
@@ -587,7 +587,7 @@ public class CredentialServiceTest {
         when(surveyForm.getAllCompletedCategories()).thenReturn(categoryArrayList);
         when(surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null)).thenReturn(personCategory);
 
-        credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult);
+        credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult, false);
         verify(credentialDwellingRepository, times(timesToCheck)).findByCreditHolderDniAndAddressAndCredentialStateIn
                 (22L, null, new ArrayList<>());
     }
@@ -612,7 +612,7 @@ public class CredentialServiceTest {
         when(personRepository.findByDocumentNumber(any(Long.class))).thenReturn(Optional.of(new Person()));
         when(personRepository.save(any(Person.class))).thenReturn(createPersonMock());
 
-        credentialService.buildAllCredentialsFromForm(surveyForm);
+        credentialService.buildAllCredentialsFromForm(surveyForm, false);
 
         Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 0);
     }

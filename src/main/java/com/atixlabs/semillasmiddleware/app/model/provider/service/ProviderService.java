@@ -81,12 +81,12 @@ public class ProviderService{
     }
 
     public Page<Provider> findAll(Integer page, ProviderFilterDto providerFilterDto){
-        Pageable pageRequest = PageRequest.of(page, Integer.valueOf(size), Sort.by("name").ascending());
+        Pageable pageRequest = PageRequest.of(page, Integer.valueOf(size), Sort.by("providerCategory.name").descending().and(Sort.by("name")));
         return providerRepository.findAll(getProviderSpecification(providerFilterDto), pageRequest);
     }
 
     public List<Provider> findAll(){
-        return providerRepository.findAll();
+        return providerRepository.findAll(Sort.by("providerCategory.name").descending().and(Sort.by("name")));
     }
 
     public void disable(Long providerId){

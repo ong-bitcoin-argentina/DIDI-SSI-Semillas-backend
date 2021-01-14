@@ -14,7 +14,6 @@ import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
@@ -22,6 +21,7 @@ import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
+import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialStateService;
 import com.atixlabs.semillasmiddleware.app.service.PersonService;
@@ -45,8 +45,6 @@ import org.mockito.Mock;
 
 import org.junit.Before;
 import org.mockito.*;
-import org.mockito.invocation.InvocationOnMock;
-import org.mockito.stubbing.Answer;
 import org.springframework.boot.test.context.SpringBootTest;
 
 import java.math.BigDecimal;
@@ -79,7 +77,7 @@ public class CredentialServiceTest {
     private CredentialStateRepository credentialStateRepository;
 
     @Mock
-    private CredentialIdentityRepository credentialIdentityRepository;
+    private CredentialIdentityService credentialIdentityService;
 
     @Mock
     private CredentialDwellingRepository credentialDwellingRepository;
@@ -262,7 +260,7 @@ public class CredentialServiceTest {
         credential1.setDateOfIssue(LocalDateTime.now());
         credential1.setDateOfRevocation(LocalDateTime.now().plusDays(14));
         credential1.setBeneficiaryDni(29302594L);
-        credential1.setCreditState("Estado");
+        credential1.setCreditStatus("Estado");
         credential1.setCreditHolder(beneficiary);
         credential1.setCredentialState(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
         credentials.add(credential1);
@@ -305,7 +303,7 @@ public class CredentialServiceTest {
         credential1.setIdGroup(loan.getIdGroup());
         credential1.setCurrentCycle(loan.getCycleDescription());
         credential1.setAmountExpiredCycles(0);
-        credential1.setCreditState(loan.getStatus());
+        credential1.setCreditStatus(loan.getStatus());
         credential1.setExpiredAmount(loan.getExpiredAmount());
         credential1.setCreationDate(loan.getCreationDate());
         credential1.setBeneficiaryDni(personMock.getDocumentNumber());
@@ -331,7 +329,7 @@ public class CredentialServiceTest {
         credential1.setIdGroup(loan.getIdGroup());
         credential1.setCurrentCycle(loan.getCycleDescription());
         credential1.setAmountExpiredCycles(0);
-        credential1.setCreditState(loan.getStatus());
+        credential1.setCreditStatus(loan.getStatus());
         credential1.setExpiredAmount(loan.getExpiredAmount());
         credential1.setCreationDate(loan.getCreationDate());
         credential1.setBeneficiaryDni(personMock.getDocumentNumber());
@@ -567,7 +565,7 @@ public class CredentialServiceTest {
     }*/
 
     @Test
-    public void buildAllCredentialsFromFormOK() throws InvalidRowException {
+    public void buildAllCredentialsFromFormOK() throws InvalidRowException, CredentialException {
         log.info("buildAllCredentialsFromFormOK");
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         SurveyForm surveyForm = createSurveyFormMock(createAnswerRowListMock(), processExcelFileResult);
@@ -648,7 +646,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditStatus());
         Assertions.assertTrue(creditSaved.getIdHistorical() == creditSaved.getId());
 
         //benefit
@@ -704,7 +702,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(null, creditSaved.getIdDidiCredential());
         Assertions.assertEquals(null, creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditStatus());
 
      /*   //benefit
         Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
@@ -751,7 +749,7 @@ public class CredentialServiceTest {
         Assertions.assertNotNull(creditSaved.getDateOfIssue());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
-        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditState());
+        Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditStatus());
     }
 
     @Test

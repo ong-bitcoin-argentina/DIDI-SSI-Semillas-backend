@@ -222,6 +222,12 @@ private CertTemplateRepository certTemplateRepository;
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));
         }
 
+       String holderActiveKinsmanPendingCode = CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode();
+       Optional<CredentialState> credentialHolderActiveKinsmanPending = credentialStateRepository.findByStateName(holderActiveKinsmanPendingCode);
+        if (credentialHolderActiveKinsmanPending.isEmpty()) {
+           credentialStateRepository.save(new CredentialState(holderActiveKinsmanPendingCode));
+        }
+
         if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
             configuration.setValue("500");
@@ -238,23 +244,7 @@ private CertTemplateRepository certTemplateRepository;
 
 
         //revocation reasons
-        if(revocationReasonRepository.findAll().size() == 0){
-            RevocationReason updateReason = new RevocationReason(RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
-            revocationReasonRepository.save(updateReason);
-
-            RevocationReason cancelledReason = new RevocationReason(RevocationReasonsCodes.CANCELLED.getCode());
-            revocationReasonRepository.save(cancelledReason);
-
-
-            RevocationReason expiredReason = new RevocationReason(RevocationReasonsCodes.EXPIRED_INFO.getCode());
-            revocationReasonRepository.save(expiredReason);
-
-            RevocationReason unlinkingReason = new RevocationReason(RevocationReasonsCodes.UNLINKING.getCode());
-            revocationReasonRepository.save(unlinkingReason);
-
-            RevocationReason defaultReason = new RevocationReason(RevocationReasonsCodes.DEFAULT.getCode());
-            revocationReasonRepository.save(defaultReason);
-        }
+       saveRevocationCodes();
 
         if(processControlRepository.findByProcessName(ProcessNamesCodes.BONDAREA.getCode()).isEmpty()){
             ProcessControl process = new ProcessControl();
@@ -281,6 +271,15 @@ private CertTemplateRepository certTemplateRepository;
 	
 	    this.loadCertTemplatesValues();
         this.saveCategories();
+    }
+
+    private void saveRevocationCodes() {
+        String[] revocationNames = Arrays.stream(RevocationReasonsCodes.values()).map(a -> a.getCode()).toArray(String[]::new);
+        for (String revocationName : revocationNames) {
+            if (!revocationReasonRepository.findByReason(revocationName).isPresent()) {
+                revocationReasonRepository.save(new RevocationReason(revocationName));
+            }
+        }
     }
 
     private void saveCategories(){

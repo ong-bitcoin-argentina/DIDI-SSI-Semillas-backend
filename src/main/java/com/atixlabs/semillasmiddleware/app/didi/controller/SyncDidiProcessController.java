@@ -55,7 +55,8 @@ public class SyncDidiProcessController {
         Map<String, String> jsonMessage = new HashMap<>();
 
         try {
-            this.syncDidiProcessService.emmitCredentialsBenefit();
+            this.syncDidiProcessService.emmitCredentialsBenefit(false);
+            this.syncDidiProcessService.emmitCredentialsBenefit(true);
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials benefits",e);
             jsonMessage.put("message", "ERROR "+e.getMessage());
@@ -71,7 +72,8 @@ public class SyncDidiProcessController {
         Map<String, String> jsonMessage = new HashMap<>();
 
         try {
-            this.syncDidiProcessService.emmitCredentialsIdentity();
+            this.syncDidiProcessService.emmitCredentialsIdentity(false);
+            this.syncDidiProcessService.emmitCredentialsIdentity(true);
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials identity",e);
             jsonMessage.put("message", "ERROR "+e.getMessage());

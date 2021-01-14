@@ -12,6 +12,8 @@ import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfiguratio
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
@@ -19,7 +21,10 @@ import com.atixlabs.semillasmiddleware.app.processControl.model.constant.Process
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
+import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
@@ -38,8 +43,10 @@ import retrofit2.Retrofit;
 
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.time.Period;
 import java.time.format.DateTimeFormatter;
 import java.time.temporal.TemporalUnit;
 import java.util.*;
@@ -57,14 +64,16 @@ public class BondareaService {
     private PersonRepository personRepository;
     private ProcessControlService processControlService;
     private LoanService loanService;
+    private CredentialService credentialService;
 
     @Autowired
-    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, ProcessControlService processControlService, LoanService loanService) {
+    public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, ProcessControlService processControlService, LoanService loanService, CredentialService credentialService) {
         this.loanRepository = loanRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.personRepository = personRepository;
         this.processControlService = processControlService;
         this.loanService = loanService;
+        this.credentialService = credentialService;
     }
 
     @Value("${bondarea.base_url}")
@@ -286,10 +295,14 @@ public class BondareaService {
             Response<BondareaLoanResponse> response = callSync.execute();
 
             if (response.code() == HttpStatus.OK.value()) {
+                if (idBondareaLoan == null || idBondareaLoan.isEmpty()) {
+                    if(response.body() == null || response.body().getLoans() == null || response.body().getLoans().isEmpty()) throw new RuntimeException("No body or loans received in sync, aborting");
+                }
                 bondareaLoanResponse = response.body();
                 log.debug("Bondarea get loans has been successfully executed " + response.body());
             } else {
-                return Collections.emptyList();
+                log.error("Sync call to get Bonadarea Loan Response was not OK", response.errorBody());
+                throw new BondareaSyncroException("Bondarea response was not OK");
             }
 
         } catch (JsonSyntaxException ex) {
@@ -387,7 +400,7 @@ public class BondareaService {
                 if (opLoanToUpdate.isPresent()) {
                     //update
                     Loan loanToUpdate = opLoanToUpdate.get();
-                    Loan loanToSave = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
+                    Loan loanToSave = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave), this.calculateExpirationDate(loanDtoToSave));
 
                     log.info("--- loanToSave creation date " + loanToSave.getCreationDate());
 
@@ -405,7 +418,7 @@ public class BondareaService {
                     }
                 } else {
                     log.info("new credit " + loanDtoToSave.getIdBondareaLoan());
-                    Loan newLoan = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave));
+                    Loan newLoan = new Loan(loanDtoToSave, this.calculateFeeNumber(loanDtoToSave), this.calculateExpirationDate(loanDtoToSave));
                     //set the loan on active
                     newLoan.setStatus(LoanStatusCodes.ACTIVE.getCode());
                     newLoan.setSynchroTime(startTimeProcess);
@@ -585,13 +598,13 @@ public class BondareaService {
 
                         //if the group was not processed..
                         if (!processedGroupLoans.contains(credit.getIdGroup())) {
-                            // get the group to check their expired money
-                            List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
+                            // get the group active loans to check their expired money
+                            List<Loan> oneGroup = loanRepository.findAllByIdGroupAndStatus(credit.getIdGroup(), LoanStatusCodes.ACTIVE.getCode());
                             BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
 
                             BigDecimal maxAmount = new BigDecimal(config.get().getValue());
                             if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
-                                //set beneficiaries with this credit in default
+                                //loanset beneficiaries with this credit in default
                                 for (Loan loan : oneGroup) {
                                     addCreditInDefaultForHolder(loan, startProcessTime);
                                 }
@@ -641,7 +654,6 @@ public class BondareaService {
      */
     private BigDecimal sumExpiredAmount(List<Loan> group) {
         BigDecimal amountExpired = BigDecimal.ZERO;
-
         for (Loan credit : group) {
             amountExpired = amountExpired.add(new BigDecimal(credit.getExpiredAmount().toString()));
         }
@@ -712,6 +724,9 @@ public class BondareaService {
                 holder.getDefaults().remove(credit);
                 personRepository.save(holder);
                 log.info("Credit for group " + credit.getIdGroup() + " is ok now, removing from default list for holder: " + holder.getDocumentNumber());
+                log.info("Remove credit credentials emmited in default for loan id bondarea["+credit.getIdBondareaLoan()+"]");
+                credentialService.revokeDefaultCredentialsForLoan(credit);
+                credentialService.createNewCreditCredential(credit);
                 break;
             }
         }
@@ -745,6 +760,30 @@ public class BondareaService {
      * @param loanDto
      * @return
      */
+
+    public LocalDate calculateExpirationDate(BondareaLoanDto loanDto) throws BondareaSyncroException {
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        LocalDate d1 = DateUtil.getLocalDateNow();
+        LocalDate d2 = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
+        long daysPassed = Period.between(d2, d1).getDays();
+        LocalDate expirationDate = null;
+        try {
+            double dayPeriodicity = this.getTcDays(loanDto.getFeeDuration());
+            double diff;
+            if (daysPassed > dayPeriodicity) {
+                diff = daysPassed % dayPeriodicity;
+            } else {
+                diff = dayPeriodicity - daysPassed;
+            }
+            expirationDate = d1.plusDays((long) diff);
+        } catch (Exception e) {
+            log.error("Error on calculateFeeNumber {}", e.getMessage(), e);
+            throw new BondareaSyncroException(e.getMessage());
+        } finally {
+            return expirationDate;
+        }
+    }
+
     public Integer calculateFeeNumber(BondareaLoanDto loanDto) throws BondareaSyncroException {
 
         LocalDate today = DateUtil.getLocalDateNow();

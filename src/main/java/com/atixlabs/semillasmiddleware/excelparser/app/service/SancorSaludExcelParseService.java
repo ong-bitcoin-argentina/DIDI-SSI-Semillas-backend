@@ -40,33 +40,34 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     @Override
     public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials) {
 
-        if (this.checkIfRowIsEmpty(currentRow)){
-            log.debug("row {} is empty",currentRow.getRowNum());
-            return processExcelFileResult;
-        }
-        
-        processExcelFileResult.addTotalReadRow();
-
         try {
+            log.info("Processing row " + currentRow.getRowNum());
             SancorPolicyRow sancorPolicyRow = this.parseRow(currentRow);
+
+            if (this.checkIfRowIsEmpty(sancorPolicyRow)){
+                log.debug("row {} is empty",currentRow.getRowNum());
+                return processExcelFileResult;
+            }
+            processExcelFileResult.addTotalReadRow();
             List<String> errors =  rowRowValidator.validate(sancorPolicyRow);
-            if(errors == null || errors.isEmpty()) {
+            if (errors == null || errors.isEmpty()) {
                 SancorPolicy sancorPolicy = this.buildSancorPolicy(sancorPolicyRow);
                 this.sancorPolicys.add(sancorPolicy);
                 processExcelFileResult.addTotalValidRows();
-            }else{
+            } else {
                 this.addErrors(processExcelFileResult,errors,sancorPolicyRow);
             }
 
-        } catch (Exception e) {
+        } catch (InvalidRowException e) {
+            log.info(String.format("The row %s is invalid", currentRow.getRowNum()), e);
             processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
         }
 
         return processExcelFileResult;
     }
 
-    private boolean checkIfRowIsEmpty(Row row) {
-        if (row == null || row.getLastCellNum() <= 0) {
+    private boolean checkIfRowIsEmpty(SancorPolicyRow row) {
+        if (row == null || row.isEmpty()) {
             return true;
         }
         else
@@ -122,7 +123,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
                 if (opSancorPolicy.isPresent()) {
 
-                    log.debug("updatig sancor policy for dni {}", opSancorPolicy.get().getCertificateClientDni());
+                    log.debug("updating sancor policy for dni {}", opSancorPolicy.get().getCertificateClientDni());
 
                     sancorPolicy = opSancorPolicy.get().merge(sancorPolicy);
                 }

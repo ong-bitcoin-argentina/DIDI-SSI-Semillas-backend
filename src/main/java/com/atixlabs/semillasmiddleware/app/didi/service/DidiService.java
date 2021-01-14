@@ -6,6 +6,7 @@ import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.exceptions.DidiEmmitCredentialException;
 import com.atixlabs.semillasmiddleware.app.model.RetrofitBuilder;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
@@ -16,6 +17,7 @@ import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CertTemplateService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.enpoint.DidiEndpoint;
+import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
@@ -25,6 +27,7 @@ import retrofit2.Call;
 import retrofit2.Response;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -252,33 +255,45 @@ public class DidiService {
 
 
     public void createAndEmmitCertificateDidi(Credential credential) {
+        DidiCreateCredentialResponse didiCreateCredentialResponse;
 
-        DidiCreateCredentialResponse didiCreateCredentialResponse = this.createCertificateDidi(credential);
+        try{
+             didiCreateCredentialResponse = this.createCertificateDidi(credential);
+        }catch (Exception ex){
+            log.error("Error emitting credentials Ex["+ex.getMessage()+"]");
+            return;
+        }
 
         if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals("success")) {
+            String id = (String) ((LinkedTreeMap) ((ArrayList) didiCreateCredentialResponse.getData()).get(0)).get("_id");
 
-            log.info("didiSync: certificateId to emmit: "+didiCreateCredentialResponse.getData().get(0).get_id());
-            DidiEmmitCredentialResponse didiEmmitCredentialResponse = emmitCertificateDidi(didiCreateCredentialResponse.getData().get(0).get_id());
+            log.info("didiSync: certificateId to emmit: "+ id);
 
-            if (didiEmmitCredentialResponse!=null)
-                log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
+            try {
+                DidiEmmitCredentialResponse didiEmmitCredentialResponse = emmitCertificateDidi(id);
+                if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals("success")) {
+                    log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
+                } else {
+                    log.info("didiSync: emmitCertificate Didn't respond success");
+                    rollbackCredentialCreation(id);
+                }
 
-            if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals("success")){
-                log.info("didiSync: La credencial fue emitida, persistiendo datos en bd");
                 this.saveEmittedCredential(didiEmmitCredentialResponse, credential);
                 this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_OK.getCode());
-            }
-            else {
-                log.error("didiSync: Fallo la emision de la certificado, borrando el certificado creado pero no-emitido del didi-issuer");
-                this.didiDeleteCertificate(didiCreateCredentialResponse.getData().get(0).get_id());
-                this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
-                this.saveCredentialOnPending(credential);
+            } catch (DidiEmmitCredentialException e) {
+                rollbackCredentialCreation(id);
+                e.printStackTrace();
             }
         } else {
-            log.error("didiSync: fallo la creacion de la certificado, msg["+didiCreateCredentialResponse.getMessage()+"] body["+didiCreateCredentialResponse.getData()+"]");
+            log.error("didiSync: fallo la creacion del certificado, ["+(didiCreateCredentialResponse != null ? didiCreateCredentialResponse.getData() : "Error no manejado") +"]");
             this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_ERROR.getCode());
             this.saveCredentialOnPending(credential);
         }
+    }
+
+    private void rollbackCredentialCreation(String id) {
+        log.error("didiSync: fallo la emisión de la credencial, se hace rollback de la creación de la misma.");
+        this.didiDeleteCertificate(id, RevocationReasonsCodes.DEFAULT.getCode());
     }
 
     //todo must be use a transaction to rollback
@@ -336,16 +351,22 @@ public class DidiService {
             return response.body();
         } catch (Exception ex) {
             log.error("didiSync: emmitCertificateDidi: Request error", ex);
+            throw new DidiEmmitCredentialException(ex);
         }
-
-        return null;
     }
 
-    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId)  {
-        log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi");
-        Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId);
+    private String getDidiRevocationReasonCode(String reason) {
+        return RevocationReasonsCodes.getByCode(reason).map(revocation -> {
+            return revocation.getDidiCode();
+        }).orElseThrow( () -> new RuntimeException("Could not get Didi revocation reason code"));
+    }
 
+    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId, String reason)  {
+        HashMap<String, String> certificateDeleteBody = new HashMap<String, String>();
         try {
+            certificateDeleteBody.put("reason", getDidiRevocationReasonCode(reason));
+            log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi, reason: " + reason);
+            Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId, certificateDeleteBody);
             Response<DidiEmmitCredentialResponse> response = callSync.execute();
             log.info("didiSync: deleteCertificate - response:");
             if (response.body() != null)
@@ -366,7 +387,17 @@ public class DidiService {
 
             //todo: ACA ESTOY HACIENDO UN UPDATE QUE SOLO ESTA BIEN SI ES PRE-CREDENCIAL
             if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())) {
-                //actualizo cuando es una pre-credencial en estado PENDING_DIDI sino doy de alta una nueva.
+                if (pendingCredential.getBeneficiaryDni().equals(pendingCredential.getCreditHolderDni())) {
+                    //Es una credencial de titular
+                    setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), pendingCredential);
+                } else {
+                    //Es una credencial de familiar
+                    setCredentialState(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode(), pendingCredential);
+                }
+                pendingCredential.setIdDidiCredential(credentialDidiId);
+                credentialRepository.save(pendingCredential);
+            } else if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode())) {
+                //actualizo cuando es una credencial activada por el titular, y el familiar pendiente.
                 pendingCredential.setIdDidiCredential(credentialDidiId);
                 setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), pendingCredential);
                 credentialRepository.save(pendingCredential);

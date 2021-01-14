@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
@@ -122,14 +123,14 @@ public class SurveyExcelParseService extends ExcelParseService {
             log.info("endOfFileHandler -> all forms are ok: building credentials");
             for (SurveyForm surveyForm : surveyFormList) {
                 pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
-                if (createCredentials)
+                if (createCredentials){
                     credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                } else {
+                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                }
             }
 
-            if(pdfsGenerated.size() > 1)
-                processExcelFileResult.setDownloadableFileName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
-            else
-                processExcelFileResult.setDownloadableFileName(pdfsGenerated.get(0));
+            setDownloadableFileName(pdfsGenerated, processExcelFileResult);
         }
         else
             log.info("endOfFileHandler -> there are forms with errors: stopping import");
@@ -137,5 +138,12 @@ public class SurveyExcelParseService extends ExcelParseService {
         //todo: rows with multiple errors must be considered in next sprint
         processExcelFileResult.setTotalValidRows(processExcelFileResult.getTotalReadRows() - processExcelFileResult.getTotalErrorsRows());
         clearFormRelatedVariables();
+    }
+
+    private void setDownloadableFileName(List<String> pdfsGenerated, ProcessExcelFileResult processExcelFileResult){
+        if(pdfsGenerated.size() > 1)
+            processExcelFileResult.setDownloadableFileName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
+        else
+            processExcelFileResult.setDownloadableFileName(pdfsGenerated.get(0));
     }
 }

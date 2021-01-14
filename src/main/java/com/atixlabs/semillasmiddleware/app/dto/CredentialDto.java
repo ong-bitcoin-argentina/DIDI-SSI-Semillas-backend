@@ -7,8 +7,8 @@ import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
-import net.bytebuddy.implementation.bind.MethodDelegationBinder;
 
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 
@@ -44,6 +44,10 @@ public class CredentialDto {
 
     private LocalDateTime dateOfRevocation;
     private String revocationReason;
+    private  BigDecimal amount;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    private LocalDate startDate;
+
 
     //beneficiary
     private String beneficiaryType;
@@ -60,11 +64,23 @@ public class CredentialDto {
     private LocalDate finishDate;
     private String expiredAmount;
     private Integer currentCycleNumber;
+    private LocalDate expirationDate;
 
     //dwelling
     private String dwellingType;
     private String dwellingAddress;
     private String possessionType;
+    private String district;
+    private String generalConditions;
+    private String lightInstallation;
+    private String neighborhoodType;
+    private Boolean gas;
+    private Boolean carafe;
+    private Boolean water;
+    private Boolean waterWell;
+    private String address;
+    private String location;
+    private String neighborhood;
 
     //entrepreneurship
     private String entrepreneurshipType;
@@ -170,10 +186,13 @@ public class CredentialDto {
         this.currentCycle = credit.getCurrentCycle();
         this.totalCycles = credit.getTotalCycles();
         this.amountExpiredCycles = credit.getAmountExpiredCycles();
-        this.creditState = credit.getCreditState();
+        this.creditState = credit.getCreditStatus();
         this.finishDate = credit.getFinishDate();
         this.expiredAmount = credit.getExpiredAmount().toString();
         this.currentCycleNumber = credit.getCurrentCycleNumber();
+        this.expirationDate = credit.getExpirationDate();
+        this.startDate = credit.getStartDate();
+        this.amount = credit.getAmount();
     }
 
     public CredentialDto(CredentialDwelling dwelling){
@@ -181,6 +200,18 @@ public class CredentialDto {
         this.dwellingType = dwelling.getDwellingType();
         this.dwellingAddress = dwelling.getDwellingAddress();
         this.possessionType = dwelling.getPossessionType();
+        this.district = dwelling.getDistrict();
+        //nuevos campos
+        this.generalConditions = dwelling.getGeneralConditions();
+        this.lightInstallation = dwelling.getLightInstallation();
+        this.neighborhoodType = dwelling.getNeighborhoodType();
+        this.gas = dwelling.getGas();
+        this.carafe = dwelling.getCarafe();
+        this.water = dwelling.getWater();
+        this.address = dwelling.getAddress();
+        this.location = dwelling.getLocation();
+        this.neighborhood = dwelling.getNeighborhood();
+        this.waterWell = dwelling.getWatterWell();
     }
 
     public CredentialDto(CredentialEntrepreneurship entrepreneurship){

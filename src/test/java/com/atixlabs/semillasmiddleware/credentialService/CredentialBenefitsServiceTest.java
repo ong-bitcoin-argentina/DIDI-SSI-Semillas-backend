@@ -22,6 +22,7 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialStateService;
 import com.atixlabs.semillasmiddleware.app.service.PersonService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
@@ -416,7 +417,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(0)).didiDeleteCertificate(anyString());
+        verify(didiService, times(0)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -441,7 +442,7 @@ public class CredentialBenefitsServiceTest {
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), holder.getDocumentNumber(), PersonTypesCodes.HOLDER.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
-        when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
+        when(didiService.didiDeleteCertificate(anyString(), anyString())).thenReturn(true);
 
         try {
             credentialBenefitsService.revokeHolderCredentialsBenefitsForLoan(holder);
@@ -451,7 +452,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(1)).didiDeleteCertificate(anyString());
+        verify(didiService, times(1)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -546,7 +547,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(0)).didiDeleteCertificate(anyString());
+        verify(didiService, times(0)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -578,7 +579,7 @@ public class CredentialBenefitsServiceTest {
         when(credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holder.getDocumentNumber(), beneficiary.getDocumentNumber(), PersonTypesCodes.FAMILY.getCode())).thenReturn(Optional.of(credentialBenefitsSaved));
         when(revocationReasonRepository.findByReason(RevocationReasonsCodes.DEFAULT.getCode())).thenReturn(Optional.of(reasonDefault));
         when(credentialRepository.findById(any())).thenReturn(Optional.of(credentialBenefitsSaved));
-        when(didiService.didiDeleteCertificate(anyString())).thenReturn(true);
+        when(didiService.didiDeleteCertificate(anyString(), anyString())).thenReturn(true);
         when(personService.findFamilyForHolder(holder)).thenReturn(Optional.of(family));
 
         try {
@@ -589,7 +590,7 @@ public class CredentialBenefitsServiceTest {
         }
 
         verify(credentialRepository, times(1)).save(credentialBenefitCaptor.capture());
-        verify(didiService, times(1)).didiDeleteCertificate(anyString());
+        verify(didiService, times(1)).didiDeleteCertificate(anyString(), anyString());
         CredentialBenefits credentialBenefits = credentialBenefitCaptor.getValue();
         Assertions.assertEquals(StateRevoke.get(), credentialBenefits.getCredentialState());
     }
@@ -719,6 +720,65 @@ public class CredentialBenefitsServiceTest {
         Assertions.assertEquals(StateRevoke.get(), credentialBenefitsSaved.getCredentialState());
 
 
+    }
+
+    @Test
+    public void whenFinalizeLoanAndIsTheOnlyActiveForHolder_thenRevokeCredentialsBenefits() throws CredentialException {
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+
+        when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+
+        CredentialBenefitService credentialBenefitServiceSpy = Mockito.spy(this.credentialBenefitsService);
+        credentialBenefitServiceSpy.handleLoanFinalized(loan,null);
+
+        verify(credentialBenefitServiceSpy, times(1)).revokeHolderCredentialsBenefitsForLoan(opHolder.get());
+        verify(credentialBenefitServiceSpy, times(1)).revokeFamilyCredentialsBenefitsForLoan(opHolder.get());
+
+    }
+
+    @Test
+    public void whenFinalizeLoanAndIsNotTheOnlyActiveForHolder_thenDonothing() throws CredentialException {
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+
+        loan.setState(LoanStateCodes.DEFAULT.getCode());
+
+        List<Loan> otherLoans = new ArrayList<Loan>();
+        otherLoans.add(this.getMockLoan());
+
+        when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+
+        CredentialBenefitService credentialBenefitServiceSpy = Mockito.spy(this.credentialBenefitsService);
+        List<Loan> result = credentialBenefitServiceSpy.handleLoanFinalized(loan,otherLoans);
+
+        verify(credentialBenefitServiceSpy, times(0)).revokeHolderCredentialsBenefitsForLoan(opHolder.get());
+        verify(credentialBenefitServiceSpy, times(0)).revokeFamilyCredentialsBenefitsForLoan(opHolder.get());
+
+        Assert.assertEquals(otherLoans,result);
+    }
+
+    @Test
+    public void whenFinalizeLoanAndIsNotTheOnlyActiveForHolderAndIsOnDefault_thenReturnLoansToVerify() throws CredentialException {
+
+        Loan loan = this.getMockLoan();
+        Optional<Person> opHolder = this.getPersonMockWithDid();
+
+
+        List<Loan> otherLoans = new ArrayList<Loan>();
+        otherLoans.add(this.getMockLoan());
+
+        when(personService.findByDocumentNumber(anyLong())).thenReturn(opHolder);
+
+        CredentialBenefitService credentialBenefitServiceSpy = Mockito.spy(this.credentialBenefitsService);
+        List<Loan> result = credentialBenefitServiceSpy.handleLoanFinalized(loan,otherLoans);
+
+        verify(credentialBenefitServiceSpy, times(0)).revokeHolderCredentialsBenefitsForLoan(opHolder.get());
+        verify(credentialBenefitServiceSpy, times(0)).revokeFamilyCredentialsBenefitsForLoan(opHolder.get());
+
+        Assert.assertTrue(result.isEmpty());
     }
 
     private Optional<ParameterConfiguration> getParameterConfigurationDidiIssuerMock(){

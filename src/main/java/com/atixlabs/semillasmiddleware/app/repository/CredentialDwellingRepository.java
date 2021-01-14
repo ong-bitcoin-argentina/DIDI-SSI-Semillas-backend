@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import org.springframework.data.jpa.repository.JpaRepository;
@@ -13,5 +14,8 @@ public interface CredentialDwellingRepository extends JpaRepository<CredentialDw
     List<CredentialDwelling> findByCredentialState(CredentialState credentialState);
 
     List<CredentialDwelling> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
+
+    List<Credential> findByCreditHolderDniAndAddressAndCredentialStateIn(Long creditHolderDni, String address, List<CredentialState> credentialStateActivePending);
+
 
 }

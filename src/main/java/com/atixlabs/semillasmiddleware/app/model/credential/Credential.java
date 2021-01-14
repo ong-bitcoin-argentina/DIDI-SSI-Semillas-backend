@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
@@ -117,6 +118,10 @@ public class Credential extends AuditableEntity {
             this.beneficiaryFirstName = null;
             this.beneficiaryLastName = null;
         }
+    }
+
+    public boolean isRevoked(){
+        return credentialState.getStateName().equals(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
     }
 
 

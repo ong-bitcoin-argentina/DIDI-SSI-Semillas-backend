@@ -29,6 +29,7 @@ public class PersonCategory implements Category {
     private AnswerDto phoneData;
     private AnswerDto referenceContact;
     private AnswerDto educationLevel;
+    private AnswerDto occupationSubcategory;
 
     private AnswerDto name;
     private AnswerDto surname;
@@ -120,6 +121,9 @@ public class PersonCategory implements Category {
 
         String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryUniqueName.replaceAll("DATOS|DEL","")));
 
+        this.occupationSubcategory = new AnswerDto(PersonQuestion.OCCUPATION);
+        this.occupationSubcategory.setAnswer("SUBCATEGORY");
+
         try{
             this.personType = PersonType.get(personTypeString);
         } catch (IllegalArgumentException e) {
@@ -127,6 +131,8 @@ public class PersonCategory implements Category {
             log.error("ERROR AL INTENTAR OBTENER EL TIPO DE PERSONA: "+e.getMessage());
         }
     }
+
+
 
     @Override
     public void loadData(AnswerRow answerRow, ProcessExcelFileResult processExcelFileResult) {
@@ -161,6 +167,7 @@ public class PersonCategory implements Category {
                 answerRow.setAnswer("SUBCATEGORY");
                 return Optional.of(this.educationLevel);
             case OCCUPATION:
+                if (!this.occupation.answerIsEmpty()) return Optional.empty();
                 return Optional.of(this.occupation);
             case ID_TYPE:
                 return Optional.of(this.idType);
@@ -265,7 +272,7 @@ public class PersonCategory implements Category {
 
     @Override
     public boolean isEmpty(){
-        return documentNumber.answerIsEmpty();
+        return documentNumber.answerIsEmpty() && name.answerIsEmpty() && surname.answerIsEmpty();
     }
 
     @Override
@@ -316,6 +323,10 @@ public class PersonCategory implements Category {
         return (String) relation.getAnswer();
     }
 
+    public String getAddress() {return (String) address.getAnswer();}
+    public String getLocation() {return (String) locality.getAnswer();}
+    public String getNeighborhood() {return (String) neighborhood.getAnswer();}
+
     @Override
     public String toString() {
         return "PersonCategory{" +
@@ -343,15 +354,51 @@ public class PersonCategory implements Category {
     }
 
     @Override
-    public List<AnswerDto> getAnswersList(){
-        return Arrays.asList(
-                firstLastName, name, surname, age, birthDate, occupation, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
-                institutionLevel, primary, highSchool, tertiary, university, workshops, courses, others, lastStudyYear,
-                addressData1, address, betweenStreets, neighborhood, zone, locality, address2,
-                phoneData, landLine, cellPhone, facebook, email,
-                referenceContact, referenceContactName, referenceContactSurname, relation, referenceContactPhone,
-                occupation, studies, works
-        );
+    public List<AnswerDto> getAnswersList() {
+        switch(personType) {
+            case CHILD:
+                return Arrays.asList(
+                        firstLastName, name, surname, age, birthDate, idType, documentNumber, gender,
+                        occupationSubcategory,occupation, studies, works
+                );
+            case SPOUSE:
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, idType, documentNumber, gender, childrenQuantity,
+                                     occupationSubcategory, occupation, studies, works
+                );
+            case OTHER_KINSMAN:
+                return Arrays.asList(firstLastName, name, surname, age, birthDate, idType, documentNumber, gender, relation,
+                        occupationSubcategory, occupation, studies, works
+                );
+            default: //BENEFICIARY
+                return Arrays.asList(
+                        firstLastName, name, surname, age, birthDate, nationality, residenceTimeInCountry, idType, documentNumber, civilStatus, gender, childrenQuantity,
+                        institutionLevel, primary, highSchool, tertiary, university, workshops, courses, others, lastStudyYear,
+                        addressData1, address, betweenStreets, neighborhood, zone, locality, address2,
+                        phoneData, landLine, cellPhone, facebook, email,
+                        referenceContact, referenceContactName, referenceContactSurname, relation, referenceContactPhone,
+                        studies, works
+                );
+        }
     }
 
+    @Override
+    public String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
+        String html="";
+
+        List<AnswerDto> answerDtos = this.getAnswersList();
+
+        for (AnswerDto answer : answerDtos) {
+
+            if (answer.getQuestion() != null) {// && answer.getAnswer() != null) {
+                String ans = String.valueOf(Optional.ofNullable(answer.getAnswer()).orElse(""));
+                if (ans.equals("SUBCATEGORY")) {
+                    html += subCategoryTemplate
+                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
+                } else html += rowTemplate
+                        .replace(questionParam, answer.getQuestion().getQuestionName())
+                        .replace(answerParam, ans);
+            }
+        }
+        return html;
+    }
 }

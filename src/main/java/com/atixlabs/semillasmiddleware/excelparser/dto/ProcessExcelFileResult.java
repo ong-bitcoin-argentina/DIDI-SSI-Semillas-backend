@@ -20,10 +20,12 @@ public class ProcessExcelFileResult {
     private int totalValidRows = 0;
     private int totalErrorsRows = 0;
     private int totalEmptyRows = 0;
+    private int totalWarnRows = 0;
     private int totalProcessedForms = 0;
     private String fileName = null;
     private String downloadableFileName;
 
+    private List<ExcelWarnDetail> warnRows = new ArrayList<>();
     private List<ExcelErrorDetail> errorRows = new ArrayList<>();
     @JsonIgnore
     private List<ExcelErrorDetail> debugRows = new ArrayList<>();
@@ -33,8 +35,19 @@ public class ProcessExcelFileResult {
         this.totalErrorsRows++;
     }
 
+
+    public void addRowWarn(String warnHeader, String warnBody){
+        this.warnRows.add(new ExcelWarnDetail(warnHeader, warnBody));
+        this.totalWarnRows++;
+    }
+
     public void addRowError(String errorHeader, String errorBody){
         this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody));
+        this.totalErrorsRows++;
+    }
+
+    public void addRowError(String errorHeader, String errorBody, ExcelErrorType excelErrorType, String data){
+        this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody, excelErrorType, data));
         this.totalErrorsRows++;
     }
 

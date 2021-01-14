@@ -23,7 +23,7 @@ public class CertificateClientValidator extends EmptyFieldValidator<SancorPolicy
         String regexNumbers = "\\d+";
         String regexDAndNumbers = "D\\d+";
         List<String> errors = new ArrayList<String>();
-        if(!(value.matches(regexDAndNumbers)||value.matches(regexNumbers))){
+        if(value == null || !(value.matches(regexDAndNumbers) || value.matches(regexNumbers))){
             errors.add(String.format("El campo Cliente %s debe tener el formato 'Dnnnnn...' o ser solo números",fieldName));
         }
 

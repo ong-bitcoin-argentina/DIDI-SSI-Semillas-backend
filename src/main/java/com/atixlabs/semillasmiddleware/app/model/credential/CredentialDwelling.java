@@ -34,12 +34,27 @@ public class CredentialDwelling extends Credential {
     private Integer antiquity; //antiguedad
     private Integer numberOfEnvironments; //cantidad de ambientes
     private Long rental; //monto alquiler
+    private String address;
+    private String location;
+    private String neighborhood;
 
     public CredentialDwelling(CredentialDwelling credentialDwelling){
         super(credentialDwelling);
         this.dwellingType = credentialDwelling.dwellingType;
         this.dwellingAddress = credentialDwelling.dwellingAddress;
         this.possessionType = credentialDwelling.possessionType;
+        //campos nuevos
+        this.district = credentialDwelling.district;
+        this.generalConditions = credentialDwelling.generalConditions;
+        this.lightInstallation = credentialDwelling.lightInstallation;
+        this.neighborhoodType = credentialDwelling.neighborhoodType;
+        this.gas = credentialDwelling.gas;
+        this.carafe = credentialDwelling.carafe;
+        this.water = credentialDwelling.water;
+        this.address = credentialDwelling.address;
+        this.location = credentialDwelling.location;
+        this.neighborhood = credentialDwelling.neighborhood;
+
     }
 
 }

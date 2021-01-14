@@ -8,7 +8,7 @@ import java.util.List;
 public abstract class EmptyFieldValidator<T> extends Validator<T> {
 
 
-    private String emptyErrorMessage = "El campo %s es obligaotrio, no puede estar vacio";
+    private String emptyErrorMessage = "El campo %s es obligatorio, no puede estar vacio";
 
     public List<String> validateEmptyField(Long value, String fieldName) {
 

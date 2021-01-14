@@ -13,6 +13,7 @@ public class IdentityValidationFilter {
     private Optional<LocalDate> dateFrom;
     private Optional<LocalDate> dateTo;
     private Optional<String> name;
+    private Optional<String> surname;
     private Optional<Long> dni;
     private Optional<RequestState> requestState;
 }

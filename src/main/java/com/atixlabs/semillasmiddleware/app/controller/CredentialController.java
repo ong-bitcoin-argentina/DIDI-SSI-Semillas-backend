@@ -111,7 +111,9 @@ public class CredentialController {
 
     @PatchMapping("/revoke/{idCredential}/reason/{idReason}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long idCredential, @PathVariable @NotNull @Min(1) Long idReason) {
+    public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long idCredential,
+                                                   @PathVariable @NotNull @Min(1) Long idReason,
+                                                   @RequestParam(required = false, defaultValue = "false") boolean revokeOnlyThisCredential) {
         Optional<String> opRevocationReason = credentialService.getReasonFromId(idReason);
         if (opRevocationReason.isPresent()) {
             Optional<Credential> credentialToRevoke = credentialService.getCredentialById(idCredential);
@@ -120,7 +122,7 @@ public class CredentialController {
                     //possibilities -> Emprendimiento, Vivienda, identididad familiar, identidad titular (only the last one have a business logic, the others only revoke itself)
                     boolean revokeOk = false;
                     try {
-                        revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get());
+                        revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get(), revokeOnlyThisCredential);
                     } catch (CredentialException e) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + idCredential);
                     }

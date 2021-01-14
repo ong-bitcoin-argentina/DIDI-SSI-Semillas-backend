@@ -68,7 +68,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials){
 
         AnswerRow answerRow = null;
         try {
@@ -103,7 +103,7 @@ public class SurveyExcelParseService extends ExcelParseService {
             }
         }
         if(!hasNext)
-            endOfFileHandler(processExcelFileResult, createCredentials);
+            endOfFileHandler(processExcelFileResult, createCredentials, skipIdentityCredentials);
 
         return processExcelFileResult;
     }
@@ -114,7 +114,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials){
         List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
@@ -131,9 +131,9 @@ public class SurveyExcelParseService extends ExcelParseService {
             for (SurveyForm surveyForm : surveyFormList) {
                 pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
                 if (createCredentials){
-                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                    credentialService.buildAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
                 } else {
-                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult, skipIdentityCredentials);
                 }
             }
 

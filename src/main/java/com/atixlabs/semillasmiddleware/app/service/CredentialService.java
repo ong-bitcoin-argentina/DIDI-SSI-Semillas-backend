@@ -48,6 +48,7 @@ import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Stream;
 
+import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
 
 @Slf4j
@@ -696,9 +697,9 @@ public class CredentialService {
 
 
 
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) throws CredentialException {
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
-        saveAllCredentialsFromForm(surveyForm);
+        saveAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
     }
 
 
@@ -708,7 +709,7 @@ public class CredentialService {
      *
      * @param surveyForm
      */
-    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult) {
+    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult, boolean skipIdentityCredentials) {
         log.info("  validateIdentityCredentialFromForm");
 
         //1-get all people data from form, creditHolder will be a beneficiary as well.
@@ -733,26 +734,33 @@ public class CredentialService {
 
             if (categoryName.equals(BENEFICIARY_CATEGORY_NAME) || categoryName.equals(SPOUSE_CATEGORY_NAME)
                 || categoryName.equals(CHILD_CATEGORY_NAME) || categoryName.equals(KINSMAN_CATEGORY_NAME)) {
-                PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
-                Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
-                credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
-                if (categoryName.equals(BENEFICIARY_CATEGORY_NAME)) {
+
+                if (categoryName.equals(BENEFICIARY_CATEGORY_NAME) || !skipIdentityCredentials) {
+                    PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
+                    Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
+                    credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
                     beneficiaryAddress = beneficiaryPersonCategory.getAddress();
                 }
-            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME)) {
-                EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
-                credentialsOptional = getEntrepreneurCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), entrepreneurshipCategory.getName());
+
+                if (skipIdentityCredentials) {
+                    continue;
+                }
             } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
-                credentialsOptional = getDwellingCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), beneficiaryAddress);
+                DwellingCategory dwellingCategory = (DwellingCategory) category;
+                Boolean isModification = dwellingCategory.isModification();
+                if (!isModification) {
+                    continue;
+                } else {
+                    credentialsOptional = getDwellingCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), beneficiaryAddress);
+                }
             }
 
             if (!credentialsOptional.isEmpty()) {
+                log.info(bodyLog(credentialsOptional.get(0)));
                 processExcelFileResult.addRowError(
                         ExcelErrorDetail.builder()
                         .errorHeader("Advertencia CREDENCIAL DUPLICADA")
-                        .errorBody("Existe al menos una credencial de tipo " + credentialsOptional.get(0).getCredentialCategory() +
-                                " en estado " + credentialsOptional.get(0).getCredentialState().getStateName() +
-                                " para el DNI " + credentialsOptional.get(0).getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente")
+                        .errorBody(bodyLog(credentialsOptional.get(0)))
                         .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
                         .credentialId(credentialsOptional.get(0).getId())
                         .category(credentialsOptional.get(0).getCredentialCategory())
@@ -765,6 +773,12 @@ public class CredentialService {
             }
         }
         return allCredentialsNewOrInactive;
+    }
+
+    private String bodyLog(Credential credential) {
+        return "Existe al menos una credencial de tipo " + credential.getCredentialCategory() +
+                " en estado " + credential.getCredentialState().getStateName() +
+                " para el DNI " + credential.getBeneficiary().getDocumentNumber() + " si desea continuar debe revocarlas manualmente";
     }
 
 
@@ -802,7 +816,7 @@ public class CredentialService {
         );
     }
 
-    private void saveAllCredentialsFromForm(SurveyForm surveyForm) throws CredentialException {
+    private void saveAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
@@ -812,7 +826,10 @@ public class CredentialService {
 
         //4-Now working with each beneficiary
         for (Category category : categoryArrayList) {
-            saveCredential(category, creditHolder, surveyForm);
+            if (!skipIdentityCredentials || !(category.getCategoryName().equals(BENEFICIARY_CATEGORY_NAME) || category.getCategoryName().equals(CHILD_CATEGORY_NAME)
+                || category.getCategoryName().equals(SPOUSE_CATEGORY_NAME) || category.getCategoryName().equals(KINSMAN_CATEGORY_NAME))) {
+                saveCredential(category, creditHolder, surveyForm);
+            }
         }
     }
 
@@ -830,12 +847,18 @@ public class CredentialService {
                 this.createCredentialIdentityKinsman(credentialIdentity);
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
-                credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
+                EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
+                if (entrepreneurshipCategory.getIsModification()) {
+                    credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
+                }
                 break;
             case DWELLING_CATEGORY_NAME:
-                PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
-                credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
-                break;
+                DwellingCategory dwellingCategory = (DwellingCategory) category;
+                if (dwellingCategory.isModification()) {
+                    PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
+                    credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
+                    break;
+                }
         }
     }
 
@@ -1144,7 +1167,7 @@ public class CredentialService {
      * @param id
      * @return
      */
-    public boolean revokeCredential(Long id, String reasonCode) throws CredentialException {
+    public boolean revokeCredential(Long id, String reasonCode, boolean revokeOnlyThisCredential) throws CredentialException {
         boolean haveRevokeOk = true;
         CredentialTypesCodes credentialType;
 
@@ -1163,93 +1186,79 @@ public class CredentialService {
 
             //todo rollback if fail
             log.info("credential type of : " + credentialType.getCode());
-            switch (credentialType) {
-                case CREDENTIAL_DWELLING:
-                case CREDENTIAL_ENTREPRENEURSHIP:
-                case CREDENTIAL_BENEFITS_FAMILY:
+
+            if (credentialType == CREDENTIAL_DWELLING || credentialType == CREDENTIAL_ENTREPRENEURSHIP || credentialType == CREDENTIAL_BENEFITS_FAMILY
+                    || ((credentialType == CREDENTIAL_IDENTITY || credentialType == CREDENTIAL_IDENTITY_FAMILY) && revokeOnlyThisCredential)) {
+                haveRevokeOk = this.revokeComplete(credentialToRevoke, reasonCode);
+            } else if (credentialType == CREDENTIAL_IDENTITY) {
+                //find all the identities that the dni of the holder is into. (with state active or pending)
+                List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                List<CredentialIdentity> holderIdentities = credentialIdentityService.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
+
+                if (holderIdentities.size() == 0) {
+                    log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
+                    haveRevokeOk = false;
+                }
+                for (Credential credential : holderIdentities) {
+                    haveRevokeOk = this.revokeComplete(credential, reasonCode);
+                }
+            } else if (credentialType == CREDENTIAL_IDENTITY_FAMILY) {
+                //revoke the identities of the familiar: the one created by the survey and if it exists, the one created because the person download the app. (with state active or pending)
+                List<CredentialState>  activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                List<CredentialIdentity> familiarIdentities = credentialIdentityService.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(),
+                        credentialToRevoke.getBeneficiaryDni(), activePendingStates);
+
+                if (familiarIdentities.size() == 0) {
+                    log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
+                    haveRevokeOk = false;
+                }
+                for (Credential credential : familiarIdentities) {
+                    haveRevokeOk = this.revokeComplete(credential, reasonCode);
+                }
+            } else if (credentialType == CREDENTIAL_BENEFITS) {
+                //revoke benefit if the holder does not have another credit(active or pending, and did not finish) and also revoke benefits family .
+                List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                List<CredentialCredit> creditsActivePending = credentialCreditRepository.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
+                if (creditsActivePending.size() == 0) {
                     haveRevokeOk = this.revokeComplete(credentialToRevoke, reasonCode);
-                    break;
 
-                case CREDENTIAL_IDENTITY:
-                    //find all the identities that the dni of the holder is into. (with state active or pending)
-                    List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialIdentity> holderIdentities = credentialIdentityService.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
-
-                    if (holderIdentities.size() == 0) {
-                        log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
-                        haveRevokeOk = false;
+                    if (haveRevokeOk) {
+                        //get the familiar benefits in which the holder is within
+                        List<CredentialBenefits> familiarBenefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(credentialToRevoke.getCreditHolderDni(), activePendingStates, PersonTypesCodes.FAMILY.getCode());
+                        for (CredentialBenefits familiarBenefit : familiarBenefits) {
+                            haveRevokeOk = this.revokeComplete(familiarBenefit, reasonCode);
+                        }
                     }
-                    for (Credential credential : holderIdentities) {
-                        haveRevokeOk = this.revokeComplete(credential, reasonCode);
-                    }
+                } else {
+                    log.info("Impossible to revoke credential benefit. There are credits in state active or pending.");
+                    haveRevokeOk = false;
+                }
+            } else if (credentialType == CREDENTIAL_CREDIT) {
+                //get the credit credential to get the group
+                Optional<CredentialCredit> credentialCredit = credentialCreditRepository.findById(credentialToRevoke.getId());
+                if (credentialCredit.isPresent()) {
+                    //get the group that is not revoked
+                    List<CredentialCredit> creditsGroup = this.getCreditGroup(credentialCredit.get().getIdGroup());
+                    //for each holder credit -> revoke credit -> revoke benefits -> revoke familiar benefits
+                    for (CredentialCredit credit : creditsGroup) {
+                        haveRevokeOk = this.revokeComplete(credit, reasonCode); //todo validate successful revocation to continue
 
-                    break;
+                        //get benefits with holder dni (holder benefits and familiar benefits)
+                        List<CredentialState> activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
+                        List<CredentialBenefits> benefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(credit.getCreditHolderDni(), activePendingStates);
 
-                case CREDENTIAL_IDENTITY_FAMILY:
-                    //revoke the identities of the familiar: the one created by the survey and if it exists, the one created because the person download the app. (with state active or pending)
-                    activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialIdentity> familiarIdentities = credentialIdentityService.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(),
-                            credentialToRevoke.getBeneficiaryDni(), activePendingStates);
-
-                    if (familiarIdentities.size() == 0) {
-                        log.info("There is no credential type " + credentialType.getCode() + " to revoke! The credentials are not in state pending or active");
-                        haveRevokeOk = false;
-                    }
-                    for (Credential credential : familiarIdentities) {
-                        haveRevokeOk = this.revokeComplete(credential, reasonCode);
-                    }
-
-                    break;
-
-                case CREDENTIAL_BENEFITS:
-                    //revoke benefit if the holder does not have another credit(active or pending, and did not finish) and also revoke benefits family .
-                    activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                    List<CredentialCredit> creditsActivePending = credentialCreditRepository.findByCreditHolderDniAndCredentialStateIn(credentialToRevoke.getCreditHolderDni(), activePendingStates);
-                    if (creditsActivePending.size() == 0) {
-                        haveRevokeOk = this.revokeComplete(credentialToRevoke, reasonCode);
-
-                        if (haveRevokeOk) {
-                            //get the familiar benefits in which the holder is within
-                            List<CredentialBenefits> familiarBenefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateInAndBeneficiaryType(credentialToRevoke.getCreditHolderDni(), activePendingStates, PersonTypesCodes.FAMILY.getCode());
-                            for (CredentialBenefits familiarBenefit : familiarBenefits) {
-                                haveRevokeOk = this.revokeComplete(familiarBenefit, reasonCode);
+                        if (benefits.size() == 0) {
+                            log.info("For the dni holder: " + credit.getCreditHolderDni() + " there is no benefits in active nor pending");
+                        } else {
+                            for (CredentialBenefits benefit : benefits) {
+                                haveRevokeOk = this.revokeComplete(benefit, reasonCode);
                             }
                         }
-                    } else {
-                        log.info("Impossible to revoke credential benefit. There are credits in state active or pending.");
-                        haveRevokeOk = false;
                     }
-
-                    break;
-
-                case CREDENTIAL_CREDIT:
-                    //get the credit credential to get the group
-                    Optional<CredentialCredit> credentialCredit = credentialCreditRepository.findById(credentialToRevoke.getId());
-                    if (credentialCredit.isPresent()) {
-                        //get the group that is not revoked
-                        List<CredentialCredit> creditsGroup = this.getCreditGroup(credentialCredit.get().getIdGroup());
-                        //for each holder credit -> revoke credit -> revoke benefits -> revoke familiar benefits
-                        for (CredentialCredit credit : creditsGroup) {
-                            haveRevokeOk = this.revokeComplete(credit, reasonCode); //todo validate successful revocation to continue
-
-                            //get benefits with holder dni (holder benefits and familiar benefits)
-                            activePendingStates = credentialStateRepository.findByStateNameIn(List.of(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), CredentialStatesCodes.PENDING_DIDI.getCode()));
-                            List<CredentialBenefits> benefits = credentialBenefitsRepository.findByCreditHolderDniAndCredentialStateIn(credit.getCreditHolderDni(), activePendingStates);
-
-                            if (benefits.size() == 0) {
-                                log.info("For the dni holder: " + credit.getCreditHolderDni() + " there is no benefits in active nor pending");
-                            } else {
-                                for (CredentialBenefits benefit : benefits) {
-                                    haveRevokeOk = this.revokeComplete(benefit, reasonCode);
-                                }
-                            }
-                        }
-                    } else {
-                        log.error("Error you are trying to revoke a credit that no longer exist, id: " + credentialToRevoke.getId());
-                        haveRevokeOk = false;
-                    }
-
-                    break;
+                } else {
+                    log.error("Error you are trying to revoke a credit that no longer exist, id: " + credentialToRevoke.getId());
+                    haveRevokeOk = false;
+                }
             }
         } else {
             //todo throw non-existent credential ?

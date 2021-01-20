@@ -3,6 +3,8 @@ package com.atixlabs.semillasmiddleware.excelparser.app.service;
 import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
@@ -38,7 +40,8 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials) {
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult,
+             boolean createCredentials, boolean skipIdentityCredentials) {
 
         try {
             log.info("Processing row " + currentRow.getRowNum());
@@ -60,7 +63,12 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
         } catch (InvalidRowException e) {
             log.info(String.format("The row %s is invalid", currentRow.getRowNum()), e);
-            processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader(String.valueOf(currentRow.getRowNum()))
+                    .errorBody(e.toString())
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
         }
 
         return processExcelFileResult;
@@ -77,7 +85,12 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     private void addErrors(ProcessExcelFileResult processExcelFileResult, List<String> errors, SancorPolicyRow sancorPolicyRow){
 
         for(String error : errors){
-            processExcelFileResult.addRowError(sancorPolicyRow.getRowNum(), error);
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader(String.valueOf(sancorPolicyRow.getRowNum()))
+                    .errorBody(error)
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
         }
     }
 
@@ -90,12 +103,12 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
 
     @Override
-    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials) throws Exception {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials, boolean skipIdentityCredentials) throws Exception {
         log.info("Sancor Salud processSingleSheetFile");
         this.cleanSancorPolicies();
         ProcessExcelFileResult processExcelFileResult = null;
         try {
-            processExcelFileResult = super.processSingleSheetFile(filePath, true);
+            processExcelFileResult = super.processSingleSheetFile(filePath, true, false);
         }finally {
             this.cleanSancorPolicies();
         }
@@ -115,7 +128,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
         ProcessExcelFileResult processExcelFileResult = null;
         try {
-            processExcelFileResult = super.processSingleSheetFile(filePath, true);
+            processExcelFileResult = super.processSingleSheetFile(filePath, true, false);
             log.info("Sancor policies to save {}", (sancorPolicys != null ? sancorPolicys.size() : 0));
 
             for (SancorPolicy sancorPolicy : sancorPolicys) {

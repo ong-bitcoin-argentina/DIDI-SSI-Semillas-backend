@@ -30,24 +30,14 @@ public class ProcessExcelFileResult {
     @JsonIgnore
     private List<ExcelErrorDetail> debugRows = new ArrayList<>();
 
-    public void addRowError(Integer errorHeader, String errorBody){
-        this.errorRows.add(new ExcelErrorDetail(String.valueOf(errorHeader), errorBody));
-        this.totalErrorsRows++;
-    }
-
 
     public void addRowWarn(String warnHeader, String warnBody){
         this.warnRows.add(new ExcelWarnDetail(warnHeader, warnBody));
         this.totalWarnRows++;
     }
 
-    public void addRowError(String errorHeader, String errorBody){
-        this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody));
-        this.totalErrorsRows++;
-    }
-
-    public void addRowError(String errorHeader, String errorBody, ExcelErrorType excelErrorType, String data){
-        this.errorRows.add(new ExcelErrorDetail(errorHeader, errorBody, excelErrorType, data));
+    public void addRowError(ExcelErrorDetail excelErrorDetail){
+        this.errorRows.add(excelErrorDetail);
         this.totalErrorsRows++;
     }
 
@@ -60,8 +50,8 @@ public class ProcessExcelFileResult {
     public void addEmptyRow(){this.totalEmptyRows++;}
     public void addTotalProcessedForms(){ this.totalProcessedForms++;}
 
-    public void addRowDebug(String errorHeader, String errorBody){
-        this.debugRows.add(new ExcelErrorDetail(errorHeader, errorBody));
+    public void addRowDebug(ExcelErrorDetail excelErrorDetail){
+        this.debugRows.add(excelErrorDetail);
     }
 
     @Override

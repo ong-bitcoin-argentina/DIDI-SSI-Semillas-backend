@@ -39,7 +39,10 @@ public class FileManagerController {
 
     @PostMapping("/upload")
     @ResponseBody
-    public ResponseEntity uploadFile(@RequestParam("file") MultipartFile file, @RequestParam(required = false, defaultValue = "true") boolean createCredentials ) throws Exception, InvalidCategoryException {
+    public ResponseEntity uploadFile(
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = false, defaultValue = "true") boolean createCredentials,
+            @RequestParam(required = false, defaultValue = "true") boolean skipIdentityCredentials) throws Exception, InvalidCategoryException {
 
         log.info("uploadFile executed");
 
@@ -49,7 +52,7 @@ public class FileManagerController {
 
         File receivedFile = fileManagerService.uploadFile(file);
 
-        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath(), createCredentials);
+        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath(), createCredentials, skipIdentityCredentials);
 
         return ResponseEntity.ok(processExcelFileResult);
     }
@@ -74,7 +77,7 @@ public class FileManagerController {
 
         File receivedFile = fileManagerService.uploadFile(file);
 
-        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processSingleSheetFile(receivedFile.getPath(), true);
+        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processSingleSheetFile(receivedFile.getPath(), true, false);
 
         return ResponseEntity.ok(processExcelFileResult);
 

@@ -1,5 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.service;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidCategoryException;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
@@ -33,7 +35,7 @@ public abstract class ExcelParseService {
     FileUtil fileUtil;
 
 
-    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials) throws Exception {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials, boolean skipIdentityCredentials) throws Exception {
         log.info("Validation for file "+filePath+" begins");
 
         File xlsxFile = fileUtil.getFileByPath(filePath);
@@ -53,12 +55,17 @@ public abstract class ExcelParseService {
                 rowsIterator.next();
 
             while (rowsIterator.hasNext()) {
-                processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult, createCredentials);
+                processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult, createCredentials, skipIdentityCredentials);
             }
             return processExcelFileResult;
         } catch (NotOfficeXmlFileException c) {
             log.error("Invalid file format: " + filePath);
-            processExcelFileResult.addRowError("Error en el archivo", "Formato de archivo inválido. Por favor, verificá que la extensión del archivo sea xlsx.");
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader("Error en el archivo")
+                    .errorBody("Por favor, verificá que el formato del archivo sea correcto.")
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
             return processExcelFileResult;
         } finally {
             fileInput.close();
@@ -66,6 +73,7 @@ public abstract class ExcelParseService {
     }
 
 
-    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials) throws Exception;
+    public abstract ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult,
+                                                      boolean createCredentials, boolean skipIdentityCredentials) throws Exception;
 
 }

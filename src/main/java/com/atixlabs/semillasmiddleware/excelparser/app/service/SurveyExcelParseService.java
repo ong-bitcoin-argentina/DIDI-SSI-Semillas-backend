@@ -5,6 +5,8 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
@@ -66,13 +68,18 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials){
 
         AnswerRow answerRow = null;
         try {
             answerRow = new AnswerRow(currentRow);
         } catch (InvalidRowException e) {
-            processExcelFileResult.addRowError(currentRow.getRowNum(), e.toString());
+            processExcelFileResult.addRowError(ExcelErrorDetail.builder()
+                    .errorHeader(String.valueOf(currentRow.getRowNum()))
+                    .errorBody(e.toString())
+                    .errorType(ExcelErrorType.OTHER)
+                    .build()
+            );
         }
 
         if (answerRow != null) {
@@ -96,7 +103,7 @@ public class SurveyExcelParseService extends ExcelParseService {
             }
         }
         if(!hasNext)
-            endOfFileHandler(processExcelFileResult, createCredentials);
+            endOfFileHandler(processExcelFileResult, createCredentials, skipIdentityCredentials);
 
         return processExcelFileResult;
     }
@@ -107,7 +114,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials){
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials){
         List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
@@ -124,9 +131,9 @@ public class SurveyExcelParseService extends ExcelParseService {
             for (SurveyForm surveyForm : surveyFormList) {
                 pdfsGenerated.add(pdfParserService.generatePdfFromSurvey(surveyForm));
                 if (createCredentials){
-                    credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                    credentialService.buildAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
                 } else {
-                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult);
+                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult, skipIdentityCredentials);
                 }
             }
 

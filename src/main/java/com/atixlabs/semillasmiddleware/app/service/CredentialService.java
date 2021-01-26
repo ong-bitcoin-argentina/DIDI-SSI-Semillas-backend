@@ -739,7 +739,9 @@ public class CredentialService {
                     PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
                     Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
                     credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
-                    beneficiaryAddress = beneficiaryPersonCategory.getAddress();
+                    if (categoryName.equals(BENEFICIARY_CATEGORY_NAME)) {
+                        beneficiaryAddress = beneficiaryPersonCategory.getAddress();
+                    }
                 }
 
                 if (skipIdentityCredentials) {

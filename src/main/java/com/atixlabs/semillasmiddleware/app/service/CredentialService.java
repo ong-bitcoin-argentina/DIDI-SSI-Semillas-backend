@@ -766,9 +766,9 @@ public class CredentialService {
                         .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
                         .credentialId(credentialsOptional.get(0).getId())
                         .category(credentialsOptional.get(0).getCredentialCategory())
-                        .documentNumber(credentialsOptional.get(0).getCreditHolderDni())
-                        .name(credentialsOptional.get(0).getCreditHolderFirstName())
-                        .lastName(credentialsOptional.get(0).getCreditHolderLastName())
+                        .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
+                        .name(credentialsOptional.get(0).getBeneficiaryFirstName())
+                        .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
                         .build()
                 );
                 allCredentialsNewOrInactive = false;

@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.app.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.ApiResponse;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
+import com.atixlabs.semillasmiddleware.app.dto.RevokeRequestDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
@@ -113,7 +114,7 @@ public class CredentialController {
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long idCredential,
                                                    @PathVariable @NotNull @Min(1) Long idReason,
-                                                   @RequestParam(required = false, defaultValue = "false") boolean revokeOnlyThisCredential) {
+                                                   @RequestBody RevokeRequestDto revokeDto) {
         Optional<String> opRevocationReason = credentialService.getReasonFromId(idReason);
         if (opRevocationReason.isPresent()) {
             Optional<Credential> credentialToRevoke = credentialService.getCredentialById(idCredential);
@@ -122,7 +123,7 @@ public class CredentialController {
                     //possibilities -> Emprendimiento, Vivienda, identididad familiar, identidad titular (only the last one have a business logic, the others only revoke itself)
                     boolean revokeOk = false;
                     try {
-                        revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get(), revokeOnlyThisCredential);
+                        revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get(), revokeDto.getRevokeOnlyThisCredential());
                     } catch (CredentialException e) {
                         return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + idCredential);
                     }

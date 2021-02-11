@@ -222,6 +222,7 @@ public class CredentialService {
 
                 Person holder = opBeneficiary.get();
 
+                if (!holder.isInDefault()) {
                     CredentialCredit credit = this.buildCreditCredential(loan, opBeneficiary.get(), null);
                     loan.setHasCredential(true);
 
@@ -232,7 +233,10 @@ public class CredentialService {
                     loanRepository.save(loan);
                     log.info("Credential Credit created for loan: " + loan.getIdBondareaLoan() + " dni: " + opBeneficiary.get().getDocumentNumber());
                     return credit;
-
+                } else {
+                    log.error("The holder " + holder.getDocumentNumber() + " is in default, credentials credit for loan " + loan.getIdBondareaLoan() + " not created");
+                    return null;
+                }
             } else {
                 log.error("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");
                 throw new PersonDoesNotExistsException("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");

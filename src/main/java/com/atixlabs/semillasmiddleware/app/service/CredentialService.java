@@ -219,18 +219,16 @@ public class CredentialService {
 
             if (opBeneficiary.isPresent()) {
 
-                Person holder = opBeneficiary.get();
-                
-                    CredentialCredit credit = this.buildCreditCredential(loan, opBeneficiary.get(), null);
-                    loan.setHasCredential(true);
+                CredentialCredit credit = this.buildCreditCredential(loan, opBeneficiary.get(), null);
+                loan.setHasCredential(true);
 
-                    credit = credentialCreditRepository.save(credit);
-                    //get the new id and save it on id historic
-                    credit.setIdHistorical(credit.getId());
-                    credentialCreditRepository.save(credit);
-                    loanRepository.save(loan);
-                    log.info("Credential Credit created for loan: " + loan.getIdBondareaLoan() + " dni: " + opBeneficiary.get().getDocumentNumber());
-                    return credit;
+                credit = credentialCreditRepository.save(credit);
+                //get the new id and save it on id historic
+                credit.setIdHistorical(credit.getId());
+                credentialCreditRepository.save(credit);
+                loanRepository.save(loan);
+                log.info("Credential Credit created for loan: " + loan.getIdBondareaLoan() + " dni: " + opBeneficiary.get().getDocumentNumber());
+                return credit;
 
             } else {
                 log.error("Person with dni " + loan.getDniPerson() + " has not been created. The loan exists but the survey with this person has not been loaded");

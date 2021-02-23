@@ -743,7 +743,8 @@ public class CredentialService {
                 }
             } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
                 DwellingCategory dwellingCategory = (DwellingCategory) category;
-                Boolean isModification = dwellingCategory.isModification();
+                boolean isModification = dwellingCategory.isModification();
+                log.info("new field isModification value on dwelling category: " + isModification);
                 if (!isModification) {
                     continue;
                 } else {

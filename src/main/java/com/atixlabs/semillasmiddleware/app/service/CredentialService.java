@@ -760,7 +760,7 @@ public class CredentialService {
                         .errorBody(bodyLog(credentialsOptional.get(0)))
                         .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
                         .credentialId(credentialsOptional.get(0).getId())
-                        .category(credentialsOptional.get(0).getCredentialCategory())
+                        .category(credentialsOptional.get(0).getCredentialDescription())
                         .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
                         .name(credentialsOptional.get(0).getBeneficiaryFirstName())
                         .lastName(credentialsOptional.get(0).getBeneficiaryLastName())

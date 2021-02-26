@@ -823,11 +823,38 @@ public class CredentialService {
 
         //4-Now working with each beneficiary
         for (Category category : categoryArrayList) {
-            if (!skipIdentityCredentials || !(category.getCategoryName().equals(BENEFICIARY_CATEGORY_NAME) || category.getCategoryName().equals(CHILD_CATEGORY_NAME)
-                || category.getCategoryName().equals(SPOUSE_CATEGORY_NAME) || category.getCategoryName().equals(KINSMAN_CATEGORY_NAME))) {
+            if (!skipIdentityCredentials || !this.isIdentityCategoryAndHasIdentityCredential(creditHolder , category)) {
                 saveCredential(category, creditHolder, surveyForm);
             }
         }
+    }
+
+    private boolean isIdentityCategoryAndHasIdentityCredential(Person creditHolder, Category category) {
+        if(!this.isIdentityCategory(category)) {
+            return false;
+        } else {
+            return this.hasIdentityCredential(creditHolder, (PersonCategory) category);
+        }
+    }
+
+    private boolean isIdentityCategory(Category category) {
+        return (category.getCategoryName().equals(BENEFICIARY_CATEGORY_NAME) || category.getCategoryName().equals(CHILD_CATEGORY_NAME)
+                || category.getCategoryName().equals(SPOUSE_CATEGORY_NAME) || category.getCategoryName().equals(KINSMAN_CATEGORY_NAME));
+    }
+
+    private boolean hasIdentityCredential(Person creditHolder, PersonCategory beneficiaryPersonCategory) {
+        Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
+        List<CredentialState> credentialStateActivePending = this.getCredentialStateActivePending();
+        List<CredentialIdentity> credentials = credentialIdentityService.findByCreditHolderDniAndBeneficiaryDniAndCredentialStateIn(creditHolder.getDocumentNumber(), beneficiary.getDocumentNumber(), credentialStateActivePending);
+        return credentials.size() > 0;
+    }
+
+    private List<CredentialState> getCredentialStateActivePending() {
+        List<String> statesCodesToFind = new ArrayList<>();
+        statesCodesToFind.add(CredentialStatesCodes.PENDING_DIDI.getCode());
+        statesCodesToFind.add(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        statesCodesToFind.add(CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode());
+        return credentialStateRepository.findByStateNameIn(statesCodesToFind);
     }
 
 

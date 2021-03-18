@@ -2,3 +2,4 @@
 semillas-middleware.iml
 target/*
 .gradle/*
+/node_modules

@@ -3,7 +3,7 @@ branches:
   only:
     - master
     - develop
-    - "/^MM-\d+/"
+    - MM-222
 install:
   - mvn install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 script:

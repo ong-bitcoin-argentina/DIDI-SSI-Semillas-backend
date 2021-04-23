@@ -7,6 +7,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import org.hibernate.annotations.Where;
 
 import javax.persistence.*;
 import java.time.LocalDate;
@@ -40,6 +41,7 @@ public class Person {
     private List<DIDHisotoric> DIDIsHisotoric;
 
     @ManyToMany(fetch=FetchType.EAGER)
+    @Where(clause = "state = 'Default'")
     protected List<Loan> defaults; //TODO must be a HashSet
 
 

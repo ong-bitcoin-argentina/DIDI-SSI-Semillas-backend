@@ -352,8 +352,9 @@ public class BondareaService {
                     return false;
                 }
 
-              this.createAndUpdateLoans(loansDto, startTime);
+                this.createAndUpdateLoans(loansDto, startTime);
                 this.handlePendingLoans(startTime);
+                this.handleFinalizedLoans(startTime);
 
                 try {
                        this.checkCreditsForDefault();
@@ -431,6 +432,7 @@ public class BondareaService {
             }
         }
 
+        //Update a PENDING the Loans that is actives and not was update by new loans of Bondarea.
         int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTimeProcess, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
         log.info(modifiedRows + " Loans have been updated to pending state");
 
@@ -458,6 +460,7 @@ public class BondareaService {
 
                 if ((loansDto!=null) && (!loansDto.isEmpty())) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
+                    //TODO check state
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     log.info("loan has FINALIZED");
                 } else {
@@ -474,7 +477,27 @@ public class BondareaService {
         }
     }
 
+    /**
+     * Determinate for each loan in finalized state whether it will been pass to Ok state.
+     * @param startTime
+     */
+    public void handleFinalizedLoans(LocalDateTime startTime) {
 
+        List<Loan> finalizedLoans =
+                loanRepository.findAllByStatusAndState(LoanStatusCodes.FINALIZED.getCode(), LoanStateCodes.DEFAULT.getCode());
+        log.info("Finalized Loans to verify " + (finalizedLoans != null ? finalizedLoans.size() : 0));
+        for (Loan finalizedLoan : finalizedLoans) {
+
+            try {
+                List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), finalizedLoan.getIdBondareaLoan(), "");
+                finalizedLoan.setState(LoanStateCodes.OK.getCode());
+                finalizedLoan.setUpdateTime(startTime);
+                loanRepository.save(finalizedLoan);
+            } catch (Exception ex) {
+                log.error("Error finalizing a default loan ", ex);
+            }
+        }
+    }
 
     /**
      * Synchronize MOCK loans process from Bondarea

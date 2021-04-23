@@ -21,6 +21,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByStatus(String status);
 
+    List<Loan> findAllByStatusAndState(String status, String state);
 
     List<Loan> findAllByUpdateTimeAndStatus(LocalDateTime updateTime, String status);
 

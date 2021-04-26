@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import retrofit2.Call;
 //import retrofit2.GsonConverterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -58,6 +59,7 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Slf4j
 public class BondareaService {
 
+    public static final BigDecimal MAX_AMOUNT = BigDecimal.valueOf(500);
 
     private LoanRepository loanRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
@@ -458,9 +460,13 @@ public class BondareaService {
             try {
                 List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
 
-                if ((loansDto!=null) && (!loansDto.isEmpty())) {
+                if (!CollectionUtils.isEmpty(loansDto)) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
-                    //TODO check state
+                    if (loansDto.get(0).getExpiredAmount().compareTo(MAX_AMOUNT) < 0)
+                        pendingLoan.setState(LoanStateCodes.OK.getCode());
+                    else
+                        pendingLoan.setState(LoanStateCodes.DEFAULT.getCode());
+
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     log.info("loan has FINALIZED");
                 } else {
@@ -490,9 +496,12 @@ public class BondareaService {
 
             try {
                 List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), finalizedLoan.getIdBondareaLoan(), "");
-                finalizedLoan.setState(LoanStateCodes.OK.getCode());
-                finalizedLoan.setUpdateTime(startTime);
-                loanRepository.save(finalizedLoan);
+                if (!CollectionUtils.isEmpty(loansDto) &&
+                        (loansDto.get(0).getExpiredAmount().compareTo(MAX_AMOUNT) < 0)) {
+                    finalizedLoan.setState(LoanStateCodes.OK.getCode());
+                    finalizedLoan.setUpdateTime(startTime);
+                    loanRepository.save(finalizedLoan);
+                }
             } catch (Exception ex) {
                 log.error("Error finalizing a default loan ", ex);
             }

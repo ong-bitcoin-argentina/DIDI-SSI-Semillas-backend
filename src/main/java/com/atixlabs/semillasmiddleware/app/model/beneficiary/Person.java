@@ -41,7 +41,6 @@ public class Person {
     private List<DIDHisotoric> DIDIsHisotoric;
 
     @ManyToMany(fetch=FetchType.EAGER)
-    @Where(clause = "state = 'Default'")
     protected List<Loan> defaults; //TODO must be a HashSet
 
 

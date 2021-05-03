@@ -59,8 +59,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Slf4j
 public class BondareaService {
 
-    public static final BigDecimal MAX_AMOUNT = BigDecimal.valueOf(500);
-
     private LoanRepository loanRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
     private PersonRepository personRepository;
@@ -432,8 +430,6 @@ public class BondareaService {
                 //TODO add alarm
             }
         }
-
-        //Update a PENDING the Loans that is actives and not was update by new loans of Bondarea.
         int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTimeProcess, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
         log.info(modifiedRows + " Loans have been updated to pending state");
 

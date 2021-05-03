@@ -461,6 +461,7 @@ public class BondareaService {
 
                 if (!CollectionUtils.isEmpty(loansDto)) {
                     //TODO check default group
+                    pendingLoan.setExpiredAmount(loansDto.get(0).getExpiredAmount());
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     log.info("loan has FINALIZED");
                 } else {

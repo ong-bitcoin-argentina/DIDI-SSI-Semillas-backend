@@ -411,6 +411,7 @@ public class CredentialService {
      */
     private List<Loan> handleActiveCredits(LocalDateTime lastTimeProcessRun) {
 
+//        List<Loan> loansModifiedActive = loanService.findLoansActive();
         List<Loan> loansModifiedActive = loanService.findLastLoansModifiedActiveWithCredential(lastTimeProcessRun);
 
         log.info(String.format(" %d active credits found for evaluate credentials ", (loansModifiedActive != null ? loansModifiedActive.size() : 0)));
@@ -1100,7 +1101,8 @@ public class CredentialService {
         areEquals = credentialCredit.getIdBondareaCredit().equals(loan.getIdBondareaLoan());
         areEquals = areEquals && credentialCredit.getIdGroup().equals(loan.getIdGroup());
         areEquals = areEquals && credentialCredit.getCurrentCycle().equals(loan.getCycleDescription());
-        areEquals = areEquals && credentialCredit.getCreditStatus().equals(loan.getStatus());
+        if (Objects.nonNull(credentialCredit.getCreditStatus()))
+            areEquals = areEquals && credentialCredit.getCreditStatus().equals(loan.getStatus());
         areEquals = areEquals && credentialCredit.getExpiredAmount().equals(loan.getExpiredAmount());
         areEquals = areEquals && credentialCredit.getCreationDate().equals(loan.getCreationDate());
         //Since this is a calculated field, it is not considered to identify if credential must be updated

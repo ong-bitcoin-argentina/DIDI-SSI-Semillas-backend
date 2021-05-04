@@ -21,6 +21,7 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
 
     List<Loan> findAllByStatus(String status);
 
+    List<Loan> findAllByStatusAndState(String status, String state);
 
     List<Loan> findAllByUpdateTimeAndStatus(LocalDateTime updateTime, String status);
 
@@ -52,6 +53,8 @@ public interface LoanRepository extends JpaRepository<Loan, Long> {
     List<Loan> findAllByHasCredentialAndStatusAndState(Boolean hasCredential, String status, String state);
 
     List<Loan> findAllByIdGroupAndStatus(String idGroup, String status);
+
+    List<Loan> findAllByIdGroup(String idGroup);
 
     List<Loan> findAllByDniPersonAndStatusAndIdBondareaLoanNot(long dniPerson, String status, String idBondareaLoan);
 

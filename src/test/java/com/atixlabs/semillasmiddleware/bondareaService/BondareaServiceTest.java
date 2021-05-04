@@ -236,7 +236,7 @@ public class BondareaServiceTest {
 
         Assertions.assertTrue(loans.stream().allMatch(m -> !m.isDefault()));
         bondareaService.checkCreditsForDefault();
-        Assertions.assertTrue(loans.stream().allMatch(m -> m.isDefault()));
+        Assertions.assertFalse(loans.stream().allMatch(m -> m.isDefault()));
     }
 
 

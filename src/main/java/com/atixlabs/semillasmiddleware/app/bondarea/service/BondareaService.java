@@ -35,6 +35,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
+import org.springframework.util.CollectionUtils;
 import retrofit2.Call;
 //import retrofit2.GsonConverterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
@@ -57,7 +58,6 @@ import static java.time.temporal.ChronoUnit.DAYS;
 @Service
 @Slf4j
 public class BondareaService {
-
 
     private LoanRepository loanRepository;
     private ParameterConfigurationRepository parameterConfigurationRepository;
@@ -352,7 +352,7 @@ public class BondareaService {
                     return false;
                 }
 
-              this.createAndUpdateLoans(loansDto, startTime);
+                this.createAndUpdateLoans(loansDto, startTime);
                 this.handlePendingLoans(startTime);
 
                 try {
@@ -430,7 +430,6 @@ public class BondareaService {
                 //TODO add alarm
             }
         }
-
         int modifiedRows = loanRepository.updateStateBySynchroTimeLessThanAndActive(startTimeProcess, LoanStatusCodes.PENDING.getCode(), LoanStatusCodes.ACTIVE.getCode());
         log.info(modifiedRows + " Loans have been updated to pending state");
 
@@ -456,8 +455,9 @@ public class BondareaService {
             try {
                 List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
 
-                if ((loansDto!=null) && (!loansDto.isEmpty())) {
-                    // if there is a loan will be the one we filtered with the same id and status finalized
+                if (!CollectionUtils.isEmpty(loansDto)) {
+                    //TODO check default group
+                    pendingLoan.setExpiredAmount(loansDto.get(0).getExpiredAmount());
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     log.info("loan has FINALIZED");
                 } else {
@@ -473,8 +473,6 @@ public class BondareaService {
             }
         }
     }
-
-
 
     /**
      * Synchronize MOCK loans process from Bondarea
@@ -570,69 +568,41 @@ public class BondareaService {
     public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, Exception {
 
         log.info("Checking active credits for defaults");
-
         if (processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS)) {
+
             LocalDateTime lastTimeProcessRan = processControlService.getProcessTimeByProcessCode(ProcessNamesCodes.CHECK_DEFAULTERS);
-
             try {
-                ProcessControl processCheckDefaultersControl = processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.RUNNING);
 
+                ProcessControl processCheckDefaultersControl = processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.RUNNING);
                 LocalDateTime startProcessTime = processCheckDefaultersControl.getStartTime();
 
-                List<String> processedGroupLoans = new ArrayList<>();
+                this.handleDefaultFinalizedLoans(startProcessTime);
 
                 //get the modified loans (actives) -- to check default
                 log.info("check modifed loans from "+lastTimeProcessRan);
                 List<Loan> modifiedLoans = loanService.findLastLoansModified(lastTimeProcessRan, List.of(LoanStatusCodes.ACTIVE.getCode()));
+                modifiedLoans.addAll(loanRepository.findAllByStatusAndState(LoanStatusCodes.FINALIZED.getCode(), LoanStateCodes.DEFAULT.getCode()));
+                if (CollectionUtils.isEmpty(modifiedLoans)) {
 
-                if ((modifiedLoans == null) || (modifiedLoans.size() == 0)) {
                     log.info("no active credits to check");
                     processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.OK);
                     return;
                 }
-
                 Optional<ParameterConfiguration> config = parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
                 if (config.isPresent()) {
-                    log.info("loans to verify: "+modifiedLoans.size());
-                    for (Loan credit : modifiedLoans) {
 
-                        //if the group was not processed..
-                        if (!processedGroupLoans.contains(credit.getIdGroup())) {
-                            // get the group active loans to check their expired money
-                            List<Loan> oneGroup = loanRepository.findAllByIdGroupAndStatus(credit.getIdGroup(), LoanStatusCodes.ACTIVE.getCode());
-                            BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
-
-                            BigDecimal maxAmount = new BigDecimal(config.get().getValue());
-                            if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
-                                //loanset beneficiaries with this credit in default
-                                for (Loan loan : oneGroup) {
-                                    addCreditInDefaultForHolder(loan, startProcessTime);
-                                }
-                            } else {
-                                //credit group is ok.
-                                // if this credit has been in default, is needed to delete this one.
-                                for (Loan loan : oneGroup) {
-                                    checkToDeleteCreditInDefault(loan, startProcessTime);
-                                }
-                            }
-
-                            // given the group, delete this group from the actual list so it wont be repeated.
-                            if (!processedGroupLoans.contains(credit.getIdGroup())) {
-                                processedGroupLoans.add(credit.getIdGroup());
-                            }
-                        }
-                    }
-
+                    this.checkAndUpdateDefaultGroupCredits(modifiedLoans,config.get(),lastTimeProcessRan);
                     //set process finish ok
                     processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.OK);
-
                 } else {
+
                     processControlService.setStatusToProcess(ProcessNamesCodes.CHECK_DEFAULTERS, ProcessControlStatusCodes.FAIL);
                     //set the process start time as the one before, to it would check again from that time
                     processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
                     throw new InvalidExpiredConfigurationException("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
                 }
             } catch (Exception ex) {
+
                 //exception unknown
                 //set the process start time as the one before, to it would check again from that time
                 processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
@@ -640,7 +610,69 @@ public class BondareaService {
                 throw ex;
             }
         } else {
+
             log.info("Check Defaults can't run ! Process " + ProcessNamesCodes.CHECK_DEFAULTERS.getCode() + " is still running or " + ProcessNamesCodes.BONDAREA.getCode() + " is not running");
+        }
+    }
+
+    /**
+     * Update loans finalized and default merge with Bondarea data.
+     * @param startProcessTime
+     */
+    public void handleDefaultFinalizedLoans(LocalDateTime startProcessTime) throws BondareaSyncroException {
+
+        List<Loan> loansFinalizedDefault = loanRepository.findAllByStatusAndState(LoanStatusCodes.FINALIZED.getCode(), LoanStateCodes.DEFAULT.getCode());
+
+        for (Loan loan : loansFinalizedDefault ){
+
+            List<BondareaLoanDto> loansDto = this.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), loan.getIdBondareaLoan(), "");
+            if (!CollectionUtils.isEmpty(loansDto)) {
+
+                loan.setExpiredAmount(loansDto.get(0).getExpiredAmount());
+                loan.setUpdateTime(startProcessTime);
+                loanRepository.save(loan);
+            }
+        }
+    }
+
+    /**
+     * Check and update the default credits status for each group
+     * @param loans
+     * @param parameterConfiguration
+     * @param updateTime
+     */
+    public void checkAndUpdateDefaultGroupCredits(List<Loan> loans, ParameterConfiguration parameterConfiguration,
+                                                  LocalDateTime updateTime){
+
+        List<String> processedGroupLoans = new ArrayList<>();
+        log.info("loans to verify: "+loans.size());
+        for (Loan credit : loans) {
+
+            //if the group was not processed..
+            if (!processedGroupLoans.contains(credit.getIdGroup())) {
+                // get the group active loans to check their expired money
+                List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
+                BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
+
+                BigDecimal maxAmount = new BigDecimal(parameterConfiguration.getValue());
+                if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
+                    //loanset beneficiaries with this credit in default
+                    for (Loan loan : oneGroup) {
+                        addCreditInDefaultForHolder(loan, updateTime);
+                    }
+                } else {
+                    //credit group is ok.
+                    // if this credit has been in default, is needed to delete this one.
+                    for (Loan loan : oneGroup) {
+                        checkToDeleteCreditInDefault(loan, updateTime);
+                    }
+                }
+
+                // given the group, delete this group from the actual list so it wont be repeated.
+                if (!processedGroupLoans.contains(credit.getIdGroup())) {
+                    processedGroupLoans.add(credit.getIdGroup());
+                }
+            }
         }
     }
 

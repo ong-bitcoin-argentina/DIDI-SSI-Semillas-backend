@@ -42,6 +42,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.*;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.criteria.Predicate;
 import java.time.LocalDateTime;
@@ -691,7 +692,7 @@ public class CredentialService {
     }
 
 
-
+    @Transactional
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         saveAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
@@ -858,7 +859,6 @@ public class CredentialService {
         return credentialStateRepository.findByStateNameIn(statesCodesToFind);
     }
 
-
     private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
@@ -873,6 +873,8 @@ public class CredentialService {
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
                 EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
+                if (Objects.isNull(entrepreneurshipCategory.getIsModification()))
+                    throw new CredentialException("Question of entrepreneurship is empty");
                 if (entrepreneurshipCategory.getIsModification()) {
                     credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
                 }

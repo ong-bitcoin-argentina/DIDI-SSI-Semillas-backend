@@ -874,7 +874,7 @@ public class CredentialService {
             case ENTREPRENEURSHIP_CATEGORY_NAME:
                 EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
                 if (Objects.isNull(entrepreneurshipCategory.getIsModification()))
-                    throw new CredentialException("Question of entrepreneurship is empty");
+                    throw new CredentialException("Falta la pregunta de emprendimiento.");
                 if (entrepreneurshipCategory.getIsModification()) {
                     credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
                 }

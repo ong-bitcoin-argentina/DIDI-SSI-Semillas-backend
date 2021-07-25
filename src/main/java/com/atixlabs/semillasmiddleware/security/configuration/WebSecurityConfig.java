@@ -17,6 +17,11 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+
+import java.util.Arrays;
 
 @Configuration
 @EnableWebSecurity
@@ -32,12 +37,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     public JwtRequestFilter jwtAuthenticationFilter() {
         return new JwtRequestFilter();
     }
-
-
-   /* @Autowired
-    public void configureGlobal(AuthenticationManagerBuilder auth) throws Exception {
-        auth.userDetailsService(jwtUserDetailsService).passwordEncoder(passwordEncoder());
-    }*/
 
     @Override
     public void configure(AuthenticationManagerBuilder authenticationManagerBuilder)
@@ -87,17 +86,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
             // other public endpoints of your API may be appended to this array
     };
 
-
-
-
-    /*@Override
-    protected void configure(HttpSecurity httpSecurity) throws Exception {
-        httpSecurity.cors()
-                .and().csrf().disable()
-                .authorizeRequests().antMatchers("*").permitAll()
-             ;
-    }*/
-
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
@@ -121,5 +109,19 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
         httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
 
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(Arrays.asList("*"));
+        configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "OPTIONS", "DELETE", "PATCH"));
+        configuration.setAllowCredentials(true);
+        configuration.setAllowedHeaders(Arrays.asList("Cache-Control","X-Mx-ReqToken","User-Agent","Keep-Alive",
+                "Cookie","Sec-WebSocket-Extensions","Sec-WebSocket-Key", "Sec-WebSocket-Version", "Upgrade",
+                "X-Requested-With","Origin","Access-Control-Allow-Headers","Content-Type","Accept","Authorization",
+                "Set-Cookie","Cookies","nonce"));
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
+    }
 
 }

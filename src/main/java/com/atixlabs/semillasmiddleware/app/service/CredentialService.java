@@ -743,14 +743,7 @@ public class CredentialService {
                     continue;
                 }
             } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
-                DwellingCategory dwellingCategory = (DwellingCategory) category;
-                boolean isModification = dwellingCategory.isModification();
-                log.info("new field isModification value on dwelling category: " + isModification);
-                if (!isModification) {
-                    continue;
-                } else {
                     credentialsOptional = getDwellingCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), beneficiaryAddress);
-                }
             }
 
             if (!credentialsOptional.isEmpty()) {

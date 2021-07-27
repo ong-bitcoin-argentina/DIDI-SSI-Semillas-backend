@@ -152,7 +152,7 @@ public class ParserCategoriesTest {
     public void answerCategoryFactoryReturnsSameCategoryObject(){
 
         SurveyForm surveyForm = new SurveyForm();
-        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList(true));
         Assert.assertEquals(
                 surveyForm.getCategoryByUniqueName("Emprendimiento", null),
                 surveyForm.getCategoryByUniqueName("EMPRENDIMIENTO", null)
@@ -164,14 +164,14 @@ public class ParserCategoriesTest {
     public void invalidCategoryThrowsInvalidCategoryException(){
         //answerCategoryFactory.get("non-existent category");
         SurveyForm surveyForm = new SurveyForm();
-        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList(true));
         Assert.assertNull(surveyForm.getCategoryByUniqueName("non-existent-category", null));
     }
 
     @Test
     public void categoryFactoryAssignsChildAndSpouseTheCorrespondingEnum(){
         SurveyForm surveyForm = new SurveyForm();
-        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList(true));
 
 
 
@@ -237,7 +237,7 @@ public class ParserCategoriesTest {
     public void child2AndChild11ReturnDifferentObjects() {
 
         SurveyForm surveyForm = new SurveyForm();
-        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList(true));
         Assert.assertNotEquals(
                 surveyForm.getCategoryByUniqueName("DATOS HIJO 2", null),
                 surveyForm.getCategoryByUniqueName("DATOS HIJO 11", null)

@@ -478,7 +478,7 @@ public class CredentialServiceTest {
     private SurveyForm createSurveyFormMock(ArrayList<AnswerRow> answerRowArrayList, ProcessExcelFileResult processExcelFileResult) {
 
         SurveyForm surveyForm = new SurveyForm();
-        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList());
+        surveyForm.setCategoryList(answerCategoryFactory.getCategoryList(true));
         surveyForm.setSurveyFormCode("TEST-CREATE-CREDENTIALS");
         surveyForm.setSurveyDate(LocalDate.now());
         surveyForm.setPdv(1L);

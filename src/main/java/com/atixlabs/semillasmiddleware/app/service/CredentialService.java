@@ -859,7 +859,7 @@ public class CredentialService {
         return credentialStateRepository.findByStateNameIn(statesCodesToFind);
     }
 
-    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) {
+    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) throws CredentialException {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:

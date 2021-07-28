@@ -108,20 +108,4 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
     }
-
-    @Bean
-    CorsConfigurationSource corsConfigurationSource() {
-        CorsConfiguration configuration = new CorsConfiguration();
-        configuration.setAllowedOrigins(Arrays.asList("*"));
-        configuration.setAllowedMethods(Arrays.asList("POST", "GET", "PUT", "OPTIONS", "DELETE", "PATCH"));
-        configuration.setAllowCredentials(true);
-        configuration.setAllowedHeaders(Arrays.asList("Cache-Control","X-Mx-ReqToken","User-Agent","Keep-Alive",
-                "Cookie","Sec-WebSocket-Extensions","Sec-WebSocket-Key", "Sec-WebSocket-Version", "Upgrade",
-                "X-Requested-With","Origin","Access-Control-Allow-Headers","Content-Type","Accept","Authorization",
-                "Set-Cookie","Cookies","nonce"));
-        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
-        source.registerCorsConfiguration("/**", configuration);
-        return source;
-    }
-
 }

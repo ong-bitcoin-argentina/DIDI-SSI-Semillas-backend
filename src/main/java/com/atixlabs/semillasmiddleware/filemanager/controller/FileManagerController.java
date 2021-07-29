@@ -24,7 +24,8 @@ import java.io.InputStream;
 @Slf4j
 @RestController
 @RequestMapping("/api/file")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST})
+@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS,
+        RequestMethod.HEAD, RequestMethod.TRACE})
 public class FileManagerController {
 
     @Autowired

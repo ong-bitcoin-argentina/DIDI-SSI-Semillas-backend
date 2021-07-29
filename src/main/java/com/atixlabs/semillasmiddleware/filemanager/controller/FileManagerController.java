@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.filemanager.controller;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SancorSaludExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -24,8 +25,7 @@ import java.io.InputStream;
 @Slf4j
 @RestController
 @RequestMapping("/api/file")
-@CrossOrigin(origins = "*", methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS,
-        RequestMethod.HEAD, RequestMethod.TRACE})
+@CrossOrigin(origins = "*")
 public class FileManagerController {
 
     @Autowired
@@ -43,7 +43,7 @@ public class FileManagerController {
     public ResponseEntity uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false, defaultValue = "true") boolean createCredentials,
-            @RequestParam(required = false, defaultValue = "true") boolean skipIdentityCredentials) throws Exception, InvalidCategoryException {
+            @RequestParam(required = false, defaultValue = "true") boolean skipIdentityCredentials) throws Exception, CredentialException {
 
         log.info("uploadFile executed");
 

@@ -1,7 +1,6 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -26,7 +25,7 @@ public class AnswerCategoryFactory {
     private Map<String, Class<?>> categoryMap;
 
 
-    public ArrayList<Category> getCategoryList(){
+    public ArrayList<Category> getCategoryList(boolean createCredential){
 
 
         //Keep all Category options.
@@ -37,7 +36,11 @@ public class AnswerCategoryFactory {
         //building CATEGORY_MAP
         categoryMap = new HashMap<>();
         for (Categories categoryEnum : categoryEnumList) {
-            categoryMap.put(categoryEnum.getCode(), categoryEnum.getLinkedClass());
+            if (categoryEnum.getCode().equals("VIVIENDA") && (!createCredential) ){
+                categoryMap.put(categoryEnum.getCode(), DwellingCategoryWithoutCredentials.class);
+            }else {
+                categoryMap.put(categoryEnum.getCode(), categoryEnum.getLinkedClass());
+            }
         }
 
         //Filling category list with objects

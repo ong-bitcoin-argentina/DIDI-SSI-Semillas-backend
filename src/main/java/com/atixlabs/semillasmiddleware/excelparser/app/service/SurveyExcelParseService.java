@@ -49,12 +49,12 @@ public class SurveyExcelParseService extends ExcelParseService {
     private SurveyForm currentForm;
     private List<SurveyForm> surveyFormList;
 
-    public void resetFormRelatedVariables(){
+    public void resetFormRelatedVariables(boolean createCredentials){
         //log.info("resetFormRelatedVariables: ");
         if (currentForm == null){
             log.info("Building all form categories:");
             currentForm = new SurveyForm();
-            currentForm.setCategoryList(answerCategoryFactory.getCategoryList());
+            currentForm.setCategoryList(answerCategoryFactory.getCategoryList(createCredentials));
         }
 
         if (surveyFormList == null)
@@ -84,14 +84,14 @@ public class SurveyExcelParseService extends ExcelParseService {
 
         if (answerRow != null) {
             if(!answerRow.isEmpty(currentRow)){
-                resetFormRelatedVariables();
+                resetFormRelatedVariables(createCredentials);
                 processExcelFileResult.addTotalReadRow();
                 if (answerRow.hasFormKeyValues()) {
 
                     if (!currentForm.isRowFromSameForm(answerRow)) {
                         endOfFormHandler(processExcelFileResult);
                         currentForm = new SurveyForm(answerRow);
-                        currentForm.setCategoryList(answerCategoryFactory.getCategoryList());
+                        currentForm.setCategoryList(answerCategoryFactory.getCategoryList( createCredentials));
                     }
 
                     currentForm.setCategoryData(answerRow, processExcelFileResult);

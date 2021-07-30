@@ -39,7 +39,7 @@ public class DwellingCategoryWithoutCredentials implements Category {
     AnswerDto numberOfEnvironments; //cantidad de ambientes
     AnswerDto rental; //monto alquiler
 
-    public DwellingCategoryWithoutCredentials(String categoryUniqueName, Categories category){
+    public DwellingCategoryWithoutCredentials(String categoryUniqueName){
         this.description = new AnswerDto(DidiSyncStatus.DESCRIPTION);
         this.brick= new AnswerDto(DidiSyncStatus.BRICK);
         this.lock= new AnswerDto(DidiSyncStatus.LOCK);

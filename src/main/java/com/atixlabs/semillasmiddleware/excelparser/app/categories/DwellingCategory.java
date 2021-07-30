@@ -41,7 +41,7 @@ public class DwellingCategory implements Category {
     AnswerDto numberOfEnvironments; //cantidad de ambientes
     AnswerDto rental; //monto alquiler
 
-    public DwellingCategory(String categoryUniqueName, Categories category){
+    public DwellingCategory(String categoryUniqueName){
         this.description = new AnswerDto(DidiSyncStatus.DESCRIPTION);
         this.brick= new AnswerDto(DidiSyncStatus.BRICK);
         this.lock= new AnswerDto(DidiSyncStatus.LOCK);

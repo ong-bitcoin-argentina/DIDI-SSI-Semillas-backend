@@ -1,10 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
 import retrofit2.Call;
 import retrofit2.http.GET;
-import retrofit2.http.Path;
 import retrofit2.http.Query;
 
 public interface BondareaEndpoint {

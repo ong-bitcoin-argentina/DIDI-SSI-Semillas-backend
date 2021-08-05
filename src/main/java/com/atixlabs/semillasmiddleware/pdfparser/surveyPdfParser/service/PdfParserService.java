@@ -22,6 +22,7 @@ public class PdfParserService {
     private static final String PDF_SUFFIX = "Encuesta_";
     private static final String CATEGORY_NAME_PARAM = "{{categoryName}}";
     private static final String TABLE_CONTENT_PARAM = "{{tableContent}}";
+    private static final String CREATE_DATE_PARAM = "{{creationDate}}";
     private static final String SEMILLAS_IMAGE_BASE64_PARAM = "{{semillasImgB64}}";
     private static final String QUESTION_PARAM = "{{question}}";
     private static final String ANSWER_PARAM = "{{answer}}";
@@ -54,9 +55,12 @@ public class PdfParserService {
                 .getCategoryByUniqueName(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), null);
 
         String html = generateHtmlFromCategories(categoriesStack);
-        String template = EmailTemplatesUtil.getTemplate(TEMPLATE_NAME).replace(TABLE_CONTENT_PARAM, html)
+        String createDate = surveyForm.getSurveyDate().toString();
+        String template = EmailTemplatesUtil.getTemplate(TEMPLATE_NAME)
+                .replace(TABLE_CONTENT_PARAM, html)
                 .replace(SEMILLAS_IMAGE_BASE64_PARAM, "data:image/svg+xml;base64,"
-                        + Base64.getEncoder().encodeToString(EmailTemplatesUtil.getImage(IMG_LOGO_NAME).getBytes()));
+                        + Base64.getEncoder().encodeToString(EmailTemplatesUtil.getImage(IMG_LOGO_NAME).getBytes()))
+                .replace(CREATE_DATE_PARAM,createDate);
 
         return PDFUtil.createTemporaryPdf(PDF_SUFFIX + beneficiaryCategory.getFullName(), template);
     }

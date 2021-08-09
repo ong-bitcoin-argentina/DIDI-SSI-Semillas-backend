@@ -587,9 +587,7 @@ public class CredentialServiceTest {
         when(surveyForm.getAllCompletedCategories()).thenReturn(categoryArrayList);
         when(surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null)).thenReturn(personCategory);
 
-        credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult, false);
-        verify(credentialDwellingRepository, times(timesToCheck)).findByCreditHolderDniAndAddressAndCredentialStateIn
-                (22L, null, new ArrayList<>());
+        Assertions.assertTrue(credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult, false));
     }
 
     @Test

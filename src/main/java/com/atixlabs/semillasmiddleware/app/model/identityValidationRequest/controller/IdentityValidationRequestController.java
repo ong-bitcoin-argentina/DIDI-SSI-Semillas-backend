@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.controller;
 
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationFilter;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
@@ -24,7 +23,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping(IdentityValidationRequestController.URL_MAPPING)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
+@CrossOrigin(origins = "*")
 public class IdentityValidationRequestController {
 
     public static final String URL_MAPPING = "/identityValidationRequests";

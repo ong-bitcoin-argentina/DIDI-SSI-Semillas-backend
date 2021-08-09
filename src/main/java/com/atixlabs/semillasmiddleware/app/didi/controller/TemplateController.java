@@ -1,8 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.didi.controller;
 
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
 import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
-import com.atixlabs.semillasmiddleware.app.didi.model.constant.DidiAppUserOperationResult;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.service.CertTemplateService;
 import lombok.extern.slf4j.Slf4j;
@@ -16,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(TemplateController.URL_BASE)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*")
 @Slf4j
 public class TemplateController {
 

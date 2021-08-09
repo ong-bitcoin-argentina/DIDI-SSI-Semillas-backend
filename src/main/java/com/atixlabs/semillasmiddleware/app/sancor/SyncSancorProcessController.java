@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.sancor;
 
-import com.atixlabs.semillasmiddleware.app.didi.controller.SyncDidiProcessController;
 import com.atixlabs.semillasmiddleware.app.dto.ProcessResultDto;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SyncSancorProcessService;
 import lombok.extern.slf4j.Slf4j;
@@ -13,7 +12,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(SyncSancorProcessController.URL_MAPPING_SANCOR)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*")
 @Slf4j
 public class SyncSancorProcessController {
 

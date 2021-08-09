@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(SyncDidiProcessController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*")
 @Slf4j
 public class SyncDidiProcessController {
 

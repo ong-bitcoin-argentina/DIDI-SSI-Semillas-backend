@@ -18,7 +18,7 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 @RequestMapping(BondareaController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*")
 public class BondareaController {
 
     public static final String URL_MAPPING_CREDENTIAL = "/bondarea";

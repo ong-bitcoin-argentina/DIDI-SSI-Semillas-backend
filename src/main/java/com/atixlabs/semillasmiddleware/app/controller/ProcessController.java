@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.service.ProcessExecutorService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -11,7 +10,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(ProcessController.URL_PROCESS)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
+@CrossOrigin(origins = "*")
 @Slf4j
 public class ProcessController {
 

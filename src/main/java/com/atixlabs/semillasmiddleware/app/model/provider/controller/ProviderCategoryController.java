@@ -16,7 +16,7 @@ import java.util.List;
 @Slf4j
 @RestController
 @RequestMapping(ProviderCategoryController.URL_MAPPING)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "*")
 public class ProviderCategoryController {
     public static final String URL_MAPPING = "/providerCategories";
 

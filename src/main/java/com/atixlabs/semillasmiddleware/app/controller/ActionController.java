@@ -25,7 +25,7 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping(ActionController.URL_MAPPING)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
+@CrossOrigin(origins = "*")
 public class ActionController {
 
     public static final String URL_MAPPING = "/action";

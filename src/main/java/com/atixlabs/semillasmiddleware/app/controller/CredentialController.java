@@ -150,7 +150,7 @@ public class CredentialController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/share")
-    public ResponseEntity<> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
+    public ResponseEntity<?> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
         if (!shareCredentialRequest.getCustomProviderEmail().isPresent() && !shareCredentialRequest.getProviderId().isPresent())
             return ResponseEntity.badRequest().body(ApiResponse.error()
                     .setBody("You must either specify a provider id or an email")

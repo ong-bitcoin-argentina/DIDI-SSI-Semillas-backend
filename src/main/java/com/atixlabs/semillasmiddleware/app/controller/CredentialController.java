@@ -37,7 +37,8 @@ import java.util.stream.Collectors;
 @RestController
 @RequestMapping(CredentialController.URL_MAPPING_CREDENTIAL)
 @CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600,
-        methods= {RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.OPTIONS})
+        methods= {RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.OPTIONS,
+        RequestMethod.PUT, RequestMethod.HEAD, RequestMethod.TRACE})
 @Slf4j
 public class CredentialController {
 
@@ -57,14 +58,6 @@ public class CredentialController {
         this.loanService = loanService;
         this.processControlService = processControlService;
         this.shareCredentialService = shareCredentialService;
-    }
-
-    @RequestMapping(value= "/credentials/**", method=RequestMethod.OPTIONS)
-    public void corsHeaders(HttpServletResponse response) {
-        response.addHeader("Access-Control-Allow-Origin", "*");
-        response.addHeader("Access-Control-Allow-Methods", "GET, POST, PUT, DELETE, OPTIONS");
-        response.addHeader("Access-Control-Allow-Headers", "origin, content-type, accept, x-requested-with");
-        response.addHeader("Access-Control-Max-Age", "3600");
     }
 
     //TODO fix

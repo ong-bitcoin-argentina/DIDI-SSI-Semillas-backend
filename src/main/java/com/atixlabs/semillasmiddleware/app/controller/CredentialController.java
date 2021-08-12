@@ -36,9 +36,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(CredentialController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", allowedHeaders = "*", maxAge = 3600,
-        methods= {RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH, RequestMethod.OPTIONS,
-        RequestMethod.PUT, RequestMethod.HEAD, RequestMethod.TRACE})
 @Slf4j
 public class CredentialController {
 

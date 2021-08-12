@@ -90,7 +90,8 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     protected void configure(HttpSecurity httpSecurity) throws Exception {
 
         httpSecurity
-                .cors().configurationSource(request -> corsConfiguration())
+                .cors()
+                .configurationSource(request -> corsConfiguration().combine(new CorsConfiguration().applyPermitDefaultValues()))
                 .and()
                 .csrf()
                 .disable()

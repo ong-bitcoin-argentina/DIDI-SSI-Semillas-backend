@@ -33,6 +33,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -601,7 +602,7 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void buildAllCredentialsFromFormOK() throws InvalidRowException, CredentialException {
+    public void buildAllCredentialsFromFormOK() throws InvalidRowException, CredentialException, FileManagerException {
         log.info("buildAllCredentialsFromFormOK");
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         SurveyForm surveyForm = createSurveyFormMock(createAnswerRowListMock(), processExcelFileResult);

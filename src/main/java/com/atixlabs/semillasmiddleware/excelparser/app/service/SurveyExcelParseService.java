@@ -10,6 +10,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
 import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
@@ -68,7 +69,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials){
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials) throws FileManagerException {
 
         AnswerRow answerRow = null;
         try {
@@ -114,7 +115,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials){
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials) throws FileManagerException {
         List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");

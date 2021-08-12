@@ -35,6 +35,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -693,7 +694,7 @@ public class CredentialService {
 
 
     @Transactional
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException, FileManagerException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         saveAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
     }
@@ -808,7 +809,7 @@ public class CredentialService {
         );
     }
 
-    private void saveAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
+    private void saveAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException, FileManagerException {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
@@ -852,7 +853,7 @@ public class CredentialService {
         return credentialStateRepository.findByStateNameIn(statesCodesToFind);
     }
 
-    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) throws CredentialException {
+    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) throws CredentialException, FileManagerException {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:
@@ -867,7 +868,7 @@ public class CredentialService {
             case ENTREPRENEURSHIP_CATEGORY_NAME:
                 EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
                 if (Objects.isNull(entrepreneurshipCategory.getIsModification()))
-                    throw new CredentialException("No se encuentra la pregunta de emprendimiento.");
+                    throw new FileManagerException("No se encuentra la pregunta de emprendimiento.");
                 if (entrepreneurshipCategory.getIsModification()) {
                     credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
                 }

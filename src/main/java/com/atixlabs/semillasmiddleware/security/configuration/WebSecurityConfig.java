@@ -87,7 +87,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
     @Override
     protected void configure(HttpSecurity httpSecurity) throws Exception {
         httpSecurity
-                .cors().configurationSource(request -> new CorsConfiguration().applyPermitDefaultValues())
+                .cors()
                 .and()
                 .csrf()
                 .disable()
@@ -105,18 +105,6 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
                 .authenticated();
 
         httpSecurity.addFilterBefore(jwtAuthenticationFilter(), UsernamePasswordAuthenticationFilter.class);
-    }
-
-    @Bean
-    public WebMvcConfigurer corsConfigurer() {
-        return new WebMvcConfigurer() {
-            @Override
-            public void addCorsMappings(CorsRegistry registry) {
-                registry.addMapping("/**")
-                        .allowedOrigins("*")
-                        .allowedMethods("GET", "PUT", "POST", "PATCH", "DELETE", "OPTIONS");
-            }
-        };
     }
 
 }

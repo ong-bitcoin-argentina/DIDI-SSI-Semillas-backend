@@ -104,4 +104,6 @@ public class FinancialSituationCategory implements Category {
     public List<AnswerDto> getAnswersList() {
         return Arrays.asList(previousCredits, previousUnpaidCredit, name, reason, year);
     }
+
+    public Boolean isModification() { return true; }
 }

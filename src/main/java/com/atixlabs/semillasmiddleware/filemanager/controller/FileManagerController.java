@@ -51,7 +51,7 @@ public class FileManagerController {
         }
 
         File receivedFile = fileManagerService.uploadFile(file);
-
+        surveyExcelParseService.clearFormRelatedVariables();
         ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath(), createCredentials, skipIdentityCredentials);
 
         return ResponseEntity.ok(processExcelFileResult);

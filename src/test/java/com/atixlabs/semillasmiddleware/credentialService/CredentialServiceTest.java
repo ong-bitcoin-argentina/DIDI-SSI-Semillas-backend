@@ -572,7 +572,7 @@ public class CredentialServiceTest {
         //Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCreditHolder().getFirstName() ,credentials.get(0).getCreditHolder().getFirstName());
     }*/
 
-    private void dwellingCredentialWithIsModification (boolean isModification, int timesToCheck) {
+    private void dwellingCredentialWithIsModification (boolean isModification, int timesToCheck) throws FileManagerException {
         PersonCategory personCategory = Mockito.mock(PersonCategory.class);
         when(personCategory.getCategoryName()).thenReturn(BENEFICIARY_CATEGORY_NAME);
         when(personCategory.getDocumentNumber()).thenReturn(22L);
@@ -592,12 +592,12 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void dwellingCredentialWithIsModificationTrue () {
+    public void dwellingCredentialWithIsModificationTrue () throws FileManagerException {
         dwellingCredentialWithIsModification(true, 1);
     }
 
     @Test
-    public void dwellingCredentialWithIsModificationFalse () {
+    public void dwellingCredentialWithIsModificationFalse () throws FileManagerException {
         dwellingCredentialWithIsModification(false, 0);
     }
 

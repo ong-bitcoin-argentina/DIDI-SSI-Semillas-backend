@@ -99,4 +99,6 @@ public class InterviewDataCategory implements Category {
     public List<AnswerDto> getAnswersList() {
         return Arrays.asList(generalData, solidarityGroup, adviser);
     }
+
+    public Boolean isModification() { return true; }
 }

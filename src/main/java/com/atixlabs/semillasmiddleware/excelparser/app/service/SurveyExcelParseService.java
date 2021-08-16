@@ -21,6 +21,7 @@ import org.springframework.stereotype.Service;
 import java.io.FileNotFoundException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 @Service
 @Slf4j
@@ -64,7 +65,8 @@ public class SurveyExcelParseService extends ExcelParseService {
 
     public void clearFormRelatedVariables(){
         currentForm = null;
-        surveyFormList.clear();
+        if (Objects.nonNull(surveyFormList))
+            surveyFormList.clear();
         surveyFormList = null;
     }
 

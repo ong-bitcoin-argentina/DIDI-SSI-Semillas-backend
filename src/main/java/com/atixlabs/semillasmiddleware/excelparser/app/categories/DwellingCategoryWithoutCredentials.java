@@ -31,6 +31,7 @@ public class DwellingCategoryWithoutCredentials implements Category {
     AnswerDto generalConditions; //condiciones generales
     AnswerDto neighborhoodType; //tipo de barrio
     AnswerDto basicServicies; //servicios basicos
+    AnswerDto isModification; //es modificacion
     AnswerDto gas; //red de gas
     AnswerDto carafe; //garrafa
     AnswerDto water; //red de agua
@@ -53,6 +54,7 @@ public class DwellingCategoryWithoutCredentials implements Category {
         this.generalConditions= new AnswerDto(DidiSyncStatus.GENERAL_CONDITIONS);
         this.neighborhoodType= new AnswerDto(DidiSyncStatus.NEIGHBORHOOD_TYPE);
         this.basicServicies= new AnswerDto(DidiSyncStatus.BASIC_SERVICES);
+        this.isModification = new AnswerDto(DidiSyncStatus.IS_MODIFICATION);
         this.gas= new AnswerDto(DidiSyncStatus.GAS);
         this.carafe= new AnswerDto(DidiSyncStatus.CARAFE);
         this.water= new AnswerDto(DidiSyncStatus.WATER);
@@ -104,6 +106,8 @@ public class DwellingCategoryWithoutCredentials implements Category {
                 return Optional.of(this.neighborhoodType);
             case BASIC_SERVICES:
                 return Optional.of(this.basicServicies);
+            case IS_MODIFICATION:
+                return Optional.of(this.isModification);
             case GAS:
                 return Optional.of(this.gas);
             case CARAFE:
@@ -166,6 +170,7 @@ public class DwellingCategoryWithoutCredentials implements Category {
                 && holdingType.answerIsEmpty() && dwellingType.answerIsEmpty()
                 && lightInstallation.answerIsEmpty() && generalConditions.answerIsEmpty()
                 && neighborhoodType.answerIsEmpty() && basicServicies.answerIsEmpty()
+                && isModification.answerIsEmpty()
                 && gas.answerIsEmpty() && carafe.answerIsEmpty() && water.answerIsEmpty()
                 && watterWell.answerIsEmpty() && antiquity.answerIsEmpty()
                 && numberOfEnvironments.answerIsEmpty() && rental.answerIsEmpty();
@@ -237,6 +242,8 @@ public class DwellingCategoryWithoutCredentials implements Category {
         return ((Long) this.antiquity.getAnswer()).intValue();
     }
 
+    public Boolean isModification() { return getBooleanFromAnswer(this.isModification); }
+
     public Integer getNumberOfEnvironments() {
         if(this.numberOfEnvironments.getAnswer() == null) return null;
         return ((Long) this.numberOfEnvironments.getAnswer()).intValue();
@@ -249,9 +256,9 @@ public class DwellingCategoryWithoutCredentials implements Category {
 
     @Override
     public List<AnswerDto> getAnswersList(){
-        return Arrays.asList( description, brick,  lock,  wood,  paperBoard,  district,  dwellingCondition,  holdingType,
-                dwellingType,  lightInstallation,  generalConditions,  neighborhoodType,  basicServicies, gas,
-                carafe,  water,  watterWell,  antiquity,  numberOfEnvironments,  rental);
+        return Arrays.asList( description, brick,  lock,  wood,  paperBoard,  district,  dwellingCondition,
+                holdingType, dwellingType,  lightInstallation,  generalConditions,  neighborhoodType,  basicServicies,
+                isModification, gas, carafe,  water,  watterWell,  antiquity,  numberOfEnvironments,  rental);
     }
 
     @Override
@@ -271,6 +278,7 @@ public class DwellingCategoryWithoutCredentials implements Category {
                 ", generalConditions=" + generalConditions +
                 ", neighborhoodType=" + neighborhoodType +
                 ", basicServicies=" + basicServicies +
+                ", isModification=" + isModification +
                 ", gas=" + gas +
                 ", carafe=" + carafe +
                 ", water=" + water +

@@ -117,4 +117,6 @@ public class PatrimonialSituationCategory implements Category {
     public List<AnswerDto> getAnswersList() {
         return Arrays.asList(patrimonyData, cash, spun, stock, machinery, property, total);
     }
+
+    public Boolean isModification() { return true; }
 }

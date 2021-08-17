@@ -28,7 +28,7 @@ import java.util.Optional;
 @RequestMapping("/auth")
 @CrossOrigin(
         origins = "*",
-        methods = {RequestMethod.GET, RequestMethod.POST})
+        methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.OPTIONS})
 public class AuthController {
 
     @Autowired

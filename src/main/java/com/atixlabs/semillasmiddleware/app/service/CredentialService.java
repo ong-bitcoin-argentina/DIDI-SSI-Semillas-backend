@@ -25,16 +25,14 @@ import com.atixlabs.semillasmiddleware.app.processControl.model.constant.Process
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.*;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -693,7 +691,7 @@ public class CredentialService {
 
 
     @Transactional
-    public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
+    public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException, FileManagerException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
         saveAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
     }
@@ -705,7 +703,7 @@ public class CredentialService {
      *
      * @param surveyForm
      */
-    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult, boolean skipIdentityCredentials) {
+    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult, boolean skipIdentityCredentials) throws FileManagerException {
         log.info("  validateIdentityCredentialFromForm");
 
         //1-get all people data from form, creditHolder will be a beneficiary as well.
@@ -744,7 +742,13 @@ public class CredentialService {
                     continue;
                 }
             } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
+                if (Objects.isNull(category.isModification()))
+                    throw new FileManagerException("No se encuentra la pregunta de vivienda.");
+                if (category.isModification())
                     credentialsOptional = getDwellingCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), beneficiaryAddress);
+            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME)) {
+                if (Objects.isNull(category.isModification()))
+                    throw new FileManagerException("No se encuentra la pregunta de emprendimiento.");
             }
 
             if (!credentialsOptional.isEmpty()) {
@@ -808,7 +812,7 @@ public class CredentialService {
         );
     }
 
-    private void saveAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException {
+    private void saveAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException, FileManagerException {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
         Person creditHolder = Person.getPersonFromPersonCategory(creditHolderPersonCategory);
@@ -852,7 +856,7 @@ public class CredentialService {
         return credentialStateRepository.findByStateNameIn(statesCodesToFind);
     }
 
-    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) throws CredentialException {
+    private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) throws CredentialException, FileManagerException {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {
             case BENEFICIARY_CATEGORY_NAME:
@@ -866,14 +870,16 @@ public class CredentialService {
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
                 EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
-                if (Objects.isNull(entrepreneurshipCategory.getIsModification()))
-                    throw new CredentialException("No se encuentra la pregunta de emprendimiento.");
-                if (entrepreneurshipCategory.getIsModification()) {
+                if (Objects.isNull(entrepreneurshipCategory.isModification()))
+                    throw new FileManagerException("No se encuentra la pregunta de emprendimiento.");
+                if (entrepreneurshipCategory.isModification()) {
                     credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
                 }
                 break;
             case DWELLING_CATEGORY_NAME:
                 DwellingCategory dwellingCategory = (DwellingCategory) category;
+                if (Objects.isNull(dwellingCategory.isModification()))
+                    throw new FileManagerException("No se encuentra la pregunta de vivienda.");
                 if (dwellingCategory.isModification()) {
                     PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
                     credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));

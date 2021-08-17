@@ -7,6 +7,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
 
 
 public interface Category {
@@ -19,6 +20,7 @@ public interface Category {
      boolean isValid(ProcessExcelFileResult processExcelFileResult);
      boolean isEmpty();
      boolean isRequired();
+     Boolean isModification();
 
      default String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
           String html="";
@@ -43,7 +45,7 @@ public interface Category {
      }
 
      default Boolean getBooleanFromAnswer(AnswerDto answerDto){
-          if (answerDto.getAnswer() == null) return null;
+          if (Objects.isNull(answerDto) || answerDto.getAnswer() == null) return null;
           String answer = (String) answerDto.getAnswer();
           if (answer.equalsIgnoreCase("si")) return true;
           if (answer.equalsIgnoreCase("no")) return false;

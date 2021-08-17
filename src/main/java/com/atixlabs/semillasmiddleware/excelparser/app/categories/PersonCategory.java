@@ -401,4 +401,6 @@ public class PersonCategory implements Category {
         }
         return html;
     }
+
+    public Boolean isModification() { return true; }
 }

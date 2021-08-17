@@ -26,6 +26,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
@@ -35,7 +36,6 @@ import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping(CredentialController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
 @Slf4j
 public class CredentialController {
 
@@ -56,7 +56,6 @@ public class CredentialController {
         this.processControlService = processControlService;
         this.shareCredentialService = shareCredentialService;
     }
-
 
     //TODO fix
     @GetMapping

@@ -293,7 +293,8 @@ public class EntrepreneurshipCategory implements Category {
         answers.add(this.address);
         answers.add(this.activityEndingDate);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName))
+                .collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 
@@ -325,7 +326,7 @@ public class EntrepreneurshipCategory implements Category {
     public LocalDate getActivityEndingDate(){
         return (LocalDate) this.activityEndingDate.getAnswer();
     }
-    public Boolean getIsModification() { return getBooleanFromAnswer(this.isModification); }
+    public Boolean isModification() { return getBooleanFromAnswer(this.isModification); }
 
     @Override
     public String toString() {

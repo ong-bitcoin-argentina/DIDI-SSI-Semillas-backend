@@ -33,6 +33,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 
 import lombok.extern.slf4j.Slf4j;
@@ -571,7 +572,7 @@ public class CredentialServiceTest {
         //Assertions.assertEquals(credentialsFilteredRevokedMock().get(0).getCreditHolder().getFirstName() ,credentials.get(0).getCreditHolder().getFirstName());
     }*/
 
-    private void dwellingCredentialWithIsModification (boolean isModification, int timesToCheck) {
+    private void dwellingCredentialWithIsModification (boolean isModification, int timesToCheck) throws FileManagerException {
         PersonCategory personCategory = Mockito.mock(PersonCategory.class);
         when(personCategory.getCategoryName()).thenReturn(BENEFICIARY_CATEGORY_NAME);
         when(personCategory.getDocumentNumber()).thenReturn(22L);
@@ -591,17 +592,17 @@ public class CredentialServiceTest {
     }
 
     @Test
-    public void dwellingCredentialWithIsModificationTrue () {
+    public void dwellingCredentialWithIsModificationTrue () throws FileManagerException {
         dwellingCredentialWithIsModification(true, 1);
     }
 
     @Test
-    public void dwellingCredentialWithIsModificationFalse () {
+    public void dwellingCredentialWithIsModificationFalse () throws FileManagerException {
         dwellingCredentialWithIsModification(false, 0);
     }
 
     @Test
-    public void buildAllCredentialsFromFormOK() throws InvalidRowException, CredentialException {
+    public void buildAllCredentialsFromFormOK() throws InvalidRowException, CredentialException, FileManagerException {
         log.info("buildAllCredentialsFromFormOK");
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         SurveyForm surveyForm = createSurveyFormMock(createAnswerRowListMock(), processExcelFileResult);

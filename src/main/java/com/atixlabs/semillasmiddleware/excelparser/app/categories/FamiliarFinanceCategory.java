@@ -234,4 +234,6 @@ public class FamiliarFinanceCategory implements Category {
                 totalMonthlyEntry2, totalMonthlyExit2, totalMonthlyFamiliarSurplus
         );
     }
+
+    public Boolean isModification() { return true; }
 }

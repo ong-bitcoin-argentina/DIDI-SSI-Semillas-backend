@@ -751,12 +751,12 @@ public class CredentialService {
                 if ((Objects.isNull(category.isModification()) && pdfValidation))
                     credentialsOptional = getDwellingCredentials(credentialStateActivePending,
                             creditHolder.getDocumentNumber(), beneficiaryAddress);
-                if (!Objects.isNull(category.isModification()))
-                    if (category.isModification() || pdfValidation)
+                if (!Objects.isNull(category.isModification()) &&
+                     (Boolean.TRUE.equals(category.isModification()) || pdfValidation))
                         credentialsOptional = getDwellingCredentials(credentialStateActivePending,
                                 creditHolder.getDocumentNumber(), beneficiaryAddress);
-            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME)) {
-                if (Objects.isNull(category.isModification()) && !pdfValidation)
+            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME) &&
+                    Objects.isNull(category.isModification()) && !pdfValidation) {
                     throw new FileManagerException("No se encuentra la pregunta de emprendimiento.");
             }
 

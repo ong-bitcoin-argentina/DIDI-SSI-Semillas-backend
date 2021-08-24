@@ -241,6 +241,10 @@ public class DwellingCategory implements Category {
 
     public Boolean isModification() { return getBooleanFromAnswer(this.isModification); }
 
+    public void setIsModification(AnswerDto isModification) {
+        this.isModification = isModification;
+    }
+
     public Integer getAntiquity() {
         if(this.antiquity.getAnswer() == null) return null;
         return ((Long) this.antiquity.getAnswer()).intValue();

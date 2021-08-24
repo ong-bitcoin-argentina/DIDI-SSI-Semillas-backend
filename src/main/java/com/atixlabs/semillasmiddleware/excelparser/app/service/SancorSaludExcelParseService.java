@@ -41,7 +41,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
     @Override
     public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult,
-             boolean createCredentials, boolean skipIdentityCredentials) {
+             boolean createCredentials, boolean skipIdentityCredentials, boolean pdfValidation) {
 
         try {
             log.info("Processing row " + currentRow.getRowNum());
@@ -103,12 +103,15 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
 
     @Override
-    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials, boolean skipIdentityCredentials) throws Exception {
+    public ProcessExcelFileResult processSingleSheetFile(String filePath, boolean createCredentials,
+                                                         boolean skipIdentityCredentials,
+                                                         boolean pdfValidation) throws Exception {
         log.info("Sancor Salud processSingleSheetFile");
         this.cleanSancorPolicies();
         ProcessExcelFileResult processExcelFileResult = null;
         try {
-            processExcelFileResult = super.processSingleSheetFile(filePath, true, false);
+            processExcelFileResult = super.processSingleSheetFile(filePath, true,
+                    false, false);
         }finally {
             this.cleanSancorPolicies();
         }
@@ -128,7 +131,8 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
         ProcessExcelFileResult processExcelFileResult = null;
         try {
-            processExcelFileResult = super.processSingleSheetFile(filePath, true, false);
+            processExcelFileResult = super.processSingleSheetFile(filePath, true,
+                    false, false);
             log.info("Sancor policies to save {}", (sancorPolicys != null ? sancorPolicys.size() : 0));
 
             for (SancorPolicy sancorPolicy : sancorPolicys) {

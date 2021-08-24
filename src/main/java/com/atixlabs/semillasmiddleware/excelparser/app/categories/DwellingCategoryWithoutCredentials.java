@@ -159,7 +159,9 @@ public class DwellingCategoryWithoutCredentials implements Category {
         answers.add(this.numberOfEnvironments);
         answers.add(this.rental);
 
-        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(processExcelFileResult, categoryOriginalName)).collect(Collectors.toList());
+        List<Boolean> validations = answers.stream().map(answerDto -> answerDto.isValid(
+                    processExcelFileResult, categoryOriginalName))
+                .collect(Collectors.toList());
         return validations.stream().allMatch(v->v);
     }
 
@@ -243,6 +245,10 @@ public class DwellingCategoryWithoutCredentials implements Category {
     }
 
     public Boolean isModification() { return getBooleanFromAnswer(this.isModification); }
+
+    public void setIsModification(AnswerDto isModification) {
+        this.isModification = isModification;
+    }
 
     public Integer getNumberOfEnvironments() {
         if(this.numberOfEnvironments.getAnswer() == null) return null;

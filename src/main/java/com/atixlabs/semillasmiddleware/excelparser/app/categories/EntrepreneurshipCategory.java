@@ -327,6 +327,9 @@ public class EntrepreneurshipCategory implements Category {
         return (LocalDate) this.activityEndingDate.getAnswer();
     }
     public Boolean isModification() { return getBooleanFromAnswer(this.isModification); }
+    public void setIsModification(AnswerDto isModification) {
+        this.isModification = isModification;
+    }
 
     @Override
     public String toString() {

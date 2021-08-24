@@ -236,4 +236,8 @@ public class FamiliarFinanceCategory implements Category {
     }
 
     public Boolean isModification() { return true; }
+
+    public void setIsModification(AnswerDto isModification) {
+
+    }
 }

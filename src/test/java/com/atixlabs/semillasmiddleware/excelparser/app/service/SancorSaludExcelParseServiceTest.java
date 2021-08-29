@@ -1,13 +1,15 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.validatorfactory.ExcelRowValidatorFactory;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
+import org.mockito.*;
 
 public class SancorSaludExcelParseServiceTest {
 
@@ -52,6 +54,20 @@ public class SancorSaludExcelParseServiceTest {
         String certificateClient = "9100";
         Long result = sancorSaludExcelParseService.parseDni(certificateClient);
         Assert.assertEquals(Long.valueOf(9100L), result);
+    }
+
+    @Test
+    public void processRowTest(){
+        Workbook mockWorkbook = Mockito.mock(Workbook.class);
+        Sheet mockSheet = Mockito.mock(Sheet.class);
+        Row mockRow = Mockito.mock(Row.class);
+
+        Mockito.doReturn(mockSheet).when(mockWorkbook).createSheet();
+
+        ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
+        ProcessExcelFileResult result = sancorSaludExcelParseService.processRow(mockRow, true,
+                processExcelFileResult,false, false);
+
     }
 
 }

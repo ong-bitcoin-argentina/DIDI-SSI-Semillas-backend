@@ -6,22 +6,19 @@ import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class CertTemplateServiceTest {
 
-    private String didiTemplateCodeCredit = "code didiTemplateCodeCredit";
+    private final String didiTemplateCodeCredit = "code didiTemplateCodeCredit";
 
     @Mock
     private CertTemplateRepository certTemplateRepository;

@@ -21,6 +21,7 @@ public interface Category {
      boolean isEmpty();
      boolean isRequired();
      Boolean isModification();
+     public void setIsModification(AnswerDto isModification);
 
      default String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
           String html="";

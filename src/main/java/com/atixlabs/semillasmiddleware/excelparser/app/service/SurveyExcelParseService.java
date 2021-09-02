@@ -52,7 +52,6 @@ public class SurveyExcelParseService extends ExcelParseService {
     private List<SurveyForm> surveyFormList;
 
     public void resetFormRelatedVariables(boolean createCredentials){
-        //log.info("resetFormRelatedVariables: ");
         if (currentForm == null){
             log.info("Building all form categories:");
             currentForm = new SurveyForm();
@@ -71,7 +70,10 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
     @Override
-    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials) throws FileManagerException {
+    public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext,
+                                             ProcessExcelFileResult processExcelFileResult, boolean createCredentials,
+                                             boolean skipIdentityCredentials,
+                                             boolean pdfValidation) throws FileManagerException {
 
         AnswerRow answerRow = null;
         try {
@@ -106,7 +108,7 @@ public class SurveyExcelParseService extends ExcelParseService {
             }
         }
         if(!hasNext)
-            endOfFileHandler(processExcelFileResult, createCredentials, skipIdentityCredentials);
+            endOfFileHandler(processExcelFileResult, createCredentials, skipIdentityCredentials, pdfValidation);
 
         return processExcelFileResult;
     }
@@ -117,7 +119,8 @@ public class SurveyExcelParseService extends ExcelParseService {
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
-    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials, boolean skipIdentityCredentials) throws FileManagerException {
+    private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials,
+                                  boolean skipIdentityCredentials, boolean pdfValidation) throws FileManagerException {
         List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
@@ -136,7 +139,8 @@ public class SurveyExcelParseService extends ExcelParseService {
                 if (createCredentials){
                     credentialService.buildAllCredentialsFromForm(surveyForm, skipIdentityCredentials);
                 } else {
-                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult, skipIdentityCredentials);
+                    credentialService.validateAllCredentialsFromForm(surveyForm, processExcelFileResult,
+                            skipIdentityCredentials, pdfValidation);
                 }
             }
 

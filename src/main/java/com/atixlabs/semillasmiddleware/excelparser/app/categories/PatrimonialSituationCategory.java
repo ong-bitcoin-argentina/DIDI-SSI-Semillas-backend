@@ -119,4 +119,8 @@ public class PatrimonialSituationCategory implements Category {
     }
 
     public Boolean isModification() { return true; }
+
+    public void setIsModification(AnswerDto isModification) {
+
+    }
 }

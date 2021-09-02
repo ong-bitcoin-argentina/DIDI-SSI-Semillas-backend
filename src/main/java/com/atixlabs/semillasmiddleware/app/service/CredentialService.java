@@ -28,6 +28,8 @@ import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
@@ -703,7 +705,9 @@ public class CredentialService {
      *
      * @param surveyForm
      */
-    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult, boolean skipIdentityCredentials) throws FileManagerException {
+    public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult,
+                                                  boolean skipIdentityCredentials,
+                                                  boolean pdfValidation) throws FileManagerException {
         log.info("  validateIdentityCredentialFromForm");
 
         //1-get all people data from form, creditHolder will be a beneficiary as well.
@@ -742,12 +746,17 @@ public class CredentialService {
                     continue;
                 }
             } else if (categoryName.equals(DWELLING_CATEGORY_NAME)) {
-                if (Objects.isNull(category.isModification()))
-                    throw new FileManagerException("No se encuentra la pregunta de vivienda.");
-                if (category.isModification())
-                    credentialsOptional = getDwellingCredentials(credentialStateActivePending, creditHolder.getDocumentNumber(), beneficiaryAddress);
-            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME)) {
-                if (Objects.isNull(category.isModification()))
+                if (Objects.isNull(category.isModification()) && !pdfValidation)
+                        throw new FileManagerException("No se encuentra la pregunta de vivienda.");
+                if ((Objects.isNull(category.isModification()) && pdfValidation))
+                    credentialsOptional = getDwellingCredentials(credentialStateActivePending,
+                            creditHolder.getDocumentNumber(), beneficiaryAddress);
+                if (!Objects.isNull(category.isModification()) &&
+                     (Boolean.TRUE.equals(category.isModification()) || pdfValidation))
+                        credentialsOptional = getDwellingCredentials(credentialStateActivePending,
+                                creditHolder.getDocumentNumber(), beneficiaryAddress);
+            } else if (categoryName.equals(ENTREPRENEURSHIP_CATEGORY_NAME) &&
+                    Objects.isNull(category.isModification()) && !pdfValidation) {
                     throw new FileManagerException("No se encuentra la pregunta de emprendimiento.");
             }
 

@@ -112,7 +112,8 @@ public class FileManagerControllerIntegrationTest extends BasicAuthIntegrationTe
         assertTrue(uploadFile.exists());
 
         log.info("file uploaded successfully");
-        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(tmpFilePath, true, false);
+        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService
+                .processSingleSheetFile(tmpFilePath, true, false, false);
 
         log.info(processExcelFileResult.toString());
         assertEquals(32, processExcelFileResult.getTotalValidRows());

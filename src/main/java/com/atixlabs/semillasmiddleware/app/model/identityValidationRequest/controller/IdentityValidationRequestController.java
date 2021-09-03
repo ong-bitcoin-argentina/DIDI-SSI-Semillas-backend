@@ -23,6 +23,8 @@ import java.util.Optional;
 @Slf4j
 @RestController
 @RequestMapping(IdentityValidationRequestController.URL_MAPPING)
+@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH, RequestMethod.OPTIONS,
+            RequestMethod.DELETE, RequestMethod.HEAD})
 public class IdentityValidationRequestController {
 
     public static final String URL_MAPPING = "/identityValidationRequests";

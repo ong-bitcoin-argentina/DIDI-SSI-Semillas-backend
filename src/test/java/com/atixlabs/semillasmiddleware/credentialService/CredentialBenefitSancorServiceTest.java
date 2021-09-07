@@ -3,6 +3,7 @@ package com.atixlabs.semillasmiddleware.credentialService;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
@@ -32,6 +33,7 @@ import org.mockito.stubbing.Answer;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -184,7 +186,7 @@ public class CredentialBenefitSancorServiceTest {
 
     @Test
     public void getHolderCredentialBenefitTest(){
-        CredentialBenefitSancor credentialBenefitSancor = getCredentialBenefitSancorMock();
+        CredentialBenefitSancor credentialBenefitSancor = mockCredentialBenefitSancorMock();
 
         when(credentialBenefitSancorRepository.findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(any(),any()))
         .thenReturn(Optional.ofNullable(credentialBenefitSancor));
@@ -193,11 +195,14 @@ public class CredentialBenefitSancorServiceTest {
                 getPersonMockWithDid().get());
 
         Assertions.assertEquals(credentialBenefitSancor, result.get());
+        verify(credentialBenefitSancorRepository, times(1))
+                .findTopByCreditHolderDniAndBeneficiaryDniOrderByIdDesc(any(), any());
+
     }
 
     @Test
     public void buildHolderBenefitsCredentialTest(){
-        CredentialBenefitSancor credentialBenefitSancor = getCredentialBenefitSancorMock();
+        CredentialBenefitSancor credentialBenefitSancor = mockCredentialBenefitSancorMock();
         SancorPolicy opSancorPolicy = new SancorPolicy();
         CredentialState credentialState = createCredentialStatePendingDidiMock().get();
 
@@ -209,6 +214,7 @@ public class CredentialBenefitSancorServiceTest {
         credentialBenefitSancor.setDateOfIssue(result.getDateOfIssue());
 
         Assertions.assertEquals(credentialBenefitSancor.toString(), result.toString());
+        verify(credentialStateService, times(1)).getCredentialPendingDidiState();
     }
 
     @Test
@@ -222,6 +228,7 @@ public class CredentialBenefitSancorServiceTest {
                 otherLoansActiveForHolder);
 
         Assertions.assertNotNull(result);
+        verify(personService, times(1)).findByDocumentNumber(any());
     }
 
     @Test
@@ -235,6 +242,69 @@ public class CredentialBenefitSancorServiceTest {
                 otherLoansActiveForHolder);
 
         Assertions.assertNotNull(result);
+        verify(personService, times(0)).findByDocumentNumber(any());
+    }
+
+    @Test
+    public void getCredentialBenefitSancorsOnPendingDidiStateTest(){
+
+        CredentialState pendingDidiState = createCredentialStatePendingDidiMock().get();
+        List<CredentialBenefitSancor> credentialBenefitSancors = Collections.singletonList(mockCredentialBenefitSancorMock());
+
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(pendingDidiState);
+        when(credentialBenefitSancorRepository.findByCredentialState(any())).thenReturn(credentialBenefitSancors);
+
+        List<CredentialBenefitSancor> result = credentialBenefitSancorService.getCredentialBenefitSancorsOnPendindDidiState();
+
+        Assertions.assertNotNull(result);
+        verify(credentialStateService, times(1)).getCredentialPendingDidiState();
+        verify(credentialBenefitSancorRepository, times(1)).findByCredentialState(any());
+    }
+
+    @Test
+    public void saveTest(){
+
+        CredentialBenefitSancor credentialBenefitSancor = mockCredentialBenefitSancorMock();
+
+        when(credentialBenefitSancorRepository.save(any())).thenReturn(credentialBenefitSancor);
+        CredentialBenefitSancor result = credentialBenefitSancorService.save(credentialBenefitSancor);
+
+        Assertions.assertEquals(result.toString(),credentialBenefitSancor.toString());
+        verify(credentialBenefitSancorRepository, times(1)).save(any());
+    }
+
+    @Test
+    public void getCredentialBenefitSancorActiveForDniTest(){
+
+        CredentialBenefitSancor credentialBenefitSancor = mockCredentialBenefitSancorMock();
+        Optional<CredentialState> activeDidiState = createCredentialStateActiveDidiMock();
+
+        when(credentialStateService.getCredentialActiveState()).thenReturn(activeDidiState);
+        when(credentialBenefitSancorRepository.findByCreditHolderDniAndCredentialState(any(),any()))
+                .thenReturn(Collections.singletonList(credentialBenefitSancor));
+        List<CredentialBenefitSancor> result = credentialBenefitSancorService
+                .getCredentialBenefitSancorActiveForDni(1L);
+
+        Assertions.assertEquals(result.size(), 1);
+        verify(credentialStateService, times(1)).getCredentialActiveState();
+        verify(credentialBenefitSancorRepository, times(1))
+                .findByCreditHolderDniAndCredentialState(any(),any());
+    }
+
+    @Test
+    public void buildNewOnPendidgDidiTest(){
+
+        CredentialBenefitSancor credentialBenefitSancor = mockCredentialBenefitSancorMock();
+        DidiAppUser newDidiAppUser = mockDidiUserApp();
+        CredentialState credentialStatePending = createCredentialStatePendingDidiMock().get();
+
+        when(credentialStateService.getCredentialPendingDidiState()).thenReturn(credentialStatePending);
+
+        CredentialBenefitSancor result = credentialBenefitSancorService.buildNewOnPendidgDidi(credentialBenefitSancor,
+                newDidiAppUser);
+
+        Assertions.assertEquals(result.getBeneficiaryDni(), credentialBenefitSancor.getBeneficiaryDni());
+        verify(credentialStateService, times(1)).getCredentialPendingDidiState();
     }
 
     private Loan getMockLoan() {
@@ -276,6 +346,13 @@ public class CredentialBenefitSancorServiceTest {
         return Optional.of(credentialState);
     }
 
+    private Optional<CredentialState> createCredentialStateActiveDidiMock() {
+        CredentialState credentialState = new CredentialState();
+        credentialState.setId(2L);
+        credentialState.setStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        return Optional.of(credentialState);
+    }
+
     private Optional<ParameterConfiguration> getParameterConfigurationDidiIssuerMock(){
         ParameterConfiguration parameterConfiguration = new ParameterConfiguration();
         parameterConfiguration.setConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode());
@@ -283,10 +360,17 @@ public class CredentialBenefitSancorServiceTest {
         return Optional.of(parameterConfiguration);
     }
 
-    private CredentialBenefitSancor getCredentialBenefitSancorMock(){
+    private CredentialBenefitSancor mockCredentialBenefitSancorMock(){
         CredentialBenefitSancor credentialBenefitSancor = new CredentialBenefitSancor();
         credentialBenefitSancor.setCredentialState(createCredentialStatePendingDidiMock().get());
         credentialBenefitSancor.setBeneficiaryDni(34669543L);
         return credentialBenefitSancor;
     }
+
+    private DidiAppUser mockDidiUserApp(){
+        DidiAppUser didiAppUser = new DidiAppUser(1L, "23434234324", "PENDING");
+        return didiAppUser;
+    }
+
+
 }

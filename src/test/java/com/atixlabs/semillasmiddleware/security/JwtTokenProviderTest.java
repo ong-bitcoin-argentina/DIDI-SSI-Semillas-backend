@@ -19,8 +19,13 @@ import org.springframework.test.util.ReflectionTestUtils;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.Optional;
 
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 
 @RunWith(SpringRunner.class)
 public class JwtTokenProviderTest {
@@ -47,27 +52,17 @@ public class JwtTokenProviderTest {
     }
 
     @Test
-    @Ignore
     public void testGenerateTokenOk() throws Exception {
-
         UserDetails userDetails = new User("user", "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6",
                 new ArrayList<>());
-
-        Date now = Date.from(Instant.ofEpochSecond(1580310));
-
-        Mockito.doReturn(now).when(DateUtil.getDateNow());
-
-
-        Mockito.doReturn(true).when(jwtTokenControlUtil).isTokenValid(anyString());
-
+;
+        when(jwtTokenControlUtil.isTokenValid(any())).thenReturn(true);
         Mockito.doReturn(true).when(jwtTokenControlUtil).revoqueToken(anyString());
 
         String token = jwtTokenProvider.generateToken(userDetails);
-
-        Assert.assertEquals(this.getTokenExpected(), token);
-
+        Assert.assertNotNull(token);
+        verify(jwtTokenControlUtil,times(1)).setToken(any(),any());
     }
-
 
     @Test
     public void testValidateTokenExpired() throws Exception {
@@ -80,19 +75,14 @@ public class JwtTokenProviderTest {
     }
 
     @Test
-    @Ignore
     public void testValidateTokenOk() throws Exception {
         UserDetails userDetails = new User("user", "$2a$10$slYQmyNdGzTn7ZLBXBChFOC9f6kFjAqPhccnP6DxlWXx2lPk1C3G6",
                 new ArrayList<>());
 
-        Date now = new Date();
-
-        Mockito.doReturn(now).when(dateUtil).getDateNow();
-        Mockito.doReturn(true).when(jwtTokenControlUtil).isTokenValid(anyString());
+        when(jwtTokenControlUtil.isTokenValid(any())).thenReturn(true);
         Mockito.doReturn(true).when(jwtTokenControlUtil).revoqueToken(anyString());
 
         String token = jwtTokenProvider.generateToken(userDetails);
-
         Boolean result = jwtTokenProvider.validateToken(token, userDetails);
 
         Assert.assertTrue(result);

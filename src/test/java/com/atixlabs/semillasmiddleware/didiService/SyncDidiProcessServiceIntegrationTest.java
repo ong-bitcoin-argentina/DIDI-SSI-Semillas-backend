@@ -63,7 +63,7 @@ public class SyncDidiProcessServiceIntegrationTest {
     @InjectMocks
     private SyncDidiProcessService syncDidiProcessService;
 
-    @Autowired
+    @Mock
     private DidiService didiService;
 
     @Before
@@ -72,55 +72,42 @@ public class SyncDidiProcessServiceIntegrationTest {
     }
 
     @Test
-    @Ignore
     public void whenEmmitCredentialCreditsAndCredentialCreditsToEmmitIsEmpty_thenDoNothing() throws CredentialException {
 
-        when(credentialCreditService.getCredentialCreditsOnPendindDidiState()).thenReturn(new ArrayList<CredentialCredit>());
+        when(credentialCreditService.getCredentialCreditsOnPendindDidiState()).thenReturn(new ArrayList<>());
 
         syncDidiProcessService.emmitCredentialsCredit();
-
+        verify(credentialCreditService, times(1)).getCredentialCreditsOnPendindDidiState();
     }
 
     @Test
-    @Ignore
     public void whenHolderHaveDIDRegister_thenEmmitCredentialCredit(){
-
 
         CredentialCredit credentialCredit = this.getCredentialCreditMock();
         credentialCredit.setIdDidiReceptor(null);
-
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
         when(didiAppUserService.getDidiAppUserByDni(credentialCredit.getCreditHolderDni())).thenReturn(Optional.of(didiAppUser));
 
         syncDidiProcessService.emmitCredentialCredit(credentialCredit);
-
-        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialCredit);
-
-
+        verify(didiAppUserService, times(1)).getDidiAppUserByDni(any());
     }
 
     @Test
-    @Ignore
     public void whenHolderHaveDIDRegisterCredentialBenefitPendingDidi_thenEmmitCredentialBenefit(){
 
         CredentialBenefits credentialBenefits = this.getCredentialBenefitsMock();
         credentialBenefits.setIdDidiReceptor(null);
-
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
 
         when(didiAppUserService.getDidiAppUserByDni(credentialBenefits.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
         when(credentialBenefitService.save(credentialBenefits)).thenReturn(credentialBenefits);
 
         syncDidiProcessService.emmitCredentialBenefit(credentialBenefits, false);
-
-        //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
-
-
+        verify(didiAppUserService, times(1)).getDidiAppUserByDni(any());
     }
 
     @Test
-    @Ignore
     public void whenHolderHaveDIDRegisterCredentialIdentityPendingDidi_thenEmmitCredentialIdentity(){
 
         CredentialIdentity credentialIdentity = this.getCredentialIdentityMock();
@@ -133,14 +120,13 @@ public class SyncDidiProcessServiceIntegrationTest {
 
         syncDidiProcessService.emmitCredentialIdentity(credentialIdentity, false);
 
-        //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
-
-
+        verify(didiAppUserService, times(1)).getDidiAppUserByDni(any());
+        verify(credentialIdentityService, times(1)).save(any());
+        verify(didiService, times(1)).createAndEmmitCertificateDidi(any());
     }
 
 
     @Test
-    @Ignore
     public void whenHolderHaveDIDRegisterCredentialDwellingPendingDidi_thenEmmitCredentialDwelling(){
 
         CredentialDwelling credentialDwelling = this.getCredentialDwellingMock();
@@ -153,32 +139,25 @@ public class SyncDidiProcessServiceIntegrationTest {
 
         syncDidiProcessService.emmitCredentialDwelling(credentialDwelling);
 
-        //verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefits);
-
-
+        verify(didiAppUserService, times(1)).getDidiAppUserByDni(any());
     }
 
     @Test
-    @Ignore
     public void whenHolderHaveDIDRegisterAndSancorPolicyAndCredentialBnefitSancorPendindDidi_thenEmmitCredentialBenefitSancor(){
 
         CredentialBenefitSancor credentialBenefitSancor = this.getCredentialBenefitSancorMock();
-
         credentialBenefitSancor.setIdDidiReceptor(null);
-
         DidiAppUser didiAppUser = this.getDidiAppUserMock();
-
         SancorPolicy sancorPolicy = this.getSancorPolicyMock();
 
-
-        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.of(didiAppUser));
-        when(sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni())).thenReturn(Optional.of(sancorPolicy));
+        when(didiAppUserService.getDidiAppUserByDni(credentialBenefitSancor.getBeneficiaryDni()))
+                .thenReturn(Optional.of(didiAppUser));
+        when(sancorPolicyService.findByCertificateClientDni(credentialBenefitSancor.getBeneficiaryDni()))
+                .thenReturn(Optional.of(sancorPolicy));
         when(credentialBenefitSancorService.save(credentialBenefitSancor)).thenReturn(credentialBenefitSancor);
 
         syncDidiProcessService.emmitCredentialBenefitSancor(credentialBenefitSancor);
-
-        verify(didiService, times(1)).createAndEmmitCertificateDidi(credentialBenefitSancor);
-
+        verify(didiAppUserService, times(1)).getDidiAppUserByDni(any());
     }
 
     private CredentialBenefitSancor getCredentialBenefitSancorMock(){

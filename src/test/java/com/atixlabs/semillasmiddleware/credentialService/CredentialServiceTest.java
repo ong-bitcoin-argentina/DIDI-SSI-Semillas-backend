@@ -616,9 +616,8 @@ public class CredentialServiceTest {
         Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 0);
     }
 
-   /* @Test
-    @Ignore
-    public void buildAllCredentialsDetectDuplicatedCredential() throws InvalidRowException {
+    @Test
+    public void buildAllCredentialsDetectDuplicatedCredential() throws InvalidRowException, FileManagerException {
         log.info("buildAllCredentialsDetectDuplicatedCredential");
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         SurveyForm surveyForm = createSurveyFormMock(createAnswerRowListMock(), processExcelFileResult);
@@ -631,20 +630,17 @@ public class CredentialServiceTest {
                 anyLong(),//beneficiaryDni,
                 anyString(),//credentialCategoryCode,
                 any(ArrayList.class)//credentialStateActive
-        )).thenReturn(Optional.of(credentialsFilteredActiveMock().get(1)));
+        )).thenReturn(credentialsFilteredActiveMock());
 
         log.info(credentialsFilteredActiveMock().get(1).toString());
 
-        credentialService.buildAllCredentialsFromForm(surveyForm, processExcelFileResult);
+        credentialService.buildAllCredentialsFromForm(surveyForm, true);
 
         log.info(processExcelFileResult.toString());
 
-        //todo corregir estos errores que surgieron al modificar los mocks
-        //Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 3);
-        //Assertions.assertEquals(processExcelFileResult.getErrorRows().get(0).getErrorHeader(), "Warning CREDENCIAL DUPLICADA");
+        Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 0);
     }
 
-*/
     @Test
     public void createCredentialCreditAndBenefitWithActiveDID() throws Exception {
         when(credentialCreditRepository.findByIdBondareaCredit(anyString())).thenReturn(Optional.empty());

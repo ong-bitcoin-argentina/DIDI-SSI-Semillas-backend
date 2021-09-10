@@ -30,7 +30,7 @@
 			src/main/java/com/atixlabs/semillasmiddleware/SemillasMiddlewareApplication.java
 		</sonar.coverage.exclusions>
 		<jacoco.version>0.8.6</jacoco.version>
-		<jacoco.coveredRatio>70%</jacoco.coveredRatio>
+		<jacoco.coveredRatio>10%</jacoco.coveredRatio>
 		<jacoco.haltOnFailure>true</jacoco.haltOnFailure>
 	</properties>
 
@@ -88,14 +88,12 @@
 			<artifactId>jjwt</artifactId>
 			<version>0.9.1</version>
 		</dependency>
-
 		<!-- SECURITY -->
 		<dependency>
 			<groupId>org.passay</groupId>
 			<artifactId>passay</artifactId>
 			<version>1.4.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.security.oauth</groupId>
 			<artifactId>spring-security-oauth2</artifactId>
@@ -113,7 +111,6 @@
 			<groupId>de.codecentric</groupId>
 			<artifactId>spring-boot-admin-starter-server</artifactId>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-devtools</artifactId>
@@ -134,8 +131,6 @@
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-tomcat</artifactId>
 			<!--scope>provided</scope-->
-
-
 		</dependency>
 		<dependency>
 			<groupId>org.projectlombok</groupId>
@@ -143,14 +138,12 @@
 			<version>1.18.16</version>
 			<scope>provided</scope>
 		</dependency>
-
-	<!-- used for annotations on endpoints such as @min(), @notNull, etc -->
-	<dependency>
-		<groupId>org.hibernate.validator</groupId>
-		<artifactId>hibernate-validator</artifactId>
-		<version>6.0.10.Final</version>
-	</dependency>
-
+		<!-- used for annotations on endpoints such as @min(), @notNull, etc -->
+		<dependency>
+			<groupId>org.hibernate.validator</groupId>
+			<artifactId>hibernate-validator</artifactId>
+			<version>6.0.10.Final</version>
+		</dependency>
 		<dependency><!--xls-->
 			<groupId>org.apache.poi</groupId>
 			<artifactId>poi</artifactId>
@@ -161,14 +154,11 @@
 			<artifactId>poi-ooxml</artifactId>
 			<version>4.1.2</version>
 		</dependency>
-
-
 		<dependency>
 			<groupId>org.apache.maven.plugins</groupId>
 			<artifactId>maven-compiler-plugin</artifactId>
 			<version>3.0</version>
 		</dependency>
-
 		<!-- Retrofit -->
 		<dependency>
 			<groupId>com.google.code.gson</groupId>
@@ -180,70 +170,43 @@
 			<artifactId>retrofit</artifactId>
 			<version>2.7.2</version>
 		</dependency>
-
 		<dependency>
 			<groupId>com.squareup.retrofit2</groupId>
 			<artifactId>converter-gson</artifactId>
 			<version>2.6.1</version>
 		</dependency>
-
 		<!-- scalar allows to receive the response as string, very usefull for debugging -->
 		<dependency>
 			<groupId>com.squareup.retrofit2</groupId>
 			<artifactId>converter-scalars</artifactId>
 			<version>2.3.0</version>
 		</dependency>
-
 		<!--swagger -->
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger2</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-swagger-ui</artifactId>
 			<version>2.9.2</version>
 		</dependency>
-		
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-bean-validators</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>io.springfox</groupId>
 			<artifactId>springfox-data-rest</artifactId>
 			<version>3.0.0</version>
 		</dependency>
-
 		<dependency>
 			<groupId>org.springframework.plugin</groupId>
 			<artifactId>spring-plugin-core</artifactId>
 			<version>2.0.0.RELEASE</version>
 		</dependency>
-
-		<!-- Aspect -->
-		<!-- dependency>
-			<groupId>org.springframework</groupId>
-			<artifactId>spring-aop</artifactId>
-			<version>5.2.6.RELEASE</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjweaver</artifactId>
-			<version>1.9.5</version>
-		</dependency>
-
-		<dependency>
-			<groupId>org.aspectj</groupId>
-			<artifactId>aspectjrt</artifactId>
-			<version>1.9.5</version>
-		</dependency -->
-
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-aop</artifactId>
@@ -259,11 +222,6 @@
 			<artifactId>applicationinsights-logging-logback</artifactId>
 			<version>2.6.3</version>
 		</dependency>
-
-
-
-
-
 
 		<!-- TESTING -->
 		<dependency>

@@ -42,7 +42,9 @@ public class FileManagerController {
     public ResponseEntity uploadFile(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false, defaultValue = "true") boolean createCredentials,
-            @RequestParam(required = false, defaultValue = "true") boolean skipIdentityCredentials) throws Exception, CredentialException {
+            @RequestParam(required = false, defaultValue = "true") boolean skipIdentityCredentials,
+            @RequestParam(required = false, defaultValue = "false") boolean pdfValidation)
+            throws Exception, CredentialException {
 
         log.info("uploadFile executed");
 
@@ -52,7 +54,8 @@ public class FileManagerController {
 
         File receivedFile = fileManagerService.uploadFile(file);
         surveyExcelParseService.clearFormRelatedVariables();
-        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(receivedFile.getPath(), createCredentials, skipIdentityCredentials);
+        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSingleSheetFile(
+                receivedFile.getPath(), createCredentials, skipIdentityCredentials, pdfValidation);
 
         return ResponseEntity.ok(processExcelFileResult);
     }
@@ -77,7 +80,9 @@ public class FileManagerController {
 
         File receivedFile = fileManagerService.uploadFile(file);
 
-        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService.processSingleSheetFile(receivedFile.getPath(), true, false);
+        ProcessExcelFileResult processExcelFileResult = sancorSaludExcelParseService
+                .processSingleSheetFile(receivedFile.getPath(), true, false,
+                        false);
 
         return ResponseEntity.ok(processExcelFileResult);
 

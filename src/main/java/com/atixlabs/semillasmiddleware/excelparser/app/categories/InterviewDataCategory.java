@@ -101,4 +101,8 @@ public class InterviewDataCategory implements Category {
     }
 
     public Boolean isModification() { return true; }
+
+    public void setIsModification(AnswerDto isModification) {
+
+    }
 }

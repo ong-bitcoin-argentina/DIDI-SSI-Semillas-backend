@@ -66,7 +66,7 @@ public class SancorSaludExcelParseServiceTest {
 
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         ProcessExcelFileResult result = sancorSaludExcelParseService.processRow(mockRow, true,
-                processExcelFileResult,false, false);
+                processExcelFileResult,false, false, false);
 
     }
 

@@ -6,22 +6,19 @@ import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import org.junit.Assert;
 import org.junit.Before;
 import org.junit.Test;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import java.util.Optional;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.when;
 
 public class CertTemplateServiceTest {
 
-    private String didiTemplateCodeCredit = "code didiTemplateCodeCredit";
+    private final String didiTemplateCodeCredit = "code didiTemplateCodeCredit";
 
     @Mock
     private CertTemplateRepository certTemplateRepository;
@@ -44,6 +41,50 @@ public class CertTemplateServiceTest {
         String result = certTemplateService.getCertTemplateDescription(CredentialCategoriesCodes.CREDIT);
 
         Assert.assertEquals("Semillas Crediticia", result);
+
+    }
+
+    @Test
+    public void whenGetTemplateDescriptionCreditCertAndNotExistInDB_thenReturnBenefit(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateDescription(CredentialCategoriesCodes.BENEFIT);
+
+        Assert.assertEquals("Semillas Beneficio", result);
+
+    }
+
+    @Test
+    public void whenGetTemplateDescriptionCreditCertAndNotExistInDB_thenReturnIdentity(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateDescription(CredentialCategoriesCodes.IDENTITY);
+
+        Assert.assertEquals("Semillas Identidad", result);
+
+    }
+
+    @Test
+    public void whenGetTemplateDescriptionCreditCertAndNotExistInDB_thenReturnDwelling(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateDescription(CredentialCategoriesCodes.DWELLING);
+
+        Assert.assertEquals("Semillas Vivienda", result);
+
+    }
+
+    @Test
+    public void whenGetTemplateDescriptionCreditCertAndNotExistInDB_thenReturnEntrepreneurship(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateDescription(CredentialCategoriesCodes.ENTREPRENEURSHIP);
+
+        Assert.assertEquals("Semillas Emprendimiento", result);
 
     }
 
@@ -78,7 +119,8 @@ public class CertTemplateServiceTest {
         CertTemplate certTemplate = new CertTemplate();
         certTemplate.setTemplateCode("CERT CODE DB VALUE TEST");
 
-        when(certTemplateRepository.findByCredentialCategoriesCodes(CredentialCategoriesCodes.CREDIT)).thenReturn(Optional.of(certTemplate));
+        when(certTemplateRepository.findByCredentialCategoriesCodes(CredentialCategoriesCodes.CREDIT))
+                .thenReturn(Optional.of(certTemplate));
 
         String result = certTemplateService.getCertTemplateCode(CredentialCategoriesCodes.CREDIT);
 
@@ -86,4 +128,47 @@ public class CertTemplateServiceTest {
 
     }
 
+    @Test
+    public void whenGetTemplateCodeCreditCertAndExistInDB_thenReturnBenefit(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateCode(CredentialCategoriesCodes.BENEFIT);
+
+        Assert.assertEquals(null, result);
+
+    }
+
+    @Test
+    public void whenGetTemplateCodeCreditCertAndExistInDB_thenReturnIdentity(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateCode(CredentialCategoriesCodes.IDENTITY);
+
+        Assert.assertEquals(null, result);
+
+    }
+
+    @Test
+    public void whenGetTemplateCodeCreditCertAndExistInDB_thenReturnDwelling(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateCode(CredentialCategoriesCodes.DWELLING);
+
+        Assert.assertEquals(null, result);
+
+    }
+
+    @Test
+    public void whenGetTemplateCodeCreditCertAndExistInDB_thenReturnEntrepreneurship(){
+
+        when(certTemplateRepository.findByCredentialCategoriesCodes(any())).thenReturn(Optional.empty());
+
+        String result = certTemplateService.getCertTemplateCode(CredentialCategoriesCodes.ENTREPRENEURSHIP);
+
+        Assert.assertEquals(null, result);
+
+    }
 }

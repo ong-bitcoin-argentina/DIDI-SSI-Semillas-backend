@@ -49,7 +49,7 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
 
 
     @Override
-    Optional<CredentialBenefitSancor> getHolderCredentialBenefit(Person holder) {
+    public Optional<CredentialBenefitSancor> getHolderCredentialBenefit(Person holder) {
         return this.getCredentialBenefits(holder.getDocumentNumber(), holder.getDocumentNumber());
     }
 

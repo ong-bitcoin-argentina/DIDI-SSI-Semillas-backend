@@ -30,60 +30,62 @@ import com.atixlabs.semillasmiddleware.security.service.UserService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.google.common.collect.Sets;
 
-import java.util.*;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
+import java.util.Arrays;
+import java.util.Optional;
+
 @Component
 @Slf4j
 public class DBInitializer implements CommandLineRunner {
 
-    private UserService userService;
+    public static final String MENU_VIEW_PROFILE = "VIEW_PROFILE";
 
-    private RoleService roleService;
-
-    private PermissionRepository permissionRepository;
-
-    private MenuRepository menuRepository;
-
-    private CredentialStateRepository credentialStateRepository;
-
-    private ParameterConfigurationRepository parameterConfigurationRepository;
-
-    private RevocationReasonRepository revocationReasonRepository;
-
-    private ProcessControlRepository processControlRepository;
-
-    private String enviroment;
-
-    private ProviderCategoryRepository providerCategoryRepository;
-
-private CertTemplateRepository certTemplateRepository;
+    private final UserService userService;
+    private final RoleService roleService;
+    private final PermissionRepository permissionRepository;
+    private final MenuRepository menuRepository;
+    private final CredentialStateRepository credentialStateRepository;
+    private final ParameterConfigurationRepository parameterConfigurationRepository;
+    private final RevocationReasonRepository revocationReasonRepository;
+    private final ProcessControlRepository processControlRepository;
+    private final ProviderCategoryRepository providerCategoryRepository;
+    private final CertTemplateRepository certTemplateRepository;
 
     @Value("${didi.semillas.template_code_identity}")
     private String didiTemplateCodeIdentity;
-
     @Value("${didi.semillas.template_code_entrepreneurship}")
     private String didiTemplateCodeEntrepreneurship;
-
     @Value("${didi.semillas.template_code_dwelling}")
     private String didiTemplateCodeDwelling;
-
     @Value("${didi.semillas.template_code_benefit}")
     private String didiTemplateCodeBenefit;
-
     @Value("${didi.semillas.template_code_credit}")
     private String didiTemplateCodeCredit;
-
     @Value("${didi.semillas.template_code_sancor_salud}")
     private String didiTemplateCodeSancorSalud;
+    @Value("${semillas.username}")
+    private String semillasUserName;
+    @Value("${semillas.email}")
+    private String semillasEmail;
+    @Value("${semillas.password}")
+    private String semillasPassword;
+    @Value("${semillas.name}")
+    private String semillasName;
+    @Value("${semillas.lastname}")
+    private String semillasLastName;
 
     @Autowired
-    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository, MenuRepository menuRepository, CredentialStateRepository credentialStateRepository, ParameterConfigurationRepository parameterConfigurationRepository, RevocationReasonRepository revocationReasonRepository, ProcessControlRepository processControlRepository, @Value("${deploy.enviroment}") String enviroment, CertTemplateRepository certTemplateRepository, ProviderCategoryRepository providerCategoryRepository) {
+    public DBInitializer(UserService userService, RoleService roleService, PermissionRepository permissionRepository,
+                         MenuRepository menuRepository, CredentialStateRepository credentialStateRepository,
+                         ParameterConfigurationRepository parameterConfigurationRepository,
+                         RevocationReasonRepository revocationReasonRepository,
+                         ProcessControlRepository processControlRepository, CertTemplateRepository certTemplateRepository,
+                         ProviderCategoryRepository providerCategoryRepository) {
         this.userService = userService;
         this.roleService = roleService;
         this.permissionRepository = permissionRepository;
@@ -92,159 +94,65 @@ private CertTemplateRepository certTemplateRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
         this.revocationReasonRepository = revocationReasonRepository;
         this.processControlRepository = processControlRepository;
-        this.enviroment = enviroment;
         this.certTemplateRepository = certTemplateRepository;
         this.providerCategoryRepository = providerCategoryRepository;
     }
 
    @Override
     public void run(String... args) throws Exception {
-        if (roleService.findByCode(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role()) == null) {
-            menuRepository.deleteAll();
-            Menu mainUserMenu =
-                    menuRepository.save(
-                            Menu.builder().name("Profile").code("USERS").order(3).build());
-            Menu viewUserMenu =
-                    menuRepository.save(
-                            Menu.builder()
-                                    .name("View Profile")
-                                    .code("VIEW_PROFILE")
-                                    // .icon("user")
-                                    .parent(mainUserMenu)
-                                    .uri("/user-information")
-                                    .order(0)
-                                    .type("GET")
-                                    .build());
-            Menu logoutMenu =
-                    menuRepository.save(
-                            Menu.builder()
-                                    .name("Logout")
-                                    .code("LOGOUT")
-                                    .parent(mainUserMenu)
-                                    .order(1)
-                                    .uri("/login")
-                                    .type("GET")
-                                    .build());
-            /*
-             * Menu mModifyUser =
-             * menuRepository.save(Menu.builder().name("Modificar Usuario")
-             * .code("MODIFY_USER") .icon("user") .parent(mainUserMenu)
-             * .uri("/user-information") .type("POST") .build()); Menu mListUsers =
-             * menuRepository.save(Menu.builder().name("Usuarios") .code("LIST_USER")
-             * .icon("user") .parent(mainUserMenu) .uri("/users") .type("GET") .build());
-             */
-
-            Menu manageUsersMenu =
-                    menuRepository.save(
-                            Menu.builder()
-                                    .name("Manage Users")
-                                    .code("MANAGE_USERS")
-                                    .order(2)
-                                    .uri("/administration")
-                                    .type("GET")
-                                    .build());
-
-            Permission viewProfilePermission =
-                    permissionRepository.save(
-                            Permission.builder().code("VIEW_PROFILE").description("Permiso ver perfil").build());
-
-            Permission createUserPermission =
-                    permissionRepository.save(
-                            Permission.builder()
-                                    .code("CREATE_USER")
-                                    .description("Permiso crear usuario")
-                                    .build());
-
-            Permission viewListUserPermission =
-                    permissionRepository.save(
-                            Permission.builder()
-                                    .code("LIST_USERS")
-                                    .description("Permiso Listar usuarios")
-                                    .build());
-
-            Permission modifyUserPermission =
-                    permissionRepository.save(
-                            Permission.builder()
-                                    .code("MODIFY_USERS")
-                                    .description("Permiso Modificar usuarios")
-                                    .build());
-
-            Role roleAdmin =
-                    roleService.save(
-                            Role.builder()
-                                    .code(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role())
-                                    .description("Administrator")
-                                    .menus(Sets.newHashSet(mainUserMenu, manageUsersMenu, viewUserMenu, logoutMenu))
-                                    .permissions(
-                                            Sets.newHashSet(
-                                                    createUserPermission,
-                                                    modifyUserPermission,
-                                                    viewListUserPermission,
-                                                    viewProfilePermission))
-                                    .build());
-            Role roleViewer =
-                    roleService.save(
-                            Role.builder()
-                                    .code(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_VIEWER.role())
-                                    .description("Viewer")
-                                    .menus(Sets.newHashSet(mainUserMenu, viewUserMenu, logoutMenu))
-                                    .permissions(Sets.newHashSet(modifyUserPermission, viewProfilePermission))
-                                    .build());
-        }
-
-        if(enviroment!=null && enviroment.equals("production")){
-            this.createProductionUsers();
-        }else
-            this.createUsers();
+        saveRolesAndPermissions();
+        createUser();
 
         Optional<Menu> menu = menuRepository.findByCode("USERS");
-        if (menu.isPresent() && menu.get().getName().contains("Profile")) {
-            menu.get().setName("My account");
-            menuRepository.save(menu.get());
+        if (menu.isPresent()) {
+            if (menu.get().getName().contains("Profile")) {
+                menu.get().setName("My account");
+                menuRepository.save(menu.get());
+            }
+            if (menuRepository.findByCode(MENU_VIEW_PROFILE).isPresent()) {
+                menuRepository.save(menu.get());
+            }
         }
-
-        if (menuRepository.findByCode("VIEW_PROFILE").isPresent()) {
-            menuRepository.save(menu.get());
-        }
-
         //Credential States
-        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
+        Optional<CredentialState> credentialStateOptional = credentialStateRepository.findByStateName(
+                CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode());
         if (credentialStateOptional.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode()));
         }
-        Optional<CredentialState> credentialStateRevoke = credentialStateRepository.findByStateName(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
+        Optional<CredentialState> credentialStateRevoke = credentialStateRepository.findByStateName(
+                CredentialStatesCodes.CREDENTIAL_REVOKE.getCode());
         if (credentialStateRevoke.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.CREDENTIAL_REVOKE.getCode()));
         }
-
-        Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        Optional<CredentialState> credentialStatePending = credentialStateRepository.findByStateName(
+                CredentialStatesCodes.PENDING_DIDI.getCode());
         if (credentialStatePending.isEmpty()) {
             credentialStateRepository.save(new CredentialState(CredentialStatesCodes.PENDING_DIDI.getCode()));
         }
-
-       String holderActiveKinsmanPendingCode = CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode();
-       Optional<CredentialState> credentialHolderActiveKinsmanPending = credentialStateRepository.findByStateName(holderActiveKinsmanPendingCode);
+        String holderActiveKinsmanPendingCode = CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode();
+        Optional<CredentialState> credentialHolderActiveKinsmanPending = credentialStateRepository.findByStateName(
+                holderActiveKinsmanPendingCode);
         if (credentialHolderActiveKinsmanPending.isEmpty()) {
-           credentialStateRepository.save(new CredentialState(holderActiveKinsmanPendingCode));
+            credentialStateRepository.save(new CredentialState(holderActiveKinsmanPendingCode));
         }
 
-        if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode()).isPresent()){
+        if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode())
+                .isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
             configuration.setValue("500");
             configuration.setConfigurationName(ConfigurationCodes.MAX_EXPIRED_AMOUNT.getCode());
             parameterConfigurationRepository.save(configuration);
         }
 
-        if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode()).isPresent()){
+        if(!parameterConfigurationRepository.findByConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode())
+                .isPresent()){
             ParameterConfiguration configuration = new ParameterConfiguration();
             configuration.setValue("1234567890");
             configuration.setConfigurationName(ConfigurationCodes.ID_DIDI_ISSUER.getCode());
             parameterConfigurationRepository.save(configuration);
         }
 
-
-        //revocation reasons
-       saveRevocationCodes();
+        saveRevocationCodes();
 
         if(processControlRepository.findByProcessName(ProcessNamesCodes.BONDAREA.getCode()).isEmpty()){
             ProcessControl process = new ProcessControl();
@@ -269,205 +177,79 @@ private CertTemplateRepository certTemplateRepository;
             processControlRepository.save(process);
         }
 	
-	    this.loadCertTemplatesValues();
+        this.loadCertTemplatesValues();
         this.saveCategories();
     }
 
+    private void createUser() throws ExistUserException {
+        if (userService.findByUsername(semillasUserName).isEmpty()) {
+            UserEditRequest userResponse = new UserEditRequest();
+            userResponse.setUsername(semillasUserName);
+            userResponse.setEmail(semillasEmail);
+            userResponse.setPassword(semillasPassword);
+            userResponse.setNewPassword(semillasPassword);
+            userResponse.setConfirmNewPassword(semillasPassword);
+            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
+            userResponse.setName(semillasName);
+            userResponse.setLastName(semillasLastName);
+            userService.createOrEdit(userResponse);
+        }
+    }
+
+    private void saveRolesAndPermissions(){
+        if (roleService.findByCode(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role()) == null) {
+
+            menuRepository.deleteAll();
+            Menu mainUserMenu = menuRepository.save(Menu.builder().name("Profile").code("USERS").order(3).build());
+            Menu viewUserMenu = menuRepository.save(Menu.builder().name("View Profile").code(MENU_VIEW_PROFILE)
+                    .parent(mainUserMenu).uri("/user-information").order(0).type("GET").build());
+            Menu logoutMenu = menuRepository.save(Menu.builder().name("Logout").code("LOGOUT").parent(mainUserMenu)
+                    .order(1).uri("/login").type("GET").build());
+            Menu manageUsersMenu = menuRepository.save(Menu.builder().name("Manage Users").code("MANAGE_USERS").order(2)
+                    .uri("/administration").type("GET").build());
+
+            Permission viewProfilePermission = permissionRepository.save(Permission.builder().code(MENU_VIEW_PROFILE)
+                    .description("Permiso ver perfil").build());
+            Permission createUserPermission = permissionRepository.save(Permission.builder().code("CREATE_USER")
+                    .description("Permiso crear usuario").build());
+            Permission viewListUserPermission = permissionRepository.save(Permission.builder().code("LIST_USERS")
+                    .description("Permiso Listar usuarios").build());
+            Permission modifyUserPermission = permissionRepository.save(Permission.builder().code("MODIFY_USERS")
+                    .description("Permiso Modificar usuarios").build());
+
+            roleService.save(Role.builder().code(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role())
+                    .description("Administrator")
+                    .menus(Sets.newHashSet(mainUserMenu, manageUsersMenu, viewUserMenu, logoutMenu))
+                    .permissions(Sets.newHashSet(createUserPermission, modifyUserPermission, viewListUserPermission,
+                            viewProfilePermission))
+                    .build());
+            roleService.save(Role.builder()
+                    .code(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_VIEWER.role())
+                    .description("Viewer")
+                    .menus(Sets.newHashSet(mainUserMenu, viewUserMenu, logoutMenu))
+                    .permissions(Sets.newHashSet(modifyUserPermission, viewProfilePermission))
+                    .build());
+        }
+    }
+
     private void saveRevocationCodes() {
-        String[] revocationNames = Arrays.stream(RevocationReasonsCodes.values()).map(a -> a.getCode()).toArray(String[]::new);
+        String[] revocationNames = Arrays.stream(RevocationReasonsCodes.values()).map(RevocationReasonsCodes::getCode)
+                .toArray(String[]::new);
         for (String revocationName : revocationNames) {
-            if (!revocationReasonRepository.findByReason(revocationName).isPresent()) {
+            if (revocationReasonRepository.findByReason(revocationName).isEmpty())
                 revocationReasonRepository.save(new RevocationReason(revocationName));
-            }
         }
     }
 
     private void saveCategories(){
         String[] categories = new String[]{"Salud", "Oportunidad", "Saber", "Sueño", "Finanza"};
         for (String category : categories) {
-            if(!providerCategoryRepository.findByName(category).isPresent()) {
+            if(providerCategoryRepository.findByName(category).isEmpty())
                 providerCategoryRepository.save(new ProviderCategory(category));
-            }
-        }
-
-
-    }
-
-    private void createUsers() throws ExistUserException {
-        //TODO change pass
-        if (!userService.findByUsername("admin@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("admin@atixlabs.com");
-            userResponse.setEmail("admin@atixlabs.com");
-            userResponse.setPassword("admin");
-            userResponse.setNewPassword("admin");
-            userResponse.setConfirmNewPassword("admin");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Admin");
-            userResponse.setLastName("Admin");
-            userService.createOrEdit(userResponse);
-        }
-//TODO users only for test, delete
-        if (!userService.findByUsername("flor@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("flor@atixlabs.com");
-            userResponse.setEmail("flor@atixlabs.com");
-            userResponse.setPassword("flor");
-            userResponse.setNewPassword("flor");
-            userResponse.setConfirmNewPassword("flor");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Florencia");
-            userResponse.setLastName("Atix");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("facu@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("facu@atixlabs.com");
-            userResponse.setEmail("facu@atixlabs.com");
-            userResponse.setPassword("facu");
-            userResponse.setNewPassword("facu");
-            userResponse.setConfirmNewPassword("facu");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Facundo");
-            userResponse.setLastName("Atix");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("tamara@semillas.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("tamara@semillas.com");
-            userResponse.setEmail("tamara@semillas.com");
-            userResponse.setPassword("tamara");
-            userResponse.setNewPassword("tamara");
-            userResponse.setConfirmNewPassword("tamara");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Tamara");
-            userResponse.setLastName("Semillas");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("cronUser@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("cronUser@atixlabs.com");
-            userResponse.setEmail("cronUser@atixlabs.com");
-            userResponse.setPassword("admin");
-            userResponse.setNewPassword("admin");
-            userResponse.setConfirmNewPassword("admin");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("cronUser");
-            userResponse.setLastName("cronUser");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("didiUser@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("didiUser@atixlabs.com");
-            userResponse.setEmail("didiUser@atixlabs.com");
-            userResponse.setPassword("admin");
-            userResponse.setNewPassword("admin");
-            userResponse.setConfirmNewPassword("admin");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("didiUser");
-            userResponse.setLastName("didiUser");
-            userService.createOrEdit(userResponse);
-        }
-        if (!userService.findByUsername("viewer@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("viewer@atixlabs.com");
-            userResponse.setEmail("viewer@atixlabs.com");
-            userResponse.setPassword("viewer");
-            userResponse.setNewPassword("viewer");
-            userResponse.setConfirmNewPassword("viewer");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_VIEWER.role());
-            userResponse.setName("Viewer");
-            userResponse.setLastName("Viewer");
-            userService.createOrEdit(userResponse);
         }
     }
 
-
-    private void createProductionUsers() throws ExistUserException {
-        //TODO change pass
-        if (!userService.findByUsername("admin").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("admin");
-            userResponse.setEmail("admin@semillas.org");
-            userResponse.setPassword("admin1q2w3e4r");
-            userResponse.setNewPassword("admin1q2w3e4r");
-            userResponse.setConfirmNewPassword("admin1q2w3e4r");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Admin");
-            userResponse.setLastName("Admin");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("atixlabs").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("atixlabs");
-            userResponse.setEmail("info@atixlabs.com");
-            userResponse.setPassword("atix1q2w3e4r");
-            userResponse.setNewPassword("atix1q2w3e4r");
-            userResponse.setConfirmNewPassword("atix1q2w3e4r");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Atix");
-            userResponse.setLastName("Labs");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("tamara@semillas.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("tamara@semillas.com");
-            userResponse.setEmail("tamara@semillas.com");
-            userResponse.setPassword("tama1q2w3e4r");
-            userResponse.setNewPassword("tama1q2w3e4r");
-            userResponse.setConfirmNewPassword("tama1q2w3e4r");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("Tamara");
-            userResponse.setLastName("Semillas");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("cronUser@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("cronUser@atixlabs.com");
-            userResponse.setEmail("cronUser@atixlabs.com");
-            userResponse.setPassword("cron1q2w3e4r");
-            userResponse.setNewPassword("cron1q2w3e4r");
-            userResponse.setConfirmNewPassword("cron1q2w3e4r");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("cronUser");
-            userResponse.setLastName("cronUser");
-            userService.createOrEdit(userResponse);
-        }
-
-        if (!userService.findByUsername("didiUser@atixlabs.com").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("didiUser@atixlabs.com");
-            userResponse.setEmail("didiUser@atixlabs.com");
-            userResponse.setPassword("didi1q2w3e4r");
-            userResponse.setNewPassword("didi1q2w3e4r");
-            userResponse.setConfirmNewPassword("didi1q2w3e4r");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_ADMIN.role());
-            userResponse.setName("didiUser");
-            userResponse.setLastName("didiUser");
-            userService.createOrEdit(userResponse);
-        }
-        if (!userService.findByUsername("viewer").isPresent()) {
-            UserEditRequest userResponse = new UserEditRequest();
-            userResponse.setUsername("viewer");
-            userResponse.setEmail("viewer@semillas.com");
-            userResponse.setPassword("viewer1q2w3e4r");
-            userResponse.setNewPassword("viewer1q2w3e4r");
-            userResponse.setConfirmNewPassword("viewer1q2w3e4r");
-            userResponse.setRole(com.atixlabs.semillasmiddleware.security.enums.Role.ROLE_VIEWER.role());
-            userResponse.setName("Viewer");
-            userResponse.setLastName("Viewer");
-            userService.createOrEdit(userResponse);
-        }
-    }
-
-/**
+    /**
      *    IDENTITY("Identidad"),
      *     DWELLING("Vivienda"),
      *     ENTREPRENEURSHIP("Emprendimiento"),
@@ -495,15 +277,15 @@ private CertTemplateRepository certTemplateRepository;
             CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT,didiTemplateCodeBenefit,"Semillas Beneficio" );
             certTemplateRepository.save(certTemplate);
         }
-
         if(!this.isCertTemplateValueExists(CredentialCategoriesCodes.BENEFIT_SANCOR)){
             CertTemplate certTemplate = new CertTemplate(CredentialCategoriesCodes.BENEFIT_SANCOR,didiTemplateCodeSancorSalud,"Sancor Salud" );
             certTemplateRepository.save(certTemplate);
         }
     }
-    private boolean isCertTemplateValueExists(CredentialCategoriesCodes credentialCategoriesCodes){
 
-        Optional<CertTemplate> certTemplate =  certTemplateRepository.findByCredentialCategoriesCodes(credentialCategoriesCodes);
+    private boolean isCertTemplateValueExists(CredentialCategoriesCodes credentialCategoriesCodes){
+        Optional<CertTemplate> certTemplate =  certTemplateRepository
+                .findByCredentialCategoriesCodes(credentialCategoriesCodes);
         return certTemplate.isPresent();
     }
 }

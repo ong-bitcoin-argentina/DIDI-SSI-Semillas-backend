@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.dto.ApiResponse;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.dto.RevokeRequestDto;
@@ -13,10 +12,10 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
-import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
-import com.atixlabs.semillasmiddleware.app.service.MailService;
 import com.atixlabs.semillasmiddleware.app.service.ShareCredentialService;
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
+import com.atixlabs.semillasmiddleware.filemanager.exception.EmptyFileException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -25,13 +24,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.util.*;
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -42,19 +45,27 @@ public class CredentialController {
     public static final String URL_MAPPING_CREDENTIAL = "/credentials";
 
     private CredentialService credentialService;
-    private LoanService loanService;
-    private ProcessControlService processControlService;
     private ShareCredentialService shareCredentialService;
 
     @Autowired
     public CredentialController(CredentialService credentialService,
-                                LoanService loanService,
-                                ProcessControlService processControlService,
                                 ShareCredentialService shareCredentialService) {
         this.credentialService = credentialService;
-        this.loanService = loanService;
-        this.processControlService = processControlService;
         this.shareCredentialService = shareCredentialService;
+    }
+
+    @PostMapping("/importCredentials")
+    @ResponseBody
+    public ResponseEntity<ProcessExcelFileResult> importCredentials(
+            @RequestParam("file") MultipartFile file) throws EmptyFileException, IOException {
+
+        log.info("uploadFile executed");
+
+        if (file.isEmpty()) {
+            throw new EmptyFileException("Empty file");
+        }
+
+        return ResponseEntity.ok(credentialService.importCredentials(file));
     }
 
     //TODO fix
@@ -96,8 +107,7 @@ public class CredentialController {
     @GetMapping("/types")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialTypes() {
-        List<String> credentialTypes = Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
-        return credentialTypes;
+        return Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
     }
 
     @GetMapping("/revocation-reasons")
@@ -106,8 +116,6 @@ public class CredentialController {
         //todo this is not the best option to obtain the reasons able by the user.
         return credentialService.getRevocationReasonsForUser();
     }
-
-
 
     @PatchMapping("/revoke/{idCredential}/reason/{idReason}")
     @ResponseStatus(HttpStatus.OK)
@@ -159,7 +167,7 @@ public class CredentialController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/share")
-    public ResponseEntity<?> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
+    public ResponseEntity notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
         if (!shareCredentialRequest.getCustomProviderEmail().isPresent() && !shareCredentialRequest.getProviderId().isPresent())
             return ResponseEntity.badRequest().body(ApiResponse.error()
                     .setBody("You must either specify a provider id or an email")

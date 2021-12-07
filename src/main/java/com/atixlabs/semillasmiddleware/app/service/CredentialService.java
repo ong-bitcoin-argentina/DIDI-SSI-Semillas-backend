@@ -55,6 +55,7 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -1465,26 +1466,25 @@ public class CredentialService {
 
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
         XSSFSheet worksheet = workbook.getSheetAt(0);
+        formatHeader(worksheet);
 
-        String workSheetName = workbook.getSheetName(0);
-        XSSFRow headerRow =  worksheet.getRow(0);
-        XSSFCell cell = headerRow.getCell(0);
-//        XSSFCell newCell = new XSSFCell("hola");
-        worksheet.removeRow(headerRow);
-//        for(int i=1;i<headerRow.getRowNum() ;i++){
-//            XSSFCell cell = headerRow.getCell(i);
-//            headerRow.getCell(i).setCellValue("hola");
-//        }
-        for(int i=1;i<worksheet.getPhysicalNumberOfRows() ;i++) {
-
-            XSSFRow row = worksheet.getRow(i);
-
-            XSSFCell row01 = row.getCell(0);
-            XSSFCell row02 = row.getCell(1);
-
-        }
+        
 
         return processExcelFileResult;
+    }
+
+    public void formatHeader(XSSFSheet sheet) {
+        XSSFRow headerRow =  sheet.getRow(0);
+        for(int i=0;i<headerRow.getLastCellNum() ;i++){
+            XSSFCell cell = headerRow.getCell(i);
+            String newCell = cell.getStringCellValue();
+            if (newCell.contains("#")) {
+                newCell = newCell.substring(newCell.indexOf("#") + 1);
+                newCell = newCell.substring(0, newCell.indexOf("#"));
+                headerRow.createCell(i);
+                headerRow.getCell(i).setCellValue(newCell);
+            }
+        }
     }
 }
 

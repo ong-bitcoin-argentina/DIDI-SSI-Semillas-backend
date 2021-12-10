@@ -29,6 +29,7 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonType
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
+import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
@@ -54,10 +55,13 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.poiji.bind.Poiji;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.hssf.usermodel.HSSFRow;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
-import org.apache.poi.xssf.usermodel.XSSFRichTextString;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
@@ -1463,12 +1467,22 @@ public class CredentialService {
 
     public ProcessExcelFileResult importCredentials(MultipartFile file) throws IOException {
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
-
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+
         XSSFSheet worksheet = workbook.getSheetAt(0);
+        XSSFSheet childGroupSheet = workbook.getSheet("grupo_hijos");
+        XSSFSheet memberFamilyGroupSheet = workbook.getSheet("grupo_datos_miembro");
+        XSSFSheet memberIncomeGroupSheet = workbook.getSheet("grupo_ingresos_miembro");
+        XSSFSheet entrepreneurshipCreditSheet = workbook.getSheet("grupo_creditos_emprendimiento");
+        XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
+
         formatHeader(worksheet);
 
-        
+        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
+
+//        for (Form form: formList) {
+//
+//        }
 
         return processExcelFileResult;
     }
@@ -1478,11 +1492,13 @@ public class CredentialService {
         for(int i=0;i<headerRow.getLastCellNum() ;i++){
             XSSFCell cell = headerRow.getCell(i);
             String newCell = cell.getStringCellValue();
-            if (newCell.contains("#")) {
+            if (!newCell.isEmpty() && newCell.contains("#")) {
                 newCell = newCell.substring(newCell.indexOf("#") + 1);
-                newCell = newCell.substring(0, newCell.indexOf("#"));
-                headerRow.createCell(i);
-                headerRow.getCell(i).setCellValue(newCell);
+                if (!newCell.isEmpty() && newCell.contains("#")) {
+                    newCell = newCell.substring(0, newCell.indexOf("#"));
+                    headerRow.createCell(i);
+                    headerRow.getCell(i).setCellValue(newCell);
+                }
             }
         }
     }

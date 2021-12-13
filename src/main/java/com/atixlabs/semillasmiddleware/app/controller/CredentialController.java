@@ -57,7 +57,9 @@ public class CredentialController {
     @PostMapping("/importCredentials")
     @ResponseBody
     public ResponseEntity<ProcessExcelFileResult> importCredentials(
-            @RequestParam("file") MultipartFile file) throws EmptyFileException, IOException {
+            @RequestParam("file") MultipartFile file,
+            @RequestParam(required = false, defaultValue = "false") boolean createCredentials)
+            throws EmptyFileException, IOException {
 
         log.info("uploadFile executed");
 
@@ -65,7 +67,7 @@ public class CredentialController {
             throw new EmptyFileException("Empty file");
         }
 
-        return ResponseEntity.ok(credentialService.importCredentials(file));
+        return ResponseEntity.ok(credentialService.importCredentials(file,createCredentials));
     }
 
     //TODO fix

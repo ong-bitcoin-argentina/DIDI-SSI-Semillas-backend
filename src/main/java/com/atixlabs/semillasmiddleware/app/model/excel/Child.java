@@ -8,14 +8,20 @@ public class Child {
     @ExcelRow
     private int rowIndex;
 
-    @ExcelCellName("Grupo Solidario")
-    private String grupoSolidario;
+    @ExcelCellName("Apellido_Hijo")
+    private String apellidoHijo;
 
-    @ExcelCellName("Asesora")
-    private String asesora;
+    @ExcelCellName("Nombre_Hijo")
+    private String nombreHijo;
 
-    @ExcelCellName("Nombre")
-    private String nombre;
+    @ExcelCellName("Fecha_Nacimiento_Hijo")
+    private String fechaNacimientoHijo;
 
+    @ExcelCellName("Edad_Hijo")
+    private String edadHijo;
 
+    @ExcelCellName("_parent_index")
+    private int parentIndex;
+
+    //TODO: add missing form columns
 }

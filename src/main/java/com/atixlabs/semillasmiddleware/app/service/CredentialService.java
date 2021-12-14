@@ -15,42 +15,89 @@ import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsExcepti
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.*;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialEntrepreneurship;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialFilterDto;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
+import com.atixlabs.semillasmiddleware.app.model.excel.Child;
+import com.atixlabs.semillasmiddleware.app.model.excel.EntrepreneurshipCredit;
+import com.atixlabs.semillasmiddleware.app.model.excel.FamilyCredit;
+import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMember;
+import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMemberIncome;
+import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
-import com.atixlabs.semillasmiddleware.app.repository.*;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.*;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitsRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialDwellingRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialEntrepreneurshipRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
+import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.poiji.bind.Poiji;
+import com.poiji.option.PoijiOptions;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
+import org.apache.poi.ss.usermodel.Name;
+import org.apache.poi.ss.util.AreaReference;
+import org.apache.poi.ss.util.CellReference;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
+import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.*;
 
 @Slf4j
 @Service
@@ -766,7 +813,7 @@ public class CredentialService {
                         ExcelErrorDetail.builder()
                         .errorHeader("Advertencia CREDENCIAL DUPLICADA")
                         .errorBody(bodyLog(credentialsOptional.get(0)))
-                        .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
+                        .errorType(DUPLICATED_CREDENTIAL)
                         .credentialId(credentialsOptional.get(0).getId())
                         .category(credentialsOptional.get(0).getCredentialDescription())
                         .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
@@ -1424,6 +1471,110 @@ public class CredentialService {
         CredentialState statePendingDidi = credentialStateService.getCredentialPendingDidiState();
 
         return (credential.getCredentialState().equals(statePendingDidi));
+    }
+
+    public ProcessExcelFileResult importCredentials(MultipartFile file, boolean createCredentials) throws IOException {
+
+        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+
+        XSSFSheet worksheet = workbook.getSheetAt(0);
+        XSSFSheet childGroupSheet = workbook.getSheet("grupo_hijos");
+        XSSFSheet familyMemberGroupSheet = workbook.getSheet("grupo_datos_miembro");
+        XSSFSheet familyMemberIncomeGroupSheet = workbook.getSheet("grupo_ingresos_miembro");
+        XSSFSheet entrepreneurshipCreditSheet = workbook.getSheet("grupo_creditos_emprendimiento");
+        XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
+
+        formatHeader(worksheet);
+        formatHeader(childGroupSheet);
+        formatHeader(familyMemberGroupSheet);
+        formatHeader(familyMemberIncomeGroupSheet);
+        formatHeader(entrepreneurshipCreditSheet);
+        formatHeader(familyCreditGroupSheet);
+
+//        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
+
+        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
+        List<Child> childList = Poiji.fromExcel(childGroupSheet,Child.class);
+        List<FamilyMember> familyMemberList = Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class);
+        List<FamilyMemberIncome> familyMemberIncomeList =
+                Poiji.fromExcel(familyMemberIncomeGroupSheet, FamilyMemberIncome.class);
+        List<EntrepreneurshipCredit> entrepreneurshipCreditList =
+                Poiji.fromExcel(entrepreneurshipCreditSheet, EntrepreneurshipCredit.class);
+        List<FamilyCredit> familyCreditList =
+                Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class);
+
+        return getDummyValidations();
+    }
+
+    //TODO: delete this method after implement validate credentials
+    private ProcessExcelFileResult getDummyValidations() {
+        ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
+
+        processExcelFileResult.setTotalReadRows(372);
+        processExcelFileResult.setTotalValidRows(369);
+        processExcelFileResult.setTotalErrorsRows(3);
+        processExcelFileResult.setTotalEmptyRows(25);
+        processExcelFileResult.setTotalWarnRows(0);
+        processExcelFileResult.setTotalProcessedForms(1);
+        processExcelFileResult.setFileName("diego_rodriguez.xlsx");
+        processExcelFileResult.setWarnRows(new ArrayList<>());
+
+        List<ExcelErrorDetail> excelErrorDetailList = new ArrayList<>();
+        ExcelErrorDetail excelErrorDetail01 = new ExcelErrorDetail(
+                "Advertencia CREDENCIAL DUPLICADA",
+                "Existe al menos una credencial de tipo Identidad en estado Titular_vigente-Familiar_pendiente para el DNI 38944784 si desea continuar debe revocarlas manualmente",
+                DUPLICATED_CREDENTIAL,
+                38944784L,
+                "Luis",
+                "Gonzalez",
+                6L,
+                "Identidad - Familiar"
+        );
+        ExcelErrorDetail excelErrorDetail02 = new ExcelErrorDetail(
+                "Advertencia CREDENCIAL DUPLICADA",
+                "Existe al menos una credencial de tipo Identidad en estado Titular_vigente-Familiar_pendiente para el DNI 3330533 si desea continuar debe revocarlas manualmente",
+                DUPLICATED_CREDENTIAL,
+                3330533L,
+                "Pedro",
+                "Sanchez",
+                7L,
+                "Identidad - Familiar"
+        );
+        ExcelErrorDetail excelErrorDetail03 = new ExcelErrorDetail(
+                "Advertencia CREDENCIAL DUPLICADA",
+                "Existe al menos una credencial de tipo Identidad en estado Titular_vigente-Familiar_pendiente para el DNI 3422420 si desea continuar debe revocarlas manualmente",
+                DUPLICATED_CREDENTIAL,
+                3422420L,
+                "Carla",
+                "Peterson",
+                8L,
+                "Identidad - Familiar"
+        );
+        excelErrorDetailList.add(excelErrorDetail01);
+        excelErrorDetailList.add(excelErrorDetail02);
+        excelErrorDetailList.add(excelErrorDetail03);
+        processExcelFileResult.setErrorRows(excelErrorDetailList);
+
+        return processExcelFileResult;
+    }
+
+
+    public void formatHeader(XSSFSheet sheet) {
+        if (Objects.isNull(sheet))
+            return;
+        XSSFRow headerRow =  sheet.getRow(0);
+        for(int i=0;i<headerRow.getLastCellNum() ;i++){
+            XSSFCell cell = headerRow.getCell(i);
+            String newCell = cell.getStringCellValue();
+            if (!newCell.isEmpty() && newCell.contains("#")) {
+                newCell = newCell.substring(newCell.indexOf("#") + 1);
+                if (!newCell.isEmpty() && newCell.contains("#")) {
+                    newCell = newCell.substring(0, newCell.indexOf("#"));
+                    headerRow.createCell(i);
+                    headerRow.getCell(i).setCellValue(newCell);
+                }
+            }
+        }
     }
 }
 

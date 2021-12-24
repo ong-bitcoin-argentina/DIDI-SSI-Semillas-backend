@@ -87,12 +87,15 @@ import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
@@ -783,7 +786,8 @@ public class CredentialService {
                 if (categoryName.equals(BENEFICIARY_CATEGORY_NAME) || !skipIdentityCredentials) {
                     PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
                     Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
-                    credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
+                    credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(),
+                            CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
                     if (categoryName.equals(BENEFICIARY_CATEGORY_NAME)) {
                         beneficiaryAddress = beneficiaryPersonCategory.getAddress();
                     }
@@ -1503,7 +1507,38 @@ public class CredentialService {
         List<FamilyCredit> familyCreditList =
                 Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class);
 
-        return getDummyValidations();
+
+        List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(
+                List.of(CredentialStatesCodes.PENDING_DIDI.getCode(),
+                        CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(),
+                        CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode())
+                );
+
+        ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
+
+        for (Form form: formList) {
+            List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
+                    Long.parseLong(form.getNumeroDniBeneficiario()), CredentialCategoriesCodes.IDENTITY.getCode(),
+                    Long.parseLong(form.getNumeroDniBeneficiario()));
+
+            if (!credentialsOptional.isEmpty()) {
+                log.info(bodyLog(credentialsOptional.get(0)));
+                processExcelFileResult.addRowError(
+                        ExcelErrorDetail.builder()
+                                .errorHeader("Advertencia CREDENCIAL DUPLICADA")
+                                .errorBody(bodyLog(credentialsOptional.get(0)))
+                                .errorType(DUPLICATED_CREDENTIAL)
+                                .credentialId(credentialsOptional.get(0).getId())
+                                .category(credentialsOptional.get(0).getCredentialDescription())
+                                .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
+                                .name(credentialsOptional.get(0).getBeneficiaryFirstName())
+                                .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
+                                .build()
+                );
+            }
+        }
+
+        return processExcelFileResult;
     }
 
     //TODO: delete this method after implement validate credentials

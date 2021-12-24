@@ -2,7 +2,11 @@ package com.atixlabs.semillasmiddleware.app.model.excel;
 
 import com.poiji.annotation.ExcelCellName;
 import com.poiji.annotation.ExcelRow;
+import lombok.Getter;
+import lombok.Setter;
 
+@Getter
+@Setter
 public class Form {
 
     @ExcelRow
@@ -32,5 +36,10 @@ public class Form {
     @ExcelCellName("Estado_Civil_Otro_Beneficiario")
     private String estadoCivilOtroBeneficiario;
 
-    //TODO: add missing form columns
+    @ExcelCellName("Genero_Beneficiario")
+    private String generoBeneficiario;
+
+    @ExcelCellName("Numero_Dni_Beneficiario")
+    private String numeroDniBeneficiario;
+
 }

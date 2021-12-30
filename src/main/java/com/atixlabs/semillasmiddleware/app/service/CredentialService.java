@@ -54,6 +54,7 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.Entrepreneursh
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
@@ -100,6 +101,7 @@ import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
+import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.BENEFICIARY;
 import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.*;
 
 @Slf4j
@@ -925,7 +927,8 @@ public class CredentialService {
             case CHILD_CATEGORY_NAME:
             case SPOUSE_CATEGORY_NAME:
             case KINSMAN_CATEGORY_NAME:
-                CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
+                CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category,
+                        creditHolder));
                 this.createCredentialIdentityKinsman(credentialIdentity);
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
@@ -941,7 +944,8 @@ public class CredentialService {
                 if (Objects.isNull(dwellingCategory.isModification()))
                     throw new FileManagerException("No se encuentra la pregunta de vivienda.");
                 if (dwellingCategory.isModification()) {
-                    PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
+                    PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(
+                            BENEFICIARY_CATEGORY_NAME.getCode(), null);
                     credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
                     break;
                 }
@@ -1518,8 +1522,8 @@ public class CredentialService {
 
         for (Form form: formList) {
             List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
-                    Long.parseLong(form.getNumeroDniBeneficiario()), CredentialCategoriesCodes.IDENTITY.getCode(),
-                    Long.parseLong(form.getNumeroDniBeneficiario()));
+                    form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                    form.getNumeroDniBeneficiario());
 
             if (!credentialsOptional.isEmpty()) {
                 log.info(bodyLog(credentialsOptional.get(0)));
@@ -1536,63 +1540,45 @@ public class CredentialService {
                                 .build()
                 );
             }
+
+            if (processExcelFileResult.getErrorRows().isEmpty()) {
+                this.saveIdentityCredentials(form);
+            }
         }
-
         return processExcelFileResult;
     }
 
-    //TODO: delete this method after implement validate credentials
-    private ProcessExcelFileResult getDummyValidations() {
-        ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
 
-        processExcelFileResult.setTotalReadRows(372);
-        processExcelFileResult.setTotalValidRows(369);
-        processExcelFileResult.setTotalErrorsRows(3);
-        processExcelFileResult.setTotalEmptyRows(25);
-        processExcelFileResult.setTotalWarnRows(0);
-        processExcelFileResult.setTotalProcessedForms(1);
-        processExcelFileResult.setFileName("diego_rodriguez.xlsx");
-        processExcelFileResult.setWarnRows(new ArrayList<>());
+    public void saveIdentityCredentials(Form form) {
 
-        List<ExcelErrorDetail> excelErrorDetailList = new ArrayList<>();
-        ExcelErrorDetail excelErrorDetail01 = new ExcelErrorDetail(
-                "Advertencia CREDENCIAL DUPLICADA",
-                "Existe al menos una credencial de tipo Identidad en estado Titular_vigente-Familiar_pendiente para el DNI 38944784 si desea continuar debe revocarlas manualmente",
-                DUPLICATED_CREDENTIAL,
-                38944784L,
-                "Luis",
-                "Gonzalez",
-                6L,
-                "Identidad - Familiar"
-        );
-        ExcelErrorDetail excelErrorDetail02 = new ExcelErrorDetail(
-                "Advertencia CREDENCIAL DUPLICADA",
-                "Existe al menos una credencial de tipo Identidad en estado Titular_vigente-Familiar_pendiente para el DNI 3330533 si desea continuar debe revocarlas manualmente",
-                DUPLICATED_CREDENTIAL,
-                3330533L,
-                "Pedro",
-                "Sanchez",
-                7L,
-                "Identidad - Familiar"
-        );
-        ExcelErrorDetail excelErrorDetail03 = new ExcelErrorDetail(
-                "Advertencia CREDENCIAL DUPLICADA",
-                "Existe al menos una credencial de tipo Identidad en estado Titular_vigente-Familiar_pendiente para el DNI 3422420 si desea continuar debe revocarlas manualmente",
-                DUPLICATED_CREDENTIAL,
-                3422420L,
-                "Carla",
-                "Peterson",
-                8L,
-                "Identidad - Familiar"
-        );
-        excelErrorDetailList.add(excelErrorDetail01);
-        excelErrorDetailList.add(excelErrorDetail02);
-        excelErrorDetailList.add(excelErrorDetail03);
-        processExcelFileResult.setErrorRows(excelErrorDetailList);
+        // BENEFICIARY_CATEGORY_NAME
+        Person beneficiary = new Person(form);
+        beneficiary = savePersonIfNew(beneficiary);
+        CredentialIdentity credentialIdentity = new CredentialIdentity(beneficiary, BENEFICIARY);
+        credentialIdentityService.save(credentialIdentity);
 
-        return processExcelFileResult;
+        // CHILD_CATEGORY_NAME, SPOUSE_CATEGORY_NAME, KINSMAN_CATEGORY_NAME
+//        CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
+//        this.createCredentialIdentityKinsman(credentialIdentity);
+
+        // ENTREPRENEURSHIP_CATEGORY_NAME
+//        EntrepreneurshipCategory entrepreneurshipCategory = (EntrepreneurshipCategory) category;
+//        if (Objects.isNull(entrepreneurshipCategory.isModification()))
+//            throw new FileManagerException("No se encuentra la pregunta de emprendimiento.");
+//        if (entrepreneurshipCategory.isModification()) {
+//            credentialEntrepreneurshipRepository.save(buildEntrepreneurshipCredential(category, creditHolder));
+//        }
+
+        // DWELLING_CATEGORY_NAME:
+//        DwellingCategory dwellingCategory = (DwellingCategory) category;
+//        if (Objects.isNull(dwellingCategory.isModification()))
+//            throw new FileManagerException("No se encuentra la pregunta de vivienda.");
+//        if (dwellingCategory.isModification()) {
+//            PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(
+//                    BENEFICIARY_CATEGORY_NAME.getCode(), null);
+//            credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
+//        }
     }
-
 
     public void formatHeader(XSSFSheet sheet) {
         if (Objects.isNull(sheet))

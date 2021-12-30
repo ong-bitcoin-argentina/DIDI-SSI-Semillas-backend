@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
+import com.atixlabs.semillasmiddleware.app.model.excel.Child;
 import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.Getter;
@@ -57,6 +58,17 @@ public class Person {
         this.lastName = form.getApellidoBeneficiario();
         this.birthDate = form.getFechaNacimientoBeneficiario();
         this.gender = form.getGeneroBeneficiario();
+    }
+
+    public Person(Child child) {
+        this.documentNumber = child.getNumeroDocumentoHijo();
+        this.firstName = child.getNombreHijo();
+        this.lastName = child.getApellidoHijo();
+        this.birthDate = child.getFechaNacimientoHijo();
+        if (child.getGeneroHijo().isEmpty())
+            this.gender = child.getGeneroOtroHijo();
+        else
+            this.gender = child.getGeneroHijo();
     }
 
     //TODO user this

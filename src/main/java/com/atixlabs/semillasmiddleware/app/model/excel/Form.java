@@ -5,6 +5,8 @@ import com.poiji.annotation.ExcelRow;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.time.LocalDate;
+
 @Getter
 @Setter
 public class Form {
@@ -25,7 +27,7 @@ public class Form {
     private String apellidoBeneficiario;
 
     @ExcelCellName("Fecha_Nacimiento_Beneficiario")
-    private String fechaNacimientoBeneficiario;
+    private LocalDate fechaNacimientoBeneficiario;
 
     @ExcelCellName("Edad_Beneficiario")
     private String edadBeneficiario;
@@ -40,6 +42,6 @@ public class Form {
     private String generoBeneficiario;
 
     @ExcelCellName("Numero_Dni_Beneficiario")
-    private String numeroDniBeneficiario;
+    private Long numeroDniBeneficiario;
 
 }

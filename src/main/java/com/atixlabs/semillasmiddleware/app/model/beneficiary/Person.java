@@ -2,17 +2,25 @@ package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
+import com.atixlabs.semillasmiddleware.app.model.excel.Child;
+import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
-import org.hibernate.annotations.Where;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.FetchType;
+import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
+import javax.persistence.Id;
+import javax.persistence.ManyToMany;
+import javax.persistence.OneToMany;
+import javax.persistence.Table;
 import java.time.LocalDate;
 import java.util.ArrayList;
-import java.util.HashSet;
 import java.util.List;
 
 @NoArgsConstructor
@@ -40,9 +48,28 @@ public class Person {
     @OneToMany
     private List<DIDHisotoric> DIDIsHisotoric;
 
-    @ManyToMany(fetch=FetchType.EAGER)
+    @ManyToMany(fetch = FetchType.EAGER)
     protected List<Loan> defaults; //TODO must be a HashSet
 
+
+    public Person(Form form) {
+        this.documentNumber = form.getNumeroDniBeneficiario();
+        this.firstName = form.getNombreBeneficiario();
+        this.lastName = form.getApellidoBeneficiario();
+        this.birthDate = form.getFechaNacimientoBeneficiario();
+        this.gender = form.getGeneroBeneficiario();
+    }
+
+    public Person(Child child) {
+        this.documentNumber = child.getNumeroDocumentoHijo();
+        this.firstName = child.getNombreHijo();
+        this.lastName = child.getApellidoHijo();
+        this.birthDate = child.getFechaNacimientoHijo();
+        if (child.getGeneroHijo().isEmpty())
+            this.gender = child.getGeneroOtroHijo();
+        else
+            this.gender = child.getGeneroHijo();
+    }
 
     //TODO user this
     public boolean equalsIgnoreId(Person person1, Person person2) {
@@ -84,28 +111,5 @@ public class Person {
             this.getDefaults().add(loan);
         }
     }
-
-    /*
-    @JoinColumn(name = "ID_CREDENTIAL")
-    @OneToMany
-    private List<Credential> credentials;
-
-*/
-
-/*
-
-    @OneToMany
-    private List<Application> applications;
-*/
-
-
-    /*
-    kinsman (pariente), p1,p2, tiporelacion (kind of kinship)
-
-    tipo de relacion
-            hijo
-    conyugue
-            familiar*/
-
 
 }

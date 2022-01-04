@@ -26,8 +26,17 @@ public class Child {
     @ExcelCellName("Edad_Hijo")
     private String edadHijo;
 
+    @ExcelCellName("Tipo_Documento_Hijo")
+    private String tipoDocumentoHijo;
+
     @ExcelCellName("Numero_Documento_Hijo")
     private Long numeroDocumentoHijo;
+
+    @ExcelCellName("Tipo_Documento_Otro_Hijo")
+    private String tipoDocumentoOtroHijo;
+
+    @ExcelCellName("Numero_Documento_Otro_Hijo")
+    private String numeroDocOtroHijo;
 
     @ExcelCellName("Genero_Hijo")
     private String generoHijo;

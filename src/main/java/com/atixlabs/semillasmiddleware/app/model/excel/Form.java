@@ -44,4 +44,35 @@ public class Form {
     @ExcelCellName("Numero_Dni_Beneficiario")
     private Long numeroDniBeneficiario;
 
+    // Datos del conyuge
+    @ExcelCellName("Apellido_Conyuge")
+    private String apellidoConyuge;
+
+    @ExcelCellName("Nombre_Conyuge")
+    private String nombreConyuge;
+
+    @ExcelCellName("Fecha_Nacimiento_Conyuge")
+    private LocalDate fechaNacimientoConyuge;
+
+    @ExcelCellName("Edad_Conyuge")
+    private String edadConyuge;
+
+    @ExcelCellName("Genero_Conyuge")
+    private String generoConyuge;
+
+    @ExcelCellName("Genero_Otro_Conyuge")
+    private String generoOtroConyuge;
+
+    @ExcelCellName("Tipo_Documento_Conyuge")
+    private String tipoDocumentoConyuge;
+
+    @ExcelCellName("Numero_Dni_Conyuge")
+    private Long numeroDniConyuge;
+
+    @ExcelCellName("Tipo_Documento_Otro_Conyuge")
+    private String tipoDocumentoOtroConyuge;
+
+    @ExcelCellName("Numero_Documento_Otro_Conyuge")
+    private String numeroDocumentoOtroConyuge;
+    
 }

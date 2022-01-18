@@ -50,9 +50,6 @@ public class Form {
     @ExcelCellName("Hay_Mas_Miembros_Familia")
     private String tieneMasFamilia;
 
-    @ExcelCellName("_index")
-    private int index;
-
     // Datos del conyuge
     @ExcelCellName("Apellido_Conyuge")
     private String apellidoConyuge;
@@ -77,6 +74,5 @@ public class Form {
 
     @ExcelCellName("Numero_Dni_Conyuge")
     private Long numeroDniConyuge;
-
     
 }

@@ -989,7 +989,6 @@ public class CredentialService {
 
     //todo move into credentia{}
     //
-    // l type class
     private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder)  {
         PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
         Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
@@ -1528,6 +1527,12 @@ public class CredentialService {
                     form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
                     form.getNumeroDniBeneficiario());
 
+            for (Child child: childList){
+                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                    form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                    child.getNumeroDocumentoHijo() ));
+            }
+
             if (!credentialsOptional.isEmpty()) {
                 log.info(bodyLog(credentialsOptional.get(0)));
                 processExcelFileResult.addRowError(
@@ -1544,11 +1549,13 @@ public class CredentialService {
                 );
             }
 
-            //TODO recuperar todos los relacionados con el form(beneficiario)
+            //TODO recuperar todos los relacionados con el form(beneficiario) Vivieda, emprendimiento
 
             if (processExcelFileResult.getErrorRows().isEmpty()) {
                     this.saveIdentityCredentials(form);
-//                    this.saveChildIdentityCredentials(form, childList);
+                    if (form.getTieneHijos().equals("Si")){
+                        this.saveChildIdentityCredentials(form, childList);
+                        }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
             }
@@ -1556,9 +1563,7 @@ public class CredentialService {
         return processExcelFileResult;
     }
 
-
     public void saveIdentityCredentials(Form form) {
-
         // BENEFICIARY_CATEGORY_NAME
         Person beneficiary = new Person(form);
         beneficiary = savePersonIfNew(beneficiary);
@@ -1566,23 +1571,24 @@ public class CredentialService {
         Optional<CredentialState> credentialStateOptional =
                 credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
-
         credentialIdentityService.save(credentialIdentity);
     }
 
     public void saveChildIdentityCredentials(Form form, List<Child> childList) {
-
+        // CHILD_CATEGORY_NAME
         Person creditHolder = new Person(form);
         for (Child child: childList) {
-            Person childPerson = new Person(child);
-            childPerson = savePersonIfNew(childPerson);
-            CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
-            Optional<CredentialState> credentialStateOptional =
-                    credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-            credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
-            credentialIdentityService.save(credentialIdentity);
-            //TODO ver si este metodo es necesario o no
-//            this.createCredentialIdentityKinsman(credentialIdentity);
+            if (form.getIndex() == child.getParentIndex()) {
+                Person childPerson = new Person(child);
+                childPerson = savePersonIfNew(childPerson);
+                CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
+                Optional<CredentialState> credentialStateOptional =
+                        credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+                credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+                credentialIdentityService.save(credentialIdentity);
+
+                this.createCredentialIdentityKinsman(credentialIdentity);
+            }
         }
     }
 

@@ -1527,6 +1527,12 @@ public class CredentialService {
                     form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
                     form.getNumeroDniBeneficiario());
 
+            //compruebo que el esposo no se repita
+            credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
+                    CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
+            log.info(String.valueOf(credentialsOptional));
+
+            //compruebo que los hijos no se repitan
             for (Child child: childList){
                 credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
                     form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
@@ -1553,9 +1559,12 @@ public class CredentialService {
 
             if (processExcelFileResult.getErrorRows().isEmpty()) {
                     this.saveIdentityCredentials(form);
+                    if (form.getNumeroDniConyuge()!= null) {
+                        this.saveSpouseIdentityCredentials(form);
+                    }
                     if (form.getTieneHijos().equals("Si")){
                         this.saveChildIdentityCredentials(form, childList);
-                        }
+                    }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
             }
@@ -1572,6 +1581,21 @@ public class CredentialService {
                 credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
         credentialIdentityService.save(credentialIdentity);
+    }
+
+    public void saveSpouseIdentityCredentials(Form form){
+        // SPOUSE_CATEGORY_NAME
+        Person creditHolder = new Person(form);
+        Person spousePerson = new Person();
+        spousePerson.Spouse(form);
+        spousePerson = savePersonIfNew(spousePerson);
+        // buildCredential
+        CredentialIdentity credentialIdentity = new CredentialIdentity(spousePerson, creditHolder, SPOUSE);
+        Optional<CredentialState> credentialStateOptional =
+                credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+        credentialIdentityService.save(credentialIdentity);
+        this.createCredentialIdentityKinsman(credentialIdentity);
     }
 
     public void saveChildIdentityCredentials(Form form, List<Child> childList) {

@@ -54,20 +54,13 @@ import com.atixlabs.semillasmiddleware.excelparser.app.categories.Entrepreneursh
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.poiji.bind.Poiji;
-import com.poiji.option.PoijiOptions;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.openxml4j.util.ZipSecureFile;
-import org.apache.poi.ss.usermodel.Name;
-import org.apache.poi.ss.util.AreaReference;
-import org.apache.poi.ss.util.CellReference;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -81,28 +74,23 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
-import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.BENEFICIARY;
-import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.CHILD;
+import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.*;
 import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.*;
 
 @Slf4j
@@ -1483,6 +1471,13 @@ public class CredentialService {
         return (credential.getCredentialState().equals(statePendingDidi));
     }
 
+    /**
+     *
+     * @param file
+     * @param createCredentials
+     * @return String con los resultads del procesamiento del excel
+     * @throws IOException
+     */
     @Transactional
     public ProcessExcelFileResult importCredentials(MultipartFile file, boolean createCredentials) throws IOException {
 
@@ -1503,6 +1498,7 @@ public class CredentialService {
         formatHeader(familyCreditGroupSheet);
 
 //        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
+//   TODO revisar que pasa cuando falta alguno de los grupos en el excel
 
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
         List<Child> childList = Poiji.fromExcel(childGroupSheet,Child.class);
@@ -1514,7 +1510,7 @@ public class CredentialService {
         List<FamilyCredit> familyCreditList =
                 Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class);
 
-
+        // credentialStateActivePending tiene id-nombre de los estados
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(
                 List.of(CredentialStatesCodes.PENDING_DIDI.getCode(),
                         CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(),
@@ -1524,11 +1520,17 @@ public class CredentialService {
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
 
         for (Form form: formList) {
+            // compruebo que el beneficiario no se repita
             List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
                     form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
                     form.getNumeroDniBeneficiario());
 
-            if (!credentialsOptional.isEmpty()) {
+            //compruebo que el esposo no se repita
+           credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
+                   CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
+            log.info(String.valueOf(credentialsOptional));
+
+            if (!credentialsOptional.isEmpty() ) {
                 log.info(bodyLog(credentialsOptional.get(0)));
                 processExcelFileResult.addRowError(
                         ExcelErrorDetail.builder()
@@ -1543,22 +1545,23 @@ public class CredentialService {
                                 .build()
                 );
             }
-
-            //TODO recuperar todos los relacionados con el form(beneficiario)
+            //TODO recuperar todos los relacionados con el form(beneficiario), vivienda, emprendimiento...
 
             if (processExcelFileResult.getErrorRows().isEmpty()) {
-                    this.saveIdentityCredentials(form);
-//                    this.saveChildIdentityCredentials(form, childList);
+                this.saveIdentityCredentials(form);
+               if (form.getNumeroDniConyuge()!= null) {
+                    this.saveSpouseIdentityCredentials(form);
+                }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
+                // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
             }
-        }
+        } //for
         return processExcelFileResult;
     }
 
 
     public void saveIdentityCredentials(Form form) {
-
         // BENEFICIARY_CATEGORY_NAME
         Person beneficiary = new Person(form);
         beneficiary = savePersonIfNew(beneficiary);
@@ -1566,23 +1569,39 @@ public class CredentialService {
         Optional<CredentialState> credentialStateOptional =
                 credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
-
         credentialIdentityService.save(credentialIdentity);
     }
 
-    public void saveChildIdentityCredentials(Form form, List<Child> childList) {
+    public void saveSpouseIdentityCredentials(Form form){
+        // SPOUSE_CATEGORY_NAME
+        Person creditHolder = new Person(form);
+        Person spousePerson = new Person();
+        spousePerson.Spouse(form);
+        spousePerson = savePersonIfNew(spousePerson);
+        // buildCredential
+        CredentialIdentity credentialIdentity = new CredentialIdentity(spousePerson, creditHolder, SPOUSE);
+        Optional<CredentialState> credentialStateOptional =
+                credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+        //
+        credentialIdentityService.save(credentialIdentity);
+        this.createCredentialIdentityKinsman(credentialIdentity);
+    }
 
+    public void saveChildIdentityCredentials(Form form, List<Child> childList) {
         Person creditHolder = new Person(form);
         for (Child child: childList) {
             Person childPerson = new Person(child);
             childPerson = savePersonIfNew(childPerson);
+
             CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
             Optional<CredentialState> credentialStateOptional =
                     credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
             credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
             credentialIdentityService.save(credentialIdentity);
             //TODO ver si este metodo es necesario o no
-//            this.createCredentialIdentityKinsman(credentialIdentity);
+            this.createCredentialIdentityKinsman(credentialIdentity);
+
         }
     }
 

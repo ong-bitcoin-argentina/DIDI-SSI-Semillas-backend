@@ -2,6 +2,7 @@ package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.excel.Child;
 import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
@@ -10,15 +11,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.ManyToMany;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
+import javax.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -51,13 +44,24 @@ public class Person {
     @ManyToMany(fetch = FetchType.EAGER)
     protected List<Loan> defaults; //TODO must be a HashSet
 
-
     public Person(Form form) {
         this.documentNumber = form.getNumeroDniBeneficiario();
         this.firstName = form.getNombreBeneficiario();
         this.lastName = form.getApellidoBeneficiario();
         this.birthDate = form.getFechaNacimientoBeneficiario();
         this.gender = form.getGeneroBeneficiario();
+
+    }
+
+    public void Spouse(Form form){
+        this.documentNumber = form.getNumeroDniConyuge();
+        this.firstName = form.getNombreConyuge();
+        this.lastName = form.getApellidoConyuge();
+        this.birthDate = form.getFechaNacimientoConyuge();
+        if (form.getGeneroConyuge().isEmpty())
+            this.gender= form.getGeneroOtroConyuge();
+        else
+            this.gender = form.getGeneroConyuge();
     }
 
     public Person(Child child) {

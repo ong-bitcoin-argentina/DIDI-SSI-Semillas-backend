@@ -110,7 +110,7 @@ public class CredentialIdentityService extends CredentialCommonService {
 
 
     public CredentialIdentity save(CredentialIdentity credentialIdentity){
-        return credentialIdentityRepository.save(credentialIdentity);
+        return credentialIdentityRepository.saveAndFlush(credentialIdentity);
     }
 
     public CredentialIdentity buildNewOnPendidgDidi(CredentialIdentity credentialIdentity, DidiAppUser newDidiAppUser) throws CredentialException {

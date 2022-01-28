@@ -946,10 +946,10 @@ public class CredentialService {
     private Person savePersonIfNew(Person person) {
         Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
         if (personOptional.isEmpty())
-            return personRepository.save(person);
+            return personRepository.saveAndFlush(person);
         if (!(person.equalsIgnoreId(person, personOptional.get()))) {
             person.setId(personOptional.get().getId());
-            return personRepository.save(person);
+            return personRepository.saveAndFlush(person);
         }
         return personOptional.get();
     }
@@ -1555,12 +1555,12 @@ public class CredentialService {
             //TODO recuperar todos los relacionados con el form(beneficiario) Vivieda, emprendimiento
 
             if (processExcelFileResult.getErrorRows().isEmpty()) {
-                    this.saveIdentityCredentials(form);
+                    Person personBeneficiary = this.saveIdentityCredentials(form);
                     if (form.getNumeroDniConyuge()!= null) {
-                        this.saveSpouseIdentityCredentials(form);
+                        this.saveSpouseIdentityCredentials(form, personBeneficiary);
                     }
                     if (form.getTieneHijos().equals("Si")){
-                        this.saveChildIdentityCredentials(form, childList);
+                        this.saveChildIdentityCredentials(form, personBeneficiary, childList);
                     }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
@@ -1570,20 +1570,20 @@ public class CredentialService {
         return processExcelFileResult;
     }
 
-    public void saveIdentityCredentials(Form form) {
+    public Person saveIdentityCredentials(Form form) {
         // BENEFICIARY_CATEGORY_NAME
-        Person beneficiary = new PersonBuilder().fromForm(form).build();
+        Person beneficiary = savePersonIfNew(new PersonBuilder().fromForm(form).build());
         beneficiary = savePersonIfNew(beneficiary);
         CredentialIdentity credentialIdentity = new CredentialIdentity(beneficiary, beneficiary, BENEFICIARY);
         Optional<CredentialState> credentialStateOptional =
                 credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
         credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
         credentialIdentityService.save(credentialIdentity);
+        return beneficiary;
     }
 
-    public void saveSpouseIdentityCredentials(Form form){
+    public void saveSpouseIdentityCredentials(Form form, Person creditHolder){
         // SPOUSE_CATEGORY_NAME
-        Person creditHolder = new PersonBuilder().fromForm(form).build();
         Person spousePerson = new Person();
         spousePerson.Spouse(form);
         spousePerson = savePersonIfNew(spousePerson);
@@ -1597,9 +1597,8 @@ public class CredentialService {
         this.createCredentialIdentityKinsman(credentialIdentity);
     }
 
-    public void saveChildIdentityCredentials(Form form, List<Child> childList) {
+    public void saveChildIdentityCredentials(Form form, Person creditHolder, List<Child> childList) {
         // CHILD_CATEGORY_NAME
-        Person creditHolder = new Person(form);
         for (Child child: childList) {
             if (form.getIndex() == child.getParentIndex()) {
                 Person childPerson = new PersonBuilder().fromForm(form).build();

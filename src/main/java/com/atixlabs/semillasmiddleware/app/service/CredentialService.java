@@ -13,6 +13,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.PersonBuilder;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
@@ -1571,7 +1572,7 @@ public class CredentialService {
 
     public void saveIdentityCredentials(Form form) {
         // BENEFICIARY_CATEGORY_NAME
-        Person beneficiary = new Person(form);
+        Person beneficiary = new PersonBuilder().fromForm(form).build();
         beneficiary = savePersonIfNew(beneficiary);
         CredentialIdentity credentialIdentity = new CredentialIdentity(beneficiary, beneficiary, BENEFICIARY);
         Optional<CredentialState> credentialStateOptional =
@@ -1582,7 +1583,7 @@ public class CredentialService {
 
     public void saveSpouseIdentityCredentials(Form form){
         // SPOUSE_CATEGORY_NAME
-        Person creditHolder = new Person(form);
+        Person creditHolder = new PersonBuilder().fromForm(form).build();
         Person spousePerson = new Person();
         spousePerson.Spouse(form);
         spousePerson = savePersonIfNew(spousePerson);
@@ -1601,7 +1602,7 @@ public class CredentialService {
         Person creditHolder = new Person(form);
         for (Child child: childList) {
             if (form.getIndex() == child.getParentIndex()) {
-                Person childPerson = new Person(child);
+                Person childPerson = new PersonBuilder().fromForm(form).build();
                 childPerson = savePersonIfNew(childPerson);
                 CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
                 Optional<CredentialState> credentialStateOptional =

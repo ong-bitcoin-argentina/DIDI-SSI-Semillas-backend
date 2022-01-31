@@ -1528,16 +1528,17 @@ public class CredentialService {
             //compruebo que el esposo no se repita
             credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
                     CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
-            log.info(String.valueOf(credentialsOptional));
 
-            //compruebo que los hijos no se repitan
+
+            //compruebo que los hijos no se repita
             for (Child child: childList){
                 credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
-                    form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                    child.getNumeroDocumentoHijo() ));
+                    child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                    form.getNumeroDniBeneficiario() ));
             }
 
             if (!credentialsOptional.isEmpty() ) {
+                log.info("duplicadas" + credentialsOptional);
                 log.info(bodyLog(credentialsOptional.get(0)));
                 processExcelFileResult.addRowError(
                         ExcelErrorDetail.builder()

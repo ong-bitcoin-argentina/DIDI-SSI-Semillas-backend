@@ -1562,6 +1562,9 @@ public class CredentialService {
                     if (form.getTieneHijos().equals("Si")){
                         this.saveChildIdentityCredentials(form, personBeneficiary, childList);
                     }
+                    if (form.getTieneMasFamilia().equals("Si")){
+                        this.saveFamilyIdentityCredentials(form, personBeneficiary, familyMemberList);
+                    }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
                 // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
@@ -1604,6 +1607,22 @@ public class CredentialService {
                 Person childPerson = new PersonBuilder().fromForm(form).build();
                 childPerson = savePersonIfNew(childPerson);
                 CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
+                Optional<CredentialState> credentialStateOptional =
+                        credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+                credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+                credentialIdentityService.save(credentialIdentity);
+
+                this.createCredentialIdentityKinsman(credentialIdentity);
+            }
+        }
+    }
+
+    public void saveFamilyIdentityCredentials(Form form, Person creditHolder, List<FamilyMember> familyList){
+        for (FamilyMember family: familyList){
+            if (form.getIndex() == family.getParentIndex()){
+                Person familyPerson = new PersonBuilder().fromFamilyMember(family).build();
+                familyPerson = savePersonIfNew(familyPerson);
+                CredentialIdentity credentialIdentity = new CredentialIdentity(familyPerson, creditHolder, OTHER_KINSMAN);
                 Optional<CredentialState> credentialStateOptional =
                         credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
                 credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);

@@ -2,8 +2,13 @@ package com.atixlabs.semillasmiddleware.app.model.excel;
 
 import com.poiji.annotation.ExcelCellName;
 import com.poiji.annotation.ExcelRow;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.time.LocalDate;
+
+@Setter
+@Getter
 
 public class FamilyMember {
 
@@ -39,12 +44,6 @@ public class FamilyMember {
 
     @ExcelCellName("Numero_Dni_Familiar")
     private Long numeroDniFamiliar;
-
-    @ExcelCellName("Tipo_Documento_Otro_Familiar")
-    private String tipoDocumentoOtroFamiliar;
-
-    @ExcelCellName("Numero_Documento_Otro_Familiar")
-    private String numeroDocumentoOtroFamiliar;
 
     @ExcelCellName("_parent_index")
     private int parentIndex;

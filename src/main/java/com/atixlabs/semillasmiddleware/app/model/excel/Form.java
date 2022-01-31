@@ -14,6 +14,9 @@ public class Form {
     @ExcelRow
     private int rowIndex;
 
+    @ExcelCellName("_index")
+    private int index;
+
     @ExcelCellName("Grupo Solidario")
     private String grupoSolidario;
 

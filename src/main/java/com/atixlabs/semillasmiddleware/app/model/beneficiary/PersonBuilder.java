@@ -1,5 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
+import com.atixlabs.semillasmiddleware.app.model.excel.Child;
 import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMember;
 import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 
@@ -18,6 +19,16 @@ public class PersonBuilder {
         return this;
     }
 
+    public PersonBuilder fromChild(Child child){
+        person = new Person();
+        person.setDocumentNumber(child.getNumeroDocumentoHijo());
+        person.setFirstName(child.getNombreHijo());
+        person.setLastName(child.getApellidoHijo());
+        person.setBirthDate(child.getFechaNacimientoHijo());
+        person.setGender(child.getGeneroHijo());
+
+        return this;
+    }
     public PersonBuilder fromFamilyMember(FamilyMember family){
         person = new Person();
         person.setDocumentNumber(family.getNumeroDniFamiliar());

@@ -1603,10 +1603,10 @@ public class CredentialService {
 
     public void saveChildIdentityCredentials(Form form, Person creditHolder, List<Child> childList) {
         // CHILD_CATEGORY_NAME
-        for (Child child: childList) {
-            if (form.getIndex() == child.getParentIndex()) {
-                Person childPerson = new PersonBuilder().fromForm(form).build();
-                childPerson = savePersonIfNew(childPerson);
+        childList.stream()
+            .filter(child -> form.getIndex() == child.getParentIndex())
+            .forEach(child -> {
+                Person childPerson = savePersonIfNew(new PersonBuilder().fromChild(child).build());
                 CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
                 Optional<CredentialState> credentialStateOptional =
                         credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
@@ -1614,8 +1614,7 @@ public class CredentialService {
                 credentialIdentityService.save(credentialIdentity);
 
                 this.createCredentialIdentityKinsman(credentialIdentity);
-            }
-        }
+            });
     }
 
     public void saveFamilyIdentityCredentials(Form form, Person creditHolder, List<FamilyMember> familyList){

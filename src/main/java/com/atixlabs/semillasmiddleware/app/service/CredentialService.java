@@ -1501,14 +1501,14 @@ public class CredentialService {
 //   TODO revisar que pasa cuando falta alguno de los grupos en el excel
 
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
-        List<Child> childList = Poiji.fromExcel(childGroupSheet,Child.class);
-        List<FamilyMember> familyMemberList = Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class);
+        List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
+        List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
         List<FamilyMemberIncome> familyMemberIncomeList =
-                Poiji.fromExcel(familyMemberIncomeGroupSheet, FamilyMemberIncome.class);
+                familyMemberIncomeGroupSheet!=null?Poiji.fromExcel(familyMemberIncomeGroupSheet, FamilyMemberIncome.class):new ArrayList<>();
         List<EntrepreneurshipCredit> entrepreneurshipCreditList =
-                Poiji.fromExcel(entrepreneurshipCreditSheet, EntrepreneurshipCredit.class);
+                entrepreneurshipCreditSheet!=null?Poiji.fromExcel(entrepreneurshipCreditSheet, EntrepreneurshipCredit.class):new ArrayList<>();
         List<FamilyCredit> familyCreditList =
-                Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class);
+                familyCreditGroupSheet!=null?Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class): new ArrayList<>();
 
         // credentialStateActivePending tiene id-nombre de los estados
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(

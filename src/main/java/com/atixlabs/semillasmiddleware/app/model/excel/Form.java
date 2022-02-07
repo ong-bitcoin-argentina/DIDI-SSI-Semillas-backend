@@ -81,4 +81,66 @@ public class Form {
     @ExcelCellName("Numero_Dni_Conyuge")
     private Long numeroDniConyuge;
 
+    //Datos de Vivienda
+
+    @ExcelCellName("Vivienda_Hubo_Cambios")
+    private String huboCambiosVivienda;
+
+    @ExcelCellName("Vivienda_Tipo_Tenencia")
+    private String viviendaTipoTenencia;
+
+    @ExcelCellName("Vivienda_Tipo_Tenencia_Otro")
+    private String viviendaTipoTenenciaOtro;
+
+    @ExcelCellName("Vivienda_Tipo_Vivienda")
+    private String viviendaTipoVivienda;
+
+    @ExcelCellName("Vivienda_Tipo_Vivienda_Otro")
+    private String viviendaTipoViviendaOtro;
+
+    //TODO: cambiar por Gas y Agua por separado
+    @ExcelCellName("Vivienda_Servicios_Basicos")
+    private String viviendaServiciosBasicos;
+
+    @ExcelCellName("Vivienda_Instalacion_Luz")
+    private String viviendaInstalacionLuz;
+
+    @ExcelCellName("Vivienda_General")
+    private String viviendaCondicionesGenerales;
+
+    @ExcelCellName("Vivienda_General_Otro")
+    private String viviendaCondicionesGeneralesOtro;
+
+    @ExcelCellName("Vivienda_Tipo_Barrio")
+    private String viviendaTipoBasrrio;
+
+    @ExcelCellName("Vivienda_Tipo_Barrio_Otro")
+    private String viviendaTipoBarrioOtro;
+
+    @ExcelCellName("Dom1_Calle_Beneficiario")
+    private String viviendaDireccionCalle;
+
+    @ExcelCellName("Dom1_Numero_Beneficiario")
+    private String viviendaDireccionNumero;
+
+    @ExcelCellName("Dom1_Entre_Calles_Beneficiario")
+    private String viviendaDireccionEntreCalles;
+
+    @ExcelCellName("Dom1_Municipio_Beneficiario") //Distrito
+    private String viviendaDireccionMunicipio;
+
+    @ExcelCellName("Dom1_Localidad_Beneficiario")
+    private String viviendaDomicilioLocalidad;
+
+    @ExcelCellName("Dom1_Barrio_Beneficiario")
+    private String viviendaDomicilioBarrio;
+
+    @ExcelCellName("Vivienda_Cantidad_Ambientes")
+    private String viviendaCantAmbientes;
+
+    //TODO: averiguar si es necesari el tipo de material
+    //TODO: agregar antiguedad
+
+    @ExcelCellName("Egreso_Familiar_Alquiler")
+    private String viviendaMontoAlquiler;
 }

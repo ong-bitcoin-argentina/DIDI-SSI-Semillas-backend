@@ -28,13 +28,13 @@ public class FamilyMember {
     private String nombreFamiliar;
 
     @ExcelCellName("Fecha_Nacimiento_Familiar")
-    private LocalDate fechaNacimientoFamiliar;
+    private String fechaNacimientoFamiliar;
 
     @ExcelCellName("Edad_Familiar")
     private String edadFamiliar;
 
-    @ExcelCellName("Genero_Familiar")
-    private String generoFamiliar;
+    @ExcelCellName("Genero_Familia")
+    private String generoFamilia;
 
     @ExcelCellName("Genero_Otro_Familiar")
     private String generoOtroFamiliar;

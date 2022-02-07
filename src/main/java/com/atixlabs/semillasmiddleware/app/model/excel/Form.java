@@ -30,7 +30,7 @@ public class Form {
     private String apellidoBeneficiario;
 
     @ExcelCellName("Fecha_Nacimiento_Beneficiario")
-    private LocalDate fechaNacimientoBeneficiario;
+    private String fechaNacimientoBeneficiario;
 
     @ExcelCellName("Edad_Beneficiario")
     private String edadBeneficiario;
@@ -43,6 +43,9 @@ public class Form {
 
     @ExcelCellName("Genero_Beneficiario")
     private String generoBeneficiario;
+
+    @ExcelCellName("Genero_Otro_Beneficiario")
+    private String generoOtroBeneficiario;
 
     @ExcelCellName("Numero_Dni_Beneficiario")
     private Long numeroDniBeneficiario;
@@ -61,7 +64,7 @@ public class Form {
     private String nombreConyuge;
 
     @ExcelCellName("Fecha_Nacimiento_Conyuge")
-    private LocalDate fechaNacimientoConyuge;
+    private String fechaNacimientoConyuge;
 
     @ExcelCellName("Edad_Conyuge")
     private String edadConyuge;
@@ -77,5 +80,5 @@ public class Form {
 
     @ExcelCellName("Numero_Dni_Conyuge")
     private Long numeroDniConyuge;
-    
+
 }

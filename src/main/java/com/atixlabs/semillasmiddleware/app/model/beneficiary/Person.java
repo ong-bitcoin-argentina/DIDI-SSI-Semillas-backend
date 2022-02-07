@@ -48,7 +48,7 @@ public class Person {
         this.documentNumber = form.getNumeroDniBeneficiario();
         this.firstName = form.getNombreBeneficiario();
         this.lastName = form.getApellidoBeneficiario();
-        this.birthDate = form.getFechaNacimientoBeneficiario();
+        this.birthDate = LocalDate.parse(form.getFechaNacimientoBeneficiario());
         this.gender = form.getGeneroBeneficiario();
 
     }
@@ -57,22 +57,11 @@ public class Person {
         this.documentNumber = form.getNumeroDniConyuge();
         this.firstName = form.getNombreConyuge();
         this.lastName = form.getApellidoConyuge();
-        this.birthDate = form.getFechaNacimientoConyuge();
+        this.birthDate = LocalDate.parse(form.getFechaNacimientoConyuge());
         if (form.getGeneroConyuge().isEmpty())
             this.gender= form.getGeneroOtroConyuge();
         else
             this.gender = form.getGeneroConyuge();
-    }
-
-    public Person(Child child) {
-        this.documentNumber = child.getNumeroDocumentoHijo();
-        this.firstName = child.getNombreHijo();
-        this.lastName = child.getApellidoHijo();
-        this.birthDate = child.getFechaNacimientoHijo();
-        if (child.getGeneroHijo().isEmpty())
-            this.gender = child.getGeneroOtroHijo();
-        else
-            this.gender = child.getGeneroHijo();
     }
 
     //TODO user this

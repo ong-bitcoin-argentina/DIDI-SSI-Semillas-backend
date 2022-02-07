@@ -21,7 +21,7 @@ public class Child {
     private String nombreHijo;
 
     @ExcelCellName("Fecha_Nacimiento_Hijo")
-    private LocalDate fechaNacimientoHijo;
+    private String fechaNacimientoHijo;
 
     @ExcelCellName("Edad_Hijo")
     private String edadHijo;

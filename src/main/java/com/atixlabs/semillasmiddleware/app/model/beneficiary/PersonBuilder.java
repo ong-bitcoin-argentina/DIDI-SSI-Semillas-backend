@@ -4,6 +4,8 @@ import com.atixlabs.semillasmiddleware.app.model.excel.Child;
 import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMember;
 import com.atixlabs.semillasmiddleware.app.model.excel.Form;
 
+import java.time.LocalDate;
+
 public class PersonBuilder {
 
     private Person person;
@@ -13,9 +15,12 @@ public class PersonBuilder {
         person.setDocumentNumber(form.getNumeroDniBeneficiario());
         person.setFirstName(form.getNombreBeneficiario());
         person.setLastName(form.getApellidoBeneficiario());
-        person.setBirthDate(form.getFechaNacimientoBeneficiario());
-        person.setGender(form.getGeneroBeneficiario());
-
+        person.setBirthDate(LocalDate.parse(form.getFechaNacimientoBeneficiario()));
+        if (form.getGeneroBeneficiario().isEmpty()) {
+            person.setGender(form.getGeneroOtroBeneficiario());
+        } else {
+            person.setGender(form.getGeneroBeneficiario());
+        }
         return this;
     }
 
@@ -24,9 +29,12 @@ public class PersonBuilder {
         person.setDocumentNumber(child.getNumeroDocumentoHijo());
         person.setFirstName(child.getNombreHijo());
         person.setLastName(child.getApellidoHijo());
-        person.setBirthDate(child.getFechaNacimientoHijo());
+        person.setBirthDate(LocalDate.parse(child.getFechaNacimientoHijo()));
         person.setGender(child.getGeneroHijo());
-
+        if (child.getGeneroHijo().isEmpty())
+            person.setGender(child.getGeneroOtroHijo());
+        else
+            person.setGender(child.getGeneroHijo());
         return this;
     }
     public PersonBuilder fromFamilyMember(FamilyMember family){
@@ -34,9 +42,12 @@ public class PersonBuilder {
         person.setDocumentNumber(family.getNumeroDniFamiliar());
         person.setFirstName(family.getNombreFamiliar());
         person.setLastName(family.getApellidoFamiliar());
-        person.setBirthDate(family.getFechaNacimientoFamiliar());
-        person.setGender(family.getGeneroFamiliar());
-
+        person.setBirthDate(LocalDate.parse(family.getFechaNacimientoFamiliar()));
+       if (family.getGeneroFamilia().isEmpty()){
+           person.setGender(family.getGeneroOtroFamiliar());
+       }else{
+           person.setGender(family.getGeneroFamilia());
+       }
         return this;
     }
 

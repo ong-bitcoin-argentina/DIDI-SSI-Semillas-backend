@@ -1503,7 +1503,6 @@ public class CredentialService {
 
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
 
-
         List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
         List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
 
@@ -1514,7 +1513,6 @@ public class CredentialService {
         List<FamilyCredit> familyCreditList =
                 familyCreditGroupSheet!=null?Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class): new ArrayList<>();
 
-        // credentialStateActivePending tiene id-nombre de los estados
         List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(
                 List.of(CredentialStatesCodes.PENDING_DIDI.getCode(),
                         CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(),
@@ -1533,16 +1531,26 @@ public class CredentialService {
             credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
                     CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
 
-
             //compruebo que los hijos no se repita
             for (Child child: childList){
                 credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
                     child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
                     form.getNumeroDniBeneficiario() ));
             }
+            //comprueba que la familia no se repita
+            for (FamilyMember family: familyMemberList) {
+                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                        family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                        form.getNumeroDniBeneficiario()));
+            }
+            //compruebo que el beneficiario no tenga vivienda
+            credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
+                    form.getNumeroDniBeneficiario(),
+                    beneficiaryAddress(form) ));
+
+            log.info("duplicadas " + credentialsOptional);
 
             if (!credentialsOptional.isEmpty() ) {
-                log.info("duplicadas" + credentialsOptional);
                 log.info(bodyLog(credentialsOptional.get(0)));
                 processExcelFileResult.addRowError(
                         ExcelErrorDetail.builder()
@@ -1557,7 +1565,6 @@ public class CredentialService {
                                 .build()
                 );
             }
-            //TODO recuperar todos los relacionados con el form(beneficiario) Vivieda, emprendimiento
 
             if (processExcelFileResult.getErrorRows().isEmpty()) {
                     Person personBeneficiary = this.saveIdentityCredentials(form);
@@ -1590,6 +1597,9 @@ public class CredentialService {
         return beneficiary;
     }
 
+    public String beneficiaryAddress(Form form){
+        return (form.getViviendaDireccionCalle()+" N° "+form.getViviendaDireccionNumero()+" e/ "+form.getViviendaDireccionEntreCalles());
+    }
     public void saveSpouseIdentityCredentials(Form form, Person creditHolder){
         // SPOUSE_CATEGORY_NAME
         Person spousePerson = new Person();

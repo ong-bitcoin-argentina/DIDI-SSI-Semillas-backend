@@ -16,45 +16,22 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.PersonBuilder;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialEntrepreneurship;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialFilterDto;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.*;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
-import com.atixlabs.semillasmiddleware.app.model.excel.Child;
-import com.atixlabs.semillasmiddleware.app.model.excel.EntrepreneurshipCredit;
-import com.atixlabs.semillasmiddleware.app.model.excel.FamilyCredit;
-import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMember;
-import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMemberIncome;
-import com.atixlabs.semillasmiddleware.app.model.excel.Form;
+import com.atixlabs.semillasmiddleware.app.model.excel.*;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitsRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialDwellingRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialEntrepreneurshipRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
-import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
-import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -62,6 +39,7 @@ import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerExceptio
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.poiji.bind.Poiji;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -80,21 +58,13 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
-
-import com.atixlabs.semillasmiddleware.app.model.excel.ExcelUtils;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.*;
-import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.*;
+import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.DUPLICATED_CREDENTIAL;
 
 @Slf4j
 @Service
@@ -1493,11 +1463,15 @@ public class CredentialService {
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
         formatHeader(worksheet);
+        //todo make constant
+        String actividadTipoComercioColumnName = "Actividad_Tipo/Comercio";
+        int actividadTipoComercioColumnIndex = getColumnIndex(worksheet, actividadTipoComercioColumnName);
         formatHeader(childGroupSheet);
         formatHeader(familyMemberGroupSheet);
         formatHeader(familyMemberIncomeGroupSheet);
         formatHeader(entrepreneurshipCreditSheet);
         formatHeader(familyCreditGroupSheet);
+
 
 //        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
 //   TODO revisar que pasa cuando falta alguno de los grupos en el excel
@@ -1687,20 +1661,34 @@ public class CredentialService {
         credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());
     }
 
+    //todo move to an ExcelHelper class
+    private int getColumnIndex(XSSFSheet sheet, String columnName){
+       XSSFRow headerRow =  sheet.getRow(0);
+
+        for(int i=0;i<headerRow.getLastCellNum() ;i++){
+            XSSFCell cell = headerRow.getCell(i);
+            if(cell.getStringCellValue().trim().equals(columnName.trim()))
+                return i;
+        };
+
+        return -1;
+    }
+
+    //todo move to an ExcelHelper class
     public void formatHeader(XSSFSheet sheet) {
         if (Objects.isNull(sheet))
             return;
         XSSFRow headerRow =  sheet.getRow(0);
         for(int i=0;i<headerRow.getLastCellNum() ;i++){
             XSSFCell cell = headerRow.getCell(i);
-            String newCell = cell.getStringCellValue();
-            if (!newCell.isEmpty() && newCell.contains("#")) {
-                newCell = newCell.substring(newCell.indexOf("#") + 1);
-                if (!newCell.isEmpty() && newCell.contains("#")) {
-                    newCell = newCell.substring(0, newCell.indexOf("#"));
-                    headerRow.createCell(i);
-                    headerRow.getCell(i).setCellValue(newCell);
-                }
+            boolean hasTwoHash = StringUtils.countMatches(cell.getStringCellValue(), "#")==2;
+            if(hasTwoHash){
+                String[] splittedCellContent = cell.getStringCellValue().split("#");
+                String title = splittedCellContent[1];
+                String subTitle = splittedCellContent[2].substring(splittedCellContent[2].lastIndexOf("/"));
+                subTitle = subTitle.replaceAll("/span>", ""); // clean string
+                headerRow.createCell(i);
+                headerRow.getCell(i).setCellValue(title + subTitle);
             }
         }
     }

@@ -61,7 +61,6 @@ import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.poiji.bind.Poiji;
-import com.poiji.bind.mapping.PoijiNumberFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -89,6 +88,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
+
+import com.atixlabs.semillasmiddleware.app.model.excel.ExcelUtils;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
@@ -1546,7 +1547,7 @@ public class CredentialService {
             //compruebo que el beneficiario no tenga vivienda
             credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
                     form.getNumeroDniBeneficiario(),
-                    beneficiaryAddress(form) ));
+                   ExcelUtils.beneficiaryAddress(form) ));
 
             log.info("duplicadas " + credentialsOptional);
 
@@ -1577,6 +1578,9 @@ public class CredentialService {
                     if (form.getTieneMasFamilia().equals("Si")){
                         this.saveFamilyIdentityCredentials(form, personBeneficiary, familyMemberList);
                     }
+                    if(form.getHuboCambiosVivienda().equals("Si")){
+                        this.saveDwellingCredentials(form, personBeneficiary);
+                    }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
                 // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
@@ -1597,9 +1601,7 @@ public class CredentialService {
         return beneficiary;
     }
 
-    public String beneficiaryAddress(Form form){
-        return (form.getViviendaDireccionCalle()+" N° "+form.getViviendaDireccionNumero()+" e/ "+form.getViviendaDireccionEntreCalles());
-    }
+
     public void saveSpouseIdentityCredentials(Form form, Person creditHolder){
         // SPOUSE_CATEGORY_NAME
         Person spousePerson = new Person();
@@ -1645,6 +1647,44 @@ public class CredentialService {
                 this.createCredentialIdentityKinsman(credentialIdentity);
             }
         }
+    }
+
+    public void saveDwellingCredentials(Form form, Person creditHolder){
+        //DWELLING_CATEGORY_NAME
+        CredentialDwelling credentialDwelling = new CredentialDwelling();
+        buildCredential(creditHolder, credentialDwelling);
+        buildDwellingCredentialFromForm(form, credentialDwelling);
+        credentialDwellingRepository.save(credentialDwelling);
+    }
+
+    public void buildDwellingCredentialFromForm(Form form, CredentialDwelling credentialDwelling){
+        // TODO: revisar esta linea
+        //   DwellingCategory entrepreneurshipCategory = (DwellingCategory) "Vivienda";
+
+        credentialDwelling.setDwellingType(form.getViviendaTipoVivienda());
+        credentialDwelling.setDwellingAddress(form.getViviendaDireccionMunicipio());
+        credentialDwelling.setPossessionType(form.getViviendaTipoTenencia());
+        //credentialDwelling.setBrick();
+        //credentialDwelling.setLock(entrepreneurshipCategory.getLock());
+        //credentialDwelling.setWood(entrepreneurshipCategory.getWood());
+        //credentialDwelling.setPaperBoard(entrepreneurshipCategory.getPaperBoard());
+        credentialDwelling.setLightInstallation(form.getViviendaInstalacionLuz());
+        credentialDwelling.setGeneralConditions(form.getViviendaCondicionesGenerales());
+        credentialDwelling.setNeighborhoodType(form.getViviendaTipoBasrrio());
+        credentialDwelling.setGas(true);
+        credentialDwelling.setCarafe(true);
+        credentialDwelling.setWater(true);
+        credentialDwelling.setWatterWell(true);
+        // credentialDwelling.setAntiquity(entrepreneurshipCategory.getAntiquity());
+        credentialDwelling.setNumberOfEnvironments(form.getViviendaCantAmbientes());
+        credentialDwelling.setRental(form.getViviendaMontoAlquiler());
+
+        credentialDwelling.setAddress(ExcelUtils.beneficiaryAddress(form));
+        credentialDwelling.setLocation(form.getViviendaDomicilioLocalidad());
+        credentialDwelling.setNeighborhood(form.getViviendaDomicilioBarrio());
+
+        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
+        credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());
     }
 
     public void formatHeader(XSSFSheet sheet) {

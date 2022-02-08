@@ -56,6 +56,9 @@ public class Form {
     @ExcelCellName("Hay_Mas_Miembros_Familia")
     private String tieneMasFamilia;
 
+    @ExcelCellName("Vivienda_Cambios")
+    private String huboCambiosVivienda;
+
     // Datos del conyuge
     @ExcelCellName("Apellido_Conyuge")
     private String apellidoConyuge;
@@ -82,9 +85,6 @@ public class Form {
     private Long numeroDniConyuge;
 
     //Datos de Vivienda
-
-    @ExcelCellName("Vivienda_Hubo_Cambios")
-    private String huboCambiosVivienda;
 
     @ExcelCellName("Vivienda_Tipo_Tenencia")
     private String viviendaTipoTenencia;
@@ -136,11 +136,11 @@ public class Form {
     private String viviendaDomicilioBarrio;
 
     @ExcelCellName("Vivienda_Cantidad_Ambientes")
-    private String viviendaCantAmbientes;
+    private Integer viviendaCantAmbientes;
 
     //TODO: averiguar si es necesari el tipo de material
     //TODO: agregar antiguedad
 
     @ExcelCellName("Egreso_Familiar_Alquiler")
-    private String viviendaMontoAlquiler;
+    private Long viviendaMontoAlquiler;
 }

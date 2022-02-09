@@ -1463,9 +1463,14 @@ public class CredentialService {
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
         formatHeader(worksheet);
-        //todo make constant
-        String actividadTipoComercioColumnName = "Actividad_Tipo/Comercio";
+        //Samples that shows how to get the column index and column value in forms
+        String actividadTipoComercioColumnName = "Actividad_Tipo_Comercio";
         int actividadTipoComercioColumnIndex = getColumnIndex(worksheet, actividadTipoComercioColumnName);
+        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
+        Form formTmp = formList.get(0);
+        String actividadTipoComercio = formTmp.getActividadTipoComercio();
+        //end sample
+
         formatHeader(childGroupSheet);
         formatHeader(familyMemberGroupSheet);
         formatHeader(familyMemberIncomeGroupSheet);
@@ -1476,7 +1481,6 @@ public class CredentialService {
 //        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
 //   TODO revisar que pasa cuando falta alguno de los grupos en el excel
 
-        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
 
         List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
         List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
@@ -1686,7 +1690,7 @@ public class CredentialService {
                 String[] splittedCellContent = cell.getStringCellValue().split("#");
                 String title = splittedCellContent[1];
                 String subTitle = splittedCellContent[2].substring(splittedCellContent[2].lastIndexOf("/"));
-                subTitle = subTitle.replaceAll("/span>", ""); // clean string
+                subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
                 headerRow.createCell(i);
                 headerRow.getCell(i).setCellValue(title + subTitle);
             }

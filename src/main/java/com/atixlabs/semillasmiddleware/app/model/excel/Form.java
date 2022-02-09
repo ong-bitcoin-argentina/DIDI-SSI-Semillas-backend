@@ -17,6 +17,10 @@ public class Form {
     @ExcelCellName("_index")
     private int index;
 
+    @ExcelCellName("Actividad_Tipo_Comercio")
+    private String actividadTipoComercio;
+
+
     @ExcelCellName("Grupo Solidario")
     private String grupoSolidario;
 

@@ -29,7 +29,7 @@ public class Child {
     @ExcelCellName("Tipo_Documento_Hijo")
     private String tipoDocumentoHijo;
 
-    @ExcelCellName("Numero_Documento_Hijo")
+    @ExcelCellName("Numero_Doc_Hijo")
     private Long numeroDocumentoHijo;
 
     @ExcelCellName("Genero_Hijo")

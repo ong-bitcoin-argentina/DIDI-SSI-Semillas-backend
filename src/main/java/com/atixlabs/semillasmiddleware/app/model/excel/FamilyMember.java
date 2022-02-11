@@ -42,7 +42,7 @@ public class FamilyMember {
     @ExcelCellName("Tipo_Documento_Familiar")
     private String tipoDocumentoFamiliar;
 
-    @ExcelCellName("Numero_Dni_Familiar")
+    @ExcelCellName("Numero_Doc_Familiar")
     private Long numeroDniFamiliar;
 
     @ExcelCellName("_parent_index")

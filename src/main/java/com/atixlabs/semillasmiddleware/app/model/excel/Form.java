@@ -14,6 +14,7 @@ public class Form {
     @ExcelRow
     private int rowIndex;
 
+    // Datos de la encuesta y de las asesoras
     @ExcelCellName("_index")
     private int index;
 
@@ -23,6 +24,7 @@ public class Form {
     @ExcelCellName("Asesora")
     private String asesora;
 
+    //Datos del beneficiario
     @ExcelCellName("Nombre_Beneficiario")
     private String nombreBeneficiario;
 
@@ -47,7 +49,7 @@ public class Form {
     @ExcelCellName("Genero_Otro_Beneficiario")
     private String generoOtroBeneficiario;
 
-    @ExcelCellName("Numero_Dni_Beneficiario")
+    @ExcelCellName("Numero_Doc_Beneficiario")
     private Long numeroDniBeneficiario;
 
     @ExcelCellName("Tienen_Hijos")
@@ -78,7 +80,7 @@ public class Form {
     @ExcelCellName("Tipo_Documento_Conyuge")
     private String tipoDocumentoConyuge;
 
-    @ExcelCellName("Numero_Dni_Conyuge")
+    @ExcelCellName("Numero_Doc_Conyuge")
     private Long numeroDniConyuge;
 
 }

@@ -1636,24 +1636,21 @@ public class CredentialService {
     }
 
     public void buildDwellingCredentialFromForm(Form form, CredentialDwelling credentialDwelling){
-        // TODO: revisar esta linea
-        //   DwellingCategory entrepreneurshipCategory = (DwellingCategory) "Vivienda";
-
         credentialDwelling.setDwellingType(form.getViviendaTipoVivienda());
         credentialDwelling.setDwellingAddress(form.getViviendaDireccionMunicipio());
         credentialDwelling.setPossessionType(form.getViviendaTipoTenencia());
-        //credentialDwelling.setBrick();
-        //credentialDwelling.setLock(entrepreneurshipCategory.getLock());
-        //credentialDwelling.setWood(entrepreneurshipCategory.getWood());
-        //credentialDwelling.setPaperBoard(entrepreneurshipCategory.getPaperBoard());
+        credentialDwelling.setBrick( (form.getViviendaMaterialesLadrillo() == 1) ? true : false);
+        credentialDwelling.setLock(  (form.getViviendaMaterialesChapa() == 1) ? true : false );
+        credentialDwelling.setWood( (form.getViviendaMaterialesMadera() == 1) ? true : false);
+        credentialDwelling.setPaperBoard(  (form.getViviendaMaterialesCarton() == 1) ? true : false );
         credentialDwelling.setLightInstallation(form.getViviendaInstalacionLuz());
         credentialDwelling.setGeneralConditions(form.getViviendaCondicionesGenerales());
         credentialDwelling.setNeighborhoodType(form.getViviendaTipoBasrrio());
-        credentialDwelling.setGas(true);
-        credentialDwelling.setCarafe(true);
-        credentialDwelling.setWater(true);
-        credentialDwelling.setWatterWell(true);
-        // credentialDwelling.setAntiquity(entrepreneurshipCategory.getAntiquity());
+        credentialDwelling.setGas( (form.getViviendaRedDeGas() == 1) ? true : false);
+        credentialDwelling.setCarafe( (form.getViviendaGarrafa() == 1) ? true : false);
+        credentialDwelling.setWater( (form.getViviendaRedDeAgua() == 1) ? true : false);
+        credentialDwelling.setWatterWell( (form.getViviendaBomba() == 1) ? true : false);
+        credentialDwelling.setAntiquity(form.getViviendaAntiguedad());
         credentialDwelling.setNumberOfEnvironments(form.getViviendaCantAmbientes());
         credentialDwelling.setRental(form.getViviendaMontoAlquiler());
 

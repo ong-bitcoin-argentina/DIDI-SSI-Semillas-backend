@@ -16,53 +16,30 @@ import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.PersonBuilder;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialEntrepreneurship;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialFilterDto;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.*;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
-import com.atixlabs.semillasmiddleware.app.model.excel.Child;
-import com.atixlabs.semillasmiddleware.app.model.excel.EntrepreneurshipCredit;
-import com.atixlabs.semillasmiddleware.app.model.excel.FamilyCredit;
-import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMember;
-import com.atixlabs.semillasmiddleware.app.model.excel.FamilyMemberIncome;
-import com.atixlabs.semillasmiddleware.app.model.excel.Form;
+import com.atixlabs.semillasmiddleware.app.model.excel.*;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitsRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialCreditRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialDwellingRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialEntrepreneurshipRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialStateRepository;
-import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
-import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.poiji.bind.Poiji;
-import com.poiji.bind.mapping.PoijiNumberFormat;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
@@ -81,19 +58,13 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.*;
-import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.*;
+import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.DUPLICATED_CREDENTIAL;
 
 @Slf4j
 @Service
@@ -1492,16 +1463,24 @@ public class CredentialService {
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
         formatHeader(worksheet);
+        //Samples that shows how to get the column index and column value in forms
+        String actividadTipoComercioColumnName = "Actividad_Tipo_Comercio";
+        int actividadTipoComercioColumnIndex = getColumnIndex(worksheet, actividadTipoComercioColumnName);
+        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
+        Form formTmp = formList.get(0);
+        String actividadTipoComercio = formTmp.getActividadTipoComercio();
+        //end sample
+
         formatHeader(childGroupSheet);
         formatHeader(familyMemberGroupSheet);
         formatHeader(familyMemberIncomeGroupSheet);
         formatHeader(entrepreneurshipCreditSheet);
         formatHeader(familyCreditGroupSheet);
 
+
 //        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
 //   TODO revisar que pasa cuando falta alguno de los grupos en el excel
 
-        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
 
         List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
         List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
@@ -1546,7 +1525,7 @@ public class CredentialService {
             //compruebo que el beneficiario no tenga vivienda
             credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
                     form.getNumeroDniBeneficiario(),
-                    beneficiaryAddress(form) ));
+                   ExcelUtils.beneficiaryAddress(form) ));
 
             log.info("duplicadas " + credentialsOptional);
 
@@ -1577,6 +1556,9 @@ public class CredentialService {
                     if (form.getTieneMasFamilia().equals("Si")){
                         this.saveFamilyIdentityCredentials(form, personBeneficiary, familyMemberList);
                     }
+                    if(form.getHuboCambiosVivienda().equals("Si")){
+                        this.saveDwellingCredentials(form, personBeneficiary);
+                    }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
                 // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
@@ -1597,9 +1579,7 @@ public class CredentialService {
         return beneficiary;
     }
 
-    public String beneficiaryAddress(Form form){
-        return (form.getViviendaDireccionCalle()+" N° "+form.getViviendaDireccionNumero()+" e/ "+form.getViviendaDireccionEntreCalles());
-    }
+
     public void saveSpouseIdentityCredentials(Form form, Person creditHolder){
         // SPOUSE_CATEGORY_NAME
         Person spousePerson = new Person();
@@ -1647,20 +1627,69 @@ public class CredentialService {
         }
     }
 
+    public void saveDwellingCredentials(Form form, Person creditHolder){
+        //DWELLING_CATEGORY_NAME
+        CredentialDwelling credentialDwelling = new CredentialDwelling();
+        buildCredential(creditHolder, credentialDwelling);
+        buildDwellingCredentialFromForm(form, credentialDwelling);
+        credentialDwellingRepository.save(credentialDwelling);
+    }
+
+    public void buildDwellingCredentialFromForm(Form form, CredentialDwelling credentialDwelling){
+        credentialDwelling.setDwellingType(form.getViviendaTipoVivienda());
+        credentialDwelling.setDwellingAddress(form.getViviendaDireccionMunicipio());
+        credentialDwelling.setPossessionType(form.getViviendaTipoTenencia());
+        credentialDwelling.setBrick( (form.getViviendaMaterialesLadrillo() == 1) ? true : false);
+        credentialDwelling.setLock(  (form.getViviendaMaterialesChapa() == 1) ? true : false );
+        credentialDwelling.setWood( (form.getViviendaMaterialesMadera() == 1) ? true : false);
+        credentialDwelling.setPaperBoard(  (form.getViviendaMaterialesCarton() == 1) ? true : false );
+        credentialDwelling.setLightInstallation(form.getViviendaInstalacionLuz());
+        credentialDwelling.setGeneralConditions(form.getViviendaCondicionesGenerales());
+        credentialDwelling.setNeighborhoodType(form.getViviendaTipoBasrrio());
+        credentialDwelling.setGas( (form.getViviendaRedDeGas() == 1) ? true : false);
+        credentialDwelling.setCarafe( (form.getViviendaGarrafa() == 1) ? true : false);
+        credentialDwelling.setWater( (form.getViviendaRedDeAgua() == 1) ? true : false);
+        credentialDwelling.setWatterWell( (form.getViviendaBomba() == 1) ? true : false);
+        credentialDwelling.setAntiquity(form.getViviendaAntiguedad());
+        credentialDwelling.setNumberOfEnvironments(form.getViviendaCantAmbientes());
+        credentialDwelling.setRental(form.getViviendaMontoAlquiler());
+
+        credentialDwelling.setAddress(ExcelUtils.beneficiaryAddress(form));
+        credentialDwelling.setLocation(form.getViviendaDomicilioLocalidad());
+        credentialDwelling.setNeighborhood(form.getViviendaDomicilioBarrio());
+
+        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
+        credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());
+    }
+
+    //todo move to an ExcelHelper class
+    private int getColumnIndex(XSSFSheet sheet, String columnName){
+       XSSFRow headerRow =  sheet.getRow(0);
+
+        for(int i=0;i<headerRow.getLastCellNum() ;i++){
+            XSSFCell cell = headerRow.getCell(i);
+            if(cell.getStringCellValue().trim().equals(columnName.trim()))
+                return i;
+        };
+
+        return -1;
+    }
+
+    //todo move to an ExcelHelper class
     public void formatHeader(XSSFSheet sheet) {
         if (Objects.isNull(sheet))
             return;
         XSSFRow headerRow =  sheet.getRow(0);
         for(int i=0;i<headerRow.getLastCellNum() ;i++){
             XSSFCell cell = headerRow.getCell(i);
-            String newCell = cell.getStringCellValue();
-            if (!newCell.isEmpty() && newCell.contains("#")) {
-                newCell = newCell.substring(newCell.indexOf("#") + 1);
-                if (!newCell.isEmpty() && newCell.contains("#")) {
-                    newCell = newCell.substring(0, newCell.indexOf("#"));
-                    headerRow.createCell(i);
-                    headerRow.getCell(i).setCellValue(newCell);
-                }
+            boolean hasTwoHash = StringUtils.countMatches(cell.getStringCellValue(), "#")==2;
+            if(hasTwoHash){
+                String[] splittedCellContent = cell.getStringCellValue().split("#");
+                String title = splittedCellContent[1];
+                String subTitle = splittedCellContent[2].substring(splittedCellContent[2].lastIndexOf("/"));
+                subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
+                headerRow.createCell(i);
+                headerRow.getCell(i).setCellValue(title + subTitle);
             }
         }
     }

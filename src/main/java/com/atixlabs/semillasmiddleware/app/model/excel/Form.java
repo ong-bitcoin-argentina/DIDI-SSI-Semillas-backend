@@ -18,6 +18,10 @@ public class Form {
     @ExcelCellName("_index")
     private int index;
 
+    @ExcelCellName("Actividad_Tipo_Comercio")
+    private String actividadTipoComercio;
+
+
     @ExcelCellName("Grupo Solidario")
     private String grupoSolidario;
 
@@ -58,6 +62,9 @@ public class Form {
     @ExcelCellName("Hay_Mas_Miembros_Familia")
     private String tieneMasFamilia;
 
+    @ExcelCellName("Vivienda_Cambios")
+    private String huboCambiosVivienda;
+
     // Datos del conyuge
     @ExcelCellName("Apellido_Conyuge")
     private String apellidoConyuge;
@@ -85,9 +92,6 @@ public class Form {
 
     //Datos de Vivienda
 
-    @ExcelCellName("Vivienda_Hubo_Cambios")
-    private String huboCambiosVivienda;
-
     @ExcelCellName("Vivienda_Tipo_Tenencia")
     private String viviendaTipoTenencia;
 
@@ -100,9 +104,17 @@ public class Form {
     @ExcelCellName("Vivienda_Tipo_Vivienda_Otro")
     private String viviendaTipoViviendaOtro;
 
-    //TODO: cambiar por Gas y Agua por separado
-    @ExcelCellName("Vivienda_Servicios_Basicos")
-    private String viviendaServiciosBasicos;
+    @ExcelCellName("Vivienda_Gas_Red de gas")
+    private Integer viviendaRedDeGas;
+
+    @ExcelCellName("Vivienda_Gas_Garrafa")
+    private Integer viviendaGarrafa;
+
+    @ExcelCellName("Vivienda_Agua_Red de Agua")
+    private Integer viviendaRedDeAgua;
+
+    @ExcelCellName("Vivienda_Agua_ Bomba")
+    private Integer viviendaBomba;
 
     @ExcelCellName("Vivienda_Instalacion_Luz")
     private String viviendaInstalacionLuz;
@@ -122,7 +134,7 @@ public class Form {
     @ExcelCellName("Dom1_Calle_Beneficiario")
     private String viviendaDireccionCalle;
 
-    @ExcelCellName("Dom1_Numero_Beneficiario")
+    @ExcelCellName("Dom1_Num_Beneficiario")
     private String viviendaDireccionNumero;
 
     @ExcelCellName("Dom1_Entre_Calles_Beneficiario")
@@ -138,11 +150,31 @@ public class Form {
     private String viviendaDomicilioBarrio;
 
     @ExcelCellName("Vivienda_Cantidad_Ambientes")
-    private String viviendaCantAmbientes;
+    private Integer viviendaCantAmbientes;
 
-    //TODO: averiguar si es necesari el tipo de material
-    //TODO: agregar antiguedad
+    @ExcelCellName("Vivienda_Antiguedad")
+    private Integer viviendaAntiguedad;
 
     @ExcelCellName("Egreso_Familiar_Alquiler")
-    private String viviendaMontoAlquiler;
+    private Long viviendaMontoAlquiler;
+
+    @ExcelCellName("Vivienda_Materiales_Chapa")
+    private Integer viviendaMaterialesChapa;
+
+    @ExcelCellName("Vivienda_Materiales_Cartón")
+    private Integer viviendaMaterialesCarton;
+
+    @ExcelCellName("Vivienda_Materiales_Madera")
+    private Integer viviendaMaterialesMadera;
+
+    @ExcelCellName("Vivienda_Materiales_Adobe")
+    private Integer viviendaMaterialesAdobe;
+
+    @ExcelCellName("Vivienda_Materiales_Ladrillo sin reboque")
+    private Integer viviendaMaterialesLadrillo;
+
+    @ExcelCellName("Vivienda_Materiales_Otro")
+    private Integer viviendaMaterialesOtro;
+
+
 }

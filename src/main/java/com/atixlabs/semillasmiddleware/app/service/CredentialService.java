@@ -1463,13 +1463,7 @@ public class CredentialService {
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
         formatHeader(worksheet);
-        //Samples that shows how to get the column index and column value in forms
-        String actividadTipoComercioColumnName = "Actividad_Tipo_Comercio";
-        int actividadTipoComercioColumnIndex = getColumnIndex(worksheet, actividadTipoComercioColumnName);
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
-        Form formTmp = formList.get(0);
-        String actividadTipoComercio = formTmp.getActividadTipoComercio();
-        //end sample
 
         formatHeader(childGroupSheet);
         formatHeader(familyMemberGroupSheet);
@@ -1477,10 +1471,7 @@ public class CredentialService {
         formatHeader(entrepreneurshipCreditSheet);
         formatHeader(familyCreditGroupSheet);
 
-
 //        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
-//   TODO revisar que pasa cuando falta alguno de los grupos en el excel
-
 
         List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
         List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
@@ -1559,6 +1550,9 @@ public class CredentialService {
                     if(form.getHuboCambiosVivienda().equals("Si")){
                         this.saveDwellingCredentials(form, personBeneficiary);
                     }
+                    if (form.getHuboCambiosActividad().equals("Si")){
+                        this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                    }
             } else if (createCredentials) {
                 // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
                 // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
@@ -1582,10 +1576,8 @@ public class CredentialService {
 
     public void saveSpouseIdentityCredentials(Form form, Person creditHolder){
         // SPOUSE_CATEGORY_NAME
-        Person spousePerson = new Person();
-        spousePerson.Spouse(form);
+        Person spousePerson = new PersonBuilder().fromSpouse(form).build();
         spousePerson = savePersonIfNew(spousePerson);
-        // buildCredential
         CredentialIdentity credentialIdentity = new CredentialIdentity(spousePerson, creditHolder, SPOUSE);
         Optional<CredentialState> credentialStateOptional =
                 credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
@@ -1635,31 +1627,50 @@ public class CredentialService {
         credentialDwellingRepository.save(credentialDwelling);
     }
 
+    public void saveEntrepreneurshipCredentials(Form form, Person creditHolder){
+        //ENTREPRENEURSHIP_CATEGORY
+        CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
+        buildCredential(creditHolder, credentialEntrepreneurship);
+        buildEntrepreneurshipCredentialFormForm(form, credentialEntrepreneurship);
+        this.credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
+    }
+
     public void buildDwellingCredentialFromForm(Form form, CredentialDwelling credentialDwelling){
-        credentialDwelling.setDwellingType(form.getViviendaTipoVivienda());
-        credentialDwelling.setDwellingAddress(form.getViviendaDireccionMunicipio());
-        credentialDwelling.setPossessionType(form.getViviendaTipoTenencia());
+        credentialDwelling.setAntiquity(form.getViviendaAntiguedad());
+        credentialDwelling.setPossessionType((form.getViviendaTipoTenencia().equals("Otro"))? form.getViviendaTipoTenenciaOtro() : form.getViviendaTipoTenencia());
+        credentialDwelling.setDwellingType((form.getViviendaTipoVivienda().equals("Otro")) ? form.getViviendaTipoViviendaOtro() : form.getViviendaTipoVivienda());
         credentialDwelling.setBrick( (form.getViviendaMaterialesLadrillo() == 1) ? true : false);
         credentialDwelling.setLock(  (form.getViviendaMaterialesChapa() == 1) ? true : false );
         credentialDwelling.setWood( (form.getViviendaMaterialesMadera() == 1) ? true : false);
         credentialDwelling.setPaperBoard(  (form.getViviendaMaterialesCarton() == 1) ? true : false );
-        credentialDwelling.setLightInstallation(form.getViviendaInstalacionLuz());
-        credentialDwelling.setGeneralConditions(form.getViviendaCondicionesGenerales());
-        credentialDwelling.setNeighborhoodType(form.getViviendaTipoBasrrio());
         credentialDwelling.setGas( (form.getViviendaRedDeGas() == 1) ? true : false);
         credentialDwelling.setCarafe( (form.getViviendaGarrafa() == 1) ? true : false);
         credentialDwelling.setWater( (form.getViviendaRedDeAgua() == 1) ? true : false);
         credentialDwelling.setWatterWell( (form.getViviendaBomba() == 1) ? true : false);
-        credentialDwelling.setAntiquity(form.getViviendaAntiguedad());
+        credentialDwelling.setLightInstallation(form.getViviendaInstalacionLuz());
         credentialDwelling.setNumberOfEnvironments(form.getViviendaCantAmbientes());
+        credentialDwelling.setGeneralConditions(form.getViviendaCondicionesGenerales());
+        credentialDwelling.setNeighborhoodType((form.getViviendaTipoBarrio().equals("Otro")) ? form.getViviendaTipoBarrioOtro() : form.getViviendaTipoBarrio());
         credentialDwelling.setRental(form.getViviendaMontoAlquiler());
-
+        credentialDwelling.setDwellingAddress(form.getViviendaDireccionMunicipio());
         credentialDwelling.setAddress(ExcelUtils.beneficiaryAddress(form));
         credentialDwelling.setLocation(form.getViviendaDomicilioLocalidad());
         credentialDwelling.setNeighborhood(form.getViviendaDomicilioBarrio());
 
         credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
         credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());
+    }
+
+    public void buildEntrepreneurshipCredentialFormForm(Form form, CredentialEntrepreneurship credentialEntrepreneurship){
+        credentialEntrepreneurship.setEntrepreneurshipName(form.getActividadNombre());
+        credentialEntrepreneurship.setMainActivity(form.getActividadPrincipal());
+        credentialEntrepreneurship.setEntrepreneurshipType((form.getActividadTipo().equals("Otro"))? form.getActividadTipoOtro(): form.getActividadTipo());
+        credentialEntrepreneurship.setStartActivity(form.getActividadAntiguedad());
+        credentialEntrepreneurship.setEntrepreneurshipAddress(ExcelUtils.formatAddress(form));
+        credentialEntrepreneurship.setEndActivity(null);
+
+        credentialEntrepreneurship.setCredentialCategory(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
+        credentialEntrepreneurship.setCredentialDescription(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
     }
 
     //todo move to an ExcelHelper class
@@ -1690,6 +1701,7 @@ public class CredentialService {
                 subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
                 headerRow.createCell(i);
                 headerRow.getCell(i).setCellValue(title + subTitle);
+                log.info("esto "+headerRow.getCell(i));
             }
         }
     }

@@ -4,6 +4,7 @@ import com.poiji.annotation.ExcelCellName;
 import com.poiji.annotation.ExcelRow;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.hql.spi.id.cte.AbstractCteValuesListBulkIdHandler;
 
 import java.time.LocalDate;
 
@@ -17,10 +18,6 @@ public class Form {
     // Datos de la encuesta y de las asesoras
     @ExcelCellName("_index")
     private int index;
-
-    @ExcelCellName("Actividad_Tipo_Comercio")
-    private String actividadTipoComercio;
-
 
     @ExcelCellName("Grupo Solidario")
     private String grupoSolidario;
@@ -65,6 +62,9 @@ public class Form {
     @ExcelCellName("Vivienda_Cambios")
     private String huboCambiosVivienda;
 
+    @ExcelCellName("Cambio_Actividad")
+    private String huboCambiosActividad;
+
     // Datos del conyuge
     @ExcelCellName("Apellido_Conyuge")
     private String apellidoConyuge;
@@ -95,13 +95,13 @@ public class Form {
     @ExcelCellName("Vivienda_Tipo_Tenencia")
     private String viviendaTipoTenencia;
 
-    @ExcelCellName("Vivienda_Tipo_Tenencia_Otro")
+    @ExcelCellName("Vivienda_Otro_Tipo_Tenencia")
     private String viviendaTipoTenenciaOtro;
 
     @ExcelCellName("Vivienda_Tipo_Vivienda")
     private String viviendaTipoVivienda;
 
-    @ExcelCellName("Vivienda_Tipo_Vivienda_Otro")
+    @ExcelCellName("Vivienda_Tipo_Otro_Vivienda")
     private String viviendaTipoViviendaOtro;
 
     @ExcelCellName("Vivienda_Gas_Red de gas")
@@ -122,13 +122,13 @@ public class Form {
     @ExcelCellName("Vivienda_General")
     private String viviendaCondicionesGenerales;
 
-    @ExcelCellName("Vivienda_General_Otro")
+    @ExcelCellName("Vivienda_Otro_General")
     private String viviendaCondicionesGeneralesOtro;
 
     @ExcelCellName("Vivienda_Tipo_Barrio")
-    private String viviendaTipoBasrrio;
+    private String viviendaTipoBarrio;
 
-    @ExcelCellName("Vivienda_Tipo_Barrio_Otro")
+    @ExcelCellName("Vivienda_Tipo_Otro_Barrio")
     private String viviendaTipoBarrioOtro;
 
     @ExcelCellName("Dom1_Calle_Beneficiario")
@@ -175,6 +175,55 @@ public class Form {
 
     @ExcelCellName("Vivienda_Materiales_Otro")
     private Integer viviendaMaterialesOtro;
+
+    //Datos Emprendimiento
+
+    @ExcelCellName("Actividad_Nombre")
+    private String actividadNombre;
+
+    @ExcelCellName("Actividad_Principal")
+    private String actividadPrincipal;
+
+    @ExcelCellName("Actividad_Tipo")
+    private String actividadTipo;
+
+    @ExcelCellName("Actividad_Tipo_Comercio")
+    private String actividadTipoComercio;
+
+    @ExcelCellName("Actividad_Tipo_Producción")
+    private String actividadTipoProduccion;
+
+    @ExcelCellName("Actividad_Tipo_Servicio")
+    private String actividadTipoServicio;
+
+    @ExcelCellName("Actividad_Tipo_Otro")
+    private String actividadTipoOtro;
+
+    @ExcelCellName("Actividad_Caracteristica")
+    private String actividadCaracteristica;
+
+    @ExcelCellName("Actividad_Antiguedad_Años")
+    private Integer actividadAntiguedad;
+
+    @ExcelCellName("Actividad_Dir_Calle")
+    private String actividadDirCalle;
+
+    @ExcelCellName("Actividad_Dir_Numero")
+    private String actividadDirNumero;
+
+    @ExcelCellName("Actividad_Dir_Entre_Calles")
+    private String actividadDirEntreCalles;
+
+    @ExcelCellName("Actividad_Dir_Municipio")
+    private String actividadDirMunicipio;
+
+    @ExcelCellName("Actividad_Dir_Localidad")
+    private String actividadDirLocalidad;
+
+    @ExcelCellName("Actividad_Dir_Barrio")
+    private String actividadDirBarrio;
+
+
 
 
 }

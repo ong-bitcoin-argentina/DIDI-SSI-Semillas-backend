@@ -16,13 +16,28 @@ public class PersonBuilder {
         person.setFirstName(form.getNombreBeneficiario());
         person.setLastName(form.getApellidoBeneficiario());
         person.setBirthDate(LocalDate.parse(form.getFechaNacimientoBeneficiario()));
-        if (form.getGeneroBeneficiario().isEmpty()) {
+        if (form.getGeneroBeneficiario().equals("Otro")) {
             person.setGender(form.getGeneroOtroBeneficiario());
         } else {
             person.setGender(form.getGeneroBeneficiario());
         }
         return this;
     }
+
+    public PersonBuilder fromSpouse(Form form){
+        person = new Person();
+        person.setDocumentNumber(form.getNumeroDniConyuge());
+        person.setFirstName(form.getNombreConyuge());
+        person.setLastName(form.getApellidoConyuge());
+        person.setBirthDate(LocalDate.parse(form.getFechaNacimientoConyuge()));
+        if (form.getGeneroConyuge().equals("Otro")) {
+            person.setGender(form.getGeneroOtroConyuge());
+        }else {
+            person.setGender(form.getGeneroConyuge());
+        }
+        return this;
+    }
+
 
     public PersonBuilder fromChild(Child child){
         person = new Person();
@@ -31,7 +46,7 @@ public class PersonBuilder {
         person.setLastName(child.getApellidoHijo());
         person.setBirthDate(LocalDate.parse(child.getFechaNacimientoHijo()));
         person.setGender(child.getGeneroHijo());
-        if (child.getGeneroHijo().isEmpty())
+        if (child.getGeneroHijo().equals("Otro"))
             person.setGender(child.getGeneroOtroHijo());
         else
             person.setGender(child.getGeneroHijo());
@@ -43,7 +58,7 @@ public class PersonBuilder {
         person.setFirstName(family.getNombreFamiliar());
         person.setLastName(family.getApellidoFamiliar());
         person.setBirthDate(LocalDate.parse(family.getFechaNacimientoFamiliar()));
-       if (family.getGeneroFamilia().isEmpty()){
+       if (family.getGeneroFamilia().equals("Otro")){
            person.setGender(family.getGeneroOtroFamiliar());
        }else{
            person.setGender(family.getGeneroFamilia());

@@ -44,26 +44,6 @@ public class Person {
     @ManyToMany(fetch = FetchType.EAGER)
     protected List<Loan> defaults; //TODO must be a HashSet
 
-    public Person(Form form) {
-        this.documentNumber = form.getNumeroDniBeneficiario();
-        this.firstName = form.getNombreBeneficiario();
-        this.lastName = form.getApellidoBeneficiario();
-        this.birthDate = LocalDate.parse(form.getFechaNacimientoBeneficiario());
-        this.gender = form.getGeneroBeneficiario();
-
-    }
-
-    public void Spouse(Form form){
-        this.documentNumber = form.getNumeroDniConyuge();
-        this.firstName = form.getNombreConyuge();
-        this.lastName = form.getApellidoConyuge();
-        this.birthDate = LocalDate.parse(form.getFechaNacimientoConyuge());
-        if (form.getGeneroConyuge().isEmpty())
-            this.gender= form.getGeneroOtroConyuge();
-        else
-            this.gender = form.getGeneroConyuge();
-    }
-
     //TODO user this
     public boolean equalsIgnoreId(Person person1, Person person2) {
         return person1.getDocumentNumber().equals(person2.getDocumentNumber()) &&

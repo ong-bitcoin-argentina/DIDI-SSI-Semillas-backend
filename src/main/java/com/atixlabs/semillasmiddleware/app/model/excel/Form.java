@@ -19,6 +19,9 @@ public class Form {
     @ExcelCellName("_index")
     private int index;
 
+    @ExcelCellName("_validation_status")
+    private String estadoEncuesta;
+
     @ExcelCellName("Grupo Solidario")
     private String grupoSolidario;
 

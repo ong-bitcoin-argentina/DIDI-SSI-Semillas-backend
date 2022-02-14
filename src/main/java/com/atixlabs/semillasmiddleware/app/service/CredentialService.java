@@ -59,6 +59,7 @@ import javax.persistence.criteria.Predicate;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
@@ -1492,72 +1493,74 @@ public class CredentialService {
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
 
         for (Form form: formList) {
-            // compruebo que el beneficiario no se repita
-            List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
-                    form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                    form.getNumeroDniBeneficiario());
+            if (form.getEstadoEncuesta() == null) {
 
-            //compruebo que el esposo no se repita
-            credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
-                    CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
+                // compruebo que el beneficiario no se repita
+                List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
+                        form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                        form.getNumeroDniBeneficiario());
 
-            //compruebo que los hijos no se repita
-            for (Child child: childList){
-                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
-                    child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                    form.getNumeroDniBeneficiario() ));
-            }
-            //comprueba que la familia no se repita
-            for (FamilyMember family: familyMemberList) {
-                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
-                        family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                        form.getNumeroDniBeneficiario()));
-            }
-            //compruebo que el beneficiario no tenga vivienda
-            credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
-                    form.getNumeroDniBeneficiario(),
-                   ExcelUtils.beneficiaryAddress(form) ));
+                //compruebo que el esposo no se repita
+                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
+                        CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
 
-            log.info("duplicadas " + credentialsOptional);
+                //compruebo que los hijos no se repita
+                for (Child child : childList) {
+                    credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                            child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                            form.getNumeroDniBeneficiario()));
+                }
+                //comprueba que la familia no se repita
+                for (FamilyMember family : familyMemberList) {
+                    credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                            family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                            form.getNumeroDniBeneficiario()));
+                }
+                //compruebo que el beneficiario no tenga vivienda
+                credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
+                        form.getNumeroDniBeneficiario(),
+                        ExcelUtils.beneficiaryAddress(form)));
 
-            if (!credentialsOptional.isEmpty() ) {
-                log.info(bodyLog(credentialsOptional.get(0)));
-                processExcelFileResult.addRowError(
-                        ExcelErrorDetail.builder()
-                                .errorHeader("Advertencia CREDENCIAL DUPLICADA")
-                                .errorBody(bodyLog(credentialsOptional.get(0)))
-                                .errorType(DUPLICATED_CREDENTIAL)
-                                .credentialId(credentialsOptional.get(0).getId())
-                                .category(credentialsOptional.get(0).getCredentialDescription())
-                                .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
-                                .name(credentialsOptional.get(0).getBeneficiaryFirstName())
-                                .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
-                                .build()
-                );
-            }
+                log.info("duplicadas " + credentialsOptional);
 
-            if (processExcelFileResult.getErrorRows().isEmpty()) {
+                if (!credentialsOptional.isEmpty()) {
+                    log.info(bodyLog(credentialsOptional.get(0)));
+                    processExcelFileResult.addRowError(
+                            ExcelErrorDetail.builder()
+                                    .errorHeader("Advertencia CREDENCIAL DUPLICADA")
+                                    .errorBody(bodyLog(credentialsOptional.get(0)))
+                                    .errorType(DUPLICATED_CREDENTIAL)
+                                    .credentialId(credentialsOptional.get(0).getId())
+                                    .category(credentialsOptional.get(0).getCredentialDescription())
+                                    .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
+                                    .name(credentialsOptional.get(0).getBeneficiaryFirstName())
+                                    .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
+                                    .build()
+                    );
+                }
+
+                if (processExcelFileResult.getErrorRows().isEmpty()) {
                     Person personBeneficiary = this.saveIdentityCredentials(form);
-                    if (form.getNumeroDniConyuge()!= null) {
+                    if (form.getNumeroDniConyuge() != null) {
                         this.saveSpouseIdentityCredentials(form, personBeneficiary);
                     }
-                    if (form.getTieneHijos().equals("Si")){
+                    if (form.getTieneHijos().equals("Si")) {
                         this.saveChildIdentityCredentials(form, personBeneficiary, childList);
                     }
-                    if (form.getTieneMasFamilia().equals("Si")){
+                    if (form.getTieneMasFamilia().equals("Si")) {
                         this.saveFamilyIdentityCredentials(form, personBeneficiary, familyMemberList);
                     }
-                    if(form.getHuboCambiosVivienda().equals("Si")){
+                    if (form.getHuboCambiosVivienda().equals("Si")) {
                         this.saveDwellingCredentials(form, personBeneficiary);
                     }
-                    if (form.getHuboCambiosActividad().equals("Si")){
+                    if (form.getHuboCambiosActividad().equals("Si")) {
                         this.saveEntrepreneurshipCredentials(form, personBeneficiary);
                     }
-            } else if (createCredentials) {
-                // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
-                // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
-            }
-        } //for
+                } else if (createCredentials) {
+                    // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
+                    // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
+                }
+            }} //for
         return processExcelFileResult;
     }
 
@@ -1701,7 +1704,6 @@ public class CredentialService {
                 subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
                 headerRow.createCell(i);
                 headerRow.getCell(i).setCellValue(title + subTitle);
-                log.info("esto "+headerRow.getCell(i));
             }
         }
     }

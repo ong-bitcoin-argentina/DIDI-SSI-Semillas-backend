@@ -790,6 +790,7 @@ public class CredentialService {
                         .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
                         .build()
                 );
+
                 allCredentialsNewOrInactive = false;
             }
         }
@@ -1517,11 +1518,13 @@ public class CredentialService {
                             form.getNumeroDniBeneficiario()));
                 }
                 //compruebo que el beneficiario no tenga vivienda
-                credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
+                List<Credential> credencialVivienda = (getDwellingCredentials(credentialStateActivePending,
                         form.getNumeroDniBeneficiario(),
                         ExcelUtils.beneficiaryAddress(form)));
+                credentialsOptional.addAll(credencialVivienda);
 
-                log.info("duplicadas " + credentialsOptional);
+                log.info("DUPLICADA " + credentialsOptional);
+                log.info("VIVIENDA " + credencialVivienda);
 
                 if (!credentialsOptional.isEmpty()) {
                     log.info(bodyLog(credentialsOptional.get(0)));
@@ -1537,9 +1540,11 @@ public class CredentialService {
                                     .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
                                     .build()
                     );
+                    log.info("ULTIMO: "+processExcelFileResult.getErrorRows());
                 }
-
-                if (processExcelFileResult.getErrorRows().isEmpty()) {
+                // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
+                if (processExcelFileResult.getErrorRows().isEmpty() ) {
+                    //si no hay error, creo todo
                     Person personBeneficiary = this.saveIdentityCredentials(form);
                     if (form.getNumeroDniConyuge() != null) {
                         this.saveSpouseIdentityCredentials(form, personBeneficiary);
@@ -1556,9 +1561,28 @@ public class CredentialService {
                     if (form.getHuboCambiosActividad().equals("Si")) {
                         this.saveEntrepreneurshipCredentials(form, personBeneficiary);
                     }
-                } else if (createCredentials) {
-                    // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
-                    // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
+                } else {
+                    if (createCredentials) {
+                        //solo debe haber credenciales de identidad duplicadas, que no se crean
+                        if (!credencialVivienda.isEmpty()) {
+                            //hay credenciales de vivienda activas para esa persona, en ese caso no puedo continar
+                            //muestro error
+                            log.info("ERROR: hay credenciales de vivienda duplicadas y no se puede continuar");
+
+                        } else {
+                            //si no hay credenciales de vivienda duplicada
+                            // crear emprendimiento
+                            // crear vivienda
+                            log.info("Solo creo las de emprendimiento y vivienda");
+                            Person personBeneficiary = new PersonBuilder().fromForm(form).build();
+                            if (form.getHuboCambiosActividad().equals("Si")) {
+                                this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                            }
+                            if (form.getHuboCambiosVivienda().equals("Si")) {
+                                this.saveDwellingCredentials(form, personBeneficiary);
+                            }
+                        }
+                    }
                 }
             }} //for
         return processExcelFileResult;

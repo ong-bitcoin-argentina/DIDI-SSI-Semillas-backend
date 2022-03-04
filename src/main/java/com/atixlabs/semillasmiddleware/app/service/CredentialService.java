@@ -1496,10 +1496,17 @@ public class CredentialService {
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
 
+                //compruebo que el beneficiario no tenga vivienda
+                List<Credential> credentialsOptional = (getDwellingCredentials(credentialStateActivePending,
+                        form.getNumeroDniBeneficiario(),
+                        ExcelUtils.beneficiaryAddress(form)));
+                boolean credencialVivienda = credentialsOptional.isEmpty();
+
                 // compruebo que el beneficiario no se repita
-                List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
+                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
                         form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                        form.getNumeroDniBeneficiario());
+                        form.getNumeroDniBeneficiario())
+                );
 
                 //compruebo que el esposo no se repita
                 credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
@@ -1517,14 +1524,8 @@ public class CredentialService {
                             family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
                             form.getNumeroDniBeneficiario()));
                 }
-                //compruebo que el beneficiario no tenga vivienda
-                List<Credential> credencialVivienda = (getDwellingCredentials(credentialStateActivePending,
-                        form.getNumeroDniBeneficiario(),
-                        ExcelUtils.beneficiaryAddress(form)));
-                credentialsOptional.addAll(credencialVivienda);
 
                 log.info("DUPLICADA " + credentialsOptional);
-                log.info("VIVIENDA " + credencialVivienda);
 
                 if (!credentialsOptional.isEmpty()) {
                     log.info(bodyLog(credentialsOptional.get(0)));
@@ -1564,7 +1565,7 @@ public class CredentialService {
                 } else {
                     if (createCredentials) {
                         //solo debe haber credenciales de identidad duplicadas, que no se crean
-                        if (!credencialVivienda.isEmpty()) {
+                        if (!credencialVivienda) {
                             //hay credenciales de vivienda activas para esa persona, en ese caso no puedo continar
                             //muestro error
                             log.info("ERROR: hay credenciales de vivienda duplicadas y no se puede continuar");

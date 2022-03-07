@@ -1465,6 +1465,7 @@ public class CredentialService {
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
         formatHeader(worksheet);
+
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
 
         formatHeader(childGroupSheet);
@@ -1495,7 +1496,6 @@ public class CredentialService {
 
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
-
                 //compruebo que el beneficiario no tenga vivienda
                 List<Credential> credentialsOptional = (getDwellingCredentials(credentialStateActivePending,
                         form.getNumeroDniBeneficiario(),
@@ -1525,8 +1525,6 @@ public class CredentialService {
                             form.getNumeroDniBeneficiario()));
                 }
 
-                log.info("DUPLICADA " + credentialsOptional);
-
                 if (!credentialsOptional.isEmpty()) {
                     log.info(bodyLog(credentialsOptional.get(0)));
                     processExcelFileResult.addRowError(
@@ -1541,9 +1539,7 @@ public class CredentialService {
                                     .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
                                     .build()
                     );
-                    log.info("ULTIMO: "+processExcelFileResult.getErrorRows());
                 }
-                // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
                 if (processExcelFileResult.getErrorRows().isEmpty() ) {
                     //si no hay error, creo todo
                     Person personBeneficiary = this.saveIdentityCredentials(form);
@@ -1564,17 +1560,9 @@ public class CredentialService {
                     }
                 } else {
                     if (createCredentials) {
-                        //solo debe haber credenciales de identidad duplicadas, que no se crean
                         if (!credencialVivienda) {
-                            //hay credenciales de vivienda activas para esa persona, en ese caso no puedo continar
-                            //muestro error
                             log.info("ERROR: hay credenciales de vivienda duplicadas y no se puede continuar");
-
                         } else {
-                            //si no hay credenciales de vivienda duplicada
-                            // crear emprendimiento
-                            // crear vivienda
-                            log.info("Solo creo las de emprendimiento y vivienda");
                             Person personBeneficiary = new PersonBuilder().fromForm(form).build();
                             if (form.getHuboCambiosActividad().equals("Si")) {
                                 this.saveEntrepreneurshipCredentials(form, personBeneficiary);

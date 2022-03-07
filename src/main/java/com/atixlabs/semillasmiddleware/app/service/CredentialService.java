@@ -790,6 +790,7 @@ public class CredentialService {
                         .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
                         .build()
                 );
+
                 allCredentialsNewOrInactive = false;
             }
         }
@@ -1464,6 +1465,7 @@ public class CredentialService {
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
         formatHeader(worksheet);
+
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
 
         formatHeader(childGroupSheet);
@@ -1494,11 +1496,17 @@ public class CredentialService {
 
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
+                //compruebo que el beneficiario no tenga vivienda
+                List<Credential> credentialsOptional = (getDwellingCredentials(credentialStateActivePending,
+                        form.getNumeroDniBeneficiario(),
+                        ExcelUtils.beneficiaryAddress(form)));
+                boolean credencialVivienda = credentialsOptional.isEmpty();
 
                 // compruebo que el beneficiario no se repita
-                List<Credential> credentialsOptional = getIdentityCredentials(credentialStateActivePending,
+                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
                         form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                        form.getNumeroDniBeneficiario());
+                        form.getNumeroDniBeneficiario())
+                );
 
                 //compruebo que el esposo no se repita
                 credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
@@ -1516,12 +1524,6 @@ public class CredentialService {
                             family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
                             form.getNumeroDniBeneficiario()));
                 }
-                //compruebo que el beneficiario no tenga vivienda
-                credentialsOptional.addAll(getDwellingCredentials(credentialStateActivePending,
-                        form.getNumeroDniBeneficiario(),
-                        ExcelUtils.beneficiaryAddress(form)));
-
-                log.info("duplicadas " + credentialsOptional);
 
                 if (!credentialsOptional.isEmpty()) {
                     log.info(bodyLog(credentialsOptional.get(0)));
@@ -1538,8 +1540,8 @@ public class CredentialService {
                                     .build()
                     );
                 }
-
-                if (processExcelFileResult.getErrorRows().isEmpty()) {
+                if (processExcelFileResult.getErrorRows().isEmpty() ) {
+                    //si no hay error, creo todo
                     Person personBeneficiary = this.saveIdentityCredentials(form);
                     if (form.getNumeroDniConyuge() != null) {
                         this.saveSpouseIdentityCredentials(form, personBeneficiary);
@@ -1556,9 +1558,20 @@ public class CredentialService {
                     if (form.getHuboCambiosActividad().equals("Si")) {
                         this.saveEntrepreneurshipCredentials(form, personBeneficiary);
                     }
-                } else if (createCredentials) {
-                    // TODO realizar la validacion que solo haya credenciales de identidad duplicadas, caso contrario arrojar error
-                    // DWELLING_CATEGORY y ENTREPRENEURSHIP_CATEGORY
+                } else {
+                    if (createCredentials) {
+                        if (!credencialVivienda) {
+                            log.info("ERROR: hay credenciales de vivienda duplicadas y no se puede continuar");
+                        } else {
+                            Person personBeneficiary = new PersonBuilder().fromForm(form).build();
+                            if (form.getHuboCambiosActividad().equals("Si")) {
+                                this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                            }
+                            if (form.getHuboCambiosVivienda().equals("Si")) {
+                                this.saveDwellingCredentials(form, personBeneficiary);
+                            }
+                        }
+                    }
                 }
             }} //for
         return processExcelFileResult;

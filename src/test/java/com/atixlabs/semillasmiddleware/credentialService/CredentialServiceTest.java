@@ -603,7 +603,7 @@ public class CredentialServiceTest {
         dwellingCredentialWithIsModification(false, 0);
     }
 
-    @Test
+/*    @Test
     public void buildAllCredentialsFromFormOK() throws InvalidRowException, CredentialException, FileManagerException {
         log.info("buildAllCredentialsFromFormOK");
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
@@ -616,9 +616,9 @@ public class CredentialServiceTest {
         credentialService.buildAllCredentialsFromForm(surveyForm, false);
 
         Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 0);
-    }
+    }*/
 
-    @Test
+/*    @Test
     public void buildAllCredentialsDetectDuplicatedCredential() throws InvalidRowException, FileManagerException {
         log.info("buildAllCredentialsDetectDuplicatedCredential");
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
@@ -641,7 +641,7 @@ public class CredentialServiceTest {
         log.info(processExcelFileResult.toString());
 
         Assertions.assertEquals(processExcelFileResult.getErrorRows().size(), 0);
-    }
+    }*/
 
     @Test
     public void createCredentialCreditAndBenefitWithActiveDID() throws Exception {

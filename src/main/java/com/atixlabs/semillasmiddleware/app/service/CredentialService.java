@@ -1464,18 +1464,14 @@ public class CredentialService {
         XSSFSheet entrepreneurshipCreditSheet = workbook.getSheet("grupo_creditos_emprendimiento");
         XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
 
-        formatHeader(worksheet);
+        ExcelUtils.formatHeader(worksheet);
+        ExcelUtils.formatHeader(childGroupSheet);
+        ExcelUtils.formatHeader(familyMemberGroupSheet);
+        ExcelUtils.formatHeader(familyMemberIncomeGroupSheet);
+        ExcelUtils.formatHeader(entrepreneurshipCreditSheet);
+        ExcelUtils.formatHeader(familyCreditGroupSheet);
 
         List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
-
-        formatHeader(childGroupSheet);
-        formatHeader(familyMemberGroupSheet);
-        formatHeader(familyMemberIncomeGroupSheet);
-        formatHeader(entrepreneurshipCreditSheet);
-        formatHeader(familyCreditGroupSheet);
-
-//        PoijiOptions.PoijiOptionsBuilder.settings().skip(2).limit(2);
-
         List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
         List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
 
@@ -1496,50 +1492,53 @@ public class CredentialService {
 
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
-                //compruebo que el beneficiario no tenga vivienda
-                List<Credential> credentialsOptional = (getDwellingCredentials(credentialStateActivePending,
-                        form.getNumeroDniBeneficiario(),
-                        ExcelUtils.beneficiaryAddress(form)));
-                boolean credencialVivienda = credentialsOptional.isEmpty();
+                //Validaciones
+                if (createCredentials == false) {
+                    //compruebo que el beneficiario no tenga vivienda
+                    List<Credential> credentialsOptional = (getDwellingCredentials(credentialStateActivePending,
+                            form.getNumeroDniBeneficiario(),
+                            ExcelUtils.beneficiaryAddress(form)));
+                    boolean credencialVivienda = credentialsOptional.isEmpty();
 
-                // compruebo que el beneficiario no se repita
-                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
-                        form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                        form.getNumeroDniBeneficiario())
-                );
-
-                //compruebo que el esposo no se repita
-                credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
-                        CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
-
-                //compruebo que los hijos no se repita
-                for (Child child : childList) {
+                    // compruebo que el beneficiario no se repita
                     credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
-                            child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                            form.getNumeroDniBeneficiario()));
-                }
-                //comprueba que la familia no se repita
-                for (FamilyMember family : familyMemberList) {
-                    credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
-                            family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
-                            form.getNumeroDniBeneficiario()));
-                }
-
-                if (!credentialsOptional.isEmpty()) {
-                    log.info(bodyLog(credentialsOptional.get(0)));
-                    processExcelFileResult.addRowError(
-                            ExcelErrorDetail.builder()
-                                    .errorHeader("Advertencia CREDENCIAL DUPLICADA")
-                                    .errorBody(bodyLog(credentialsOptional.get(0)))
-                                    .errorType(DUPLICATED_CREDENTIAL)
-                                    .credentialId(credentialsOptional.get(0).getId())
-                                    .category(credentialsOptional.get(0).getCredentialDescription())
-                                    .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
-                                    .name(credentialsOptional.get(0).getBeneficiaryFirstName())
-                                    .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
-                                    .build()
+                            form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                            form.getNumeroDniBeneficiario())
                     );
-                }
+
+                    //compruebo que el esposo no se repita
+                    credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
+                            CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
+
+                    //compruebo que los hijos no se repita
+                    for (Child child : childList) {
+                        credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                                child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                                form.getNumeroDniBeneficiario()));
+                    }
+                    //comprueba que la familia no se repita
+                    for (FamilyMember family : familyMemberList) {
+                        credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                                family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                                form.getNumeroDniBeneficiario()));
+                    }
+
+                    if (!credentialsOptional.isEmpty()) {
+                        log.info(bodyLog(credentialsOptional.get(0)));
+                        processExcelFileResult.addRowError(
+                                ExcelErrorDetail.builder()
+                                        .errorHeader("Advertencia CREDENCIAL DUPLICADA")
+                                        .errorBody(bodyLog(credentialsOptional.get(0)))
+                                        .errorType(DUPLICATED_CREDENTIAL)
+                                        .credentialId(credentialsOptional.get(0).getId())
+                                        .category(credentialsOptional.get(0).getCredentialDescription())
+                                        .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
+                                        .name(credentialsOptional.get(0).getBeneficiaryFirstName())
+                                        .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
+                                        .build()
+                        );
+                    }
+                }else{
                 if (processExcelFileResult.getErrorRows().isEmpty() ) {
                     //si no hay error, creo todo
                     Person personBeneficiary = this.saveIdentityCredentials(form);
@@ -1559,10 +1558,6 @@ public class CredentialService {
                         this.saveEntrepreneurshipCredentials(form, personBeneficiary);
                     }
                 } else {
-                    if (createCredentials) {
-                        if (!credencialVivienda) {
-                            log.info("ERROR: hay credenciales de vivienda duplicadas y no se puede continuar");
-                        } else {
                             Person personBeneficiary = new PersonBuilder().fromForm(form).build();
                             if (form.getHuboCambiosActividad().equals("Si")) {
                                 this.saveEntrepreneurshipCredentials(form, personBeneficiary);
@@ -1571,7 +1566,6 @@ public class CredentialService {
                                 this.saveDwellingCredentials(form, personBeneficiary);
                             }
                         }
-                    }
                 }
             }} //for
         return processExcelFileResult;
@@ -1702,23 +1696,7 @@ public class CredentialService {
         return -1;
     }
 
-    //todo move to an ExcelHelper class
-    public void formatHeader(XSSFSheet sheet) {
-        if (Objects.isNull(sheet))
-            return;
-        XSSFRow headerRow =  sheet.getRow(0);
-        for(int i=0;i<headerRow.getLastCellNum() ;i++){
-            XSSFCell cell = headerRow.getCell(i);
-            boolean hasTwoHash = StringUtils.countMatches(cell.getStringCellValue(), "#")==2;
-            if(hasTwoHash){
-                String[] splittedCellContent = cell.getStringCellValue().split("#");
-                String title = splittedCellContent[1];
-                String subTitle = splittedCellContent[2].substring(splittedCellContent[2].lastIndexOf("/"));
-                subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
-                headerRow.createCell(i);
-                headerRow.getCell(i).setCellValue(title + subTitle);
-            }
-        }
-    }
+
+
 }
 

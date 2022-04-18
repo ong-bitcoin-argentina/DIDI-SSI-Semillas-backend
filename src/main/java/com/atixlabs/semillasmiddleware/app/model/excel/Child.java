@@ -38,8 +38,15 @@ public class Child {
     @ExcelCellName("Genero_Otro_Hijo")
     private String generoOtroHijo;
 
+    @ExcelCellName("Trabaja_Hijo")
+    private String trabajaHijo;
+
+    @ExcelCellName("En_Que_Trabaja_Hijo")
+    private String enQueTrabajaHijo;
+
+    @ExcelCellName("Estudia_Hijo")
+    private String estudiaHijo;
+
     @ExcelCellName("_parent_index")
     private int parentIndex;
-
-    //TODO: add missing form columns
 }

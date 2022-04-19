@@ -13,6 +13,7 @@ import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
 import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.PersonBuilder;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
@@ -20,37 +21,51 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.*;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
+import com.atixlabs.semillasmiddleware.app.model.excel.*;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.*;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.*;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
+import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.poiji.bind.Poiji;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.xssf.usermodel.XSSFCell;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.criteria.Predicate;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import static com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes.*;
 import static com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories.*;
+import static com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType.*;
+import static com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType.DUPLICATED_CREDENTIAL;
 
 @Slf4j
 @Service
@@ -736,7 +751,8 @@ public class CredentialService {
                 if (categoryName.equals(BENEFICIARY_CATEGORY_NAME) || !skipIdentityCredentials) {
                     PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
                     Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
-                    credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(), CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
+                    credentialsOptional = getIdentityCredentials(credentialStateActivePending, beneficiary.getDocumentNumber(),
+                            CredentialCategoriesCodes.IDENTITY.getCode(), creditHolder.getDocumentNumber());
                     if (categoryName.equals(BENEFICIARY_CATEGORY_NAME)) {
                         beneficiaryAddress = beneficiaryPersonCategory.getAddress();
                     }
@@ -766,7 +782,7 @@ public class CredentialService {
                         ExcelErrorDetail.builder()
                         .errorHeader("Advertencia CREDENCIAL DUPLICADA")
                         .errorBody(bodyLog(credentialsOptional.get(0)))
-                        .errorType(ExcelErrorType.DUPLICATED_CREDENTIAL)
+                        .errorType(DUPLICATED_CREDENTIAL)
                         .credentialId(credentialsOptional.get(0).getId())
                         .category(credentialsOptional.get(0).getCredentialDescription())
                         .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
@@ -774,6 +790,7 @@ public class CredentialService {
                         .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
                         .build()
                 );
+
                 allCredentialsNewOrInactive = false;
             }
         }
@@ -874,7 +891,8 @@ public class CredentialService {
             case CHILD_CATEGORY_NAME:
             case SPOUSE_CATEGORY_NAME:
             case KINSMAN_CATEGORY_NAME:
-                CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category, creditHolder));
+                CredentialIdentity credentialIdentity = credentialIdentityService.save(buildIdentityCredential(category,
+                        creditHolder));
                 this.createCredentialIdentityKinsman(credentialIdentity);
                 break;
             case ENTREPRENEURSHIP_CATEGORY_NAME:
@@ -890,7 +908,8 @@ public class CredentialService {
                 if (Objects.isNull(dwellingCategory.isModification()))
                     throw new FileManagerException("No se encuentra la pregunta de vivienda.");
                 if (dwellingCategory.isModification()) {
-                    PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
+                    PersonCategory beneficiaryCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(
+                            BENEFICIARY_CATEGORY_NAME.getCode(), null);
                     credentialDwellingRepository.save(buildDwellingCredential(category, creditHolder, beneficiaryCategory));
                     break;
                 }
@@ -901,10 +920,10 @@ public class CredentialService {
     private Person savePersonIfNew(Person person) {
         Optional<Person> personOptional = personRepository.findByDocumentNumber(person.getDocumentNumber());
         if (personOptional.isEmpty())
-            return personRepository.save(person);
+            return personRepository.saveAndFlush(person);
         if (!(person.equalsIgnoreId(person, personOptional.get()))) {
             person.setId(personOptional.get().getId());
-            return personRepository.save(person);
+            return personRepository.saveAndFlush(person);
         }
         return personOptional.get();
     }
@@ -933,7 +952,6 @@ public class CredentialService {
 
     //todo move into credentia{}
     //
-    // l type class
     private CredentialIdentity buildIdentityCredential(Category category, Person creditHolder)  {
         PersonCategory beneficiaryPersonCategory = (PersonCategory) category;
         Person beneficiary = Person.getPersonFromPersonCategory(beneficiaryPersonCategory);
@@ -971,7 +989,8 @@ public class CredentialService {
 
     private void createCredentialIdentityKinsman(CredentialIdentity credentialIdentity) throws CredentialException {
 
-        log.info("verify credential kinsman type for beneficiary {}  and holder {}", credentialIdentity.getBeneficiaryDni(), credentialIdentity.getCreditHolderDni());
+        log.info("verify credential kinsman type for beneficiary {}  and holder {}", credentialIdentity.getBeneficiaryDni(),
+                credentialIdentity.getCreditHolderDni());
 
         Optional<DidiAppUser> didiAppUser = didiAppUserService.getDidiAppUserByDni(credentialIdentity.getBeneficiaryDni());
 
@@ -1425,5 +1444,259 @@ public class CredentialService {
 
         return (credential.getCredentialState().equals(statePendingDidi));
     }
+
+    /**
+     *
+     * @param file
+     * @param createCredentials
+     * @return String con los resultads del procesamiento del excel
+     * @throws IOException
+     */
+    @Transactional
+    public ProcessExcelFileResult importCredentials(MultipartFile file, boolean createCredentials) throws IOException {
+
+        XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
+
+        XSSFSheet worksheet = workbook.getSheetAt(0);
+        XSSFSheet childGroupSheet = workbook.getSheet("grupo_hijos");
+        XSSFSheet familyMemberGroupSheet = workbook.getSheet("grupo_datos_miembro");
+        XSSFSheet familyMemberIncomeGroupSheet = workbook.getSheet("grupo_ingresos_miembro");
+        XSSFSheet entrepreneurshipCreditSheet = workbook.getSheet("grupo_creditos_emprendimiento");
+        XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
+
+        ExcelUtils.formatHeader(worksheet);
+        ExcelUtils.formatHeader(childGroupSheet);
+        ExcelUtils.formatHeader(familyMemberGroupSheet);
+        ExcelUtils.formatHeader(familyMemberIncomeGroupSheet);
+        ExcelUtils.formatHeader(entrepreneurshipCreditSheet);
+        ExcelUtils.formatHeader(familyCreditGroupSheet);
+
+        List<Form> formList = Poiji.fromExcel(worksheet,Form.class);
+        List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
+        List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
+
+        List<FamilyMemberIncome> familyMemberIncomeList =
+                familyMemberIncomeGroupSheet!=null?Poiji.fromExcel(familyMemberIncomeGroupSheet, FamilyMemberIncome.class):new ArrayList<>();
+        List<EntrepreneurshipCredit> entrepreneurshipCreditList =
+                entrepreneurshipCreditSheet!=null?Poiji.fromExcel(entrepreneurshipCreditSheet, EntrepreneurshipCredit.class):new ArrayList<>();
+        List<FamilyCredit> familyCreditList =
+                familyCreditGroupSheet!=null?Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class): new ArrayList<>();
+
+        List<CredentialState> credentialStateActivePending = credentialStateRepository.findByStateNameIn(
+                List.of(CredentialStatesCodes.PENDING_DIDI.getCode(),
+                        CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(),
+                        CredentialStatesCodes.HOLDER_ACTIVE_KINSMAN_PENDING.getCode())
+                );
+
+        ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
+
+        for (Form form: formList) {
+            if (form.getEstadoEncuesta() == null) {
+                //Validaciones
+                if (createCredentials == false) {
+                    //compruebo que el beneficiario no tenga vivienda
+                    List<Credential> credentialsOptional = (getDwellingCredentials(credentialStateActivePending,
+                            form.getNumeroDniBeneficiario(),
+                            ExcelUtils.beneficiaryAddress(form)));
+                    boolean credencialVivienda = credentialsOptional.isEmpty();
+
+                    // compruebo que el beneficiario no se repita
+                    credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                            form.getNumeroDniBeneficiario(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                            form.getNumeroDniBeneficiario())
+                    );
+
+                    //compruebo que el esposo no se repita
+                    credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending, form.getNumeroDniConyuge(),
+                            CredentialCategoriesCodes.IDENTITY.getCode(), form.getNumeroDniBeneficiario()));
+
+                    //compruebo que los hijos no se repita
+                    for (Child child : childList) {
+                        credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                                child.getNumeroDocumentoHijo(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                                form.getNumeroDniBeneficiario()));
+                    }
+                    //comprueba que la familia no se repita
+                    for (FamilyMember family : familyMemberList) {
+                        credentialsOptional.addAll(getIdentityCredentials(credentialStateActivePending,
+                                family.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
+                                form.getNumeroDniBeneficiario()));
+                    }
+
+                    if (!credentialsOptional.isEmpty()) {
+                        log.info(bodyLog(credentialsOptional.get(0)));
+                        processExcelFileResult.addRowError(
+                                ExcelErrorDetail.builder()
+                                        .errorHeader("Advertencia CREDENCIAL DUPLICADA")
+                                        .errorBody(bodyLog(credentialsOptional.get(0)))
+                                        .errorType(DUPLICATED_CREDENTIAL)
+                                        .credentialId(credentialsOptional.get(0).getId())
+                                        .category(credentialsOptional.get(0).getCredentialDescription())
+                                        .documentNumber(credentialsOptional.get(0).getBeneficiaryDni())
+                                        .name(credentialsOptional.get(0).getBeneficiaryFirstName())
+                                        .lastName(credentialsOptional.get(0).getBeneficiaryLastName())
+                                        .build()
+                        );
+                    }
+                }else{
+                if (processExcelFileResult.getErrorRows().isEmpty() ) {
+                    //si no hay error, creo todo
+                    Person personBeneficiary = this.saveIdentityCredentials(form);
+                    if (form.getNumeroDniConyuge() != null) {
+                        this.saveSpouseIdentityCredentials(form, personBeneficiary);
+                    }
+                    if (form.getTieneHijos().equals("Si")) {
+                        this.saveChildIdentityCredentials(form, personBeneficiary, childList);
+                    }
+                    if (form.getTieneMasFamilia().equals("Si")) {
+                        this.saveFamilyIdentityCredentials(form, personBeneficiary, familyMemberList);
+                    }
+                    if (form.getHuboCambiosVivienda().equals("Si")) {
+                        this.saveDwellingCredentials(form, personBeneficiary);
+                    }
+                    if (form.getHuboCambiosActividad().equals("Si")) {
+                        this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                    }
+                } else {
+                            Person personBeneficiary = new PersonBuilder().fromForm(form).build();
+                            if (form.getHuboCambiosActividad().equals("Si")) {
+                                this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                            }
+                            if (form.getHuboCambiosVivienda().equals("Si")) {
+                                this.saveDwellingCredentials(form, personBeneficiary);
+                            }
+                        }
+                }
+            }} //for
+        return processExcelFileResult;
+    }
+
+    public Person saveIdentityCredentials(Form form) {
+        // BENEFICIARY_CATEGORY_NAME
+        Person beneficiary = savePersonIfNew(new PersonBuilder().fromForm(form).build());
+        beneficiary = savePersonIfNew(beneficiary);
+        CredentialIdentity credentialIdentity = new CredentialIdentity(beneficiary, beneficiary, BENEFICIARY);
+        Optional<CredentialState> credentialStateOptional =
+                credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+        credentialIdentityService.save(credentialIdentity);
+        return beneficiary;
+    }
+
+
+    public void saveSpouseIdentityCredentials(Form form, Person creditHolder){
+        // SPOUSE_CATEGORY_NAME
+        Person spousePerson = new PersonBuilder().fromSpouse(form).build();
+        spousePerson = savePersonIfNew(spousePerson);
+        CredentialIdentity credentialIdentity = new CredentialIdentity(spousePerson, creditHolder, SPOUSE);
+        Optional<CredentialState> credentialStateOptional =
+                credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+
+        credentialIdentityService.save(credentialIdentity);
+        this.createCredentialIdentityKinsman(credentialIdentity);
+    }
+
+    public void saveChildIdentityCredentials(Form form, Person creditHolder, List<Child> childList) {
+        // CHILD_CATEGORY_NAME
+        childList.stream()
+            .filter(child -> form.getIndex() == child.getParentIndex())
+            .forEach(child -> {
+                Person childPerson = savePersonIfNew(new PersonBuilder().fromChild(child).build());
+                CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
+                Optional<CredentialState> credentialStateOptional =
+                        credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+                credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+                credentialIdentityService.save(credentialIdentity);
+
+                this.createCredentialIdentityKinsman(credentialIdentity);
+            });
+    }
+
+    public void saveFamilyIdentityCredentials(Form form, Person creditHolder, List<FamilyMember> familyList){
+        for (FamilyMember family: familyList){
+            if (form.getIndex() == family.getParentIndex()){
+                Person familyPerson = new PersonBuilder().fromFamilyMember(family).build();
+                familyPerson = savePersonIfNew(familyPerson);
+                CredentialIdentity credentialIdentity = new CredentialIdentity(familyPerson, creditHolder, OTHER_KINSMAN);
+                Optional<CredentialState> credentialStateOptional =
+                        credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+                credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+                credentialIdentityService.save(credentialIdentity);
+
+                this.createCredentialIdentityKinsman(credentialIdentity);
+            }
+        }
+    }
+
+    public void saveDwellingCredentials(Form form, Person creditHolder){
+        //DWELLING_CATEGORY_NAME
+        CredentialDwelling credentialDwelling = new CredentialDwelling();
+        buildCredential(creditHolder, credentialDwelling);
+        buildDwellingCredentialFromForm(form, credentialDwelling);
+        credentialDwellingRepository.save(credentialDwelling);
+    }
+
+    public void saveEntrepreneurshipCredentials(Form form, Person creditHolder){
+        //ENTREPRENEURSHIP_CATEGORY
+        CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship();
+        buildCredential(creditHolder, credentialEntrepreneurship);
+        buildEntrepreneurshipCredentialFormForm(form, credentialEntrepreneurship);
+        this.credentialEntrepreneurshipRepository.save(credentialEntrepreneurship);
+    }
+
+    public void buildDwellingCredentialFromForm(Form form, CredentialDwelling credentialDwelling){
+        credentialDwelling.setAntiquity(form.getViviendaAntiguedad());
+        credentialDwelling.setPossessionType((form.getViviendaTipoTenencia().equals("Otro"))? form.getViviendaTipoTenenciaOtro() : form.getViviendaTipoTenencia());
+        credentialDwelling.setDwellingType((form.getViviendaTipoVivienda().equals("Otro")) ? form.getViviendaTipoViviendaOtro() : form.getViviendaTipoVivienda());
+        credentialDwelling.setBrick( (form.getViviendaMaterialesLadrillo() == 1) ? true : false);
+        credentialDwelling.setLock(  (form.getViviendaMaterialesChapa() == 1) ? true : false );
+        credentialDwelling.setWood( (form.getViviendaMaterialesMadera() == 1) ? true : false);
+        credentialDwelling.setPaperBoard(  (form.getViviendaMaterialesCarton() == 1) ? true : false );
+        credentialDwelling.setGas( (form.getViviendaRedDeGas() == 1) ? true : false);
+        credentialDwelling.setCarafe( (form.getViviendaGarrafa() == 1) ? true : false);
+        credentialDwelling.setWater( (form.getViviendaRedDeAgua() == 1) ? true : false);
+        credentialDwelling.setWatterWell( (form.getViviendaBomba() == 1) ? true : false);
+        credentialDwelling.setLightInstallation(form.getViviendaInstalacionLuz());
+        credentialDwelling.setNumberOfEnvironments(form.getViviendaCantAmbientes());
+        credentialDwelling.setGeneralConditions(form.getViviendaCondicionesGenerales());
+        credentialDwelling.setNeighborhoodType((form.getViviendaTipoBarrio().equals("Otro")) ? form.getViviendaTipoBarrioOtro() : form.getViviendaTipoBarrio());
+        credentialDwelling.setRental(form.getViviendaMontoAlquiler());
+        credentialDwelling.setDwellingAddress(form.getViviendaDireccionMunicipio());
+        credentialDwelling.setAddress(ExcelUtils.beneficiaryAddress(form));
+        credentialDwelling.setLocation(form.getViviendaDomicilioLocalidad());
+        credentialDwelling.setNeighborhood(form.getViviendaDomicilioBarrio());
+
+        credentialDwelling.setCredentialCategory(CredentialCategoriesCodes.DWELLING.getCode());
+        credentialDwelling.setCredentialDescription(CredentialCategoriesCodes.DWELLING.getCode());
+    }
+
+    public void buildEntrepreneurshipCredentialFormForm(Form form, CredentialEntrepreneurship credentialEntrepreneurship){
+        credentialEntrepreneurship.setEntrepreneurshipName(form.getActividadNombre());
+        credentialEntrepreneurship.setMainActivity(form.getActividadPrincipal());
+        credentialEntrepreneurship.setEntrepreneurshipType((form.getActividadTipo().equals("Otro"))? form.getActividadTipoOtro(): form.getActividadTipo());
+        credentialEntrepreneurship.setStartActivity(form.getActividadAntiguedad());
+        credentialEntrepreneurship.setEntrepreneurshipAddress(ExcelUtils.formatAddress(form));
+        credentialEntrepreneurship.setEndActivity(null);
+
+        credentialEntrepreneurship.setCredentialCategory(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
+        credentialEntrepreneurship.setCredentialDescription(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
+    }
+
+    //todo move to an ExcelHelper class
+    private int getColumnIndex(XSSFSheet sheet, String columnName){
+       XSSFRow headerRow =  sheet.getRow(0);
+
+        for(int i=0;i<headerRow.getLastCellNum() ;i++){
+            XSSFCell cell = headerRow.getCell(i);
+            if(cell.getStringCellValue().trim().equals(columnName.trim()))
+                return i;
+        };
+
+        return -1;
+    }
+
+
+
 }
 

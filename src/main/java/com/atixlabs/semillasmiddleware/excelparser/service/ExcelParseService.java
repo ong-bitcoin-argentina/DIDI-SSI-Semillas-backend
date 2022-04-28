@@ -45,11 +45,12 @@ public abstract class ExcelParseService {
 
         log.info("Validation for file "+ fileUtil.getFileByPath(filePath));
 
-        MultipartFile xlsxFile = fileUtil.getFileByPath(filePath);
+        File xlsxFile = fileUtil.getFileByPath(filePath);
+        FileInputStream fileInput = new FileInputStream(xlsxFile);
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         processExcelFileResult.setFileName(filePath);
 
-        XSSFWorkbook workbook = new XSSFWorkbook(xlsxFile.getInputStream());
+        XSSFWorkbook workbook = new XSSFWorkbook(fileInput);
         try{
         XSSFSheet worksheet = workbook.getSheetAt(0);
         XSSFSheet childGroupSheet = workbook.getSheet("grupo_hijos");
@@ -84,8 +85,8 @@ public abstract class ExcelParseService {
                 rowsIterator.next();
 
             while (rowsIterator.hasNext()) {
-
-                processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
+                // Se creara un nuevo metodo para este punto, dentro de la rama SEM-116/implementacion_pdf
+                //processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
             }
 
         return processExcelFileResult;

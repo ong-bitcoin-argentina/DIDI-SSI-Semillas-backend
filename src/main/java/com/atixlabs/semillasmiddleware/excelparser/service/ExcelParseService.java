@@ -84,10 +84,10 @@ public abstract class ExcelParseService {
             if (rowsIterator.hasNext())
                 rowsIterator.next();
 
-            while (rowsIterator.hasNext()) {
+            /*while (rowsIterator.hasNext()) {
                 // Se creara un nuevo metodo para este punto, dentro de la rama SEM-116/implementacion_pdf
                 //processRow(rowsIterator.next(), rowsIterator.hasNext(), processExcelFileResult);
-            }
+            }*/
 
         return processExcelFileResult;
     } catch (NotOfficeXmlFileException c) {

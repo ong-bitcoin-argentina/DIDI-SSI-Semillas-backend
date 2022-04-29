@@ -37,6 +37,21 @@ public class FileManagerController {
     private SancorSaludExcelParseService sancorSaludExcelParseService;
 
 
+    @PostMapping("/reportPDF")
+    @ResponseBody
+    public ResponseEntity reportPDF(
+            @RequestParam("file") MultipartFile file)
+        throws Exception, CredentialException{
+        log.info("report pdf executed");
+        if (file.isEmpty()){
+            throw new EmptyFileException("Empty file");
+        }
+        File receivedFile = fileManagerService.uploadFile(file);
+        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSheetFileFormKobo(
+                receivedFile.getPath());
+        return ResponseEntity.ok(processExcelFileResult);
+    }
+
     @PostMapping("/upload")
     @ResponseBody
     public ResponseEntity uploadFile(

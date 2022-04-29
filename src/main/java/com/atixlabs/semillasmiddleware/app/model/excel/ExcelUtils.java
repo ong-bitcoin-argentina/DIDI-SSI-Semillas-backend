@@ -30,7 +30,7 @@ public class ExcelUtils {
             if(hasTwoHash){
                 String[] splittedCellContent = cell.getStringCellValue().split("#");
                 String title = splittedCellContent[1];
-                String subTitle = splittedCellContent[2].substring(splittedCellContent[2].lastIndexOf("/"));
+                String subTitle = splittedCellContent[2].substring(splittedCellContent[2].indexOf("/"));
                 subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
                 headerRow.createCell(i);
                 headerRow.getCell(i).setCellValue(title + subTitle);

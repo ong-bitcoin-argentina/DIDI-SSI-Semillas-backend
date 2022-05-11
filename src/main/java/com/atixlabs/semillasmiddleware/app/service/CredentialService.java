@@ -1539,36 +1539,69 @@ public class CredentialService {
                         );
                     }
                 }else{
-                if (processExcelFileResult.getErrorRows().isEmpty() ) {
-                    //si no hay error, creo todo
-                    Person personBeneficiary = this.saveIdentityCredentials(form);
-                    if (form.getNumeroDniConyuge() != null) {
-                        this.saveSpouseIdentityCredentials(form, personBeneficiary);
-                    }
-                    if (form.getTieneHijos().equals("Si")) {
-                        this.saveChildIdentityCredentials(form, personBeneficiary, childList);
-                    }
-                    if (form.getTieneMasFamilia().equals("Si")) {
-                        this.saveFamilyIdentityCredentials(form, personBeneficiary, familyMemberList);
-                    }
-                    if (form.getHuboCambiosVivienda().equals("Si")) {
-                        this.saveDwellingCredentials(form, personBeneficiary);
-                    }
-                    if (form.getHuboCambiosActividad().equals("Si")) {
-                        this.saveEntrepreneurshipCredentials(form, personBeneficiary);
-                    }
-                } else {
-                            Person personBeneficiary = new PersonBuilder().fromForm(form).build();
-                            if (form.getHuboCambiosActividad().equals("Si")) {
-                                this.saveEntrepreneurshipCredentials(form, personBeneficiary);
-                            }
-                            if (form.getHuboCambiosVivienda().equals("Si")) {
-                                this.saveDwellingCredentials(form, personBeneficiary);
-                            }
+                    if (processExcelFileResult.getErrorRows().isEmpty() ) {
+                        Person personBeneficiary;
+                        //si no hay error, creo todo
+                        if (!credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiary
+                                (form.getNumeroDniBeneficiario(), credentialStateActivePending)) {
+                            personBeneficiary = this.saveIdentityCredentials(form);
+                        }else {
+                            personBeneficiary = personRepository.findByDocumentNumber(form.getNumeroDniBeneficiario()).get();
                         }
+
+                        if (form.getNumeroDniConyuge() != null &&
+                                !credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiary
+                                        (form.getNumeroDniConyuge(), credentialStateActivePending)) {
+                            this.saveSpouseIdentityCredentials(form, personBeneficiary);
+                        }
+                        if (form.getTieneHijos().equals("Si")) {
+                            validateCredentials(childList.stream()
+                                    .filter(child -> form.getIndex() == child.getParentIndex()).collect(Collectors.toList()), personBeneficiary,credentialStateActivePending);
+                        }
+                        if (form.getTieneMasFamilia().equals("Si")) {
+                            validateCredentials(familyMemberList.stream()
+                                    .filter(member -> form.getIndex() == member.getParentIndex()).collect(Collectors.toList()), personBeneficiary, credentialStateActivePending);
+                        }
+                        if (form.getHuboCambiosVivienda().equals("Si")) {
+                            this.saveDwellingCredentials(form, personBeneficiary);
+                        }
+                        if (form.getHuboCambiosActividad().equals("Si")) {
+                            this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                        }
+                    } else {
+                        Person personBeneficiary = new PersonBuilder().fromForm(form).build();
+                        if (form.getHuboCambiosActividad().equals("Si")) {
+                            this.saveEntrepreneurshipCredentials(form, personBeneficiary);
+                        }
+                        if (form.getHuboCambiosVivienda().equals("Si")) {
+                            this.saveDwellingCredentials(form, personBeneficiary);
+                        }
+                    }
                 }
-            }} //for
+            }}//for
         return processExcelFileResult;
+    }
+
+    public void validateCredentials(List<Object> lst, Person personBeneficiary,  List<CredentialState> credentialStateActivePending){
+        for (Object obj : lst){
+            switch (obj.getClass().getSimpleName()){
+                case "Child":
+                    Child child = (Child) obj;
+                    if (!credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiary
+                            (child.getNumeroDocumentoHijo(), credentialStateActivePending)) {
+                        this.saveChildIdentityCredentials(personBeneficiary, child);
+                    }
+                    break;
+
+                case "FamilyMember":
+                    FamilyMember familyMember = (FamilyMember) obj;
+                    if (!credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiary
+                            (familyMember.getNumeroDniFamiliar(), credentialStateActivePending)){
+                        this.saveFamilyIdentityCredentials(personBeneficiary, familyMember);
+                    }
+                    break;
+            }
+        }
     }
 
     public Person saveIdentityCredentials(Form form) {
@@ -1597,36 +1630,28 @@ public class CredentialService {
         this.createCredentialIdentityKinsman(credentialIdentity);
     }
 
-    public void saveChildIdentityCredentials(Form form, Person creditHolder, List<Child> childList) {
+    public void saveChildIdentityCredentials(Person creditHolder, Child child) {
         // CHILD_CATEGORY_NAME
-        childList.stream()
-            .filter(child -> form.getIndex() == child.getParentIndex())
-            .forEach(child -> {
-                Person childPerson = savePersonIfNew(new PersonBuilder().fromChild(child).build());
-                CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
-                Optional<CredentialState> credentialStateOptional =
-                        credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-                credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
-                credentialIdentityService.save(credentialIdentity);
+        Person childPerson = savePersonIfNew(new PersonBuilder().fromChild(child).build());
+        CredentialIdentity credentialIdentity = new CredentialIdentity(childPerson, creditHolder, CHILD);
+        Optional<CredentialState> credentialStateOptional =
+                credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+        credentialIdentityService.save(credentialIdentity);
 
-                this.createCredentialIdentityKinsman(credentialIdentity);
-            });
+        this.createCredentialIdentityKinsman(credentialIdentity);
     }
 
-    public void saveFamilyIdentityCredentials(Form form, Person creditHolder, List<FamilyMember> familyList){
-        for (FamilyMember family: familyList){
-            if (form.getIndex() == family.getParentIndex()){
-                Person familyPerson = new PersonBuilder().fromFamilyMember(family).build();
-                familyPerson = savePersonIfNew(familyPerson);
-                CredentialIdentity credentialIdentity = new CredentialIdentity(familyPerson, creditHolder, OTHER_KINSMAN);
-                Optional<CredentialState> credentialStateOptional =
-                        credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
-                credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
-                credentialIdentityService.save(credentialIdentity);
+    public void saveFamilyIdentityCredentials(Person creditHolder, FamilyMember family){
+        Person familyPerson = new PersonBuilder().fromFamilyMember(family).build();
+        familyPerson = savePersonIfNew(familyPerson);
+        CredentialIdentity credentialIdentity = new CredentialIdentity(familyPerson, creditHolder, OTHER_KINSMAN);
+        Optional<CredentialState> credentialStateOptional =
+                credentialStateRepository.findByStateName(CredentialStatesCodes.PENDING_DIDI.getCode());
+        credentialStateOptional.ifPresent(credentialIdentity::setCredentialState);
+        credentialIdentityService.save(credentialIdentity);
 
-                this.createCredentialIdentityKinsman(credentialIdentity);
-            }
-        }
+        this.createCredentialIdentityKinsman(credentialIdentity);
     }
 
     public void saveDwellingCredentials(Form form, Person creditHolder){

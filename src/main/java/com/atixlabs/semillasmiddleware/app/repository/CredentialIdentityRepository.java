@@ -35,4 +35,5 @@ public interface CredentialIdentityRepository extends JpaRepository<CredentialId
 
     Boolean existsByBeneficiaryDniAndRelationWithCreditHolderAndCreditHolderDni(Long beneficiaryDni, String relationWithHolder, Long holderDni);
 
+    Boolean existsByBeneficiaryDniAndCredentialStateInAndCredentialCategory(Long beneficiaryDni, List<CredentialState> credentialStateActivePending, String credentialCategory);
 }

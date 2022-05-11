@@ -16,656 +16,656 @@ public class Form {
     private int rowIndex;
 
     // Datos de la encuesta y de las asesoras
-    @ExcelCellName("_index")
+    @ExcelCellName(value = "_index", mandatory = false)
     private int index;
 
-    @ExcelCellName("_validation_status")
+    @ExcelCellName(value ="_validation_status", mandatory = false)
     private String estadoEncuesta;
 
-    @ExcelCellName("Grupo Solidario")
+    @ExcelCellName(value = "Grupo Solidario", mandatory = false)
     private String grupoSolidario;
 
-    @ExcelCellName("Asesora")
+    @ExcelCellName(value = "Asesora", mandatory = false)
     private String asesora;
 
-    @ExcelCellName("Fecha")
+    @ExcelCellName(value = "Fecha", mandatory = false)
     private String fecha;
 
     //Datos del beneficiario
-    @ExcelCellName("Nombre_Beneficiario")
+    @ExcelCellName(value = "Nombre_Beneficiario", mandatory = false)
     private String nombreBeneficiario;
 
-    @ExcelCellName("Apellido_Beneficiario")
+    @ExcelCellName(value = "Apellido_Beneficiario", mandatory = false)
     private String apellidoBeneficiario;
 
-    @ExcelCellName("Fecha_Nacimiento_Beneficiario")
+    @ExcelCellName(value = "Fecha_Nacimiento_Beneficiario", mandatory = false)
     private String fechaNacimientoBeneficiario;
 
-    @ExcelCellName("Edad_Beneficiario")
+    @ExcelCellName(value = "Edad_Beneficiario", mandatory = false)
     private String edadBeneficiario;
 
-    @ExcelCellName("Estado_Civil_Beneficiario")
+    @ExcelCellName(value = "Estado_Civil_Beneficiario",mandatory = false)
     private String estadoCivilBeneficiario;
 
-    @ExcelCellName("Estado_Civil_Otro_Beneficiario")
+    @ExcelCellName(value = "Estado_Civil_Otro_Beneficiario", mandatory = false)
     private String estadoCivilOtroBeneficiario;
 
-    @ExcelCellName("Genero_Beneficiario")
+    @ExcelCellName(value = "Genero_Beneficiario", mandatory = false)
     private String generoBeneficiario;
 
-    @ExcelCellName("Genero_Otro_Beneficiario")
+    @ExcelCellName(value = "Genero_Otro_Beneficiario", mandatory = false)
     private String generoOtroBeneficiario;
 
-    @ExcelCellName("Tipo_Documento_Beneficiario")
+    @ExcelCellName(value = "Tipo_Documento_Beneficiario", mandatory = false)
     private String tipoDocumentoBeneficiario;
 
-    @ExcelCellName("Numero_Doc_Beneficiario")
+    @ExcelCellName(value = "Numero_Doc_Beneficiario", mandatory = false)
     private Long numeroDniBeneficiario;
 
-    @ExcelCellName("Nacionalidad_Beneficiario")
+    @ExcelCellName(value = "Nacionalidad_Beneficiario", mandatory = false)
     private String nacionalidadBeneficiario;
 
-    @ExcelCellName("Tiempo_En_El_Pais_Beneficiario")
+    @ExcelCellName(value = "Tiempo_En_El_Pais_Beneficiario", mandatory = false)
     private String tiempoEnElPaisBeneficiario;
 
-    @ExcelCellName("Tienen_Hijos")
+    @ExcelCellName(value = "Tienen_Hijos", mandatory = false)
     private String tieneHijos;
 
-    @ExcelCellName("Cantidad_Hijos")
+    @ExcelCellName(value = "Cantidad_Hijos", mandatory = false)
     private Integer cantidadHijos;
 
-    @ExcelCellName("Hay_Mas_Miembros_Familia")
+    @ExcelCellName(value = "Hay_Mas_Miembros_Familia", mandatory = false)
     private String tieneMasFamilia;
 
-    @ExcelCellName("Vivienda_Cambios")
+    @ExcelCellName(value = "Vivienda_Cambios", mandatory = false)
     private String huboCambiosVivienda;
 
-    @ExcelCellName("Cambio_Actividad")
+    @ExcelCellName(value = "Cambio_Actividad", mandatory = false)
     private String huboCambiosActividad;
 
-    @ExcelCellName("Otro_Domicilio_Beneficiario")
+    @ExcelCellName(value = "Otro_Domicilio_Beneficiario", mandatory = false)
     private String otroDomicilioBeneficiario;
 
     //Domicilio 2
-    @ExcelCellName("Dom2_Calle_Beneficiario")
+    @ExcelCellName(value = "Dom2_Calle_Beneficiario", mandatory = false)
     private String otroDomicilioDireccionCalle;
 
-    @ExcelCellName("Dom2_Num_Beneficiario")
+    @ExcelCellName(value = "Dom2_Num_Beneficiario", mandatory = false)
     private String otroDomicilioDireccionNumero;
 
-    @ExcelCellName("Dom2_Entre_Calles_Beneficiario")
+    @ExcelCellName(value = "Dom2_Entre_Calles_Beneficiario", mandatory = false)
     private String otroDomicilioDireccionEntreCalles;
 
-    @ExcelCellName("Dom2_Municipio_Beneficiario") //Distrito
+    @ExcelCellName(value = "Dom2_Municipio_Beneficiario", mandatory = false) //Distrito
     private String otroDomicilioDireccionMunicipio;
 
-    @ExcelCellName("Dom2_Localidad_Beneficiario")
+    @ExcelCellName(value = "Dom2_Localidad_Beneficiario", mandatory = false)
     private String otroDomicilioDomicilioLocalidad;
 
-    @ExcelCellName("Dom2_Barrio_Beneficiario")
+    @ExcelCellName(value = "Dom2_Barrio_Beneficiario", mandatory = false)
     private String otroDomicilioDomicilioBarrio;
 
-    @ExcelCellName("Telefono_Fijo_Beneficiario")
+    @ExcelCellName(value = "Telefono_Fijo_Beneficiario", mandatory = false)
     private String telefonoFijoBeneficiario;
 
-    @ExcelCellName("Telefono_Celular_Beneficiario")
+    @ExcelCellName(value = "Telefono_Celular_Beneficiario", mandatory = false)
     private String telefonoCelularBeneficiario;
 
-    @ExcelCellName("Email_Beneficiario")
+    @ExcelCellName(value = "Email_Beneficiario", mandatory = false)
     private String emailBeneficiario;
 
-    @ExcelCellName("Facebook_Beneficiario")
+    @ExcelCellName(value = "Facebook_Beneficiario", mandatory = false)
     private String facebookBeneficiario;
 
    //Referente
-    @ExcelCellName("Apellido_Referente")
+    @ExcelCellName(value = "Apellido_Referente", mandatory = false)
     private String apellidoReferente;
 
-    @ExcelCellName("Nombre_Referente")
+    @ExcelCellName(value = "Nombre_Referente", mandatory = false)
     private String nombreReferente;
 
-    @ExcelCellName("Parentesco_Referente")
+    @ExcelCellName(value = "Parentesco_Referente", mandatory = false)
     private String parentescoReferente;
 
-    @ExcelCellName("Parentesco_Otro_Referente")
+    @ExcelCellName(value = "Parentesco_Otro_Referente", mandatory = false)
     private String parentescoOtroReferente;
 
-    @ExcelCellName("Telefono_Referente")
+    @ExcelCellName(value = "Telefono_Referente", mandatory = false)
     private String telefonoReferente;
 
     //Instruccion
-    @ExcelCellName("Primaria_Beneficiario")
+    @ExcelCellName(value = "Primaria_Beneficiario", mandatory = false)
     private String primariaBeneficiario;
 
-    @ExcelCellName("Secundaria_Beneficiario")
+    @ExcelCellName(value = "Secundaria_Beneficiario", mandatory = false)
     private String secundariaBeneficiario;
 
-    @ExcelCellName("Terciario_Beneficiario")
+    @ExcelCellName(value = "Terciario_Beneficiario", mandatory = false)
     private String terciarioBeneficiario;
 
-    @ExcelCellName("Universitario_Beneficiario")
+    @ExcelCellName(value = "Universitario_Beneficiario", mandatory = false)
     private String universitarioBeneficiario;
 
-    @ExcelCellName("Talleres_Beneficiario")
+    @ExcelCellName(value = "Talleres_Beneficiario", mandatory = false)
     private String tieneTalleresBeneficiario;
 
-    @ExcelCellName("Taller_Realizado_Beneficiario")
+    @ExcelCellName(value = "Taller_Realizado_Beneficiario", mandatory = false)
     private String tallerRealizadoBeneficiario;
 
-    @ExcelCellName("Cursos_Beneficiario")
+    @ExcelCellName(value = "Cursos_Beneficiario", mandatory = false)
     private String tieneCursosRealizadosBeneficiario;
 
-    @ExcelCellName("Curso_Realizado_Beneficiario")
+    @ExcelCellName(value = "Curso_Realizado_Beneficiario", mandatory = false)
     private  String cursoRealizadoBeneficiario;
 
-    @ExcelCellName("Instruccion_Otros")
+    @ExcelCellName(value = "Instruccion_Otros", mandatory = false)
     private String instruccionOtros;
 
-    @ExcelCellName("Instruccion_Comentario")
+    @ExcelCellName(value = "Instruccion_Comentario", mandatory = false)
     private String instruccionComentario;
 
     // Datos del conyuge
-    @ExcelCellName("Apellido_Conyuge")
+    @ExcelCellName(value = "Apellido_Conyuge", mandatory = false)
     private String apellidoConyuge;
 
-    @ExcelCellName("Nombre_Conyuge")
+    @ExcelCellName(value = "Nombre_Conyuge", mandatory = false)
     private String nombreConyuge;
 
-    @ExcelCellName("Fecha_Nacimiento_Conyuge")
+    @ExcelCellName(value = "Fecha_Nacimiento_Conyuge", mandatory = false)
     private String fechaNacimientoConyuge;
 
-    @ExcelCellName("Edad_Conyuge")
+    @ExcelCellName(value = "Edad_Conyuge", mandatory = false)
     private String edadConyuge;
 
-    @ExcelCellName("Genero_Conyuge")
+    @ExcelCellName(value = "Genero_Conyuge", mandatory = false)
     private String generoConyuge;
 
-    @ExcelCellName("Genero_Otro_Conyuge")
+    @ExcelCellName(value = "Genero_Otro_Conyuge", mandatory = false)
     private String generoOtroConyuge;
 
-    @ExcelCellName("Tipo_Documento_Conyuge")
+    @ExcelCellName(value = "Tipo_Documento_Conyuge", mandatory = false)
     private String tipoDocumentoConyuge;
 
-    @ExcelCellName("Numero_Doc_Conyuge")
+    @ExcelCellName(value = "Numero_Doc_Conyuge", mandatory = false)
     private Long numeroDniConyuge;
 
-    @ExcelCellName("Ocupacion_Conyuge")
+    @ExcelCellName(value = "Ocupacion_Conyuge", mandatory = false)
     private String ocupacionConyuge;
 
     //Datos ingreso Beneficiario
-    @ExcelCellName("Ingreso_Solicitante_Salario_Origen")
+    @ExcelCellName(value = "Ingreso_Solicitante_Salario_Origen", mandatory = false)
     private String ingresoSolicitanteSalarioOrigen;
 
-    @ExcelCellName("Ingreso_Solicitante_Salario_Tipo")
+    @ExcelCellName(value = "Ingreso_Solicitante_Salario_Tipo", mandatory = false)
     private String ingresoSolicitanteSalarioTipo;
 
-    @ExcelCellName("Ingreso_Solicitante_Salario_Monto")
+    @ExcelCellName(value = "Ingreso_Solicitante_Salario_Monto", mandatory = false)
     private Float ingresoSolicitanteSalarioMonto;
 
-    @ExcelCellName("Ingreso_Solicitante_Subsidio_Origen")
+    @ExcelCellName(value = "Ingreso_Solicitante_Subsidio_Origen", mandatory = false)
     private String ingresoSolicitanteSubsidioOrigen;
 
-    @ExcelCellName("Ingreso_Solicitante_Subsidio_Tipo")
+    @ExcelCellName(value = "Ingreso_Solicitante_Subsidio_Tipo", mandatory = false)
     private String ingresoSolicitanteSubsidioTipo;
 
-    @ExcelCellName("Ingreso_Solicitante_Subsidio_Monto")
+    @ExcelCellName(value = "Ingreso_Solicitante_Subsidio_Monto", mandatory = false)
     private Float ingresoSolicitanteSubsidioMonto;
 
-    @ExcelCellName("Ingreso_Solicitante_Pension_Origen")
+    @ExcelCellName(value = "Ingreso_Solicitante_Pension_Origen", mandatory = false)
     private String ingresoSolicitantePensionOrigen;
 
-    @ExcelCellName("Ingreso_Solicitante_Pension_Tipo")
+    @ExcelCellName(value = "Ingreso_Solicitante_Pension_Tipo", mandatory = false)
     private String ingresoSolicitantePensionTipo;
 
-    @ExcelCellName("Ingreso_Solicitante_Pension_Monto")
+    @ExcelCellName(value = "Ingreso_Solicitante_Pension_Monto", mandatory = false)
     private Float ingresoSolicitantePensionMonto;
 
-    @ExcelCellName("Ingreso_Solicitante_Otros_Origen")
+    @ExcelCellName(value = "Ingreso_Solicitante_Otros_Origen", mandatory = false)
     private String ingresoSolicitanteOtrosOrigen;
 
-    @ExcelCellName("Ingreso_Solicitante_Otros_Tipo")
+    @ExcelCellName(value = "Ingreso_Solicitante_Otros_Tipo", mandatory = false)
     private String ingresoSolicitanteOtrosTipo;
 
-    @ExcelCellName("Ingreso_Solicitante_Otros_Monto")
+    @ExcelCellName(value = "Ingreso_Solicitante_Otros_Monto", mandatory = false)
     private Float ingresoSolicitanteOtrosMonto;
 
-    @ExcelCellName("totalIngresosSolicitante")
+    @ExcelCellName(value = "totalIngresosSolicitante", mandatory = false)
     private Float totalIngresosSolicitante;
 
-    @ExcelCellName("Ingreso_Solicitante_Total")
+    @ExcelCellName(value = "Ingreso_Solicitante_Total", mandatory = false)
     private Float ingresoSolicitanteTotal;
 
-    @ExcelCellName("IngresosFamiliares")
+    @ExcelCellName(value = "ingresosFamiliares", mandatory = false)
     private Float ingresosFamiliares;
 
-    @ExcelCellName("Ingreso_Familiar_Total")
+    @ExcelCellName(value = "Ingreso_Familiar_Total", mandatory = false)
     private Float ingresoFamiliarTotal;
 
-    @ExcelCellName("ingresosTotales")
+    @ExcelCellName(value = "ingresosTotales", mandatory = false)
     private Float ingresosTotales;
 
-    @ExcelCellName("Ingreso_Total_Solicitante_Familiar")
+    @ExcelCellName(value = "Ingreso_Total_Solicitante_Familiar", mandatory = false)
     private Float ingresoTotalSolicitanteFamiliar;
 
     //Datos de Vivienda
-    @ExcelCellName("Vivienda_Tipo_Tenencia")
+    @ExcelCellName(value = "Vivienda_Tipo_Tenencia", mandatory = false)
     private String viviendaTipoTenencia;
 
-    @ExcelCellName("Vivienda_Otro_Tipo_Tenencia")
+    @ExcelCellName(value = "Vivienda_Otro_Tipo_Tenencia", mandatory = false)
     private String viviendaTipoTenenciaOtro;
 
-    @ExcelCellName("Vivienda_Tipo_Vivienda")
+    @ExcelCellName(value = "Vivienda_Tipo_Vivienda", mandatory = false)
     private String viviendaTipoVivienda;
 
-    @ExcelCellName("Vivienda_Tipo_Otro_Vivienda")
+    @ExcelCellName(value = "Vivienda_Tipo_Otro_Vivienda", mandatory = false)
     private String viviendaTipoViviendaOtro;
 
-    @ExcelCellName("Vivienda_Gas_Red de gas")
+    @ExcelCellName(value = "Vivienda_Gas_Red de gas", mandatory = false)
     private Integer viviendaRedDeGas;
 
-    @ExcelCellName("Vivienda_Gas_Garrafa")
+    @ExcelCellName(value = "Vivienda_Gas_Garrafa", mandatory = false)
     private Integer viviendaGarrafa;
 
-    @ExcelCellName("Vivienda_Agua_Red de Agua")
+    @ExcelCellName(value = "Vivienda_Agua_Red de Agua", mandatory = false)
     private Integer viviendaRedDeAgua;
 
-    @ExcelCellName("Vivienda_Agua_ Bomba")
+    @ExcelCellName(value = "Vivienda_Agua_Pozo _ Bomba", mandatory = false)
     private Integer viviendaBomba;
 
-    @ExcelCellName("Vivienda_Instalacion_Luz")
+    @ExcelCellName(value = "Vivienda_Instalacion_Luz", mandatory = false)
     private String viviendaInstalacionLuz;
 
-    @ExcelCellName("Vivienda_General")
+    @ExcelCellName(value = "Vivienda_General", mandatory = false)
     private String viviendaCondicionesGenerales;
 
-    @ExcelCellName("Vivienda_Otro_General")
+    @ExcelCellName(value = "Vivienda_Otro_General", mandatory = false)
     private String viviendaCondicionesGeneralesOtro;
 
-    @ExcelCellName("Vivienda_Tipo_Barrio")
+    @ExcelCellName(value = "Vivienda_Tipo_Barrio", mandatory = false)
     private String viviendaTipoBarrio;
 
-    @ExcelCellName("Vivienda_Tipo_Otro_Barrio")
+    @ExcelCellName(value = "Vivienda_Tipo_Otro_Barrio", mandatory = false)
     private String viviendaTipoBarrioOtro;
 
-    @ExcelCellName("Dom1_Calle_Beneficiario")
+    @ExcelCellName(value = "Dom1_Calle_Beneficiario", mandatory = false)
     private String viviendaDireccionCalle;
 
-    @ExcelCellName("Dom1_Num_Beneficiario")
+    @ExcelCellName(value = "Dom1_Num_Beneficiario", mandatory = false)
     private String viviendaDireccionNumero;
 
-    @ExcelCellName("Dom1_Entre_Calles_Beneficiario")
+    @ExcelCellName(value = "Dom1_Entre_Calles_Beneficiario", mandatory = false)
     private String viviendaDireccionEntreCalles;
 
-    @ExcelCellName("Dom1_Municipio_Beneficiario") //Distrito
+    @ExcelCellName(value = "Dom1_Municipio_Beneficiario", mandatory = false) //Distrito
     private String viviendaDireccionMunicipio;
 
-    @ExcelCellName("Dom1_Localidad_Beneficiario")
+    @ExcelCellName(value = "Dom1_Localidad_Beneficiario", mandatory = false)
     private String viviendaDomicilioLocalidad;
 
-    @ExcelCellName("Dom1_Barrio_Beneficiario")
+    @ExcelCellName(value = "Dom1_Barrio_Beneficiario", mandatory = false)
     private String viviendaDomicilioBarrio;
 
-    @ExcelCellName("Vivienda_Cantidad_Ambientes")
+    @ExcelCellName(value = "Vivienda_Cantidad_Ambientes", mandatory = false)
     private Integer viviendaCantAmbientes;
 
-    @ExcelCellName("Vivienda_Antiguedad")
+    @ExcelCellName(value = "Vivienda_Antiguedad", mandatory = false)
     private Integer viviendaAntiguedad;
 
-    @ExcelCellName("Egreso_Familiar_Alquiler")
+    @ExcelCellName(value = "Egreso_Familiar_Alquiler", mandatory = false)
     private Long viviendaMontoAlquiler;
 
-    @ExcelCellName("Vivienda_Materiales_Chapa")
+    @ExcelCellName(value = "Vivienda_Materiales_Chapa", mandatory = false)
     private Integer viviendaMaterialesChapa;
 
-    @ExcelCellName("Vivienda_Materiales_Cartón")
+    @ExcelCellName(value = "Vivienda_Materiales_Cartón", mandatory = false)
     private Integer viviendaMaterialesCarton;
 
-    @ExcelCellName("Vivienda_Materiales_Madera")
+    @ExcelCellName(value = "Vivienda_Materiales_Madera", mandatory = false)
     private Integer viviendaMaterialesMadera;
 
-    @ExcelCellName("Vivienda_Materiales_Adobe")
+    @ExcelCellName(value = "Vivienda_Materiales_Adobe", mandatory = false)
     private Integer viviendaMaterialesAdobe;
 
-    @ExcelCellName("Vivienda_Materiales_Ladrillo sin reboque")
+    @ExcelCellName(value = "Vivienda_Materiales_Ladrillo sin reboque", mandatory = false)
     private Integer viviendaMaterialesLadrillo;
 
-    @ExcelCellName("Vivienda_Materiales_Otro")
+    @ExcelCellName(value = "Vivienda_Materiales_Otro", mandatory = false)
     private Integer viviendaMaterialesOtro;
 
-    @ExcelCellName("Vivienda_Otro_Materiales")
+    @ExcelCellName(value = "Vivienda_Otro_Materiales", mandatory = false)
     private String viviendaOtroMateriales;
 
 
     //Datos Emprendimiento
-    @ExcelCellName("Actividad_Nombre")
+    @ExcelCellName(value = "Actividad_Nombre", mandatory = false)
     private String actividadNombre;
 
-    @ExcelCellName("Actividad_Principal")
+    @ExcelCellName(value = "Actividad_Principal", mandatory = false)
     private String actividadPrincipal;
 
-    @ExcelCellName("Actividad_Tipo")
+    @ExcelCellName(value = "Actividad_Tipo", mandatory = false)
     private String actividadTipo;
 
-    @ExcelCellName("Actividad_Tipo_Comercio")
+    @ExcelCellName(value = "Actividad_Tipo_Comercio", mandatory = false)
     private String actividadTipoComercio;
 
-    @ExcelCellName("Actividad_Tipo_Producción")
+    @ExcelCellName(value = "Actividad_Tipo_Producción", mandatory = false)
     private String actividadTipoProduccion;
 
-    @ExcelCellName("Actividad_Tipo_Servicio")
+    @ExcelCellName(value = "Actividad_Tipo_Servicio", mandatory = false)
     private String actividadTipoServicio;
 
-    @ExcelCellName("Actividad_Tipo_Otro")
+    @ExcelCellName(value = "Actividad_Tipo_Otro", mandatory = false)
     private String actividadTipoOtro;
 
-    @ExcelCellName("Actividad_Otro_Tipo")
+    @ExcelCellName(value = "Actividad_Otro_Tipo", mandatory = false)
     private String actividadOtroTipo;
 
-    @ExcelCellName("Actividad_Caracteristica")
+    @ExcelCellName(value = "Actividad_Caracteristica", mandatory = false)
     private String actividadCaracteristica;
 
-    @ExcelCellName("Actividad_Antiguedad_Años")
+    @ExcelCellName(value = "Actividad_Antiguedad_Años", mandatory = false)
     private Integer actividadAntiguedad;
 
-    @ExcelCellName("Actividad_Desarrollo-Ambulante")
+    @ExcelCellName(value = "Actividad_Desarrollo_Ambulante", mandatory = false)
     private Integer actividadDesarrolloAmbulante;
 
-    @ExcelCellName("Actividad_Desarrollo-Feria")
+    @ExcelCellName(value = "Actividad_Desarrollo_Feria", mandatory = false)
     private Integer actividadDesarrolloFeria;
 
     //ojo esto
-    @ExcelCellName("Actividad_Desarrollo-Local / Casa")
+    @ExcelCellName(value = "Actividad_Desarrollo_Local _ Casa", mandatory = false)
     private Integer actividadDesarrolloLocalCasa;
 
-    @ExcelCellName("Actividad_Desarrollo-Comercio")
+    @ExcelCellName(value = "Actividad_Desarrollo_Comercio", mandatory = false)
     private Integer actividadDesarrolloComercio;
 
-    @ExcelCellName("Actividad_Desarrollo-Otro")
+    @ExcelCellName(value = "Actividad_Desarrollo_Otro", mandatory = false)
     private Integer actividadDesarrolloOtro;
 
-    @ExcelCellName("Actividad_Otro_Desarrollo")
+    @ExcelCellName(value = "Actividad_Otro_Desarrollo", mandatory = false)
     private String actividadOtroDesarrollo;
 
-    @ExcelCellName("Actividad_Dir_Calle")
+    @ExcelCellName(value = "Actividad_Dir_Calle", mandatory = false)
     private String actividadDirCalle;
 
-    @ExcelCellName("Actividad_Dir_Numero")
+    @ExcelCellName(value = "Actividad_Dir_Numero", mandatory = false)
     private String actividadDirNumero;
 
-    @ExcelCellName("Actividad_Dir_Entre_Calles")
+    @ExcelCellName(value = "Actividad_Dir_Entre_Calles", mandatory = false)
     private String actividadDirEntreCalles;
 
-    @ExcelCellName("Actividad_Dir_Municipio")
+    @ExcelCellName(value = "Actividad_Dir_Municipio", mandatory = false)
     private String actividadDirMunicipio;
 
-    @ExcelCellName("Actividad_Dir_Localidad")
+    @ExcelCellName(value = "Actividad_Dir_Localidad", mandatory = false)
     private String actividadDirLocalidad;
 
-    @ExcelCellName("Actividad_Dir_Barrio")
+    @ExcelCellName(value = "Actividad_Dir_Barrio", mandatory = false)
     private String actividadDirBarrio;
 
-    @ExcelCellName("Actividad_Telefono")
+    @ExcelCellName(value = "Actividad_Telefono", mandatory = false)
     private String actividadTelefono;
 
-    @ExcelCellName("Actividad_Cantidad_Dias")
+    @ExcelCellName(value = "Actividad_Cantidad_Dias", mandatory = false)
     private Integer actividadCantidadDias;
 
-    @ExcelCellName("Actividad_Cantidad_Horas")
+    @ExcelCellName(value = "Actividad_Cantidad_Horas", mandatory = false)
     private Integer actividadCantidadHoras;
 
-    @ExcelCellName("SP_Efectivo")
+    @ExcelCellName(value = "SP_Efectivo", mandatory = false)
     private Float spEfectivo;
 
-    @ExcelCellName("SP_Fiado")
+    @ExcelCellName(value = "SP_Fiado", mandatory = false)
     private Float spFiado;
 
-    @ExcelCellName("SP_Stock")
+    @ExcelCellName(value = "SP_Stock", mandatory = false)
     private Float spStock;
 
-    @ExcelCellName("SP_Maquinaria")
+    @ExcelCellName(value = "SP_Maquinaria", mandatory = false)
     private Float spMaquinaria;
 
-    @ExcelCellName("SP_Inmuebles")
+    @ExcelCellName(value = "SP_Inmuebles", mandatory = false)
     private Float spInmuebles;
 
-    @ExcelCellName("Total_situacion_patrimonial")
+    @ExcelCellName(value = "Total_situacion_patrimonial", mandatory = false)
     private Float totalSituacionPatrimonial;
 
-    @ExcelCellName("Patrimonio_Total")
+    @ExcelCellName(value = "Patrimonio_Total", mandatory = false)
     private Float patrimonioTotal;
 
-    @ExcelCellName("Como_Completar_Ventas")
+    @ExcelCellName(value = "Como_Completar_Ventas", mandatory = false)
     private String comoCompletarVentas ;
 
-    @ExcelCellName("Ventas_Lunes")
+    @ExcelCellName(value = "Ventas_Lunes", mandatory = false)
     private Float ventasLunes;
 
-    @ExcelCellName("Ventas_Martes")
+    @ExcelCellName(value = "Ventas_Martes", mandatory = false)
     private Float ventasMartes;
 
-    @ExcelCellName("Ventas_Miercoles")
+    @ExcelCellName(value = "Ventas_Miercoles", mandatory = false)
     private Float ventasMiercoles;
 
-    @ExcelCellName("Ventas_Jueves")
+    @ExcelCellName(value = "Ventas_Jueves", mandatory = false)
     private Float ventasJueves;
 
-    @ExcelCellName("Ventas_Viernes")
+    @ExcelCellName(value = "Ventas_Viernes", mandatory = false)
     private Float ventasViernes;
 
-    @ExcelCellName("Ventas_Sabado")
+    @ExcelCellName(value = "Ventas_Sabado", mandatory = false)
     private Float ventasSabado;
 
-    @ExcelCellName("Ventas_Domingo")
+    @ExcelCellName(value = "Ventas_Domingo", mandatory = false)
     private Float ventasDomingo;
 
-    @ExcelCellName("calculation_x_semana_001")
+    @ExcelCellName(value = "calculation_x_semana_001", mandatory = false)
     private Float calculation_x_semana_001;
 
-    @ExcelCellName("Ventas_En_Una_Semana")
+    @ExcelCellName(value = "Ventas_En_Una_Semana", mandatory = false)
     private Float ventasEnUnaSemana;
 
-    @ExcelCellName("calculation")
+    @ExcelCellName(value = "calculation", mandatory = false)
     private Float calculation;
 
-    @ExcelCellName("Calculo_Ventas_Dia_Mes")
+    @ExcelCellName(value = "Calculo_Ventas_Dia_Mes", mandatory = false)
     private Float calculoVentasDiaMes;
 
-    @ExcelCellName("Ventas_Semana1")
+    @ExcelCellName(value = "Ventas_Semana1", mandatory = false)
     private Float ventasSemana1;
 
-    @ExcelCellName("Ventas_Semana2")
+    @ExcelCellName(value = "Ventas_Semana2", mandatory = false)
     private Float ventasSemana2;
 
-    @ExcelCellName("Ventas_Semana3")
+    @ExcelCellName(value = "Ventas_Semana3", mandatory = false)
     private Float ventasSemana3;
 
-    @ExcelCellName("Ventas_Semana4")
+    @ExcelCellName(value = "Ventas_Semana4", mandatory = false)
     private Float ventasSemana4;
 
-    @ExcelCellName("calculation_por_semana_001")
+    @ExcelCellName(value = "calculation_por_semana_001", mandatory = false)
     private Float calculation_por_semana_001;
 
-    @ExcelCellName("Calculo_Ventas_Semana_Mes")
+    @ExcelCellName(value = "Calculo_Ventas_Semana_Mes", mandatory = false)
     private Float calculoVentasSemanaMes;
 
-    @ExcelCellName("Ventas_Por_Mes")
+    @ExcelCellName(value = "Ventas_Por_Mes", mandatory = false)
     private Float ventasPorMes;
 
-    @ExcelCellName("calculation_total")
+    @ExcelCellName(value = "calculation_total", mandatory = false)
     private Float calculation_total;
 
-    @ExcelCellName("Egreso_Actividad_Alquiler")
+    @ExcelCellName(value = "Egreso_Actividad_Alquiler", mandatory = false)
     private Float egressoActividadAlquiler;
 
-    @ExcelCellName("Egreso_Actividad_Agua")
+    @ExcelCellName(value = "Egreso_Actividad_Agua", mandatory = false)
     private Float egressoActividadAgua;
 
-    @ExcelCellName("Egreso_Actividad_Luz")
+    @ExcelCellName(value = "Egreso_Actividad_Luz", mandatory = false)
     private Float egressoActividadLuz;
 
-    @ExcelCellName("Egreso_Actividad_Telefono")
+    @ExcelCellName(value = "Egreso_Actividad_Telefono", mandatory = false)
     private Float egressoActividadTelefono;
 
-    @ExcelCellName("Egreso_Actividad_Impuestos")
+    @ExcelCellName(value = "Egreso_Actividad_Impuestos", mandatory = false)
     private Float egressoActividadImpuestos;
 
-    @ExcelCellName("Egreso_Actividad_Compras")
+    @ExcelCellName(value = "Egreso_Actividad_Compras", mandatory = false)
     private Float egressoActividadCompras;
 
-    @ExcelCellName("Egreso_Actividad_Transporte")
+    @ExcelCellName(value = "Egreso_Actividad_Transporte", mandatory = false)
     private Float egressoActividadTransporte;
 
-    @ExcelCellName("Egreso_Actividad_Mantenimiento")
+    @ExcelCellName(value = "Egreso_Actividad_Mantenimiento", mandatory = false)
     private Float egressoActividadMantenimiento;
 
-    @ExcelCellName("Egreso_Actividad_Empleados")
+    @ExcelCellName(value = "Egreso_Actividad_Empleados", mandatory = false)
     private Float egressoActividadEmpleados;
 
-    @ExcelCellName("Egreso_Actividad_Otros")
+    @ExcelCellName(value = "Egreso_Actividad_Otros", mandatory = false)
     private Float egressoActividadOtros;
 
-    @ExcelCellName("Egreso_Actividad_Tiene_Creditos")
+    @ExcelCellName(value = "Egreso_Actividad_Tiene_Creditos", mandatory = false)
     private String egresoActividadTieneCreditos ;
 
-    @ExcelCellName("Total_creditos_emprendimiento")
+    @ExcelCellName(value = "Total_creditos_emprendimiento", mandatory = false)
     private Float totalCreditosEmprendimiento;
 
-    @ExcelCellName("Egreso_Actividad_Credito_Total")
+    @ExcelCellName(value = "Egreso_Actividad_Credito_Total", mandatory = false)
     private Float egresoActividadCreditoTotal;
 
-    @ExcelCellName("TotalEgresosEmprendimiento")
+    @ExcelCellName(value = "TotalEgresosEmprendimiento", mandatory = false)
     private Float totalEgresosEmprendimiento;
 
-    @ExcelCellName("Egreso_Actividad_Egreso_Total")
+    @ExcelCellName(value = "Egreso_Actividad_Egreso_Total", mandatory = false)
     private Float egresoActividadEgresoTotal;
 
-    @ExcelCellName("IngresoEgresoMes")
+    @ExcelCellName(value = "IngresoEgresoMes", mandatory = false)
     private Float ingresoEgresoMes;
 
-    @ExcelCellName("Ingreso_Menos_Egresos")
+    @ExcelCellName(value = "Ingreso_Menos_Egresos", mandatory = false)
     private Float ingresoMenosEgresos;
 
-    @ExcelCellName("IngresoEgresoQuincena")
+    @ExcelCellName(value = "IngresoEgresoQuincena", mandatory = false)
     private Float ingresoEgresoQuincena;
 
-    @ExcelCellName("Netos_Por_Quincena")
+    @ExcelCellName(value = "Netos_Por_Quincena", mandatory = false)
     private Float netosPorQuincena;
 
-    @ExcelCellName("Actividad_Comentario")
+    @ExcelCellName(value = "Actividad_Comentario", mandatory = false)
     private String actividadComentario;
 
-    @ExcelCellName("Ingreso_Mensual_Emprendimiento")
+    @ExcelCellName(value = "Ingreso_Mensual_Emprendimiento", mandatory = false)
     private Float ingresoMensualEmprendimiento;
 
-    @ExcelCellName("Ingreso_Mensual_Solicitante")
+    @ExcelCellName(value = "Ingreso_Mensual_Solicitante", mandatory = false)
     private Float ingresoMensualSolicitante;
 
-    @ExcelCellName("Ingreso_Mensual_Familiar")
+    @ExcelCellName(value = "Ingreso_Mensual_Familiar", mandatory = false)
     private Float ingresoMensualFamiliar;
 
-    @ExcelCellName("SumaIngresosTotales")
+    @ExcelCellName(value = "SumaIngresosTotales", mandatory = false)
     private Float sumaIngresosTotales;
 
-    @ExcelCellName("Ingreso_Mensual_Total")
+    @ExcelCellName(value = "Ingreso_Mensual_Total", mandatory = false)
     private Float ingresoMensualTotal;
 
-    @ExcelCellName("Egreso_Familiar_Alimentacion")
+    @ExcelCellName(value = "Egreso_Familiar_Alimentacion", mandatory = false)
     private Float egresoFamiliarAlimentacion;
 
-    @ExcelCellName("Egreso_Familiar_Higiene")
+    @ExcelCellName(value = "Egreso_Familiar_Higiene", mandatory = false)
     private Float egresoFamiliarHigiene;
 
-    @ExcelCellName("Egreso_Familiar_Gas")
+    @ExcelCellName(value = "Egreso_Familiar_Gas", mandatory = false)
     private Float egresoFamiliarGas;
 
-    @ExcelCellName("Egreso_Familiar_Agua")
+    @ExcelCellName(value = "Egreso_Familiar_Agua", mandatory = false)
     private Float egresoFamiliarAgua;
 
-    @ExcelCellName("Egreso_Familiar_Luz")
+    @ExcelCellName(value = "Egreso_Familiar_Luz", mandatory = false)
     private Float egresoFamiliarLuz;
 
-    @ExcelCellName("Egreso_Familiar_Telefono")
+    @ExcelCellName(value = "Egreso_Familiar_Telefono", mandatory = false)
     private Float egresoFamiliarTelefono;
 
-    @ExcelCellName("Egreso_Familiar_Educacion")
+    @ExcelCellName(value = "Egreso_Familiar_Educacion", mandatory = false)
     private Float egresoFamiliarEducacion;
 
-    @ExcelCellName("Egreso_Familiar_Transporte")
+    @ExcelCellName(value = "Egreso_Familiar_Transporte", mandatory = false)
     private Float egresoFamiliarTransporte;
 
-    @ExcelCellName("Egreso_Familiar_Salud")
+    @ExcelCellName(value = "Egreso_Familiar_Salud", mandatory = false)
     private Float egresoFamiliarSalud;
 
-    @ExcelCellName("Egreso_Familiar_Vestimenta")
+    @ExcelCellName(value = "Egreso_Familiar_Vestimenta", mandatory = false)
     private Float egresoFamiliarVestimenta;
 
-    @ExcelCellName("Egreso_Familiar_Impuestos")
+    @ExcelCellName(value = "Egreso_Familiar_Impuestos", mandatory = false)
     private Float egresoFamiliarImpuestos;
 
-    @ExcelCellName("Egreso_Familiar_Combustible")
+    @ExcelCellName(value = "Egreso_Familiar_Combustible", mandatory = false)
     private Float egresoFamiliarCombustible;
 
-    @ExcelCellName("Egreso_Familiar_Esparcimiento")
+    @ExcelCellName(value = "Egreso_Familiar_Esparcimiento", mandatory = false)
     private Float egresoFamiliarEsparcimiento;
 
-    @ExcelCellName("Egreso_Familiar_Apuestas")
+    @ExcelCellName(value = "Egreso_Familiar_Apuestas", mandatory = false)
     private Float egresoFamiliarApuestas;
 
-    @ExcelCellName("Egreso_Familiar_Cable")
+    @ExcelCellName(value = "Egreso_Familiar_Cable", mandatory = false)
     private Float egresoFamiliarCable;
 
-    @ExcelCellName("Egreso_Familiar_Internet")
+    @ExcelCellName(value = "Egreso_Familiar_Internet", mandatory = false)
     private Float egresoFamiliarInternet;
 
-    @ExcelCellName("Egreso_Familiar_Seguros")
+    @ExcelCellName(value = "Egreso_Familiar_Seguros", mandatory = false)
     private Float egresoFamiliarSeguro;
 
-    @ExcelCellName("Egreso_Familiar_Otros")
+    @ExcelCellName(value = "Egreso_Familiar_Otros", mandatory = false)
     private Float egresoFamiliarOtros;
 
-    @ExcelCellName("Egreso_Familiar_Tiene_Creditos")
+    @ExcelCellName(value = "Egreso_Familiar_Tiene_Creditos", mandatory = false)
     private String egresoFamiliarTieneCreditos;
 
-    @ExcelCellName("calculation_egresos_creditos")
+    @ExcelCellName(value = "calculation_egresos_creditos", mandatory = false)
     private Float calculationEgresosCreditos;
 
-    @ExcelCellName("Egreso_Familiar_Credito_Parcial")
+    @ExcelCellName(value = "Egreso_Familiar_Credito_Parcial", mandatory = false)
     private Float egresoFamiliarCreditoParcial;
 
-    @ExcelCellName("Total_creditos_familiares")
+    @ExcelCellName(value = "Total_creditos_familiares", mandatory = false)
     private Float totalCreditosFamiliares;
 
-    @ExcelCellName("Egreso_Familiar_Credito_Total")
+    @ExcelCellName(value = "Egreso_Familiar_Credito_Total", mandatory = false)
     private Float egresoFamiliarCreditoTotal;
 
-    @ExcelCellName("calculationTotalEgresosMensual")
+    @ExcelCellName(value = "calculationTotalEgresosMensual", mandatory = false)
     private Float calculationTotalEgresosMensual;
 
-    @ExcelCellName("Egreso_Familiar_Total")
+    @ExcelCellName(value = "Egreso_Familiar_Total", mandatory = false)
     private Float egresoFamiliarTotal;
 
-    @ExcelCellName("calculation_ingreso_egreso_mes")
+    @ExcelCellName(value = "calculation_ingreso_egreso_mes", mandatory = false)
     private Float calculationIngresoEgresoMes;
 
-    @ExcelCellName("Excedente_Familiar_Mensual")
+    @ExcelCellName(value = "Excedente_Familiar_Mensual", mandatory = false)
     private Float excedenteFamiliarMensual;
 
-    @ExcelCellName("calculation_001_quincena")
+    @ExcelCellName(value = "calculation_001_quincena", mandatory = false)
     private Float calculation_001_quincena;
 
-    @ExcelCellName("Excedente_Familiar_Quincenal")
+    @ExcelCellName(value = "Excedente_Familiar_Quincenal", mandatory = false)
     private Float excedenteFamiliarQuincenal;
 
-    @ExcelCellName("Credito_Familiar_Impago")
+    @ExcelCellName(value = "Credito_Familiar_Impago", mandatory = false)
     private String creditoFamiliarImpago;
 
-    @ExcelCellName("Credito_Familiar_Impago_Monto")
+    @ExcelCellName(value = "Credito_Familiar_Impago_Monto", mandatory = false)
     private Float creditoFamiliarImpagoMonto;
 
-    @ExcelCellName("Credito_Familiar_Impago_Fecha")
+    @ExcelCellName(value = "Credito_Familiar_Impago_Fecha", mandatory = false)
     private Float creditoFamiliarImpagoFecha;
 
-    @ExcelCellName("Credito_Familiar_Impago_Motivo")
+    @ExcelCellName(value = "Credito_Familiar_Impago_Motivo", mandatory = false)
     private Float creditoFamiliarImpagoMotivo;
 
 }

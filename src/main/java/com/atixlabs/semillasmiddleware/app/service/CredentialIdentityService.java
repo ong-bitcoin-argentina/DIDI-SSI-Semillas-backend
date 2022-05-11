@@ -5,6 +5,7 @@ import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
@@ -67,7 +68,9 @@ public class CredentialIdentityService extends CredentialCommonService {
 
     }
 
-
+    public Boolean existsCredentialIdentityActivesOrPendingDidiForBeneficiary(Long beneficiaryDni, List<CredentialState> credentialStateActivePending){
+        return  credentialIdentityRepository.existsByBeneficiaryDniAndCredentialStateInAndCredentialCategory(beneficiaryDni, credentialStateActivePending, CredentialCategoriesCodes.IDENTITY.getCode());
+    }
 
     /**
      * Abuelo Beneficiario en la encuesta, Flor Familiar

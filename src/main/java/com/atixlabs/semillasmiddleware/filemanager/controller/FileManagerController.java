@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.filemanager.controller;
 
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.excelparser.app.service.KoboSurveyExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SancorSaludExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.app.service.SurveyExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -34,6 +35,9 @@ public class FileManagerController {
     private SurveyExcelParseService surveyExcelParseService;
 
     @Autowired
+    private KoboSurveyExcelParseService koboSurveyExcelParseService;
+
+    @Autowired
     private SancorSaludExcelParseService sancorSaludExcelParseService;
 
 
@@ -47,7 +51,7 @@ public class FileManagerController {
             throw new EmptyFileException("Empty file");
         }
         File receivedFile = fileManagerService.uploadFile(file);
-        ProcessExcelFileResult processExcelFileResult = surveyExcelParseService.processSheetFileFormKobo(
+        ProcessExcelFileResult processExcelFileResult = koboSurveyExcelParseService.processSheetFileFormKobo(
                 receivedFile.getPath());
         return ResponseEntity.ok(processExcelFileResult);
     }

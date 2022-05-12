@@ -707,6 +707,13 @@ public class CredentialService {
     }
 
 
+    /*
+    #Este metodo se utilizaba previamente para la creacion de las credenciales, pero se redujo esta funcionalidad al metodo importCredentials, pero pienso
+    que para no juntar toda la logica en un solo metodo es posible subdivirla y reutilizar estos metodos.
+     */
+    /* TODO: Validar la reutilizacion de este metodo para la creacion de credenciales para aligerar la carga del metodo import credentials. Por el momento
+        la comentare para poder organizar y definir la traza del PDF.
+    */
     @Transactional
     public void buildAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException, FileManagerException {
         log.info("buildAllCredentialsFromForm: " + this.toString());
@@ -719,6 +726,10 @@ public class CredentialService {
      * to make public methods easier to read.
      *
      * @param surveyForm
+     */
+    /* TODO
+        Al igual que el metodo de buildAllCredentialsFromForm, analizar la posibilidad de reutilizar estos metodos para aligerar la carga sobre
+        el metodo importCredentials, ya que las validaciones de este metodo se estan realizando en el mismo metodo.
      */
     public boolean validateAllCredentialsFromForm(SurveyForm surveyForm, ProcessExcelFileResult processExcelFileResult,
                                                   boolean skipIdentityCredentials,
@@ -838,6 +849,10 @@ public class CredentialService {
         );
     }
 
+    /* TODO
+        Al igual que el metodo de buildAllCredentialsFromForm, analizar la posibilidad de reutilizar estos metodos para aligerar la carga sobre
+        el metodo importCredentials, ya que las validaciones de este metodo se estan realizando en el mismo metodo.
+     */
     private void saveAllCredentialsFromForm(SurveyForm surveyForm, boolean skipIdentityCredentials) throws CredentialException, FileManagerException {
         //1-get creditHolder Data
         PersonCategory creditHolderPersonCategory = (PersonCategory) surveyForm.getCategoryByUniqueName(BENEFICIARY_CATEGORY_NAME.getCode(), null);
@@ -882,6 +897,10 @@ public class CredentialService {
         return credentialStateRepository.findByStateNameIn(statesCodesToFind);
     }
 
+    /* TODO
+        Al igual que el metodo de buildAllCredentialsFromForm, analizar la posibilidad de reutilizar estos metodos para aligerar la carga sobre
+        el metodo importCredentials, ya que las validaciones de este metodo se estan realizando en el mismo metodo.
+     */
     private void saveCredential(Category category, Person creditHolder, SurveyForm surveyForm) throws CredentialException, FileManagerException {
         log.info("  saveCredential: " + category.getCategoryName());
         switch (category.getCategoryName()) {

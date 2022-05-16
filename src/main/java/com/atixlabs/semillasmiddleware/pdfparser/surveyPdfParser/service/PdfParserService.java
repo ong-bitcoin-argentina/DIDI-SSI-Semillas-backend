@@ -23,7 +23,6 @@ public class PdfParserService {
     private static String fullName = "";
 
     public List<String> generatePDFFromKobo(List<FormPDF> data){
-        String template = "";
         List<String> pdfsGenerated = new ArrayList<>();
         List<String> structure = PDFUtil.generateData(FormPDF.class.getDeclaredFields());
 
@@ -33,6 +32,7 @@ public class PdfParserService {
 
         log.info("Creating pdf from kobo form");
         for (FormPDF form: data) {
+            String template = "";
             Map<String, Object> info = PDFUtil.generateKeys(form);
             String html = generateHtmlFromStack(structure, info);
             template += EmailTemplatesUtil.getTemplate(PDFUtil.TEMPLATE_NAME)

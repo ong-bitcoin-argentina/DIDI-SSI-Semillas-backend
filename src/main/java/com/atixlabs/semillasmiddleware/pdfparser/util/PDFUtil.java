@@ -12,10 +12,7 @@ import org.thymeleaf.util.StringUtils;
 
 import java.io.*;
 import java.lang.reflect.Field;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Map;
-import java.util.TreeMap;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -111,23 +108,33 @@ public class PDFUtil {
             if (form.getOtroDomicilioBeneficiario().equals("Si")) form.setSubCat_OtroDomicilio(SubCategories.beneficiario.getSubCategories(1));
 
             // Hijos
-            if (form.getTieneHijos().equals("Si") && childList != null) form.setHijos(generateHtml(childList.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
+            if (validateList(childList.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList()))
+                    && form.getTieneHijos().equals("Si")) form.setHijos(generateHtml(childList.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
 
             // Miembros Familiares
-            if(FamilyList != null && form.getTieneMasFamilia().equals("Si")) form.setFamilyMembers(generateHtml(FamilyList.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
+            if(validateList(FamilyList.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList()))
+                    && form.getTieneMasFamilia().equals("Si")) form.setFamilyMembers(generateHtml(FamilyList.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
 
             // Ingresos Miembros Familiares
-            if(FamilyMembers != null) form.setFamilyMemberIncome(generateHtml(FamilyMembers.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
+            if(validateList(FamilyMembers.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList()))) form.setFamilyMemberIncome(generateHtml(FamilyMembers.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
 
             // Créditos Del Emprendimiento
-            if(form.getEgresoActividadTieneCreditos().equals("Si") && ECredits != null) form.setCreditosEmprendimiento(generateHtml(ECredits.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
+            if(validateList(ECredits.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList()))
+                    && form.getEgresoActividadTieneCreditos().equals("Si")) form.setCreditosEmprendimiento(generateHtml(ECredits.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
 
             // Créditos Familiares
-            if(form.getEgresoFamiliarTieneCreditos().equals("Si") && FCredits != null) form.setCreditosFamiliares(generateHtml(FCredits.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
+            if(validateList(FCredits.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList()))
+                    && form.getEgresoFamiliarTieneCreditos().equals("Si")) form.setCreditosFamiliares(generateHtml(FCredits.stream().filter(p -> p.getParentIndex() == form.getIndex()).collect(Collectors.toList())));
 
             // Créditos Impagos
-            if (form.getCreditoFamiliarImpago().equals("Si")) form.setSubCat_CreditosImpagos(SubCategories.finanzasFamiliares.getSubCategories(2));
+            if (form.getCreditoFamiliarImpago() != null && form.getCreditoFamiliarImpago().equals("Si")) form.setSubCat_CreditosImpagos(SubCategories.finanzasFamiliares.getSubCategories(2));
         }
     }
 
+    private static boolean validateList(List<Object> lst){
+        if (lst == null || lst.isEmpty()){
+            return false;
+        }
+        return true;
+    }
 }

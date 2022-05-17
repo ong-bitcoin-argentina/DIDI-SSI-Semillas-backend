@@ -2,61 +2,66 @@ package com.atixlabs.semillasmiddleware.app.model.excel;
 
 import com.poiji.annotation.ExcelCellName;
 import com.poiji.annotation.ExcelRow;
+import lombok.Getter;
+import lombok.Setter;
 
+@Setter
+@Getter
 public class FamilyMemberIncome {
 
     @ExcelRow
     private int rowIndex;
 
-    @ExcelCellName("Ingreso_Familiar_Parentesco")
+    @ExcelCellName(value = "Ingreso_Familiar_Parentesco", mandatory = false)
     private String ingresoFamiliarParentesco;
 
-    @ExcelCellName("Ingreso_Familiar_Parentesco_Otros")
+    @ExcelCellName(value = "Ingreso_Familiar_Parentesco_Otros", mandatory = false)
     private String ingresoFamiliarParentescoOtros;
 
-    @ExcelCellName("Ingreso_Familiar_Salario_Origen")
+    @ExcelCellName(value = "Ingreso_Familiar_Salario_Origen", mandatory = false)
     private String ingresoFamiliarSalarioOrigen;
 
-    @ExcelCellName("Ingreso_Familiar_Salario_Tipo")
+    @ExcelCellName(value = "Ingreso_Familiar_Salario_Tipo", mandatory = false)
     private String ingresoFamiliarSalarioTipo;
 
-    @ExcelCellName("Ingreso_Familiar_Salario_Monto")
+    @ExcelCellName(value = "Ingreso_Familiar_Salario_Monto", mandatory = false)
     private float ingresoFamiliarSalarioMonto;
 
-    @ExcelCellName("Ingreso_Familiar_Subsidio_Origen")
+    @ExcelCellName(value = "Ingreso_Familiar_Subsidio_Origen", mandatory = false)
     private String ingresoFamiliarSubsidioOrigen;
 
-    @ExcelCellName("Ingreso_Familiar_Subsidio_Tipo")
+    @ExcelCellName(value = "Ingreso_Familiar_Subsidio_Tipo", mandatory = false)
     private String ingresoFamiliarSubsidioTipo;
 
-    @ExcelCellName("Ingreso_Familiar_Subsidio_Monto")
+    @ExcelCellName(value = "Ingreso_Familiar_Subsidio_Monto", mandatory = false)
     private float ingresoFamiliarSubsidioMonto;
 
-    @ExcelCellName("Ingreso_Familiar_Pension_Origen")
+    @ExcelCellName(value = "Ingreso_Familiar_Pension_Origen", mandatory = false)
     private String ingresoFamiliarPensioOrigen;
 
-    @ExcelCellName("Ingreso_Familiar_Pension_Tipo")
+    @ExcelCellName(value = "Ingreso_Familiar_Pension_Tipo", mandatory = false)
     private String ingresoFamiliarPensionTipo;
 
-    @ExcelCellName("Ingreso_Familiar_Pension_Monto")
+    @ExcelCellName(value = "Ingreso_Familiar_Pension_Monto", mandatory = false)
     private float ingresoFamiliarPensionMonto;
 
-    @ExcelCellName("Ingreso_Familiar_Otros_Origen")
+    @ExcelCellName(value = "Ingreso_Familiar_Otros_Origen", mandatory = false)
     private String ingresoFamiliarOtrosOrigen;
 
-    @ExcelCellName("Ingreso_Familiar_Otros_Tipo")
+    @ExcelCellName(value = "Ingreso_Familiar_Otros_Tipo", mandatory = false)
     private String ingresoFamiliarOtrosTipo;
 
-    @ExcelCellName("Ingreso_Familiar_Otros_Monto")
+    @ExcelCellName(value = "Ingreso_Familiar_Otros_Monto", mandatory = false)
     private float ingresoFamiliarOtrosMonto;
 
-    @ExcelCellName("TotalIngresoFamilia")
+    @ExcelCellName(value = "TotalIngresoFamilia", mandatory = false)
     private float totalIngresoFamilia;
 
-    @ExcelCellName("Ingreso_Familiar_Parcial")
-    private float ingresoFamiliarParcial;
+    //TODO: Validar si este campo es necesario, al momento de generar el pdf no es util y genera datos vacios.
+    /*@ExcelCellName(value = "Ingreso_Familiar_Parcial", mandatory = false)
+    private float ingresoFamiliarParcial;*/
 
-    @ExcelCellName("_parent_index")
+    @ExcelCellName(value = "_parent_index", mandatory = false)
     private int parentIndex;
 
     //TODO: add missing form columns

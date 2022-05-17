@@ -16,6 +16,7 @@ import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.service.ShareCredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.filemanager.exception.EmptyFileException;
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.context.properties.bind.DefaultValue;
@@ -59,7 +60,7 @@ public class CredentialController {
     public ResponseEntity<ProcessExcelFileResult> importCredentials(
             @RequestParam("file") MultipartFile file,
             @RequestParam(required = false, defaultValue = "false") boolean createCredentials)
-            throws EmptyFileException, IOException {
+            throws FileManagerException, IOException {
 
         log.info("uploadFile executed");
 

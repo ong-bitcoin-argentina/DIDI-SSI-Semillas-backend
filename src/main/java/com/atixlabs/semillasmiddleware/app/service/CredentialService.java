@@ -1472,7 +1472,7 @@ public class CredentialService {
      * @throws IOException
      */
     @Transactional
-    public ProcessExcelFileResult importCredentials(MultipartFile file, boolean createCredentials) throws IOException {
+    public ProcessExcelFileResult importCredentials(MultipartFile file, boolean createCredentials) throws IOException, FileManagerException {
 
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 
@@ -1511,6 +1511,12 @@ public class CredentialService {
 
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
+                if (!validateFormData(form)) {
+                    throw new FileManagerException("Existen datos incompletos o incorrectos en la encuesta del Beneficiario: "
+                            + form.getNombreBeneficiario().concat(" ").concat(form.getApellidoBeneficiario()) +
+                            ". Favor de revisar la información.");
+                }
+
                 //Validaciones
                 if (createCredentials == false) {
                     //compruebo que el beneficiario no tenga vivienda
@@ -1740,7 +1746,16 @@ public class CredentialService {
         return -1;
     }
 
-
+    private boolean validateFormData(Form form){
+        if (form.getNumeroDniBeneficiario() == null || form.getNumeroDniBeneficiario() == 0 || form.getViviendaDireccionCalle().equals(null) || form.getViviendaDireccionCalle().equals("") ||
+        form.getViviendaDireccionNumero().equals(null) || form.getViviendaDireccionNumero().equals("") || form.getViviendaDireccionEntreCalles().equals(null) || form.getViviendaDireccionEntreCalles().equals("") ||
+        form.getViviendaDireccionMunicipio().equals(null) || form.getViviendaDireccionMunicipio().equals("") || form.getViviendaDomicilioBarrio().equals(null) || form.getViviendaDomicilioBarrio().equals("") ||
+        form.getViviendaDomicilioLocalidad().equals(null) || form.getViviendaDomicilioLocalidad().equals("") || form.getNombreBeneficiario().equals(null) || form.getNombreBeneficiario().equals("") ||
+        form.getApellidoBeneficiario().equals(null) || form.getApellidoBeneficiario().equals("")){
+            return false;
+        }
+        return true;
+    }
 
 }
 

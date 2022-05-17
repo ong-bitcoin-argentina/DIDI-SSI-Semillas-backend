@@ -1750,9 +1750,8 @@ public class CredentialService {
         if (form.getNumeroDniBeneficiario() == null || form.getNumeroDniBeneficiario() == 0 || form.getViviendaDireccionCalle().equals(null) || form.getViviendaDireccionCalle().equals("") ||
         form.getViviendaDireccionNumero().equals(null) || form.getViviendaDireccionNumero().equals("") || form.getViviendaDireccionEntreCalles().equals(null) || form.getViviendaDireccionEntreCalles().equals("") ||
         form.getViviendaDireccionMunicipio().equals(null) || form.getViviendaDireccionMunicipio().equals("") || form.getViviendaDomicilioBarrio().equals(null) || form.getViviendaDomicilioBarrio().equals("") ||
-        form.getViviendaDomicilioBarrio().equals("") || form.getViviendaDomicilioLocalidad().equals(null) || form.getViviendaDomicilioLocalidad().equals("")
-        || form.getNombreBeneficiario().equals(null) || form.getNombreBeneficiario().equals("") || form.getApellidoBeneficiario().equals(null)
-                || form.getApellidoBeneficiario().equals("")){
+        form.getViviendaDomicilioLocalidad().equals(null) || form.getViviendaDomicilioLocalidad().equals("") || form.getNombreBeneficiario().equals(null) || form.getNombreBeneficiario().equals("") ||
+        form.getApellidoBeneficiario().equals(null) || form.getApellidoBeneficiario().equals("")){
             return false;
         }
         return true;

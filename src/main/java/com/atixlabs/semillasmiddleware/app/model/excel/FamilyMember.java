@@ -15,37 +15,37 @@ public class FamilyMember {
     @ExcelRow
     private int rowIndex;
 
-    @ExcelCellName("Parentesco_Familiar")
+    @ExcelCellName(value = "Parentesco_Familiar",mandatory = false)
     private String parentescoFamiliar;
 
-    @ExcelCellName("Parentesco_Otro_Familiar")
+    @ExcelCellName(value = "Parentesco_Otro_Familiar", mandatory = false)
     private String parentescoOtroFamiliar;
 
-    @ExcelCellName("Apellido_Familiar")
+    @ExcelCellName(value = "Apellido_Familiar", mandatory = false)
     private String apellidoFamiliar;
 
-    @ExcelCellName("Nombre_Familiar")
+    @ExcelCellName(value = "Nombre_Familiar", mandatory = false)
     private String nombreFamiliar;
 
-    @ExcelCellName("Fecha_Nacimiento_Familiar")
+    @ExcelCellName(value = "Fecha_Nacimiento_Familiar", mandatory = false)
     private String fechaNacimientoFamiliar;
 
-    @ExcelCellName("Edad_Familiar")
+    @ExcelCellName(value = "Edad_Familiar", mandatory = false)
     private String edadFamiliar;
 
-    @ExcelCellName("Genero_Familia")
+    @ExcelCellName(value = "Genero_Familia", mandatory = false)
     private String generoFamilia;
 
-    @ExcelCellName("Genero_Otro_Familiar")
+    @ExcelCellName(value = "Genero_Otro_Familiar", mandatory = false)
     private String generoOtroFamiliar;
 
-    @ExcelCellName("Tipo_Documento_Familiar")
+    @ExcelCellName(value = "Tipo_Documento_Familiar", mandatory = false)
     private String tipoDocumentoFamiliar;
 
-    @ExcelCellName("Numero_Doc_Familiar")
+    @ExcelCellName(value = "Numero_Doc_Familiar", mandatory = false)
     private Long numeroDniFamiliar;
 
-    @ExcelCellName("_parent_index")
+    @ExcelCellName(value = "_parent_index", mandatory = false)
     private int parentIndex;
 
 }

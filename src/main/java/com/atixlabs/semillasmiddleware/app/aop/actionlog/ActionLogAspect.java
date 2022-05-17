@@ -101,6 +101,7 @@ public class ActionLogAspect {
         this.saveActionLog(ActionTypeEnum.BONDAREA_SYNC, ActionLevelEnum.ERROR, message);
     }
 
+    // TODO: Validar si este metodo sera utilizado en un futuro, si no lo mejor seria eliminarlo para evitar codigo basura. Actualmente no esta en uso.
     @AfterReturning(value = "importSurvey()")
     public void importSurveyAfter(JoinPoint joinPoint)  {
 

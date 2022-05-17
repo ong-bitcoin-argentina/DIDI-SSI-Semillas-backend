@@ -14,39 +14,39 @@ public class Child {
     @ExcelRow
     private int rowIndex;
 
-    @ExcelCellName("Apellido_Hijo")
+    @ExcelCellName(value = "Apellido_Hijo", mandatory = false)
     private String apellidoHijo;
 
-    @ExcelCellName("Nombre_Hijo")
+    @ExcelCellName(value = "Nombre_Hijo",mandatory = false)
     private String nombreHijo;
 
-    @ExcelCellName("Fecha_Nacimiento_Hijo")
+    @ExcelCellName(value = "Fecha_Nacimiento_Hijo",mandatory = false)
     private String fechaNacimientoHijo;
 
-    @ExcelCellName("Edad_Hijo")
+    @ExcelCellName(value = "Edad_Hijo", mandatory = false)
     private String edadHijo;
 
-    @ExcelCellName("Tipo_Documento_Hijo")
+    @ExcelCellName(value = "Tipo_Documento_Hijo", mandatory = false)
     private String tipoDocumentoHijo;
 
-    @ExcelCellName("Numero_Doc_Hijo")
+    @ExcelCellName(value = "Numero_Doc_Hijo", mandatory = false)
     private Long numeroDocumentoHijo;
 
-    @ExcelCellName("Genero_Hijo")
+    @ExcelCellName(value = "Genero_Hijo", mandatory = false)
     private String generoHijo;
 
-    @ExcelCellName("Genero_Otro_Hijo")
+    @ExcelCellName(value = "Genero_Otro_Hijo", mandatory = false)
     private String generoOtroHijo;
 
-    @ExcelCellName("Trabaja_Hijo")
+    @ExcelCellName(value = "Trabaja_Hijo", mandatory = false)
     private String trabajaHijo;
 
-    @ExcelCellName("En_Que_Trabaja_Hijo")
+    @ExcelCellName(value = "En_Que_Trabaja_Hijo", mandatory = false)
     private String enQueTrabajaHijo;
 
-    @ExcelCellName("Estudia_Hijo")
+    @ExcelCellName(value = "Estudia_Hijo", mandatory = false)
     private String estudiaHijo;
 
-    @ExcelCellName("_parent_index")
+    @ExcelCellName(value = "_parent_index", mandatory = false)
     private int parentIndex;
 }

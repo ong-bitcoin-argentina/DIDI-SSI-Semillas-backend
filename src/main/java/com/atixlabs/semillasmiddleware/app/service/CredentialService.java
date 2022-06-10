@@ -956,8 +956,6 @@ public class CredentialService {
 
     //todo move into credential class
     private void buildCredential(Person creditHolder, Credential credential) {
-        //creditHolder = savePersonIfNew(creditHolder);
-
         credential.setDateOfIssue(DateUtil.getLocalDateTimeNow());
         credential.setCreditHolder(creditHolder);
         credential.setCreditHolderDni(creditHolder.getDocumentNumber());
@@ -1542,7 +1540,6 @@ public class CredentialService {
         return processExcelFileResult;
     }
 
-    //Nuevos metodos para la generacion de credenciales, reduccion de codigo del metodo importCredentials.
     private <T> List<T> parseKoboSurveyIntoList(XSSFSheet sheet, Class<T> _class){
         ExcelUtils.formatHeader(sheet);
         return sheet!=null?Poiji.fromExcel(sheet, _class): new ArrayList<>();
@@ -1626,6 +1623,9 @@ public class CredentialService {
                     tempPerson = savePersonIfNew(new PersonBuilder().fromFamilyMember((FamilyMember) obj).build());
                     if(!validateIdentityCredential(tempPerson)) idCredentials.add(generateIdentityCredential(creditHolder, tempPerson, OTHER_KINSMAN));
                     break;
+
+                default:
+                    break;
             }
         }
         return idCredentials;
@@ -1648,10 +1648,9 @@ public class CredentialService {
 
         Optional<DidiAppUser> didiAppUser = didiAppUserService.getDidiAppUserByDni(idCredential.getBeneficiaryDni());
 
-        if(didiAppUser.isPresent()){
-            if(!this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(idCredential.getCreditHolderDni(), idCredential.getBeneficiaryDni())) {
+        if(didiAppUser.isPresent() && !this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman
+                                (idCredential.getCreditHolderDni(), idCredential.getBeneficiaryDni())){
                 idCredential = this.credentialIdentityService.buildNewOnPendidgDidiAsKinsmanType(idCredential, didiAppUser.get());
-            }
         }
 
         return idCredential;
@@ -1701,12 +1700,13 @@ public class CredentialService {
                             familyMember.getNumeroDniFamiliar(), CredentialCategoriesCodes.IDENTITY.getCode(),
                             form.getNumeroDniBeneficiario()));
                     break;
+
+                default:
+                    break;
             }
         }
         return credentials;
     }
-
-    //TERMINAN LOS NUEVOS METODOS
 
     public CredentialDwelling buildDwellingCredentials(Form form, Person creditHolder){
         //DWELLING_CATEGORY_NAME

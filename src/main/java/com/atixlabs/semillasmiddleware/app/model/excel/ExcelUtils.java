@@ -1,12 +1,17 @@
 package com.atixlabs.semillasmiddleware.app.model.excel;
 
+import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.util.Date;
 import java.util.Objects;
+import java.util.Set;
 
 public class ExcelUtils {
     //Relacionadas a la vivienda
@@ -35,6 +40,18 @@ public class ExcelUtils {
                 headerRow.createCell(i);
                 headerRow.getCell(i).setCellValue(title + subTitle);
             }
+        }
+    }
+
+    public static void validateFormData(Form form) throws FileManagerException {
+        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+
+        Set<ConstraintViolation<Form>> errors = validator.validate(form);
+
+        if (!errors.isEmpty()){
+            throw new FileManagerException("Se encontró un error en la información del Excel, en el campo: "
+                    .concat(errors.stream().findFirst().get().getPropertyPath().toString()).concat(", para el formulario N° "+form.getIndex())
+                    .concat(".\nError: " + errors.stream().findFirst().get().getMessage()).concat(". Favor de revisar y corregir la información."));
         }
     }
 

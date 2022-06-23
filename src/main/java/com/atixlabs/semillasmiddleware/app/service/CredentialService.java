@@ -1494,11 +1494,7 @@ public class CredentialService {
 
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
-                if (!validateFormData(form)) {
-                    throw new FileManagerException("Existen datos incompletos o incorrectos en la encuesta del Beneficiario: "
-                            + form.getNombreBeneficiario().concat(" ").concat(form.getApellidoBeneficiario()) +
-                            ". Favor de revisar la información.");
-                }
+                ExcelUtils.validateFormData(form);
 
                 //Validaciones
                 if (createCredentials == false) {
@@ -1761,17 +1757,5 @@ public class CredentialService {
         credentialEntrepreneurship.setCredentialCategory(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
         credentialEntrepreneurship.setCredentialDescription(CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode());
     }
-
-    private boolean validateFormData(Form form){
-        if (form.getNumeroDniBeneficiario() == null || form.getNumeroDniBeneficiario() == 0 || form.getViviendaDireccionCalle().equals(null) || form.getViviendaDireccionCalle().equals("") ||
-                form.getViviendaDireccionNumero().equals(null) || form.getViviendaDireccionNumero().equals("") || form.getViviendaDireccionEntreCalles().equals(null) || form.getViviendaDireccionEntreCalles().equals("") ||
-                form.getViviendaDireccionMunicipio().equals(null) || form.getViviendaDireccionMunicipio().equals("") || form.getViviendaDomicilioBarrio().equals(null) || form.getViviendaDomicilioBarrio().equals("") ||
-                form.getViviendaDomicilioLocalidad().equals(null) || form.getViviendaDomicilioLocalidad().equals("") || form.getNombreBeneficiario().equals(null) || form.getNombreBeneficiario().equals("") ||
-                form.getApellidoBeneficiario().equals(null) || form.getApellidoBeneficiario().equals("")){
-            return false;
-        }
-        return true;
-    }
-
 }
 

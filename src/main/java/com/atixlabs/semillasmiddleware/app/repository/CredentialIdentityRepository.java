@@ -1,10 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;

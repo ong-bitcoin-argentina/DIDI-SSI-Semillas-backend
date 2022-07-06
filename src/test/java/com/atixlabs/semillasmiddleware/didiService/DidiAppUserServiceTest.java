@@ -1,30 +1,20 @@
 package com.atixlabs.semillasmiddleware.didiService;
 
 
-import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.model.constant.DidiAppUserOperationResult;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
-import com.atixlabs.semillasmiddleware.util.DateUtil;
+import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.junit4.SpringRunner;
 
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import static org.mockito.Mockito.*;
 

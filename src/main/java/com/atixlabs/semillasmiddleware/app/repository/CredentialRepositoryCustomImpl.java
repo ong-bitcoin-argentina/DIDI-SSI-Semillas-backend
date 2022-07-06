@@ -3,12 +3,8 @@ package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.util.DateUtil;
-import com.fasterxml.jackson.annotation.JsonFormat;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import lombok.extern.slf4j.Slf4j;
-import org.apache.poi.ss.formula.functions.T;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
@@ -25,6 +21,8 @@ import java.util.List;
 @Service
 @Slf4j
 public class CredentialRepositoryCustomImpl implements CredentialRepositoryCustom {
+
+    private String updated = "updated";
 
     @PersistenceContext
     protected EntityManager em;
@@ -65,7 +63,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
         }
 
         if (lastUpdate != null) {
-            predicates.add(cb.like(credential.get("updated").as(String.class), lastUpdate+"%"));
+            predicates.add(cb.like(credential.get(updated).as(String.class), lastUpdate+"%"));
         }
 
         if (credentialStates != null) {
@@ -80,14 +78,14 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
         cq.where(predicates.toArray(new Predicate[0]));
 
         //order by updated field ASC
-        Order lastUpdateOrder = cb.desc(credential.get("updated"));
+        Order lastUpdateOrder = cb.desc(credential.get(updated));
         cq.orderBy(lastUpdateOrder);
 
         log.info("cq armada ");
 
         if(page != null) {
             TypedQuery<Credential> typedQuery = em.createQuery(cq);
-            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber()) * page.getPageSize()));
+            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber()) * (long) page.getPageSize()));
             typedQuery.setMaxResults(page.getPageSize());
             return new PageImpl<>(typedQuery.getResultList(), page, quantityResults);
         }else
@@ -131,7 +129,7 @@ public class CredentialRepositoryCustomImpl implements CredentialRepositoryCusto
         }
 
         if (lastUpdate != null) {
-            predicates.add(cb.like(credential.get("updated").as(String.class), lastUpdate+"%"));
+            predicates.add(cb.like(credential.get(updated).as(String.class), lastUpdate+"%"));
         }
 
         if (credentialStates != null) {

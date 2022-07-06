@@ -1,15 +1,14 @@
 package com.atixlabs.semillasmiddleware.app.sancor.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
-import com.atixlabs.semillasmiddleware.app.dto.ProcessResultDto;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
-import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitSancorService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialStateService;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.dto.ProcessResultDto;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
+import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,19 +23,12 @@ public class SyncSancorProcessService {
     private SancorPolicyService sancorPolicyService;
 
     private CredentialBenefitSancorService credentialBenefitSancorService;
-
-    private CredentialStateService credentialStateService;
-
-    private DidiService didiService;
-
     private CredentialService credentialService;
 
     @Autowired
-    public SyncSancorProcessService(SancorPolicyService sancorPolicyService, CredentialBenefitSancorService credentialBenefitSancorService,CredentialStateService credentialStateService, DidiService didiService, CredentialService credentialService){
+    public SyncSancorProcessService(SancorPolicyService sancorPolicyService, CredentialBenefitSancorService credentialBenefitSancorService, CredentialStateService credentialStateService, DidiService didiService, CredentialService credentialService){
         this.sancorPolicyService = sancorPolicyService;
         this.credentialBenefitSancorService = credentialBenefitSancorService;
-        this.credentialStateService = credentialStateService;
-        this.didiService = didiService;
         this.credentialService = credentialService;
     }
 
@@ -55,12 +47,12 @@ public class SyncSancorProcessService {
                 Optional<CredentialBenefitSancor> opCredentialBenefitSancor = credentialBenefitSancorService.getCredentialBenefitsHolder(sancorPolicy.getCertificateClientDni());
                 if (opCredentialBenefitSancor.isPresent()) {
 
-                    if (credentialBenefitSancorService.isCredentialActive(opCredentialBenefitSancor.get())) {
+                    if (Boolean.TRUE.equals(credentialBenefitSancorService.isCredentialActive(opCredentialBenefitSancor.get()))) {
                         this.credentialService.revokeComplete(opCredentialBenefitSancor.get(), RevocationReasonsCodes.UPDATE_INTERNAL);
                         CredentialBenefitSancor newCredentialBenefitSancor =  this.credentialBenefitSancorService.buildHolderBenefitsCredential(opCredentialBenefitSancor.get(), Optional.of(sancorPolicy));
                         this.credentialBenefitSancorService.save(newCredentialBenefitSancor);
                     }else{
-                        if(credentialBenefitSancorService.isCredentialPendingDidi(opCredentialBenefitSancor.get())){
+                        if(Boolean.TRUE.equals(credentialBenefitSancorService.isCredentialPendingDidi(opCredentialBenefitSancor.get()))){
                             opCredentialBenefitSancor.get().addPolicyData(sancorPolicy);
                             this.credentialBenefitSancorService.save(opCredentialBenefitSancor.get());
                         }

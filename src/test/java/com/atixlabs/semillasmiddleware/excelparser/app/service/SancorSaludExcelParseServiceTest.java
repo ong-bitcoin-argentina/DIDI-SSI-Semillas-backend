@@ -7,11 +7,14 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.Test;
+import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 
-public class SancorSaludExcelParseServiceTest {
+class SancorSaludExcelParseServiceTest {
 
     @Mock
     private SancorPolicyService sancorPolicyService;
@@ -22,38 +25,16 @@ public class SancorSaludExcelParseServiceTest {
     @InjectMocks
     private SancorSaludExcelParseService sancorSaludExcelParseService;
 
-    @Before
+    @BeforeEach
     public void setupMocks() {
         MockitoAnnotations.initMocks(this);
     }
 
-
-    @Test
-    public void whenParseDniReciveD00001_thenReturn1(){
-        String certificateClient = "D00001";
+    @ParameterizedTest
+    @CsvSource({"D00001, 1L","D0000100,100L","D10000100,10000100L","9100,9100L"})
+    void whenParseDniReceiveX_thenReturnY(String certificateClient, String longValue){
         Long result = sancorSaludExcelParseService.parseDni(certificateClient);
-        Assert.assertEquals(Long.valueOf(1L), result);
-    }
-
-    @Test
-    public void whenParseDniReciveD0000100_thenReturn100(){
-        String certificateClient = "D0000100";
-        Long result = sancorSaludExcelParseService.parseDni(certificateClient);
-        Assert.assertEquals(Long.valueOf(100L), result);
-    }
-
-    @Test
-    public void whenParseDniReciveD10000100_thenReturn10000100(){
-        String certificateClient = "D10000100";
-        Long result = sancorSaludExcelParseService.parseDni(certificateClient);
-        Assert.assertEquals(Long.valueOf(10000100L), result);
-    }
-
-    @Test
-    public void whenParseDniRecive9100_thenReturn9100(){
-        String certificateClient = "9100";
-        Long result = sancorSaludExcelParseService.parseDni(certificateClient);
-        Assert.assertEquals(Long.valueOf(9100L), result);
+        Assert.assertEquals(Long.valueOf(Long.parseLong(longValue)), result);
     }
 
     @Test
@@ -67,6 +48,8 @@ public class SancorSaludExcelParseServiceTest {
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
         ProcessExcelFileResult result = sancorSaludExcelParseService.processRow(mockRow, true,
                 processExcelFileResult,false, false, false);
+
+        Assertions.assertNotEquals(processExcelFileResult, result);
 
     }
 

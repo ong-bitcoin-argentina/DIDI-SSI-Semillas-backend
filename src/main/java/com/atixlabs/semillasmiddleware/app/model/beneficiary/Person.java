@@ -1,10 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.beneficiary;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.excel.Child;
-import com.atixlabs.semillasmiddleware.app.model.excel.Form;
+import com.atixlabs.semillasmiddleware.app.model.didiHistoric.DidiHistoric;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -39,10 +36,10 @@ public class Person {
     private String gender;
 
     @OneToMany
-    private List<DIDHisotoric> DIDIsHisotoric;
+    private List<DidiHistoric> DIDIsHisotoric; //NOSONAR
 
     @ManyToMany(fetch = FetchType.EAGER)
-    protected List<Loan> defaults; //TODO must be a HashSet
+    private List<Loan> defaults; //TODO must be a HashSet
 
     //TODO user this
     public boolean equalsIgnoreId(Person person1, Person person2) {
@@ -63,14 +60,12 @@ public class Person {
         return person;
     }
 
-    public boolean isInDefault(){return (this.defaults!=null ?  defaults.size()>0 : false);}
+    public boolean isInDefault(){return this.defaults.isEmpty();}
 
 
     public boolean removeLoanInDefault(Loan loan){
-        if(this.isInDefault()){
-            if(this.getDefaults().contains(loan)){
+        if(this.isInDefault() && this.getDefaults().contains(loan)){
                 return this.getDefaults().remove(loan);
-            }
         }
 
         return false;

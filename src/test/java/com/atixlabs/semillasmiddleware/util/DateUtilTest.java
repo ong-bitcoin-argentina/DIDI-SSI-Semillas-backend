@@ -4,7 +4,6 @@ import org.junit.Assert;
 import org.junit.Test;
 
 import java.time.LocalDate;
-import java.time.LocalDateTime;
 
 public class DateUtilTest {
 

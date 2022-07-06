@@ -13,6 +13,8 @@ import java.util.Date;
 @Component
 public class DateUtil {
 
+    private DateUtil(){}
+
     public static Date getDateNow(){
         return new Date();
     }
@@ -43,9 +45,7 @@ public class DateUtil {
     }
 
     public static String toString(LocalDate dateTime){
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
-        String date = dateTime.format(formatter);
-        return date;
+        return dateTime.format(DateTimeFormatter.ofPattern("dd/MM/yyyy"));
     }
 
     public static Instant getInstantNow(){

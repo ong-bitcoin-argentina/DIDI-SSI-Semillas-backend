@@ -1,20 +1,20 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitSancorRepository;
+import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
+import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitSancorRepository;
-import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
-import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
-import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
@@ -150,7 +150,7 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
             log.info("Holder {} has more credits actives, not revoke Sancor credential");
         }
 
-        return new ArrayList<Loan>();
+        return new ArrayList<>();
     }
 
 
@@ -178,7 +178,7 @@ public class CredentialBenefitSancorService extends CredentialBenefitCommonServi
     public List<CredentialBenefitSancor> getCredentialBenefitSancorActiveForDni(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialBenefitSancorRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());
+        return credentialBenefitSancorRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.orElse(new CredentialState()));
     }
 
     public CredentialBenefitSancor buildNewOnPendidgDidi(CredentialBenefitSancor credentialBenefitSancor, DidiAppUser newDidiAppUser) throws CredentialException {

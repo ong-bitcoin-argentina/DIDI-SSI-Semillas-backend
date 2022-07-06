@@ -1,9 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.model;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
+import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
@@ -65,9 +65,9 @@ public class Loan extends AuditableEntity {
 
     private Integer currentInstalmentNumber;
 
-    private Integer InstalmentTotalQuantity;
+    private Integer instalmentTotalQuantity;
 
-    private String InstalmentType;
+    private String instalmentType;
 
     @Column(scale = 2)
     private BigDecimal expiredAmount; // Saldo vencido del crédito individual, compuesto por capital, intereses, seguros y cargos (Ej. 1845.24)
@@ -131,9 +131,9 @@ public class Loan extends AuditableEntity {
 
         this.currentInstalmentNumber = currentFeeNumber;
 
-        this.InstalmentTotalQuantity = loanDto.getFeeTotalQuantity();
+        this.instalmentTotalQuantity = loanDto.getFeeTotalQuantity();
 
-        this.InstalmentType = loanDto.getFeeDuration();
+        this.instalmentType = loanDto.getFeeDuration();
 
         this.expirationDate = expirationDate;
     }
@@ -150,7 +150,6 @@ public class Loan extends AuditableEntity {
         Loan newLoan = (Loan) object;
 
         return this.getHash().equals(newLoan.getHash());
-        //return (this.status.equals(newLoan.getStatus()) && this.cycleDescription.equals(newLoan.getCycleDescription()) && (this.expiredAmount.compareTo(newLoan.getExpiredAmount()) == 0));
     }
 
     public String getHash(){
@@ -171,21 +170,29 @@ public class Loan extends AuditableEntity {
         return hash !=null ? hash : "";
     }
 
+    @Override
+    public int hashCode() {
+        /* ... */
+        return 0;
+    }
+
     public void merge(Loan loanToUpdate){
         this.status = loanToUpdate.getStatus();
         this.cycleDescription = loanToUpdate.getCycleDescription();
         this.expiredAmount = loanToUpdate.getExpiredAmount();
         this.personName =   loanToUpdate.getPersonName();
         this.currentInstalmentNumber = loanToUpdate.getCurrentInstalmentNumber();
-        this.InstalmentTotalQuantity = loanToUpdate.getInstalmentTotalQuantity();
-        this.InstalmentType = loanToUpdate.getInstalmentType();
+        this.instalmentTotalQuantity = loanToUpdate.getInstalmentTotalQuantity();
+        this.instalmentType = loanToUpdate.getInstalmentType();
         this.dniPerson = loanToUpdate.getDniPerson();
     }
 
 
     public boolean isDefault(){
-        return (this.state!=null ? this.state.equals(LoanStateCodes.DEFAULT.getCode()) : false);
+        if(this.state != null) return this.state.equals(LoanStateCodes.DEFAULT.getCode());
+        return false;
     }
 
     public Loan() {}
+
 }

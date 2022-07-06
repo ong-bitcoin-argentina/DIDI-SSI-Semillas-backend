@@ -61,6 +61,9 @@ public class DidiAppUserService {
                         opDidiAppUser.get().setSyncStatus(DidiSyncStatus.SYNC_MISSING.getCode());
                         didiAppUserRepository.save(opDidiAppUser.get());
                         return DidiAppUserOperationResult.NEW_REQUEST_REGISTERED;
+
+                    default:
+                        return DidiAppUserOperationResult.ERROR;
                 }
             } else {
                 //if DID is different requires sync:
@@ -71,7 +74,6 @@ public class DidiAppUserService {
                 return DidiAppUserOperationResult.NEW_DID_REGISTERED_FOR_USER;
             }
         }
-        return DidiAppUserOperationResult.ERROR;
     }
 
 

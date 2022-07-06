@@ -1,7 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.sancor.service;
 
-import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.repository.SancorPolicyRepository;
+import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

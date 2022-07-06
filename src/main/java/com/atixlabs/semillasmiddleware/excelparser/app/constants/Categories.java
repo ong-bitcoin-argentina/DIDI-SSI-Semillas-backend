@@ -73,7 +73,11 @@ public enum Categories {
     private String code;
     Categories(String code) {this.code = code;}
     public String getCode(){return this.code;}
-    static public List<Categories> getCodeList(){return Arrays.stream(values()).collect(Collectors.toList());}
-    public Integer getAmount(){return 1;}
+    public static List<Categories> getCodeList(){return Arrays.stream(values()).collect(Collectors.toList());}
+    public Integer getAmount(){return Constants.AMOUNT;}
     public Class<?> getLinkedClass(){return PersonCategory.class;}
+
+    private static class Constants{
+        public static final int AMOUNT = 1;
+    }
 }

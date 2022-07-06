@@ -22,7 +22,7 @@ public interface DidiEndpoint {
     @POST("Cert/{credential_id}/emmit")
     Call<DidiEmmitCredentialResponse> emmitCertificate(
             @Header("token") String token,
-            @Path("credential_id") String credential_id);
+            @Path("credential_id") String credentialId);
 
     //workaround para poder enviar DELETE con body
     //https://stackoverflow.com/questions/48768586/retrofit-delete-json
@@ -31,7 +31,7 @@ public interface DidiEndpoint {
     @HTTP(method = "DELETE", path = "Cert/{credential_id}", hasBody = true)
     Call<DidiEmmitCredentialResponse> deleteCertificate(
             @Header("token") String token,
-            @Path("credential_id") String credential_id,
+            @Path("credential_id") String credentialId,
             @Body HashMap<String, String> body);
 
 
@@ -43,15 +43,5 @@ public interface DidiEndpoint {
     Call<DidiGetTemplateResponse> getTemplate(
             @Header("token") String token,
             @Path("template_id") String templateId);
-
-
-/*
-    @POST("banks/{bank_id}/accounts/{account_id}/{view_id}/wallet/cvu")
-    Call<BindCVUResponse> createCVU(@Header("Authorization") String token,
-                                    @Path("bank_id") Integer bank_id,
-                                    @Path("account_id") String account_id,
-                                    @Path("view_id") String view_id,
-                                    @Body BindCVURequestBody bindCVURequestBody);
-*/
 
 }

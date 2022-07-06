@@ -1,7 +1,5 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
-import org.apache.tomcat.jni.Local;
-
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.Map;

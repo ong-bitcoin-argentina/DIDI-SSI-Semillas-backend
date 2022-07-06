@@ -2,19 +2,15 @@ package com.atixlabs.semillasmiddleware.app.didi.model;
 
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
 
 @Getter
 @Setter

@@ -1,55 +1,47 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.service;
 
+import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
+import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
+import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfigurationException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
+import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
+import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanResponse;
-import com.atixlabs.semillasmiddleware.app.bondarea.exceptions.BondareaSyncroException;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.BondareaLoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
-import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.exceptions.InvalidExpiredConfigurationException;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
-import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
-import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessControlStatusCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
 import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
-import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
-import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
-import com.atixlabs.semillasmiddleware.app.service.CredentialCreditService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
-import com.google.common.base.Strings;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import lombok.extern.slf4j.Slf4j;
 import okhttp3.OkHttpClient;
-import org.apache.tomcat.jni.Local;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpStatus;
 import org.springframework.stereotype.Service;
 import org.springframework.util.CollectionUtils;
 import retrofit2.Call;
-//import retrofit2.GsonConverterFactory;
 import retrofit2.converter.gson.GsonConverterFactory;
 import retrofit2.Response;
 import retrofit2.Retrofit;
 
 import java.math.BigDecimal;
 import java.net.SocketTimeoutException;
-import java.time.Duration;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.format.DateTimeFormatter;
-import java.time.temporal.TemporalUnit;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -66,6 +58,8 @@ public class BondareaService {
     private LoanService loanService;
     private CredentialService credentialService;
 
+    private String dateFormat = "dd/MM/yyyy";
+
     @Autowired
     public BondareaService(LoanRepository loanRepository, ParameterConfigurationRepository parameterConfigurationRepository, PersonRepository personRepository, ProcessControlService processControlService, LoanService loanService, CredentialService credentialService) {
         this.loanRepository = loanRepository;
@@ -80,35 +74,20 @@ public class BondareaService {
     private String serviceURL;
 
     @Value("${bondarea.access_key}")
-    private String access_key;
+    private String accessKey;
 
     @Value("${bondarea.access_token}")
-    private String access_token;
+    private String accessToken;
 
     @Value("${bondarea.idm}")
     private String idm;
-
-    // ID de la cuenta representado
-    //private String idAccount;
-
-    // Valores separados por "|" (pipe) de las columnas a mostrar para cada registro. (Ej. sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m)
-    private String loanColumns;
-
-    // Valores separados por "|" (pipe) de los estados de préstamos a listar.  (Ej. 55|60)
-    // private String loanstate;
-
-
-    //contains json converter and date format configuration
-    private Gson gson = null;
-
-    //contains service link with factory
-    private Retrofit retrofit = null;
 
     private BondareaEndpoint bondareaEndpoint = null;
 
 
     public void initializeBondareaApi() {
-        gson = new GsonBuilder()
+        //contains json converter and date format configuration
+        Gson gson = new GsonBuilder()
                 .setDateFormat("yyyy-MM-dd'T'HH:mm:ssZ")
                 .create();
 
@@ -118,8 +97,8 @@ public class BondareaService {
                 .writeTimeout(60, TimeUnit.SECONDS)
                 .build();
 
-
-        retrofit = new Retrofit.Builder()
+        //contains service link with factory
+        Retrofit retrofit = new Retrofit.Builder()
                 .baseUrl(serviceURL)
                 .addConverterFactory(GsonConverterFactory.create(gson))
                 .client(okHttpClient)
@@ -159,12 +138,9 @@ public class BondareaService {
      * Synchronize new loans mock. It can be used to create loans for the 1st time.
      * Then to test the creation of credit credential and benefits credentials
      *
-     * @param loanState
-     * @param idBondareaLoan
-     * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansMock(String loanState, String idBondareaLoan, String date) {
+    public List<BondareaLoanDto> getLoansMock() {
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         BondareaLoanDto loan = getMockBondareaLoan();
@@ -189,12 +165,9 @@ public class BondareaService {
      * MOCK PURPOSE:
      * Synchronize loans. This is used the 2nd time to update the loans that have already been saved.
      *
-     * @param loanState
-     * @param idBondareaLoan
-     * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansMockSecond(String loanState, String idBondareaLoan, String date) {
+    public List<BondareaLoanDto> getLoansMockSecond() {
         List<BondareaLoanDto> loans = new ArrayList<>();
 
         //id 1 is not with state 55
@@ -226,12 +199,9 @@ public class BondareaService {
      * MOCK PURPOSE:
      * Synchronize loans. This get the 4 loans but one is in default.
      *
-     * @param loanState
-     * @param idBondareaLoan
-     * @param date
      * @return
      */
-    public List<BondareaLoanDto> getLoansOneInDefaultMock(String loanState, String idBondareaLoan, String date) {
+    public List<BondareaLoanDto> getLoansOneInDefaultMock() {
 
         BondareaLoanDto loan = getMockBondareaLoan();
         List<BondareaLoanDto> loans = new ArrayList<>();
@@ -256,7 +226,7 @@ public class BondareaService {
     }
 
 
-    private List<BondareaLoanDto> getLoansFinalizedMock(String code, String idBondareaLoan, String date) {
+    private List<BondareaLoanDto> getLoansFinalizedMock() {
         List<BondareaLoanDto> loans = new ArrayList<>();
         //loan 2 is finalize
         BondareaLoanDto loan2 = getMockBondareaLoan();
@@ -285,18 +255,19 @@ public class BondareaService {
         log.info("getBondareaLoans:");
 
         //Fill url params
-        loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m|tc|nc";
+        // Valores separados por "|" (pipe) de las columnas a mostrar para cada registro. (Ej. sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m)
+        String loanColumns = "sta|t|id|staInt|id_pg|pg|fOt|fPri|sv|usr|cuentasTag|dni|pp|ppt|m|tc|nc";
 
-
-        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad", "wspre", "prerepprestamos", access_key, access_token, idm, loanColumns, loanState, idBondareaLoan, date);
+        Call<BondareaLoanResponse> callSync = bondareaEndpoint.getLoans("comunidad", "wspre", "prerepprestamos", accessKey, accessToken, idm, loanColumns, loanState, idBondareaLoan, date);
 
         BondareaLoanResponse bondareaLoanResponse;
         try {
             Response<BondareaLoanResponse> response = callSync.execute();
 
             if (response.code() == HttpStatus.OK.value()) {
-                if (idBondareaLoan == null || idBondareaLoan.isEmpty()) {
-                    if(response.body() == null || response.body().getLoans() == null || response.body().getLoans().isEmpty()) throw new RuntimeException("No body or loans received in sync, aborting");
+                if (idBondareaLoan == null || idBondareaLoan.isEmpty() ||
+                        response.body() == null || response.body().getLoans() == null || response.body().getLoans().isEmpty()) {
+                    throw new MissingResourceException("No body or loans received in sync, aborting", response.getClass().getName(), response.message());
                 }
                 bondareaLoanResponse = response.body();
                 log.debug("Bondarea get loans has been successfully executed " + response.body());
@@ -337,35 +308,10 @@ public class BondareaService {
             LocalDateTime startTime = process.getStartTime();
 
             try {
+                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat(dateFormat).plusDays(1); //get the loans with the actual day +1
+                log.info("BONDAREA - GET LOANS -- from " + todayPlusOne);
 
-                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-                log.info("BONDAREA - GET LOANS -- from " + todayPlusOne.toString());
-
-                List<BondareaLoanDto> loansDto;
-
-                try {
-                    loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
-                    log.info("BONDAREA - GET LOANS -- " + (loansDto!=null ? loansDto.size():0) +" recieved");
-                } catch (BondareaSyncroException ex) {
-                    log.error("Could not synchronized data from Bondarea ! ", ex);
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
-                    return false;
-                }
-
-                this.createAndUpdateLoans(loansDto, startTime);
-                this.handlePendingLoans(startTime);
-
-                try {
-                       this.checkCreditsForDefault();
-                } catch (InvalidExpiredConfigurationException ex) {
-                    log.error("Error checking defaults loans ",ex);
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
-                    return false;
-                }
-
-                //finish process
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.OK);
-                return true;
+                return this.checkBondareaAndLoan(null, startTime, todayPlusOne);
             } catch (Exception ex) {
                 log.error("Exception unknown ", ex);
                 processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
@@ -490,31 +436,16 @@ public class BondareaService {
             LocalDateTime startTime = process.getStartTime();
 
             try {
+                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat(dateFormat).plusDays(1); //get the loans with the actual day +1
+                log.info("BONDAREA - GET LOANS -- from " + todayPlusOne);
 
-                LocalDate todayPlusOne = DateUtil.getLocalDateWithFormat("dd/MM/yyyy").plusDays(1); //get the loans with the actual day +1
-                log.info("BONDAREA - GET LOANS -- from " + todayPlusOne.toString());
-
-                List<BondareaLoanDto> loansDto;
-
-                    loansDto = bondareaMock;
-                    log.info("BONDAREA - GET LOANS -- " + (loansDto!=null ? loansDto.size():0) +" recieved");
-
-                    log.info("Creatriondate "+loansDto.get(0).getCreationDate());
-
-                this.createAndUpdateLoans(loansDto, startTime);
-                this.handlePendingLoans(startTime);
-
-                try {
-                    this.checkCreditsForDefault();
-                } catch (InvalidExpiredConfigurationException ex) {
-                    log.error("Error checking defaults loans ",ex);
-                    processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
-                    return false;
+                if (bondareaMock != null){
+                    log.info("BONDAREA - GET LOANS -- {} recieved.",bondareaMock.size());
+                    log.info("Creatrion date {}",bondareaMock.get(0).getCreationDate());
+                    return this.checkBondareaAndLoan(bondareaMock, startTime, todayPlusOne);
                 }
 
-                //finish process
-                processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.OK);
-                return true;
+                return false;
             } catch (Exception ex) {
                 log.error("Exception unknown ", ex);
                 processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
@@ -538,9 +469,9 @@ public class BondareaService {
 
         for (Loan pendingLoan : pendingLoans) {
             try {
-                List<BondareaLoanDto> loansDto = this.getLoansFinalizedMock(BondareaLoanStatusCodes.FINALIZED.getCode(), pendingLoan.getIdBondareaLoan(), "");
+                List<BondareaLoanDto> loansDto = this.getLoansFinalizedMock();
 
-                if (loansDto.size() > 0) {
+                if (loansDto.isEmpty()) {
                     // if there is a loan will be the one we filtered with the same id and status finalized
                     pendingLoan.setStatus(LoanStatusCodes.FINALIZED.getCode());
                     log.debug("Loan with id bondarea : " + pendingLoan.getIdBondareaLoan() + "is finalized");
@@ -565,7 +496,7 @@ public class BondareaService {
      * @throws InvalidExpiredConfigurationException
      * @throws InvalidProcessException
      */
-    public void checkCreditsForDefault() throws InvalidExpiredConfigurationException, Exception {
+    public void checkCreditsForDefault() throws InvalidProcessException, InvalidExpiredConfigurationException, BondareaSyncroException {
 
         log.info("Checking active credits for defaults");
         if (processControlService.isProcessRunning(ProcessNamesCodes.BONDAREA) && !processControlService.isProcessRunning(ProcessNamesCodes.CHECK_DEFAULTERS)) {
@@ -601,7 +532,7 @@ public class BondareaService {
                     processControlService.setProcessStartTimeManually(ProcessNamesCodes.CHECK_DEFAULTERS.getCode(), lastTimeProcessRan);
                     throw new InvalidExpiredConfigurationException("There is no configuration for getting the maximum expired amount. Impossible to check the credential credit");
                 }
-            } catch (Exception ex) {
+            } catch (BondareaSyncroException | InvalidProcessException ex) {
 
                 //exception unknown
                 //set the process start time as the one before, to it would check again from that time
@@ -652,26 +583,27 @@ public class BondareaService {
             if (!processedGroupLoans.contains(credit.getIdGroup())) {
                 // get the group active loans to check their expired money
                 List<Loan> oneGroup = loanRepository.findAllByIdGroup(credit.getIdGroup());
-                BigDecimal amountExpiredOfGroup = sumExpiredAmount(oneGroup);
-
-                BigDecimal maxAmount = new BigDecimal(parameterConfiguration.getValue());
-                if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
-                    //loanset beneficiaries with this credit in default
-                    for (Loan loan : oneGroup) {
-                        addCreditInDefaultForHolder(loan, updateTime);
-                    }
-                } else {
-                    //credit group is ok.
-                    // if this credit has been in default, is needed to delete this one.
-                    for (Loan loan : oneGroup) {
-                        checkToDeleteCreditInDefault(loan, updateTime);
-                    }
-                }
+                processLoans(sumExpiredAmount(oneGroup), new BigDecimal(parameterConfiguration.getValue()), oneGroup, updateTime);
 
                 // given the group, delete this group from the actual list so it wont be repeated.
                 if (!processedGroupLoans.contains(credit.getIdGroup())) {
                     processedGroupLoans.add(credit.getIdGroup());
                 }
+            }
+        }
+    }
+
+    private void processLoans(BigDecimal amountExpiredOfGroup, BigDecimal maxAmount, List<Loan> oneGroup, LocalDateTime updateTime){
+        if (amountExpiredOfGroup.compareTo(maxAmount) >= 0) {
+            //loanset beneficiaries with this credit in default
+            for (Loan loan : oneGroup) {
+                addCreditInDefaultForHolder(loan, updateTime);
+            }
+        } else {
+            //credit group is ok.
+            // if this credit has been in default, is needed to delete this one.
+            for (Loan loan : oneGroup) {
+                checkToDeleteCreditInDefault(loan, updateTime);
             }
         }
     }
@@ -794,11 +726,10 @@ public class BondareaService {
      */
 
     public LocalDate calculateExpirationDate(BondareaLoanDto loanDto) throws BondareaSyncroException {
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
         LocalDate d1 = DateUtil.getLocalDateNow();
         LocalDate d2 = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
         long daysPassed = Period.between(d2, d1).getDays();
-        LocalDate expirationDate = null;
         try {
             double dayPeriodicity = this.getTcDays(loanDto.getFeeDuration());
             double diff;
@@ -807,12 +738,10 @@ public class BondareaService {
             } else {
                 diff = dayPeriodicity - daysPassed;
             }
-            expirationDate = d1.plusDays((long) diff);
+            return d1.plusDays((long) diff);
         } catch (Exception e) {
             log.error("Error on calculateFeeNumber {}", e.getMessage(), e);
             throw new BondareaSyncroException(e.getMessage());
-        } finally {
-            return expirationDate;
         }
     }
 
@@ -821,7 +750,7 @@ public class BondareaService {
         LocalDate today = DateUtil.getLocalDateNow();
 
         LocalDate firstFeeDate = null;
-        DateTimeFormatter formatter = DateTimeFormatter.ofPattern("dd/MM/yyyy");
+        DateTimeFormatter formatter = DateTimeFormatter.ofPattern(dateFormat);
         try {
 
             firstFeeDate = LocalDate.parse(loanDto.getDateFirstInstalment(), formatter);
@@ -876,6 +805,33 @@ public class BondareaService {
         }
     }
 
+    private boolean checkBondareaAndLoan(List<BondareaLoanDto> bondareaLoans, LocalDateTime startTime, LocalDate todayPlusOne) throws InvalidProcessException, BondareaSyncroException {
+        List<BondareaLoanDto> loansDto;
+        try {
+            if (bondareaLoans == null){
+                loansDto = this.getLoans(BondareaLoanStatusCodes.ACTIVE.getCode(), "", todayPlusOne.toString());
+                log.info("BONDAREA - GET LOANS -- " + (loansDto !=null ? loansDto.size():0) +" recieved");
+            }else{
+                loansDto = bondareaLoans;
+            }
+
+            this.createAndUpdateLoans(loansDto, startTime);
+            this.handlePendingLoans(startTime);
+
+            // Finish Process
+            this.checkCreditsForDefault();
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.OK);
+            return true;
+        }catch (BondareaSyncroException ex) {
+            log.error("Could not synchronized data from Bondarea ! ", ex);
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
+            return false;
+        } catch (InvalidExpiredConfigurationException ex) {
+            log.error("Error checking defaults loans ",ex);
+            processControlService.setStatusToProcess(ProcessNamesCodes.BONDAREA, ProcessControlStatusCodes.FAIL);
+            return false;
+        }
+    }
 }
 
 

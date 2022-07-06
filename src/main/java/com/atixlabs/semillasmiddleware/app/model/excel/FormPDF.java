@@ -3,11 +3,8 @@ package com.atixlabs.semillasmiddleware.app.model.excel;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.KoboCategories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.SubCategories;
 import com.poiji.annotation.ExcelCellName;
-import com.poiji.annotation.ExcelRow;
 import lombok.Getter;
 import lombok.Setter;
-
-import java.util.List;
 
 @Getter
 @Setter
@@ -18,7 +15,7 @@ public class FormPDF {
     private int index;
 
     // 0 - Datos de la Encuesta
-    private String Cat_datosEncuesta = KoboCategories.encuesta.getName();
+    private String Cat_datosEncuesta = KoboCategories.ENCUESTA.getName();
 
     @ExcelCellName(value = "Grupo Solidario", mandatory = false)
     private String grupoSolidario;
@@ -31,7 +28,7 @@ public class FormPDF {
     // FIN DATOS DE LA ENCUESTA
 
     //1- Datos del beneficiario
-    private String Cat_datosBeneficiario = KoboCategories.beneficiario.getName();
+    private String Cat_datosBeneficiario = KoboCategories.BENEFICIARIO.getName();
 
     @ExcelCellName(value = "Nombre_Beneficiario", mandatory = false)
     private String nombreBeneficiario;
@@ -71,7 +68,7 @@ public class FormPDF {
 
     // 1.1 Domicilio
 
-    private String SubCat_Domicilio = SubCategories.beneficiario.getSubCategories(0);
+    private String SubCat_Domicilio = SubCategories.BENEFICIARIO.getSubCategories(0);
 
     @ExcelCellName(value = "Dom1_Calle_Beneficiario", mandatory = false)
     private String viviendaDireccionCalle;
@@ -129,7 +126,7 @@ public class FormPDF {
     private String facebookBeneficiario;
 
     // 1.2 Datos Referente
-    private String SubCat_DatosReferente = SubCategories.beneficiario.getSubCategories(2);
+    private String SubCat_DatosReferente = SubCategories.BENEFICIARIO.getSubCategories(2);
 
     @ExcelCellName(value = "Apellido_Referente", mandatory = false)
     private String apellidoReferente;
@@ -147,7 +144,7 @@ public class FormPDF {
     private String telefonoReferente;
 
     //1.3 Nivel de Instruccion
-    private String SubCat_NivelInstruccion = SubCategories.beneficiario.getSubCategories(3);
+    private String SubCat_NivelInstruccion = SubCategories.BENEFICIARIO.getSubCategories(3);
 
     @ExcelCellName(value = "Primaria_Beneficiario", mandatory = false)
     private String primariaBeneficiario;
@@ -185,11 +182,11 @@ public class FormPDF {
 
     // 2- Grupo Familiar
 
-    private String Cat_GrupoFamiliar = KoboCategories.grupoFamiliar.getName();
+    private String Cat_GrupoFamiliar = KoboCategories.GRUPOFAMILIAR.getName();
 
     //2.1 Datos Conyuge
 
-    private String SubCat_DatosConyuge = SubCategories.grupoFamiliar.getSubCategories(0);
+    private String SubCat_DatosConyuge = SubCategories.GRUPOFAMILIAR.getSubCategories(0);
 
     @ExcelCellName(value = "Apellido_Conyuge", mandatory = false)
     private String apellidoConyuge;
@@ -236,10 +233,10 @@ public class FormPDF {
     // FIN GRUPO FAMILIAR
 
     // 3 - Ingresos
-    private String Cat_Ingresos = KoboCategories.ingresos.getName();
+    private String Cat_Ingresos = KoboCategories.INGRESOS.getName();
 
     // 3.1 Del Solicitante
-    private String SubCat_Solicitante = SubCategories.ingresos.getSubCategories(0);
+    private String SubCat_Solicitante = SubCategories.INGRESOS.getSubCategories(0);
 
     @ExcelCellName(value = "Ingreso_Solicitante_Salario_Origen", mandatory = false)
     private String ingresoSolicitanteSalarioOrigen;
@@ -287,7 +284,7 @@ public class FormPDF {
     private String FamilyMemberIncome;
 
     // 3.3 Total de Ingresos de la Familia
-    private String SubCat_TotalFamilia = SubCategories.ingresos.getSubCategories(1);
+    private String SubCat_TotalFamilia = SubCategories.INGRESOS.getSubCategories(1);
 
     @ExcelCellName(value = "ingresosFamiliares", mandatory = false)
     private Float ingresosFamiliares;
@@ -296,7 +293,7 @@ public class FormPDF {
     private Float ingresoFamiliarTotal;
 
     // 3.4 Total de Ingresos Solicitante y la Familia
-    private String SubCat_TotalSoliFamilia = SubCategories.ingresos.getSubCategories(2);
+    private String SubCat_TotalSoliFamilia = SubCategories.INGRESOS.getSubCategories(2);
 
     @ExcelCellName(value = "ingresosTotales", mandatory = false)
     private Float ingresosTotales;
@@ -307,7 +304,7 @@ public class FormPDF {
     // FIN INGRESOS
 
     // 4 - Vivienda
-    private String Cat_Vivienda = KoboCategories.vivienda.getName();
+    private String Cat_Vivienda = KoboCategories.VIVIENDA.getName();
 
     @ExcelCellName(value = "Vivienda_Cambios", mandatory = false)
     private String huboCambiosVivienda;
@@ -364,7 +361,7 @@ public class FormPDF {
     private String viviendaTipoBarrioOtro;
 
     //4.1 Servicios Basicos
-    private String SubCat_ServiciosBasicos = SubCategories.vivienda.getSubCategories(0);
+    private String SubCat_ServiciosBasicos = SubCategories.VIVIENDA.getSubCategories(0);
 
     @ExcelCellName(value = "Vivienda_Gas_Red de gas", mandatory = false)
     private Boolean viviendaRedDeGas;
@@ -384,7 +381,7 @@ public class FormPDF {
     // FIN VIVIENDA
 
     // 5 - Datos del Emprendimiento
-    private String Cat_DatosEmprendimiento = KoboCategories.datosEmprendimiento.getName();
+    private String Cat_DatosEmprendimiento = KoboCategories.DATOSEMPRENDIMIENTO.getName();
 
     @ExcelCellName(value = "Cambio_Actividad", mandatory = false)
     private String huboCambiosActividad;
@@ -435,7 +432,7 @@ public class FormPDF {
     private String actividadComentario;
 
     //5.1 Direccion Emprendimiento
-    private String SubCat_DireccionEmprendimiento = SubCategories.datosEmprendimiento.getSubCategories(0);
+    private String SubCat_DireccionEmprendimiento = SubCategories.DATOSEMPRENDIMIENTO.getSubCategories(0);
 
     @ExcelCellName(value = "Actividad_Dir_Calle", mandatory = false)
     private String actividadDirCalle;
@@ -461,10 +458,10 @@ public class FormPDF {
     // FIN DATOS EMPRENDIMIENTO
 
     // 6 - Ingresos y Egresos del Emprendimiento o Actividad Actual
-    private String Cat_Ingresos_Egresos = KoboCategories.ingresos_egresos.getName();
+    private String Cat_Ingresos_Egresos = KoboCategories.INGRESOS_EGRESOS.getName();
 
     //6.1 Situacion Patrimonial
-    private String SubCat_SituacionPatrimonial = SubCategories.ingresos_egresos.getSubCategories(0);
+    private String SubCat_SituacionPatrimonial = SubCategories.INGRESOS_EGRESOS.getSubCategories(0);
 
     @ExcelCellName(value = "SP_Efectivo", mandatory = false)
     private Float spEfectivo;
@@ -488,7 +485,7 @@ public class FormPDF {
     private Float patrimonioTotal;
 
     //6.2 Ingresos
-    private String SubCat_Ingresos = SubCategories.ingresos_egresos.getSubCategories(1);
+    private String SubCat_Ingresos = SubCategories.INGRESOS_EGRESOS.getSubCategories(1);
 
     @ExcelCellName(value = "Como_Completar_Ventas", mandatory = false)
     private String comoCompletarVentas ;
@@ -551,7 +548,7 @@ public class FormPDF {
     private Float calculation_total;
 
     //6.3 Egresos
-    private String SubCat_Egresos = SubCategories.ingresos_egresos.getSubCategories(2);
+    private String SubCat_Egresos = SubCategories.INGRESOS_EGRESOS.getSubCategories(2);
 
     @ExcelCellName(value = "Egreso_Actividad_Alquiler", mandatory = false)
     private Float egressoActividadAlquiler;
@@ -589,7 +586,7 @@ public class FormPDF {
     //6.3.1 Creditos del Emprendimiento
     private String CreditosEmprendimiento;
 
-    private String SubCat_ResumenEgresos = SubCategories.ingresos_egresos.getSubCategories(4);
+    private String SubCat_ResumenEgresos = SubCategories.INGRESOS_EGRESOS.getSubCategories(4);
 
     @ExcelCellName(value = "Total_creditos_emprendimiento", mandatory = false)
     private Float totalCreditosEmprendimiento;
@@ -604,7 +601,7 @@ public class FormPDF {
     private Float egresoActividadEgresoTotal;
 
     //6.4 Relacion Ingresos/Egresos
-    private String SubCat_Rel_Ingreso_Egreso = SubCategories.ingresos_egresos.getSubCategories(3);
+    private String SubCat_Rel_Ingreso_Egreso = SubCategories.INGRESOS_EGRESOS.getSubCategories(3);
 
     @ExcelCellName(value = "IngresoEgresoQuincena", mandatory = false)
     private Float ingresoEgresoQuincena;
@@ -621,10 +618,10 @@ public class FormPDF {
     //FIN INGRESOS Y EGRESOS DE LA ACTIVIDAD ACTUAL.
 
     //7 - Finanzas Familiares
-    private String Cat_FinanzasFamiliares = KoboCategories.finanzasFamiliares.getName();
+    private String Cat_FinanzasFamiliares = KoboCategories.FINANZASFAMILIARES.getName();
 
     //7.1 Ingresos Mensuales
-    private String SubCat_IngresoMensual = SubCategories.finanzasFamiliares.getSubCategories(0);
+    private String SubCat_IngresoMensual = SubCategories.FINANZASFAMILIARES.getSubCategories(0);
 
     @ExcelCellName(value = "Ingreso_Mensual_Emprendimiento", mandatory = false)
     private Float ingresoMensualEmprendimiento;
@@ -642,7 +639,7 @@ public class FormPDF {
     private Float ingresoMensualTotal;
 
     //7.2 Egresos Mensuales
-    private String SubCat_EgresoMensual = SubCategories.finanzasFamiliares.getSubCategories(1);
+    private String SubCat_EgresoMensual = SubCategories.FINANZASFAMILIARES.getSubCategories(1);
 
     @ExcelCellName(value = "Egreso_Familiar_Alimentacion", mandatory = false)
     private Float egresoFamiliarAlimentacion;
@@ -707,7 +704,7 @@ public class FormPDF {
     // 7.4 Creditos Familiares
     private String CreditosFamiliares;
 
-    private String SubCat_CreditosFamiliares = SubCategories.finanzasFamiliares.getSubCategories(4);
+    private String SubCat_CreditosFamiliares = SubCategories.FINANZASFAMILIARES.getSubCategories(4);
 
     @ExcelCellName(value = "calculation_egresos_creditos", mandatory = false)
     private Float calculationEgresosCreditos;
@@ -721,7 +718,7 @@ public class FormPDF {
     @ExcelCellName(value = "Egreso_Familiar_Credito_Total", mandatory = false)
     private Float egresoFamiliarCreditoTotal;
 
-    private String SubCat_Egreso = SubCategories.finanzasFamiliares.getSubCategories(5);
+    private String SubCat_Egreso = SubCategories.FINANZASFAMILIARES.getSubCategories(5);
 
     @ExcelCellName(value = "calculationTotalEgresosMensual", mandatory = false)
     private Float calculationTotalEgresosMensual;
@@ -730,7 +727,7 @@ public class FormPDF {
     private Float egresoFamiliarTotal;
 
     //7.4 Excedente Familiar
-    private String SubCat_ExcedenteFamiliar = SubCategories.finanzasFamiliares.getSubCategories(3);
+    private String SubCat_ExcedenteFamiliar = SubCategories.FINANZASFAMILIARES.getSubCategories(3);
 
     @ExcelCellName(value = "calculation_001_quincena", mandatory = false)
     private Float calculation_001_quincena;

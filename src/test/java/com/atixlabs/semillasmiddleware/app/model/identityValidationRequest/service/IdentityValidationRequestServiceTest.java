@@ -1,23 +1,15 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.controller.IdentityValidationRequestController;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
 import com.atixlabs.semillasmiddleware.app.service.DidiServerService;
-import com.atixlabs.semillasmiddleware.app.service.MailService;
 import org.junit.Assert;
-import org.junit.Before;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
-import org.mockito.junit.MockitoJUnitRunner;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 

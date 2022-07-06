@@ -1,27 +1,21 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
-import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefitSancor;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialBenefitsRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
+import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -41,8 +35,6 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
 
     public CredentialBenefitService(PersonService personService, CredentialStateService credentialStateService, CredentialBenefitsRepository credentialBenefitsRepository, ParameterConfigurationRepository parameterConfigurationRepository, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository){
        super(personService, credentialStateService, didiService, revocationReasonRepository, credentialRepository);
-        //this.personService = personService;
-        //this.credentialStateService = credentialStateService;
         this.credentialBenefitsRepository = credentialBenefitsRepository;
         this.parameterConfigurationRepository = parameterConfigurationRepository;
     }
@@ -73,7 +65,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
                 throw new CredentialException(message);
             }
         } else { //Holder not exists
-            String message = String.format("Can't create Benefit Credential, Holder dni %d not exists", loan.getDateFirstInstalment());
+            String message = String.format("Can't create Benefit Credential, Holder dni %d not exists", loan.getDniPerson());
             this.getLog().error(message);
             throw new CredentialException(message);
         }
@@ -109,14 +101,15 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
 
             CredentialBenefits credentialBenefitsBeneficiary = opCredentialBenefitsBeneficiary.get();
 
-            if (credentialBenefitsBeneficiary.getCredentialState().equals(opStateRevoke.get())) {
+            if (credentialBenefitsBeneficiary.getCredentialState().equals(opStateRevoke.orElse(new CredentialState()))) {
                 CredentialBenefits newCredentialBenefitsBeneficiary = this.buildNewFamiliyBenefitsCredential(holder, beneficiary);
                 newCredentialBenefitsBeneficiary.setIdHistorical(credentialBenefitsBeneficiary.getIdHistorical());
                 this.saveCredentialBenefit(newCredentialBenefitsBeneficiary);
 
             } else { //credential is active or pending didi
 
-                this.getLog().info(String.format("Credential Benefit for beneficiary %d and holder %d of loan %s is in state %s, credential not created", beneficiary.getDocumentNumber(), holder.getDocumentNumber(), loan.getIdBondareaLoan(), credentialBenefitsBeneficiary.getCredentialState().getStateName()));
+                this.getLog().info("Credential Benefit for beneficiary {} and holder {} of loan {} is in state {}, credential not created"
+                        , beneficiary.getDocumentNumber(), holder.getDocumentNumber(), loan.getIdBondareaLoan(), credentialBenefitsBeneficiary.getCredentialState().getStateName());
 
             }
         }
@@ -166,7 +159,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
 
             List<Person> family = opFamily.get();
 
-            log.info(String.format("Found %d people as family for holder %d", family.size(), holder.getDocumentNumber()));
+            log.info("Found {} people as family for holder {}", family.size(), holder.getDocumentNumber());
 
             for (Person beneficiary : family) {
 
@@ -201,8 +194,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
 
 
     public Optional<CredentialBenefits> getCredentialBenefits(Long holderDni, Long beneficiaryDni, PersonTypesCodes personTypesCodes) {
-        Optional<CredentialBenefits> opCredentialBenefitsHolder = credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holderDni, beneficiaryDni, personTypesCodes.getCode());
-        return opCredentialBenefitsHolder;
+        return credentialBenefitsRepository.findTopByCreditHolderDniAndBeneficiaryDniAndBeneficiaryTypeOrderByIdDesc(holderDni, beneficiaryDni, personTypesCodes.getCode());
     }
 
     /**
@@ -246,12 +238,12 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
                 log.info("Loan {} is not the only of holder {}, not evaluate credentials states", loanFinalized.getIdBondareaLoan(), loanFinalized.getDniPerson());
             }
         }else{
-                if(otherLoansActiveForHolder!=null || !otherLoansActiveForHolder.isEmpty()) {
+                if(otherLoansActiveForHolder!=null && !otherLoansActiveForHolder.isEmpty()) {
                     return otherLoansActiveForHolder;
                 }
 
         }
-        return new ArrayList<Loan>();
+        return new ArrayList<>();
 
     }
 
@@ -339,7 +331,7 @@ public class CredentialBenefitService extends CredentialBenefitCommonService<Cre
     public List<CredentialBenefits> getCredentialBenefitsActiveForDni(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialBenefitsRepository.findByBeneficiaryDniAndCredentialState(dni, activeDidiState.get());
+        return credentialBenefitsRepository.findByBeneficiaryDniAndCredentialState(dni, activeDidiState.orElse(new CredentialState()));
     }
 
     public CredentialBenefits buildNewOnPendidgDidi(CredentialBenefits credentialBenefits, DidiAppUser newDidiAppUser) throws CredentialException {

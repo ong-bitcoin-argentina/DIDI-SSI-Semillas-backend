@@ -1,9 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
-import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialIdentityRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

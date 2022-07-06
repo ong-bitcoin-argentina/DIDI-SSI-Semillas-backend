@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service;
 
 import com.atixlabs.semillasmiddleware.app.model.excel.FormPDF;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.EntrepreneurshipCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.PersonCategory;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PDFQuestions;
@@ -45,28 +44,30 @@ public class PdfParserService {
         return pdfsGenerated;
     }
 
-    private String generateHtmlFromStack(List<String> structure, Map<String, Object> data){
-        String htmlStack = "";
+    private static String generateHtmlFromStack(List<String> structure, Map<String, Object> data){
+        StringBuilder htmlStack = new StringBuilder();
         fullName = data.get("nombreBeneficiario").toString().concat("_").concat(data.get("apellidoBeneficiario").toString());
 
         for (String slot: structure) {
             if (slot.startsWith("Cat_")){
                 log.info("Create html from Category: "+ slot);
-                if (data.get(StringUtils.unCapitalize(slot))!=null) htmlStack += PDFUtil.headerTemplate.replace(PDFUtil.CATEGORY_NAME_PARAM, data.get(StringUtils.unCapitalize(slot)).toString());
+                if (data.get(StringUtils.unCapitalize(slot))!=null)
+                    htmlStack.append(PDFUtil.HEADERTEMPLATE.replace(PDFUtil.CATEGORY_NAME_PARAM, data.get(StringUtils.unCapitalize(slot)).toString()));
             }else if (slot.startsWith("SubCat_")){
                 log.info("Create html from Sub Category: "+ slot);
-                if (data.get(StringUtils.unCapitalize(slot))!=null) htmlStack += PDFUtil.subCategoryTemplate.replace(PDFUtil.SUBCATEGORY_PARAM, data.get(StringUtils.unCapitalize(slot)).toString());
+                if (data.get(StringUtils.unCapitalize(slot))!=null)
+                    htmlStack.append(PDFUtil.SUBCATEGORYTEMPLATE.replace(PDFUtil.SUBCATEGORY_PARAM, data.get(StringUtils.unCapitalize(slot)).toString()));
             }else{
                 if (data.get(StringUtils.unCapitalize(slot)) != null){
-                    htmlStack += generateHtmlContent(slot, parseAnswer(data.get(StringUtils.unCapitalize(slot)).toString()));
+                    htmlStack.append(generateHtmlContent(slot, parseAnswer(data.get(StringUtils.unCapitalize(slot)).toString())));
                 }
             }
         }
 
-        return htmlStack;
+        return htmlStack.toString();
     }
 
-    private String generateHtmlContent(String slot, String answer){
+    private static String generateHtmlContent(String slot, String answer){
         switch (slot){
             case "Hijos" :
             case "FamilyMembers":
@@ -76,11 +77,11 @@ public class PdfParserService {
                 return answer;
 
             default:
-                return PDFUtil.rowTemplate.replace(PDFUtil.QUESTION_PARAM, PDFQuestions.valueOf(slot).getQuestion()).replace(PDFUtil.ANSWER_PARAM, answer);
+                return PDFUtil.ROWTEMPLATE.replace(PDFUtil.QUESTION_PARAM, PDFQuestions.valueOf(slot.toUpperCase()).getQuestion()).replace(PDFUtil.ANSWER_PARAM, answer);
         }
     }
 
-    public String parseAnswer(String answer){
+    private static String parseAnswer(String answer){
         switch (answer){
             case "true":
                 return "Si";
@@ -95,7 +96,7 @@ public class PdfParserService {
 
     public String generatePdfFromSurvey(SurveyForm surveyForm) {
         log.info("Creating pdf from survey form");
-        Stack<Category> categoriesStack = new Stack<>();
+        Deque<Category> categoriesStack = new ArrayDeque<>();
         // top down order
         fillStack(categoriesStack, Categories.getCodeList(), surveyForm);
 
@@ -113,21 +114,21 @@ public class PdfParserService {
         return PDFUtil.createTemporaryPDF(PDFUtil.PDF_SUFFIX + beneficiaryCategory.getFullName(), template);
     }
 
-    private String generateHtmlFromCategories(Stack<Category> categoriesStack){
-        String htmlStack = "";
-        while (!categoriesStack.empty()){
+    private String generateHtmlFromCategories(Deque<Category> categoriesStack){
+        StringBuilder htmlStack = new StringBuilder();
+        while (!categoriesStack.isEmpty()){
             Category category = categoriesStack.pop();
             if (category == null) continue;
             log.info("Create html from category: "+category.getCategoryName());
-            String header = PDFUtil.headerTemplate.replace(PDFUtil.CATEGORY_NAME_PARAM, category.getCategoryUniqueName());
-            String rows = category.getHtmlFromTemplate(PDFUtil.rowTemplate, PDFUtil.subCategoryTemplate, PDFUtil.SUBCATEGORY_PARAM, PDFUtil.QUESTION_PARAM, PDFUtil.ANSWER_PARAM);
-            htmlStack += header+rows;
+            String header = PDFUtil.HEADERTEMPLATE.replace(PDFUtil.CATEGORY_NAME_PARAM, category.getCategoryUniqueName());
+            String rows = category.getHtmlFromTemplate(PDFUtil.ROWTEMPLATE, PDFUtil.SUBCATEGORYTEMPLATE, PDFUtil.SUBCATEGORY_PARAM, PDFUtil.QUESTION_PARAM, PDFUtil.ANSWER_PARAM);
+            htmlStack.append(header+rows);
         }
-        return htmlStack;
+        return htmlStack.toString();
     }
 
 
-    private void fillStack(Stack<Category> categoriesStack, List<Categories> categories, SurveyForm surveyForm){
+    private void fillStack(Deque<Category> categoriesStack, List<Categories> categories, SurveyForm surveyForm){
         Collections.reverse(categories);
         categories.forEach( cat -> {
             for(int i = cat.getAmount(); i >= 1; i--) {

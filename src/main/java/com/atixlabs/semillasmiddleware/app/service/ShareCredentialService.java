@@ -15,7 +15,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import java.io.IOException;
 import java.util.*;
 
 
@@ -67,7 +66,7 @@ public class ShareCredentialService {
     private PersonService personService;
     private CredentialService credentialService;
 
-    public void shareCredential(ShareCredentialRequest credentialRequest) throws IOException{
+    public void shareCredential(ShareCredentialRequest credentialRequest){
         Email email = Email.builder()
             .subject(EMAIL_SUBJECT)
             .to(getTo(credentialRequest))
@@ -83,7 +82,7 @@ public class ShareCredentialService {
     }
 
 
-    private String getTemplate(ShareCredentialRequest credentialRequest) throws IOException{
+    private String getTemplate(ShareCredentialRequest credentialRequest){
         return EmailTemplatesUtil.replaceParams(EmailTemplatesUtil.getTemplate(TEMPLATE_NAME), getTemplateParameters(credentialRequest));
     }
 
@@ -125,8 +124,8 @@ public class ShareCredentialService {
         parameters.put(BENEFICIARY_BIRTHDATE_PARAM, person.getBirthDate().toString());
         parameters.put(BENEFICIARY_PHONE_PARAM, credentialRequest.getPhone());
         parameters.put(BENEFICIARY_EMAIL_PARAM, credentialRequest.getEmail());
-        parameters.put(OWNER_NAME_PARAM, credentials.stream().findFirst().get().getCreditHolderFirstName());
-        parameters.put(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().get().getCreditHolderLastName());
+        parameters.put(OWNER_NAME_PARAM, credentials.stream().findFirst().orElse(new Credential()).getCreditHolderFirstName());
+        parameters.put(OWNER_LASTNAME_PARAM, credentials.stream().findFirst().orElse(new Credential()).getCreditHolderLastName());
         parameters.put( BENEFICIARY_CHARACTER_PARAM, character);
         parameters.put(HIMSELF_OR_FAMILIAR_PARAM, himselfOrFamiliar);
         parameters.put(SHARED_CREDENTIAL_LINK_PARAM, credentialRequest.getViewerJWT());

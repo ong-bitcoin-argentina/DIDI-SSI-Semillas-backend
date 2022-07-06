@@ -6,20 +6,10 @@ import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentCa
 import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentProviderException;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.model.ProviderCategory;
-import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderCategoryRepository;
 import com.atixlabs.semillasmiddleware.app.model.provider.repository.ProviderRepository;
-import org.junit.Before;
 import org.junit.jupiter.api.Test;
-import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.MockitoAnnotations;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Optional;
 

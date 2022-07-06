@@ -3,7 +3,6 @@ package com.atixlabs.semillasmiddleware.app.bondarea.controller;
 import com.atixlabs.semillasmiddleware.app.bondarea.dto.BondareaLoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.LoanDto;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import lombok.extern.slf4j.Slf4j;
@@ -18,7 +17,7 @@ import java.util.stream.Collectors;
 @RestController
 @Slf4j
 @RequestMapping(BondareaController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = "${bondarea.base_url}", methods= {RequestMethod.GET,RequestMethod.POST})
 public class BondareaController {
 
     public static final String URL_MAPPING_CREDENTIAL = "/bondarea";
@@ -48,7 +47,7 @@ public class BondareaController {
         if (result)
             return new ResponseEntity<>(HttpStatus.OK);
         else
-            return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Constants.BONDAREA_SYNCRO_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -64,7 +63,7 @@ public class BondareaController {
         List<BondareaLoanDto> loans;
         boolean result = true;
 
-        loans = loansJson.stream().map(loanDto -> new BondareaLoanDto(loanDto)).collect(Collectors.toList());
+        loans = loansJson.stream().map(BondareaLoanDto::new).collect(Collectors.toList());
         try {
             result = bondareaService.synchronizeMockLoans(loans);
         } catch (InvalidProcessException ex) {
@@ -75,7 +74,7 @@ public class BondareaController {
         if (result)
             return new ResponseEntity<>(HttpStatus.OK);
         else
-            return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Constants.BONDAREA_SYNCRO_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
     }
 
 
@@ -91,13 +90,13 @@ public class BondareaController {
         }
 
         if (!result)
-            return new ResponseEntity<>("Error synchronizing and processing data from Bondarea !", HttpStatus.INTERNAL_SERVER_ERROR);
+            return new ResponseEntity<>(Constants.BONDAREA_SYNCRO_ERROR, HttpStatus.INTERNAL_SERVER_ERROR);
 
         try {
             credentialService.generateCreditAndBenefitsCredentialsByLoans();
         } catch (InvalidProcessException ex) {
-            log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
-            return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(Constants.ERROR_GENERATE_CREDENTIALS + ex.getMessage());
+            return new ResponseEntity<>(Constants.ERROR_GENERATE_CREDENTIALS, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -106,16 +105,20 @@ public class BondareaController {
     @GetMapping("/force-generate-create-credit-benefit")
     @ResponseStatus(HttpStatus.OK)
     public ResponseEntity<String> forceGenerateCreditBenefit() {
-        boolean result = true;
-
         try {
             credentialService.generateCreditAndBenefitsCredentialsByLoans();
         } catch (InvalidProcessException ex) {
-            log.error("Error getting or setting process Generate-Credential !" + ex.getMessage());
-            return new ResponseEntity<>("Error getting or setting process Generate-Credential !", HttpStatus.INTERNAL_SERVER_ERROR);
+            log.error(Constants.ERROR_GENERATE_CREDENTIALS + ex.getMessage());
+            return new ResponseEntity<>(Constants.ERROR_GENERATE_CREDENTIALS, HttpStatus.INTERNAL_SERVER_ERROR);
         }
 
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private static class Constants{
+        public static final String BONDAREA_SYNCRO_ERROR = "Error synchronizing and processing data from Bondarea !";
+
+        public static final String ERROR_GENERATE_CREDENTIALS = "Error getting or setting process Generate-Credential !";
     }
 
 }

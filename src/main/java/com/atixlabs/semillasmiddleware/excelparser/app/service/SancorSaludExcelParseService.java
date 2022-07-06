@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
 import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -10,10 +9,10 @@ import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
 import com.atixlabs.semillasmiddleware.excelparser.validator.RowValidator;
 import com.atixlabs.semillasmiddleware.excelparser.validatorfactory.ExcelRowValidatorFactory;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.SancorPolicyRow;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
@@ -24,7 +23,7 @@ import java.util.Optional;
 @Slf4j
 public class SancorSaludExcelParseService extends ExcelParseService {
 
-    private List<SancorPolicy> sancorPolicys = new ArrayList<SancorPolicy>();
+    private List<SancorPolicy> sancorPolicys = new ArrayList<>();
 
     private SancorPolicyService sancorPolicyService;
 
@@ -41,7 +40,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
 
     @Override
     public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext, ProcessExcelFileResult processExcelFileResult,
-             boolean createCredentials, boolean skipIdentityCredentials, boolean pdfValidation) {
+                                             boolean createCredentials, boolean skipIdentityCredentials, boolean pdfValidation) {
 
         try {
             log.info("Processing row " + currentRow.getRowNum());
@@ -75,11 +74,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
     private boolean checkIfRowIsEmpty(SancorPolicyRow row) {
-        if (row == null || row.isEmpty()) {
-            return true;
-        }
-        else
-            return false;
+        return row == null || row.isEmpty();
     }
 
     private void addErrors(ProcessExcelFileResult processExcelFileResult, List<String> errors, SancorPolicyRow sancorPolicyRow){
@@ -95,10 +90,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
     public SancorPolicyRow parseRow(Row row) throws InvalidRowException {
-        SancorPolicyRow sancorPolicyRow = new SancorPolicyRow(row);
-
-
-        return  sancorPolicyRow;
+        return  new SancorPolicyRow(row);
     }
 
 
@@ -120,7 +112,7 @@ public class SancorSaludExcelParseService extends ExcelParseService {
     }
 
     private void cleanSancorPolicies(){
-        this.sancorPolicys =  new ArrayList<SancorPolicy>();
+        this.sancorPolicys =  new ArrayList<>();
     }
 
 
@@ -168,7 +160,6 @@ public class SancorSaludExcelParseService extends ExcelParseService {
         sancorPolicy.setCertificateClientName(sancorPolicyRow.getCertificateClientName());
         sancorPolicy.setCertificateClientAddress(sancorPolicyRow.getCertificateClientAddress());
         sancorPolicy.setCertificateClientDni(this.parseDni(sancorPolicyRow.getCertificateClient()));
-      //  private Long certificateClientDni;
 
         return sancorPolicy;
 

@@ -12,10 +12,9 @@ public class DidiCredential {
 
     private boolean split;
     private boolean deleted;
-    //private LocalDateTime createdOn;
-    private String _id;
+    private String id;
 
 
     private String templateId;
-    private String __v;
+    private String v;
 }

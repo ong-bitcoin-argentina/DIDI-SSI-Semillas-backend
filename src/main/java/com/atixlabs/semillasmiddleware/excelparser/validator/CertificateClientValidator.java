@@ -12,7 +12,7 @@ public class CertificateClientValidator extends EmptyFieldValidator<SancorPolicy
 
         String fieldName = "Cliente Certificado";
 
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         errors.addAll(this.validateEmptyField(info.getCertificateNumber(), fieldName));
         errors.addAll(this.validateFormat(info.getCertificateClient(), fieldName));
 
@@ -22,7 +22,7 @@ public class CertificateClientValidator extends EmptyFieldValidator<SancorPolicy
     public List<String> validateFormat(String value, String fieldName){
         String regexNumbers = "\\d+";
         String regexDAndNumbers = "D\\d+";
-        List<String> errors = new ArrayList<String>();
+        List<String> errors = new ArrayList<>();
         if(value == null || !(value.matches(regexDAndNumbers) || value.matches(regexNumbers))){
             errors.add(String.format("El campo Cliente %s debe tener el formato 'Dnnnnn...' o ser solo números",fieldName));
         }

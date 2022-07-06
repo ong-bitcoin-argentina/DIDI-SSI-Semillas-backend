@@ -25,7 +25,7 @@ public enum ActionLevelEnum {
 
     public static Optional<ActionLevelEnum> valueOf(int value) {
         return Arrays.stream(values())
-                .filter(ActionLevelEnum -> ActionLevelEnum.id == value)
+                .filter(actionLevelEnum -> actionLevelEnum.id == value)
                 .findFirst();
     }
 

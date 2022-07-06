@@ -1,7 +1,7 @@
 package com.atixlabs.semillasmiddleware.security.service;
 
-import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.atixlabs.semillasmiddleware.security.repository.RoleRepository;
+import com.atixlabs.semillasmiddleware.security.model.Role;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

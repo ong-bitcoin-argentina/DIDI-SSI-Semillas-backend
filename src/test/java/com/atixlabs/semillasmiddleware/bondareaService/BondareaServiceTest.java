@@ -11,22 +11,23 @@ import com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService;
 import com.atixlabs.semillasmiddleware.app.bondarea.service.LoanService;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
-import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
 import com.atixlabs.semillasmiddleware.app.processControl.model.ProcessControl;
-import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
-import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.app.repository.ParameterConfigurationRepository;
 import com.atixlabs.semillasmiddleware.app.repository.PersonRepository;
+import com.atixlabs.semillasmiddleware.app.processControl.exception.InvalidProcessException;
+import com.atixlabs.semillasmiddleware.app.processControl.model.constant.ProcessNamesCodes;
+import com.atixlabs.semillasmiddleware.app.processControl.service.ProcessControlService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.*;
 import org.junit.jupiter.api.Assertions;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.CsvSource;
 import org.mockito.*;
 import org.springframework.boot.test.context.SpringBootTest;
 
-import javax.validation.constraints.AssertTrue;
 import java.math.BigDecimal;
-import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -37,7 +38,7 @@ import static org.mockito.Mockito.*;
 
 @SpringBootTest
 @Slf4j
-public class BondareaServiceTest {
+class BondareaServiceTest {
 
     @Mock
     private LoanRepository loanRepository;
@@ -63,7 +64,7 @@ public class BondareaServiceTest {
     @Mock
     private PersonRepository personRepository;
 
-    @Before
+    @BeforeEach
     public void setupMocks(){
         MockitoAnnotations.initMocks(this);
     }
@@ -253,7 +254,7 @@ public class BondareaServiceTest {
         Loan firstLoan = loansSaves.get(0);
 
         Assertions.assertEquals(firstBondareaLoansData().get(0).getIdBondareaLoan(), firstLoan.getIdBondareaLoan());
-        Assertions.assertTrue(firstLoan.getDniPerson() != null);
+        Assertions.assertNotNull(firstLoan.getDniPerson());
 
     }
 
@@ -277,9 +278,9 @@ public class BondareaServiceTest {
 
         List<Loan> loansSaves = captor.getAllValues();
 
-        Assertions.assertTrue(loansSaves.size() == firstBondareaLoansData().size());
+        Assertions.assertEquals(loansSaves.size(),firstBondareaLoansData().size());
         Assertions.assertEquals(LoanStatusCodes.ACTIVE.getCode(), loansSaves.get(3).getStatus());
-        Assertions.assertFalse(loansSaves.get(1).getTagBondareaLoan().equals(firstBondareaLoansData().get(2).getTagBondareaLoan()));
+        Assertions.assertEquals(loansSaves.get(1).getTagBondareaLoan(),firstBondareaLoansData().get(2).getTagBondareaLoan());
     }
 
     @Test
@@ -299,7 +300,7 @@ public class BondareaServiceTest {
 
         List<Loan> loansSaves = captor.getAllValues();
 
-        //Assertions.assertTrue(loansSaves.size() > firstBondareaLoansData().size());
+        Assertions.assertTrue(loansSaves.size() > firstBondareaLoansData().size());
 
         //the active loans will be all. But some are pending -> 3
       //  List<Loan> activeLoans = loansSaves.stream().filter(loan -> loan.getStatus().equals(LoanStatusCodes.ACTIVE.getCode())).collect(Collectors.toList());
@@ -311,14 +312,14 @@ public class BondareaServiceTest {
 
     }
 
-    @Test
+    /*@Test
     public void determinatePendingLoanToFinish(){
       //  when(loanRepository.findAllByStatus(LoanStatusCodes.PENDING.getCode())).thenReturn(pendientes);
         //when(bondareaService.getLoans(BondareaLoanStatusCodes.FINALIZED.getCode(), anyString(),"")).thenReturn(vuelve 1 l)
     //TODO
 
 
-    }
+    }*/
 
     /*@Test
     public void updateLoansAllExpired() {
@@ -371,45 +372,15 @@ public class BondareaServiceTest {
 
     }
 
+    @ParameterizedTest
+    @CsvSource({"7D,1_s", "3D,0.5_s", "21D,3_s", "30D,1_m"})
+    void whenQuantityDayIsTypeWeekAndQuantityX(String days, String quantityString) throws BondareaSyncroException {
 
-    @Test
-    public void whenQuantityDayIsTypeWeekAndQuantityOne_thenReturnSeven() throws BondareaSyncroException {
+        Double quantityExpected = Double.parseDouble(days);
 
-        Double quantityExpected = 7D;
+        Double quantity = this.bondareaService.getTcDays(quantityString);
 
-        Double quantity = this.bondareaService.getTcDays("1_s");
-
-        Assert.assertEquals(quantityExpected,quantity);;
-    }
-
-    @Test
-    public void whenQuantityDayIsTypeWeekAndQuantityHalf_thenReturnthree() throws BondareaSyncroException {
-
-        Double quantityExpected = 3D;
-
-        Double quantity = this.bondareaService.getTcDays("0.5_s");
-
-        Assert.assertEquals(quantityExpected,quantity);;
-    }
-
-    @Test
-    public void whenQuantityDayIsTypeWeekAndQuantity3_thenReturnTwentyone() throws BondareaSyncroException {
-
-        Double quantityExpected = 21D;
-
-        Double quantity = this.bondareaService.getTcDays("3_s");
-
-        Assert.assertEquals(quantityExpected,quantity);;
-    }
-
-    @Test
-    public void whenQuantityDayIsTypeMonthAndQuantityOne_thenReturnSeven() throws BondareaSyncroException {
-
-        Double quantityExpected = 30D;
-
-        Double quantity = this.bondareaService.getTcDays("1_m");
-
-        Assert.assertEquals(quantityExpected,quantity);;
+        Assert.assertEquals(quantityExpected,quantity);
     }
 
     @Test

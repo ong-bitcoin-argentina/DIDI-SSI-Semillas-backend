@@ -1,11 +1,10 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.InterviewDataQuestion;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.PatrimonialSituationQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -102,7 +101,5 @@ public class InterviewDataCategory implements Category {
 
     public Boolean isModification() { return true; }
 
-    public void setIsModification(AnswerDto isModification) {
-
-    }
+    public void setIsModification(AnswerDto isModification) {/* ** */}
 }

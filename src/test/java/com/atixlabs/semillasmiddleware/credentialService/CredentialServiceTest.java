@@ -4,9 +4,9 @@ import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.repository.LoanRepository;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.RevocationReason;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
@@ -17,14 +17,13 @@ import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
+import com.atixlabs.semillasmiddleware.app.model.didiHistoric.DidiHistoric;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CredentialIdentityService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialStateService;
 import com.atixlabs.semillasmiddleware.app.service.PersonService;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.Category;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.DwellingCategory;
@@ -361,8 +360,8 @@ public class CredentialServiceTest {
         return creditsGroup;
     }
 
-    private DIDHisotoric getDIDHistoricMock() {
-        DIDHisotoric didi = new DIDHisotoric();
+    private DidiHistoric getDIDHistoricMock() {
+        DidiHistoric didi = new DidiHistoric();
         didi.setId(1L);
         didi.setActive(true);
         didi.setIdDidiReceptor("1234L");
@@ -682,7 +681,7 @@ public class CredentialServiceTest {
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiCredential());
         Assertions.assertEquals(getDIDHistoricMock().getIdDidiReceptor(), creditSaved.getIdDidiReceptor());
         Assertions.assertEquals(loan.getStatus(), creditSaved.getCreditStatus());
-        Assertions.assertTrue(creditSaved.getIdHistorical() == creditSaved.getId());
+        Assertions.assertSame(creditSaved.getIdHistorical(), creditSaved.getId());
 
         //benefit
         /*

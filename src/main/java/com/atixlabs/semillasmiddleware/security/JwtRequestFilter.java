@@ -2,7 +2,6 @@ package com.atixlabs.semillasmiddleware.security;
 
 import com.atixlabs.semillasmiddleware.security.service.JwtUserDetailsService;
 import io.jsonwebtoken.ExpiredJwtException;
-import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,12 +18,11 @@ import javax.servlet.ServletException;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
-import java.util.stream.Collectors;
 
 @Component
 public class JwtRequestFilter extends OncePerRequestFilter {
 
-    private static final Logger logger = LoggerFactory.getLogger(JwtRequestFilter.class);
+    private static final Logger log = LoggerFactory.getLogger(JwtRequestFilter.class);
 
     @Autowired
     private JwtUserDetailsService jwtUserDetailsService; //TODO get user form db
@@ -34,25 +32,18 @@ public class JwtRequestFilter extends OncePerRequestFilter {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain chain) throws ServletException, IOException {
-        logger.info("URI ["+request.getRequestURI()+"]");
-        logger.info("Method ["+request.getMethod()+"]");
+        log.info("URI [{}]", request.getRequestURI());
+        log.info("Method [{}]", request.getMethod());
         try {
-            String username = null;
             String jwtToken = this.getJwtFromRequest(request);
-            try {
-                username = jwtTokenProvider.getUsernameFromToken(jwtToken);
-            } catch (IllegalArgumentException e) {
-                logger.info("Imposible obtener JWT Token", e);
-            } catch (ExpiredJwtException e) {
-                logger.info("JWT Token Expirado", e);
-            }
+            String username = getUserNameFromToken(jwtToken);
 
-            logger.info("username " + username);
+            log.info("username {}", username);
             if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-                logger.info("loadUserByUsername");
+                log.info("loadUserByUsername");
                 UserDetails userDetails = this.jwtUserDetailsService.loadUserByUsername(username);
 
-                if (jwtTokenProvider.validateToken(jwtToken, userDetails)) {
+                if (Boolean.TRUE.equals(jwtTokenProvider.validateToken(jwtToken, userDetails))) {
                     UsernamePasswordAuthenticationToken usernamePasswordAuthenticationToken = new UsernamePasswordAuthenticationToken(
                             userDetails, null, userDetails.getAuthorities());
 
@@ -64,9 +55,20 @@ public class JwtRequestFilter extends OncePerRequestFilter {
             }
 
         } catch (Exception ex) {
-            logger.error("Could not set user authentication in security context", ex);
+            log.error("Could not set user authentication in security context", ex);
         }
         chain.doFilter(request, response);
+    }
+
+    private String getUserNameFromToken(String jwtToken){
+        try {
+            return jwtTokenProvider.getUsernameFromToken(jwtToken);
+        } catch (IllegalArgumentException e) {
+            log.info("Imposible obtener JWT Token", e);
+        } catch (ExpiredJwtException e) {
+            log.info("JWT Token Expirado", e);
+        }
+        return null;
     }
 
 

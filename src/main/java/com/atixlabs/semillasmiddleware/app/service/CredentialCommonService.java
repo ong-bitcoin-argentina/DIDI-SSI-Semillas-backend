@@ -1,13 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.RevocationReason;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import org.slf4j.Logger;
 
@@ -17,6 +17,8 @@ import java.util.Optional;
 
 public abstract class  CredentialCommonService {
 
+    protected Logger log;
+
     protected CredentialStateService credentialStateService;
 
     protected DidiService didiService;
@@ -25,7 +27,7 @@ public abstract class  CredentialCommonService {
 
     protected CredentialRepository credentialRepository;
 
-    public CredentialCommonService(CredentialStateService credentialStateService, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository){
+    protected CredentialCommonService(CredentialStateService credentialStateService, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository){
         this.credentialStateService = credentialStateService;
         this.didiService = didiService;
         this.revocationReasonRepository = revocationReasonRepository;
@@ -48,10 +50,12 @@ public abstract class  CredentialCommonService {
      * @return boolean
      */
     public boolean revokeComplete(Credential credentialToRevoke, String reasonCode) throws CredentialException {
+       getLog().info("Starting complete revoking process for credential id: {} | credential type: {} holder {} beneficiary {}"
+                ,credentialToRevoke.getId(), credentialToRevoke.getCredentialDescription(),
+               credentialToRevoke.getCreditHolderDni(), credentialToRevoke.getBeneficiaryDni());
 
-        this.getLog().info("Starting complete revoking process for credential id: " + credentialToRevoke.getId() + " | credential type: " + credentialToRevoke.getCredentialDescription() + " holder " + credentialToRevoke.getCreditHolderDni() + " beneficiary " + credentialToRevoke.getBeneficiaryDni());
-        //revoke on didi if credential was emitted
-        if (credentialToRevoke.isEmitted()) {
+    //revoke on didi if credential was emitted
+        if (Boolean.TRUE.equals(credentialToRevoke.isEmitted())) {
             if (didiService.didiDeleteCertificate(credentialToRevoke.getIdDidiCredential(), reasonCode)) {
                 // if didi fail the credential need to know that is needed to be revoked (here think in the best resolution).
                 // if this revoke came from the revocation business we will need to throw an error to rollback any change done before.
@@ -75,7 +79,7 @@ public abstract class  CredentialCommonService {
      */
 
     public boolean revokeCredentialOnlyOnSemillas(Credential credentialToRevoke, String reasonCode) throws CredentialException {
-        this.getLog().info("Revoking the credential " + credentialToRevoke.getId() + " with reason " + reasonCode);
+        this.getLog().info("Revoking the credential {} with reason {}", credentialToRevoke.getId(), reasonCode);
         boolean haveRevoke = true;
 
         Optional<RevocationReason> reason = revocationReasonRepository.findByReason(reasonCode);
@@ -84,23 +88,23 @@ public abstract class  CredentialCommonService {
             Optional<Credential> opCredential = this.getCredentialById(credentialToRevoke.getId());
             if (opCredential.isEmpty()) {
                 haveRevoke = false;
-                this.getLog().error(String.format("The credential with id: %d is not in the database", credentialToRevoke.getId()));
+                this.getLog().error("The credential with id: {} is not in the database", credentialToRevoke.getId());
             } else {
 
                 Credential credential = opCredential.get();
 
                 //revoke if the credential is not revoked yet
-                if (this.isCredentialRevoked(credential)) {
-                    this.getLog().info(String.format("The credential %d has already been revoked", credential.getId()));
+                if (Boolean.TRUE.equals(this.isCredentialRevoked(credential))) {
+                    this.getLog().info("The credential {} has already been revoked", credential.getId());
                     haveRevoke = false;
                 } else {
                     //revoke
                     Optional<CredentialState> opStateRevoke = credentialStateService.getCredentialRevokeState();
-                    credentialToRevoke.setCredentialState(opStateRevoke.get());
+                    credentialToRevoke.setCredentialState(opStateRevoke.orElse(new CredentialState()));
                     credentialToRevoke.setRevocationReason(reason.get());
                     credentialToRevoke.setDateOfRevocation(DateUtil.getLocalDateTimeNow());
                     credentialRepository.save(credentialToRevoke);
-                    this.getLog().info(String.format("Credential with id %d has been revoked!", credentialToRevoke.getId())); //then append also the reason
+                    this.getLog().info("Credential with id {} has been revoked!", credentialToRevoke.getId()); //then append also the reason
                 }
 
             }
@@ -117,13 +121,13 @@ public abstract class  CredentialCommonService {
     public Boolean isCredentialRevoked(Credential credential) throws CredentialException {
         Optional<CredentialState> opStateRevoke = credentialStateService.getCredentialRevokeState();
 
-        return (credential.getCredentialState().equals(opStateRevoke.get()));
+        return (credential.getCredentialState().equals(opStateRevoke.orElse(new CredentialState())));
     }
 
     public Boolean isCredentialActive(Credential credential) throws CredentialException {
         Optional<CredentialState> opStateActive = credentialStateService.getCredentialActiveState();
 
-        return (credential.getCredentialState().equals(opStateActive.get()));
+        return (credential.getCredentialState().equals(opStateActive.orElse(new CredentialState())));
     }
 
     public Boolean isCredentialPendingDidi(Credential credential) throws CredentialException {
@@ -142,9 +146,9 @@ public abstract class  CredentialCommonService {
         Optional<CredentialState> activeState = this.credentialStateService.getCredentialActiveState();
         CredentialState pendingDidieState = this.credentialStateService.getCredentialPendingDidiState();
 
-        List<CredentialState> states = new ArrayList<CredentialState>();
+        List<CredentialState> states = new ArrayList<>();
 
-        states.add(activeState.get());
+        states.add(activeState.orElse(new CredentialState()));
         states.add(pendingDidieState);
 
         return  states;
@@ -164,8 +168,8 @@ public abstract class  CredentialCommonService {
         Optional<CredentialState> activeState = credentialStateService.getCredentialActiveState();
         CredentialState pendingDidiState = credentialStateService.getCredentialPendingDidiState();
 
-        List<CredentialState> states = new ArrayList<CredentialState>();
-        states.add(activeState.get());
+        List<CredentialState> states = new ArrayList<>();
+        states.add(activeState.orElse(new CredentialState()));
         states.add(pendingDidiState);
 
         return states;

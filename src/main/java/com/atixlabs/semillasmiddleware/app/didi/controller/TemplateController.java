@@ -1,10 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.didi.controller;
 
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
-import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
-import com.atixlabs.semillasmiddleware.app.didi.model.constant.DidiAppUserOperationResult;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.service.CertTemplateService;
+import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -16,7 +14,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(TemplateController.URL_BASE)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = {"http://localhost:8080", "${didi.server.url}"}, methods= {RequestMethod.GET,RequestMethod.POST})
 @Slf4j
 public class TemplateController {
 
@@ -48,7 +46,7 @@ public class TemplateController {
         }else{
             for(CertTemplate certTemplate : templates){
                 Boolean result = didiService.isTemplateRegistered(certTemplate);
-                jsonMessage.put(certTemplate.getTemplateDescription(),(result ? "OK":"FAIL"));
+                jsonMessage.put(certTemplate.getTemplateDescription(),(Boolean.TRUE.equals(result) ? "OK":"FAIL"));
             }
         }
 

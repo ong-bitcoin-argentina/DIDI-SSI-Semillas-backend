@@ -26,7 +26,7 @@ public class CustomUser implements UserDetails {
 
     private Collection<? extends GrantedAuthority> authorities;
 
-    public CustomUser(){};
+    public CustomUser(){}
 
     private CustomUser(Long id, String username, String password, Collection<? extends GrantedAuthority> authorities) {
         this.id = id;

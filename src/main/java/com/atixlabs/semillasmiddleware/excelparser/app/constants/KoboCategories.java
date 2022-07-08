@@ -1,14 +1,14 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
 public enum KoboCategories {
-    encuesta("DATOS DE LA ENCUESTA"),
-    beneficiario("DATOS DEL BENEFICIARIO/A"),
-    grupoFamiliar("GRUPO FAMILIAR"),
-    ingresos("INGRESOS"),
-    vivienda("VIVIENDA"),
-    datosEmprendimiento("DATOS DEL EMPRENDIMIENTO"),
-    ingresos_egresos("INGRESOS Y EGRESOS DEL EMPRENDIMIENTO O ACTIVIDAD ACTUAL"),
-    finanzasFamiliares("FINANZAS FAMILIARES");
+    ENCUESTA("DATOS DE LA ENCUESTA"),
+    BENEFICIARIO("DATOS DEL BENEFICIARIO/A"),
+    GRUPOFAMILIAR("GRUPO FAMILIAR"),
+    INGRESOS("INGRESOS"),
+    VIVIENDA("VIVIENDA"),
+    DATOSEMPRENDIMIENTO("DATOS DEL EMPRENDIMIENTO"),
+    INGRESOS_EGRESOS("INGRESOS Y EGRESOS DEL EMPRENDIMIENTO O ACTIVIDAD ACTUAL"),
+    FINANZASFAMILIARES("FINANZAS FAMILIARES");
 
     private final String name;
 

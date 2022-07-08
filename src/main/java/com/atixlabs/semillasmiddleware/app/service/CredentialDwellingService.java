@@ -1,14 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialDwellingRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialDwelling;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -40,7 +39,7 @@ public class CredentialDwellingService extends CredentialCommonService {
     public List<CredentialDwelling> getCredentialDwellingActiveForDni(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialDwellingRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.get());
+        return credentialDwellingRepository.findByCreditHolderDniAndCredentialState(dni, activeDidiState.orElse(new CredentialState()));
     }
 
     public CredentialDwelling buildNewOnPendidgDidi(CredentialDwelling credentialDwelling, DidiAppUser newDidiAppUser) throws CredentialException {

@@ -1,10 +1,7 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
-import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
 import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
@@ -12,6 +9,8 @@ import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException
 import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
+import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
@@ -19,6 +18,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
@@ -73,7 +73,7 @@ public class SurveyExcelParseService extends ExcelParseService {
     public ProcessExcelFileResult processRow(Row currentRow, boolean hasNext,
                                              ProcessExcelFileResult processExcelFileResult, boolean createCredentials,
                                              boolean skipIdentityCredentials,
-                                             boolean pdfValidation) throws FileManagerException {
+                                             boolean pdfValidation) throws FileManagerException, IOException {
 
         AnswerRow answerRow = null;
         try {
@@ -114,13 +114,13 @@ public class SurveyExcelParseService extends ExcelParseService {
     }
 
 
-    private void endOfFormHandler(ProcessExcelFileResult processExcelFileResult){
+    private void endOfFormHandler(ProcessExcelFileResult processExcelFileResult) {
         log.info("endOfFormHandler -> add form to surveyFormList");
         processExcelFileResult.addTotalProcessedForms();
         surveyFormList.add(currentForm);
     }
     private void endOfFileHandler(ProcessExcelFileResult processExcelFileResult, boolean createCredentials,
-                                  boolean skipIdentityCredentials, boolean pdfValidation) throws FileManagerException {
+                                  boolean skipIdentityCredentials, boolean pdfValidation) throws FileManagerException, IOException {
         List<String> pdfsGenerated = new ArrayList<>();
         this.endOfFormHandler(processExcelFileResult);
         log.info("endOfFileHandler -> checking errors and building credentials");
@@ -154,7 +154,7 @@ public class SurveyExcelParseService extends ExcelParseService {
         clearFormRelatedVariables();
     }
 
-    private void setDownloadableFileName(List<String> pdfsGenerated, ProcessExcelFileResult processExcelFileResult){
+    private void setDownloadableFileName(List<String> pdfsGenerated, ProcessExcelFileResult processExcelFileResult) throws IOException {
         if(pdfsGenerated.size() > 1)
             processExcelFileResult.setDownloadableFileName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
         else

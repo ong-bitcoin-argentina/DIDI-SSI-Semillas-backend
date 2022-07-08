@@ -38,13 +38,13 @@ public class ActionLogAspect {
 
 
     @Pointcut("execution(* com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService.registerNewAppUser(..))")
-    public void registerNewAppUser() {}
+    public void registerNewAppUser() {/* ** */}
 
     @Pointcut("execution(* com.atixlabs.semillasmiddleware.app.bondarea.service.BondareaService.synchronizeLoans(..))")
-    public void syncBondarea() {}
+    public void syncBondarea() {/* ** */}
 
     @Pointcut("execution(* com.atixlabs.semillasmiddleware.app.service.CredentialService.buildAllCredentialsFromForm(..))")
-    public void importSurvey(){}
+    public void importSurvey(){/* ** */}
 
     @AfterReturning(value = "registerNewAppUser()", returning = "returnValue")
     public void registerNewAppUserAfter(JoinPoint joinPoint,  Object returnValue)  {
@@ -77,7 +77,7 @@ public class ActionLogAspect {
         try {
             value = joinPoint.proceed();
 
-            if(((Boolean) value)){
+            if(Boolean.TRUE.equals(value)){
                 this.registerSyncBondareaOk();
             }else{
                 this.registerSyncBondareaError();

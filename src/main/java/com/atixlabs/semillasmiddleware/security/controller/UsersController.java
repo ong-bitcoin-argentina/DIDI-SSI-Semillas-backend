@@ -1,12 +1,12 @@
 package com.atixlabs.semillasmiddleware.security.controller;
 
 import com.atixlabs.semillasmiddleware.security.configuration.CustomUser;
-import com.atixlabs.semillasmiddleware.security.dto.FilterUserDto;
-import com.atixlabs.semillasmiddleware.security.dto.MenuDto;
-import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.exceptions.ExistUserException;
 import com.atixlabs.semillasmiddleware.security.exceptions.InexistentUserException;
 import com.atixlabs.semillasmiddleware.security.exceptions.PasswordNotMatchException;
+import com.atixlabs.semillasmiddleware.security.dto.FilterUserDto;
+import com.atixlabs.semillasmiddleware.security.dto.MenuDto;
+import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.model.User;
 import com.atixlabs.semillasmiddleware.security.service.UserPermissionsService;
 import com.atixlabs.semillasmiddleware.security.service.UserService;
@@ -37,7 +37,7 @@ import java.util.Optional;
 @Validated
 @RequestMapping(UsersController.URL_MAPPING_USERS)
 @CrossOrigin(
-    origins = "*",
+    origins = {"http://localhost:8080", "${didi.server.url}"},
     methods = {RequestMethod.GET, RequestMethod.POST, RequestMethod.PATCH})
 public class UsersController {
 
@@ -104,7 +104,7 @@ public class UsersController {
   @ResponseStatus(HttpStatus.CREATED)
   public User createUser(
       @AuthenticationPrincipal CustomUser currentUser, @RequestBody @Valid UserEditRequest user)
-      throws ExistUserException {
+          throws ExistUserException, InexistentUserException {
     return userService.createOrEdit(user);
   }
 
@@ -143,7 +143,7 @@ public class UsersController {
       @AuthenticationPrincipal CustomUser currentUser,
       @PathVariable @Min(1) Long id,
       @RequestBody @Valid UserEditRequest updatedUser)
-      throws ExistUserException {
+          throws ExistUserException, InexistentUserException {
 
     try {
       userService.findById(id);

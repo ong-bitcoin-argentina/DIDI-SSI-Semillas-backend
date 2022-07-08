@@ -1,7 +1,5 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.constants;
 
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-
 import java.util.Arrays;
 import java.util.Map;
 import java.util.stream.Collectors;

@@ -1,7 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.dto;
 
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
@@ -111,7 +110,6 @@ public class CredentialDto {
     public CredentialDto(Credential credential) {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiReceptor();
-        //this.dateOfExpiry = credential.getDateOfRevocation();
         this.name = credential.getBeneficiaryFirstName() +" "+ credential.getBeneficiaryLastName();
         this.dniBeneficiary = credential.getBeneficiaryDni();
         this.creditHolderDni = credential.getCreditHolderDni();
@@ -127,7 +125,6 @@ public class CredentialDto {
     public void baseCredentialDto(Credential credential) {
         this.id = credential.getId();
         this.idDidiCredential = credential.getIdDidiReceptor();
-        //this.dateOfExpiry = credential.getDateOfRevocation();
         this.name = credential.getBeneficiaryFirstName() +" "+ credential.getBeneficiaryLastName();
         this.dniBeneficiary = credential.getBeneficiaryDni();
         this.creditHolderDni = credential.getCreditHolderDni();
@@ -136,7 +133,6 @@ public class CredentialDto {
         this.credentialType = credential.getCredentialDescription();
         this.dateOfRevocation = credential.getDateOfRevocation();
         this.isRevocable = credential.isManuallyRevocable();
-       // this.dateOfIssue = credential.getDateOfIssue();
 
         if(credential.getRevocationReason() !=null)
             this.revocationReason = credential.getRevocationReason().getReason();
@@ -144,28 +140,27 @@ public class CredentialDto {
 
     public static CredentialDto constructBasedOnCredentialType(Credential credential){
         if (credential.getCredentialCategory() != null) {
-            if (CredentialCategoriesCodes.BENEFIT.getCode().equals(credential.getCredentialCategory())) {
-                return new CredentialDto((CredentialBenefits) credential);
-            } else {
-                if (CredentialCategoriesCodes.CREDIT.getCode().equals(credential.getCredentialCategory())) {
+            switch (credential.getCredentialCategory()){
+                case "Beneficio Semillas":
+                    return new CredentialDto((CredentialBenefits) credential);
+
+                case "Crediticia":
                     return new CredentialDto((CredentialCredit) credential);
-                } else {
-                    if (CredentialCategoriesCodes.IDENTITY.getCode().equals(credential.getCredentialCategory())) {
-                        return new CredentialDto((CredentialIdentity) credential);
-                    } else {
-                        if (CredentialCategoriesCodes.DWELLING.getCode().equals(credential.getCredentialCategory())) {
-                            return new CredentialDto((CredentialDwelling) credential);
-                        } else {
-                            if (CredentialCategoriesCodes.ENTREPRENEURSHIP.getCode().equals(credential.getCredentialCategory())) {
-                                return new CredentialDto((CredentialEntrepreneurship) credential);
-                            } else
-                            if (CredentialCategoriesCodes.BENEFIT_SANCOR.getCode().equals(credential.getCredentialCategory())) {
-                                return new CredentialDto((CredentialBenefitSancor) credential);
-                            } else
-                                return new CredentialDto();
-                        }
-                    }
-                }
+
+                case "Identidad":
+                    return new CredentialDto((CredentialIdentity) credential);
+
+                case "Vivienda":
+                    return new CredentialDto((CredentialDwelling) credential);
+
+                case "Emprendimiento":
+                    return new CredentialDto((CredentialEntrepreneurship) credential);
+
+                case "Sancor Salud":
+                    return new CredentialDto((CredentialBenefitSancor) credential);
+
+                default:
+                    return new CredentialDto();
             }
         }
         return new CredentialDto();

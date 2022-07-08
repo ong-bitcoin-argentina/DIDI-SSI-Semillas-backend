@@ -1,13 +1,10 @@
 package com.atixlabs.semillasmiddleware.app.model.action;
 
-import lombok.Getter;
 import lombok.NoArgsConstructor;
-import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @NoArgsConstructor
 @Entity

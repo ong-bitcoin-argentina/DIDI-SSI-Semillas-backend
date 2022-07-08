@@ -1,11 +1,11 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.PersonType;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -122,13 +122,12 @@ public class PersonCategory implements Category {
         String personTypeString = StringUtil.removeNumbers(StringUtil.toUpperCaseTrimAndRemoveAccents(categoryUniqueName.replaceAll("DATOS|DEL","")));
 
         this.occupationSubcategory = new AnswerDto(PersonQuestion.OCCUPATION);
-        this.occupationSubcategory.setAnswer("SUBCATEGORY");
+        this.occupationSubcategory.setAnswer(Constants.SUBCATEGORY);
 
         try{
             this.personType = PersonType.get(personTypeString);
         } catch (IllegalArgumentException e) {
-            e.printStackTrace();
-            log.error("ERROR AL INTENTAR OBTENER EL TIPO DE PERSONA: "+e.getMessage());
+            log.error("ERROR AL INTENTAR OBTENER EL TIPO DE PERSONA: {}",e.getMessage());
         }
     }
 
@@ -149,22 +148,22 @@ public class PersonCategory implements Category {
 
         switch (questionMatch) {
             case FIRST_LAST_NAME:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.firstLastName);
             case INSTITUTION_LEVEL:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.institutionLevel);
             case ADDRESS_DATA_1:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.addressData1);
             case PHONE_DATA:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.phoneData);
             case REFERENCE_CONTACT:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.referenceContact);
             case EDUCATION_LEVEL:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.educationLevel);
             case OCCUPATION:
                 if (!this.occupation.answerIsEmpty()) return Optional.empty();
@@ -383,28 +382,32 @@ public class PersonCategory implements Category {
 
     @Override
     public String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
-        String html="";
+        StringBuilder html= new StringBuilder();
 
         List<AnswerDto> answerDtos = this.getAnswersList();
 
         for (AnswerDto answer : answerDtos) {
 
-            if (answer.getQuestion() != null) {// && answer.getAnswer() != null) {
+            if (answer.getQuestion() != null) {
                 String ans = String.valueOf(Optional.ofNullable(answer.getAnswer()).orElse(""));
-                if (ans.equals("SUBCATEGORY")) {
-                    html += subCategoryTemplate
-                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
-                } else html += rowTemplate
-                        .replace(questionParam, answer.getQuestion().getQuestionName())
-                        .replace(answerParam, ans);
+                if (ans.equals(Constants.SUBCATEGORY)) {
+                    html.append(subCategoryTemplate
+                            .replace(subcategoryParam, answer.getQuestion().getQuestionName()));
+                } else {
+                    html.append(rowTemplate
+                            .replace(questionParam, answer.getQuestion().getQuestionName())
+                            .replace(answerParam, ans));
+                }
             }
         }
-        return html;
+        return html.toString();
     }
 
     public Boolean isModification() { return true; }
 
-    public void setIsModification(AnswerDto isModification) {
+    public void setIsModification(AnswerDto isModification) {/* ** */}
 
+    private static class Constants{
+        public static final String SUBCATEGORY = "SUBCATEGORY";
     }
 }

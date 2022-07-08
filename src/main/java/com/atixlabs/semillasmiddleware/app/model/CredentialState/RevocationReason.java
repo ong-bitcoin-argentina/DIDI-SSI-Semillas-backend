@@ -1,4 +1,4 @@
-package com.atixlabs.semillasmiddleware.app.model.credentialState;
+package com.atixlabs.semillasmiddleware.app.model.CredentialState;
 
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;

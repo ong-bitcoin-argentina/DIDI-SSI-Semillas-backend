@@ -28,7 +28,7 @@ public enum ActionTypeEnum {
 
     public static Optional<ActionTypeEnum> valueOf(int value) {
         return Arrays.stream(values())
-                .filter(ActionTypeEnum -> ActionTypeEnum.id == value)
+                .filter(actionTypeEnum -> actionTypeEnum.id == value)
                 .findFirst();
     }
 }

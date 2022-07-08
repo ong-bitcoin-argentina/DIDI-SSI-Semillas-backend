@@ -4,9 +4,8 @@ import com.poiji.annotation.ExcelCellName;
 import com.poiji.annotation.ExcelRow;
 import lombok.Getter;
 import lombok.Setter;
-import org.hibernate.hql.spi.id.cte.AbstractCteValuesListBulkIdHandler;
 
-import java.time.LocalDate;
+import javax.validation.constraints.*;
 
 @Getter
 @Setter
@@ -23,43 +22,54 @@ public class Form {
     private String estadoEncuesta;
 
     @ExcelCellName(value = "Grupo Solidario", mandatory = false)
+    @NotBlank @NotEmpty
     private String grupoSolidario;
 
     @ExcelCellName(value = "Asesora", mandatory = false)
+    @NotBlank @NotEmpty
     private String asesora;
 
     @ExcelCellName(value = "Fecha", mandatory = false)
+    @NotBlank @NotEmpty
     private String fecha;
 
     //Datos del beneficiario
     @ExcelCellName(value = "Nombre_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String nombreBeneficiario;
 
     @ExcelCellName(value = "Apellido_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String apellidoBeneficiario;
 
     @ExcelCellName(value = "Fecha_Nacimiento_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String fechaNacimientoBeneficiario;
 
     @ExcelCellName(value = "Edad_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty @Min(value = 18)
     private String edadBeneficiario;
 
     @ExcelCellName(value = "Estado_Civil_Beneficiario",mandatory = false)
+    @NotBlank @NotEmpty
     private String estadoCivilBeneficiario;
 
     @ExcelCellName(value = "Estado_Civil_Otro_Beneficiario", mandatory = false)
     private String estadoCivilOtroBeneficiario;
 
     @ExcelCellName(value = "Genero_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String generoBeneficiario;
 
     @ExcelCellName(value = "Genero_Otro_Beneficiario", mandatory = false)
     private String generoOtroBeneficiario;
 
     @ExcelCellName(value = "Tipo_Documento_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String tipoDocumentoBeneficiario;
 
     @ExcelCellName(value = "Numero_Doc_Beneficiario", mandatory = false)
+    @Min(value = 000000001) @Max(value = 999999999)
     private Long numeroDniBeneficiario;
 
     @ExcelCellName(value = "Nacionalidad_Beneficiario", mandatory = false)
@@ -69,21 +79,26 @@ public class Form {
     private String tiempoEnElPaisBeneficiario;
 
     @ExcelCellName(value = "Tienen_Hijos", mandatory = false)
+    @NotBlank @NotEmpty
     private String tieneHijos;
 
     @ExcelCellName(value = "Cantidad_Hijos", mandatory = false)
     private Integer cantidadHijos;
 
     @ExcelCellName(value = "Hay_Mas_Miembros_Familia", mandatory = false)
+    @NotBlank @NotEmpty
     private String tieneMasFamilia;
 
     @ExcelCellName(value = "Vivienda_Cambios", mandatory = false)
+    @NotBlank @NotEmpty
     private String huboCambiosVivienda;
 
     @ExcelCellName(value = "Cambio_Actividad", mandatory = false)
+    @NotBlank @NotEmpty
     private String huboCambiosActividad;
 
     @ExcelCellName(value = "Otro_Domicilio_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String otroDomicilioBeneficiario;
 
     //Domicilio 2
@@ -119,43 +134,54 @@ public class Form {
 
    //Referente
     @ExcelCellName(value = "Apellido_Referente", mandatory = false)
+    @NotBlank @NotEmpty
     private String apellidoReferente;
 
     @ExcelCellName(value = "Nombre_Referente", mandatory = false)
+    @NotBlank @NotEmpty
     private String nombreReferente;
 
     @ExcelCellName(value = "Parentesco_Referente", mandatory = false)
+    @NotBlank @NotEmpty
     private String parentescoReferente;
 
     @ExcelCellName(value = "Parentesco_Otro_Referente", mandatory = false)
     private String parentescoOtroReferente;
 
     @ExcelCellName(value = "Telefono_Referente", mandatory = false)
+    @NotBlank @NotEmpty
     private String telefonoReferente;
 
     //Instruccion
     @ExcelCellName(value = "Primaria_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String primariaBeneficiario;
 
     @ExcelCellName(value = "Secundaria_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String secundariaBeneficiario;
 
     @ExcelCellName(value = "Terciario_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String terciarioBeneficiario;
 
     @ExcelCellName(value = "Universitario_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String universitarioBeneficiario;
 
     @ExcelCellName(value = "Talleres_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String tieneTalleresBeneficiario;
 
     @ExcelCellName(value = "Taller_Realizado_Beneficiario", mandatory = false)
     private String tallerRealizadoBeneficiario;
 
     @ExcelCellName(value = "Cursos_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private String tieneCursosRealizadosBeneficiario;
 
     @ExcelCellName(value = "Curso_Realizado_Beneficiario", mandatory = false)
+    @NotBlank @NotEmpty
     private  String cursoRealizadoBeneficiario;
 
     @ExcelCellName(value = "Instruccion_Otros", mandatory = false)

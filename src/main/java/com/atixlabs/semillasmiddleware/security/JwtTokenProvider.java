@@ -3,7 +3,6 @@ package com.atixlabs.semillasmiddleware.security;
 import com.atixlabs.semillasmiddleware.security.util.JwtTokenControlUtil;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import io.jsonwebtoken.*;
-import io.jsonwebtoken.impl.TextCodec;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,19 +11,14 @@ import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
 import java.io.Serializable;
-import java.io.UnsupportedEncodingException;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Function;
 
 @Component
 public class JwtTokenProvider implements Serializable {
 
     private static final Logger logger = LoggerFactory.getLogger(JwtTokenProvider.class);
-
-    @Autowired
-    private DateUtil dateUtil;
 
     @Autowired
     private JwtTokenControlUtil jwtTokenControlUtil;
@@ -35,22 +29,20 @@ public class JwtTokenProvider implements Serializable {
     @Value("${security.jwtExpirationInMs}")
     private int jwtExpirationInMs;
 
-    public String generateToken(UserDetails userDetails) throws UnsupportedEncodingException {
-        Map<String, Object> claims = new HashMap<>();
-        return doGenerateToken(claims, userDetails.getUsername());
+    public String generateToken(UserDetails userDetails){
+        return doGenerateToken(userDetails.getUsername());
     }
 
-    private byte[] getSecret() throws UnsupportedEncodingException {
-        return (secret).getBytes("UTF-8");
+    private byte[] getSecret() {
+        return (secret).getBytes(StandardCharsets.UTF_8);
     }
 
-    private String doGenerateToken(Map<String, Object> claims, String subject) throws UnsupportedEncodingException {
+    private String doGenerateToken(String subject) {
 
-        Date now = dateUtil.getDateNow();
+        Date now = DateUtil.getDateNow();
         Date expiryDate = new Date(now.getTime() + jwtExpirationInMs);
 
         String token =  Jwts.builder()
-                        //.setClaims(claims)
                         .setSubject(subject)
                         .setIssuedAt(now)
                         .setExpiration(expiryDate)
@@ -61,7 +53,7 @@ public class JwtTokenProvider implements Serializable {
     }
 
 
-    public Boolean validateToken(String token, UserDetails userDetails) throws UnsupportedEncodingException {
+    public Boolean validateToken(String token, UserDetails userDetails){
         try {
             final String username = getUsernameFromToken(token);
             return (username.equals(userDetails.getUsername()) && !isTokenExpired(token))&&(jwtTokenControlUtil.isTokenValid(token));
@@ -79,25 +71,25 @@ public class JwtTokenProvider implements Serializable {
         return false;
     }
 
-    public String getUsernameFromToken(String token) throws UnsupportedEncodingException {
+    public String getUsernameFromToken(String token){
         return getClaimFromToken(token, Claims::getSubject);
     }
 
-    public Date getExpirationDateFromToken(String token) throws UnsupportedEncodingException {
+    public Date getExpirationDateFromToken(String token) {
         return getClaimFromToken(token, Claims::getExpiration);
     }
-    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) throws UnsupportedEncodingException {
+    public <T> T getClaimFromToken(String token, Function<Claims, T> claimsResolver) {
         final Claims claims = getAllClaimsFromToken(token);
         return claimsResolver.apply(claims);
     }
 
-    private Claims getAllClaimsFromToken(String token) throws UnsupportedEncodingException {
+    private Claims getAllClaimsFromToken(String token) {
         return Jwts.parser().setSigningKey(getSecret()).parseClaimsJws(token).getBody();
     }
 
-    private Boolean isTokenExpired(String token) throws UnsupportedEncodingException {
+    private Boolean isTokenExpired(String token){
         final Date expiration = getExpirationDateFromToken(token);
-        return expiration.before(dateUtil.getDateNow());
+        return expiration.before(DateUtil.getDateNow());
     }
 
     public boolean revoqueToken(String username) {

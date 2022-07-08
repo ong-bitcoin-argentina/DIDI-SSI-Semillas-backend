@@ -14,6 +14,7 @@ import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
@@ -25,7 +26,7 @@ public class SurveyForm {
     private String surveyFormCode = null;
     private Long pdv = null;
 
-    private ArrayList<Category> categoryList = new ArrayList<>();
+    private List<Category> categoryList = new ArrayList<>();
 
     @Override
     public String toString() {
@@ -98,8 +99,6 @@ public class SurveyForm {
     }
 
     public boolean isValid(ProcessExcelFileResult processExcelFileResult) {
-        //return categoryList.stream().allMatch(category -> category.isValid(processExcelFileResult));
-
         boolean allValid = true;
         String msg;
 
@@ -131,8 +130,8 @@ public class SurveyForm {
         return allValid;
     }
 
-    public ArrayList<Category> getAllCompletedCategories() {
-        ArrayList<Category> classArrayList = new ArrayList<>();
+    public List<Category> getAllCompletedCategories() {
+        List<Category> classArrayList = new ArrayList<>();
 
         for (Category category : categoryList) {
             if (!category.isEmpty())

@@ -82,7 +82,6 @@ public class SancorPolicy extends AuditableEntity {
 
         log.info(this.getHash()+" -- "+newSancorPolicy.getHash());
         return this.getHash().equals(newSancorPolicy.getHash());
-        //return (this.status.equals(newLoan.getStatus()) && this.cycleDescription.equals(newLoan.getCycleDescription()) && (this.expiredAmount.compareTo(newLoan.getExpiredAmount()) == 0));
     }
 
     public String getHash(){
@@ -96,4 +95,9 @@ public class SancorPolicy extends AuditableEntity {
         return hash !=null ? hash : "";
     }
 
+    @Override
+    public int hashCode() {
+        /* ... */
+        return 0;
+    }
 }

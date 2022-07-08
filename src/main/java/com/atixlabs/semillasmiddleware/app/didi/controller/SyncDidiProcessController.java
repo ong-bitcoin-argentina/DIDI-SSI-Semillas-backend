@@ -1,8 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.didi.controller;
 
-import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.didi.service.SyncDidiProcessService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -13,7 +13,7 @@ import java.util.Map;
 
 @RestController
 @RequestMapping(SyncDidiProcessController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = {"http://localhost:8080", "${didi.server.url}"}, methods= {RequestMethod.GET,RequestMethod.POST})
 @Slf4j
 public class SyncDidiProcessController {
 
@@ -42,10 +42,10 @@ public class SyncDidiProcessController {
             this.syncDidiProcessService.emmitCredentialsCredit();
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials credits",e);
-            jsonMessage.put("message", "ERROR "+e.getMessage());
+            jsonMessage.put(Constants.MSG, Constants.ERROR+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Credit Emmited OK");
+        jsonMessage.put(Constants.MSG, "Credentials Credit Emmited OK");
         return jsonMessage;
     }
 
@@ -59,10 +59,10 @@ public class SyncDidiProcessController {
             this.syncDidiProcessService.emmitCredentialsBenefit(true);
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials benefits",e);
-            jsonMessage.put("message", "ERROR "+e.getMessage());
+            jsonMessage.put(Constants.MSG, Constants.ERROR+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Benefits Emmited OK");
+        jsonMessage.put(Constants.MSG, "Credentials Benefits Emmited OK");
         return jsonMessage;
     }
 
@@ -76,10 +76,10 @@ public class SyncDidiProcessController {
             this.syncDidiProcessService.emmitCredentialsIdentity(true);
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials identity",e);
-            jsonMessage.put("message", "ERROR "+e.getMessage());
+            jsonMessage.put(Constants.MSG, Constants.ERROR+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Emmited OK");
+        jsonMessage.put(Constants.MSG, "Credentials Emmited OK");
         return jsonMessage;
     }
 
@@ -92,10 +92,10 @@ public class SyncDidiProcessController {
             this.syncDidiProcessService.emmitCredentialsDwelling();
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials Dwelling",e);
-            jsonMessage.put("message", "ERROR "+e.getMessage());
+            jsonMessage.put(Constants.MSG, Constants.ERROR+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Dwelling OK");
+        jsonMessage.put(Constants.MSG, "Credentials Dwelling OK");
         return jsonMessage;
     }
 
@@ -108,10 +108,10 @@ public class SyncDidiProcessController {
             this.syncDidiProcessService.emmitCredentialsEntrepreneurship();
         } catch (CredentialException e) {
             log.error("ERROR emmiting credentials Entrepreneurship",e);
-            jsonMessage.put("message", "ERROR "+e.getMessage());
+            jsonMessage.put(Constants.MSG, Constants.ERROR+e.getMessage());
         }
 
-        jsonMessage.put("message", "Credentials Entrepreneurship OK");
+        jsonMessage.put(Constants.MSG, "Credentials Entrepreneurship OK");
         return jsonMessage;
     }
 
@@ -126,10 +126,15 @@ public class SyncDidiProcessController {
             this.syncDidiProcessService.processNewsAppDidiUsers();
         } catch (Exception e) {
             log.error("ERROR process appdidiusers",e);
-            jsonMessage.put("message", "ERROR "+e.getMessage());
+            jsonMessage.put(Constants.MSG, Constants.ERROR+e.getMessage());
         }
 
-        jsonMessage.put("message", "update didi user processs ok OK");
+        jsonMessage.put(Constants.MSG, "update didi user processs ok OK");
         return jsonMessage;
+    }
+
+    private static class Constants{
+        public static final String MSG = "mensaje";
+        public static final String ERROR = "ERROR ";
     }
 }

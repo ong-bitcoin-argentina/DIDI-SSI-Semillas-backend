@@ -1,8 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import org.checkerframework.checker.nullness.Opt;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,8 +22,6 @@ public interface CredentialCreditRepository extends JpaRepository<CredentialCred
     List<CredentialCredit> findByCreditHolderDniAndCredentialStateIn(Long holderDni, List<CredentialState> credentialStates);
 
     List<CredentialCredit> findByCreditHolderDniAndCredentialState(Long holderDni, CredentialState credentialStates);
-
-    //Optional<CredentialCredit>findFirstByCreditHolderDniOrderByDateOfIssueDesc(Long dniHolder);
 
     List<CredentialCredit> findByCreditHolderDniAndCredentialStateInAndFinishDateIsNull(Long holderDni, List<CredentialState> credentialStates);
 

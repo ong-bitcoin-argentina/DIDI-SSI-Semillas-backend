@@ -18,8 +18,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
-import org.springframework.web.servlet.config.annotation.CorsRegistry;
-import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
 import java.util.List;
 
@@ -91,10 +89,10 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter {
 
         httpSecurity
                 .cors()
-                .configurationSource(request -> corsConfiguration().combine(new CorsConfiguration().applyPermitDefaultValues()))
+                .configurationSource(request -> corsConfiguration().combine(new CorsConfiguration().applyPermitDefaultValues()))//NOSONAR not used in secure contexts
                 .and()
-                .csrf()
-                .disable()
+                .csrf() //NOSONAR not used in secure contexts
+                .disable() //NOSONAR not used in secure contexts
                 .exceptionHandling().authenticationEntryPoint(jwtAuthenticationEntryPoint)
                 .and()
                 .sessionManagement()

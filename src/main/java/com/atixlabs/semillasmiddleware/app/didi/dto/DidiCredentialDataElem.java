@@ -6,17 +6,17 @@ import lombok.Getter;
 public class DidiCredentialDataElem {
     private String name;
     private String value;
-    private String _id;
+    private String id;
 
     public DidiCredentialDataElem(String name, String value){
         this.name = name;
         this.value = value;
     }
 
-    public DidiCredentialDataElem(String name, String value, String _id){
+    public DidiCredentialDataElem(String name, String value, String id){
         this.name = name;
         this.value = value;
-        this._id = _id;
+        this.id = id;
     }
 
     @Override

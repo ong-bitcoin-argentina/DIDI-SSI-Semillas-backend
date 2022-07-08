@@ -1,9 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.didi.controller;
 
-import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiAppUserDto;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiCredential;
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiEmmitCredentialResponse;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiGetAllCredentialResponse;
 import com.atixlabs.semillasmiddleware.app.didi.model.constant.DidiAppUserOperationResult;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
@@ -13,13 +11,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.constraints.NotNull;
 import java.util.HashMap;
 import java.util.Map;
 
 @RestController
 @RequestMapping(DidiController.URL_MAPPING_CREDENTIAL)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST})
+@CrossOrigin(origins = {"http://localhost:8080", "${didi.server.url}"}, methods= {RequestMethod.GET,RequestMethod.POST})
 @Slf4j
 public class DidiController {
 
@@ -79,7 +76,7 @@ public class DidiController {
     @GetMapping("/didi/sync")
     @ResponseStatus(HttpStatus.OK)
     public String didiCredentialSync() {
-        return didiService.didiCredentialSync();
+        return didiService.didiCredentialSync();//NOSONAR not used in secure contexts
     }
 
 
@@ -93,7 +90,7 @@ public class DidiController {
 
         for (DidiCredential credential : didiGetAllCredentialResponse.getData()) {
             //REASON???
-            didiService.didiDeleteCertificate(credential.get_id(), "OTHER");
+            didiService.didiDeleteCertificate(credential.getId(), "OTHER");
         }
 
         log.info("Finalizo el proceso de borrado");

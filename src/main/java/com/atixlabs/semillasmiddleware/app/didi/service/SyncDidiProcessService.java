@@ -1,23 +1,20 @@
 package com.atixlabs.semillasmiddleware.app.didi.service;
 
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
-import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.sancor.model.SancorPolicy;
 import com.atixlabs.semillasmiddleware.app.sancor.service.SancorPolicyService;
 import com.atixlabs.semillasmiddleware.app.service.*;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 
 @Slf4j
 @Service
@@ -57,7 +54,7 @@ public class SyncDidiProcessService {
 
     public Map<CredentialCategoriesCodes, String> emmitAllCredentialsOnPendindDidiState(){
 
-        Map<CredentialCategoriesCodes, String> response = new HashMap<CredentialCategoriesCodes, String>();
+        Map<CredentialCategoriesCodes, String> response = new EnumMap<>(CredentialCategoriesCodes.class);
 
         try {
             this.emmitCredentialsIdentity(false);
@@ -429,7 +426,7 @@ public class SyncDidiProcessService {
         List<CredentialIdentity> credentialsIdentityHolderToCompare = this.credentialIdentityService.getAllCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeHolder(didiAppUserNew.getDni());
 
         for (CredentialIdentity credentialIdentityHolderType : credentialsIdentityHolderToCompare){
-            if(!this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(credentialIdentityHolderType.getCreditHolderDni(), credentialIdentityHolderType.getBeneficiaryDni())) {
+            if(Boolean.FALSE.equals(!this.credentialIdentityService.existsCredentialIdentityActivesOrPendingDidiForBeneficiaryDniAsFamilyAndTypeKinsman(credentialIdentityHolderType.getCreditHolderDni(), credentialIdentityHolderType.getBeneficiaryDni()))) {
                 CredentialIdentity newCredentialidentityAsKinsmanType = this.credentialIdentityService.buildNewOnPendidgDidiAsKinsmanType(credentialIdentityHolderType, didiAppUserNew);
                 this.credentialIdentityService.save(newCredentialidentityAsKinsmanType);
                 log.info("Credential Identity for holder {} and beneficiary {} type {} generated for id didi {} and set on pending didi state", newCredentialidentityAsKinsmanType.getCreditHolderDni(),newCredentialidentityAsKinsmanType.getBeneficiaryDni(), newCredentialidentityAsKinsmanType.getRelationWithCreditHolder(), newCredentialidentityAsKinsmanType.getIdDidiReceptor());

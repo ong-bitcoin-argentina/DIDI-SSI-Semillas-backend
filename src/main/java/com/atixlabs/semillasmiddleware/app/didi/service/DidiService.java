@@ -2,20 +2,20 @@ package com.atixlabs.semillasmiddleware.app.didi.service;
 
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.*;
-import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
-import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
 import com.atixlabs.semillasmiddleware.app.exceptions.DidiEmmitCredentialException;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.model.RetrofitBuilder;
 import com.atixlabs.semillasmiddleware.app.model.credential.*;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CertTemplateService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialService;
+import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.enpoint.DidiEndpoint;
 import com.google.gson.internal.LinkedTreeMap;
 import lombok.extern.slf4j.Slf4j;
@@ -57,27 +57,7 @@ public class DidiService {
     private String didiBaseUrl;
     private String didiUsername;
     private String didiPassword;
-    private String didiTemplateCodeIdentity;
-    private String didiTemplateCodeEntrepreneurship;
-    private String didiTemplateCodeDwelling;
-    private String didiTemplateCodeBenefit;
-    private String didiTemplateCodeCredit;
-/*
-    @Value("${didi.base_url}")
-    private String didiBaseUrl;
-    @Value("${didi.username}")
-    private String didiUsername;
-    @Value("${didi.password}")
-    private String didiPassword;
-    @Value("${didi.template_code_identity}")
-    private String didiTemplateCodeIdentity;
-    @Value("${didi.template_code_entrepreneurship}")
-    private String didiTemplateCodeEntrepreneurship;
-    @Value("${didi.template_code_dwelling}")
-    private String didiTemplateCodeDwelling;
-    @Value("${didi.template_code_benefit}")
-    private String didiTemplateCodeBenefit;
-*/
+
     @Autowired
     public DidiService(
             DidiAppUserService didiAppUserService,
@@ -117,11 +97,6 @@ public class DidiService {
         this.didiBaseUrl = didiBaseUrl;
         this.didiUsername = didiUsername;
         this.didiPassword = didiPassword;
-        this.didiTemplateCodeIdentity = didiTemplateCodeIdentity;
-        this.didiTemplateCodeEntrepreneurship = didiTemplateCodeEntrepreneurship;
-        this.didiTemplateCodeDwelling = didiTemplateCodeDwelling;
-        this.didiTemplateCodeBenefit = didiTemplateCodeBenefit;
-        this.didiTemplateCodeCredit = didiTemplateCodeCredit;
         this.certTemplateService = certTemplateService;
 
         this.setUpRetrofitForDidiAndGetToken();
@@ -151,7 +126,10 @@ public class DidiService {
         return null;
     }
 
-    @Deprecated
+    /**
+     * @deprecated
+     */
+    @Deprecated(forRemoval = true)
     public String didiCredentialSync() {
         log.info("didiSync: started");
 
@@ -161,7 +139,7 @@ public class DidiService {
         didiSyncStatus.add(DidiSyncStatus.SYNC_ERROR.getCode());
         ArrayList<DidiAppUser> didiAppUsers = didiAppUserRepository.findByActiveAndSyncStatusIn(true,didiSyncStatus);
 
-        if (didiAppUsers.size() <= 0) {
+        if (didiAppUsers.isEmpty()) {
             log.info("didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi");
             return "didiSync: No existen pedidos de didi-app pendientes para enviar hacia didi";
         }
@@ -175,7 +153,7 @@ public class DidiService {
         ArrayList<Credential> beneficiaries = credentialRepository.findByBeneficiaryDniIn(dniList);
         //todo ver pendientes -> borrar credenciales de los listados anteriores
 
-        if (creditHolders.size()<=0 && beneficiaries.size()<=0) {
+        if (creditHolders.isEmpty() && beneficiaries.isEmpty()) {
             log.info("didiSync: No existen credenciales pendientes para enviar hacia didi");
             return "didiSync: No existen credenciales pendientes para enviar hacia didi";
         }
@@ -188,7 +166,7 @@ public class DidiService {
             log.info("BENEFICIARIES");
             log.info(credential.toString());
             if (!credential.getCreditHolderDni().equals(credential.getBeneficiaryDni())) {
-                String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getBeneficiaryDni()).get().getDid();
+                String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getBeneficiaryDni()).orElse(new DidiAppUser()).getDid();
                 try {
                     updateCredentialDidAndDidiSync(credential, receivedDid);
                 } catch (CredentialException e) {
@@ -201,7 +179,7 @@ public class DidiService {
         for (Credential credential : creditHolders) {
             log.info("CREDIT HOLDERS");
             log.info(credential.toString());
-            String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getCreditHolderDni()).get().getDid();
+            String receivedDid = didiAppUserRepository.findByDniAndActiveTrue(credential.getCreditHolderDni()).orElse(new DidiAppUser()).getDid();
             try {
                 this.updateCredentialDidAndDidiSync(credential, receivedDid);
             } catch (CredentialException e) {
@@ -230,7 +208,7 @@ public class DidiService {
 
             case PENDING_DIDI:
                 boolean haveRevokeOk = true;
-                if (credential.isEmitted()) {
+                if (Boolean.TRUE.equals(credential.isEmitted())) {
                     log.info("didiSync: 1.b no-break continuo revocacion en semillas");
                     //revoke on didi too. Because it has idDididCredential.
                     haveRevokeOk = credentialService.revokeComplete(credential, RevocationReasonsCodes.UPDATE_INTERNAL.getCode());
@@ -241,14 +219,15 @@ public class DidiService {
 
                 if(haveRevokeOk) {
                     log.info("didiSync: 2  doy de alta credenciales nuevas");
-                    //String beneficiaryReceivedDid = didiAppUserRepository.findByDni(appUserDni).getDid();
                     credential.setIdDidiReceptor(receivedDid);//registro el did recibido
                     createAndEmmitCertificateDidi(credential);
                 }
 
                 break;
             case CREDENTIAL_REVOKE:
-              //TODO: Definir accionar con credenciales revocadas, por ahora las ignora");
+              /*TODO: Definir accionar con credenciales revocadas, por ahora las ignora");*/ //NOSONAR
+                break;
+            default:
                 break;
         }
     }
@@ -264,14 +243,14 @@ public class DidiService {
             return;
         }
 
-        if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals("success")) {
+        if (didiCreateCredentialResponse != null && didiCreateCredentialResponse.getStatus().equals(Constants.SUCCESS_MSG)) {
             String id = (String) ((LinkedTreeMap) ((ArrayList) didiCreateCredentialResponse.getData()).get(0)).get("_id");
 
             log.info("didiSync: certificateId to emmit: "+ id);
 
             try {
                 DidiEmmitCredentialResponse didiEmmitCredentialResponse = emmitCertificateDidi(id);
-                if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals("success")) {
+                if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals(Constants.SUCCESS_MSG)) {
                     log.info("didiSync: emmitCertificate Response: "+didiEmmitCredentialResponse.toString());
                 } else {
                     log.info("didiSync: emmitCertificate Didn't respond success");
@@ -281,8 +260,8 @@ public class DidiService {
                 this.saveEmittedCredential(didiEmmitCredentialResponse, credential);
                 this.didiAppUserService.updateAppUserStatusByCode(credential.getCreditHolderDni(), DidiSyncStatus.SYNC_OK.getCode());
             } catch (DidiEmmitCredentialException e) {
+                log.error("Error en la emisión del certificado DIDI. Error: {}", e.getMessage());
                 rollbackCredentialCreation(id);
-                e.printStackTrace();
             }
         } else {
             log.error("didiSync: fallo la creacion del certificado, ["+(didiCreateCredentialResponse != null ? didiCreateCredentialResponse.getData() : "Error no manejado") +"]");
@@ -356,22 +335,20 @@ public class DidiService {
     }
 
     private String getDidiRevocationReasonCode(String reason) {
-        return RevocationReasonsCodes.getByCode(reason).map(revocation -> {
-            return revocation.getDidiCode();
-        }).orElseThrow( () -> new RuntimeException("Could not get Didi revocation reason code"));
+        return RevocationReasonsCodes.getByCode(reason).map(RevocationReasonsCodes::getCode)
+                .orElseThrow( () -> new RuntimeException("Could not get Didi revocation reason code"));
     }
 
-    public boolean didiDeleteCertificate(String CredentialToRevokeDidiId, String reason)  {
-        HashMap<String, String> certificateDeleteBody = new HashMap<String, String>();
+    public boolean didiDeleteCertificate(String credentialToRevokeDidiId, String reason)  {
+        HashMap<String, String> certificateDeleteBody = new HashMap<>();
         try {
             certificateDeleteBody.put("reason", getDidiRevocationReasonCode(reason));
-            log.info("Revoking Credential id didi "+CredentialToRevokeDidiId+" certificate on didi, reason: " + reason);
-            Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, CredentialToRevokeDidiId, certificateDeleteBody);
+            log.info("Revoking Credential id didi "+credentialToRevokeDidiId+" certificate on didi, reason: " + reason);
+            Call<DidiEmmitCredentialResponse> callSync = endpointInterface.deleteCertificate(didiAuthToken, credentialToRevokeDidiId, certificateDeleteBody);
             Response<DidiEmmitCredentialResponse> response = callSync.execute();
             log.info("didiSync: deleteCertificate - response:");
             if (response.body() != null)
                 log.info(response.body().toString());
-            //return response.body();
             return true;
         } catch (Exception ex) {
             log.error("didiSync: deleteCertificateDidi: Request error", ex);
@@ -382,8 +359,8 @@ public class DidiService {
     private void saveEmittedCredential(DidiEmmitCredentialResponse didiEmmitCredentialResponse, Credential pendingCredential) {
         log.info("didiSync: saveEmittedCredential:");
 
-        if (didiEmmitCredentialResponse != null && didiEmmitCredentialResponse.getStatus().equals("success")) {
-            String credentialDidiId = didiEmmitCredentialResponse.getData().get_id();
+        if (didiEmmitCredentialResponse != null && didiEmmitCredentialResponse.getStatus().equals(Constants.SUCCESS_MSG)) {
+            String credentialDidiId = didiEmmitCredentialResponse.getData().getId();
 
             //todo: ACA ESTOY HACIENDO UN UPDATE QUE SOLO ESTA BIEN SI ES PRE-CREDENCIAL
             if (pendingCredential.getCredentialState().getStateName().equals(CredentialStatesCodes.PENDING_DIDI.getCode())) {
@@ -407,7 +384,7 @@ public class DidiService {
                 switch (CredentialCategoriesCodes.getEnumByStringValue(pendingCredential.getCredentialCategory())) {
                     case IDENTITY:
                         Optional<CredentialIdentity> credentialIdentityOp = credentialIdentityRepository.findById(pendingCredential.getId());
-                        CredentialIdentity credentialIdentity = new CredentialIdentity(credentialIdentityOp.get());
+                        CredentialIdentity credentialIdentity = new CredentialIdentity(credentialIdentityOp.orElse(new CredentialIdentity()));
                         credentialIdentity.setIdDidiCredential(credentialDidiId);
                         credentialIdentity.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialIdentity);
@@ -415,7 +392,7 @@ public class DidiService {
                         break;
                     case DWELLING:
                         Optional<CredentialDwelling> credentialDwellingOp = credentialDwellingRepository.findById(pendingCredential.getId());
-                        CredentialDwelling credentialDwelling = new CredentialDwelling(credentialDwellingOp.get());
+                        CredentialDwelling credentialDwelling = new CredentialDwelling(credentialDwellingOp.orElse(new CredentialDwelling()));
                         credentialDwelling.setIdDidiCredential(credentialDidiId);
                         credentialDwelling.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialDwelling);
@@ -423,7 +400,7 @@ public class DidiService {
                         break;
                     case ENTREPRENEURSHIP:
                         Optional<CredentialEntrepreneurship> credentialEntrepreneurshipOp = credentialEntrepreneurshipRepository.findById(pendingCredential.getId());
-                        CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship(credentialEntrepreneurshipOp.get());
+                        CredentialEntrepreneurship credentialEntrepreneurship = new CredentialEntrepreneurship(credentialEntrepreneurshipOp.orElse(new CredentialEntrepreneurship()));
                         credentialEntrepreneurship.setIdDidiCredential(credentialDidiId);
                         credentialEntrepreneurship.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialEntrepreneurship);
@@ -431,7 +408,7 @@ public class DidiService {
                         break;
                     case BENEFIT:
                         Optional<CredentialBenefits> credentialBenefitsOp = credentialBenefitsRepository.findById(pendingCredential.getId());
-                        CredentialBenefits credentialBenefits = new CredentialBenefits(credentialBenefitsOp.get());
+                        CredentialBenefits credentialBenefits = new CredentialBenefits(credentialBenefitsOp.orElse(new CredentialBenefits()));
                         credentialBenefits.setIdDidiCredential(credentialDidiId);
                         credentialBenefits.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialBenefits);
@@ -439,7 +416,7 @@ public class DidiService {
                         break;
                     case CREDIT:
                         Optional<CredentialCredit> credentialCreditOp = credentialCreditRepository.findById(pendingCredential.getId());
-                        CredentialCredit credentialCredit = new CredentialCredit(credentialCreditOp.get());
+                        CredentialCredit credentialCredit = new CredentialCredit(credentialCreditOp.orElse(new CredentialCredit()));
                         credentialCredit.setIdDidiCredential(credentialDidiId);
                         credentialCredit.setDateOfRevocation(null);
                         setCredentialState(CredentialStatesCodes.CREDENTIAL_ACTIVE.getCode(), credentialCredit);
@@ -502,13 +479,16 @@ public class DidiService {
             if (didiEmmitCredentialResponse!=null)
                 log.info("verify template {} Response: {} ",certTemplate.getTemplateCode(),didiEmmitCredentialResponse.toString());
 
-            if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals("success")){
+            if (didiEmmitCredentialResponse!=null && didiEmmitCredentialResponse.getStatus().equals(Constants.SUCCESS_MSG)){
                 return Boolean.TRUE;
             }
             else {
                 return Boolean.FALSE;
             }
+    }
 
+    private static class Constants{
+        public static final String SUCCESS_MSG = "success";
     }
 
 }

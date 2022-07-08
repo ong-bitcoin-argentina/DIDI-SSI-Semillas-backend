@@ -53,9 +53,8 @@ public class KoboSurveyExcelParseService{
 
         FileInputStream fileInput = new FileInputStream(xlsxFile);//Sin Cambios
 
-        XSSFWorkbook workbook = new XSSFWorkbook(fileInput);//Sin Cambios
+        try (XSSFWorkbook workbook = new XSSFWorkbook(fileInput)){
 
-        try{
             List<FormPDF> formList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheetAt(0), FormPDF.class);
             List<Child> childList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_hijos"), Child.class);
             List<FamilyMember> familyMemberList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_datos_miembro"), FamilyMember.class);
@@ -78,7 +77,6 @@ public class KoboSurveyExcelParseService{
                     .build()
             );
         } finally {
-            workbook.close();
             fileInput.close();
         }
 

@@ -1488,16 +1488,15 @@ public class CredentialService {
 
         XSSFWorkbook workbook = new XSSFWorkbook(file.getInputStream());
 
-        List<Form> formList = parseKoboSurveyIntoList(workbook.getSheetAt(0), Form.class);
-        List<Child> childList = parseKoboSurveyIntoList(workbook.getSheet("grupo_hijos"), Child.class);
-        List<FamilyMember> familyMemberList = parseKoboSurveyIntoList(workbook.getSheet("grupo_datos_miembro"), FamilyMember.class);
+        List<Form> formList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheetAt(0), Form.class);
+        ExcelUtils.validateFormData(formList);
+        List<Child> childList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_hijos"), Child.class);
+        List<FamilyMember> familyMemberList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_datos_miembro"), FamilyMember.class);
 
         ProcessExcelFileResult processExcelFileResult = new ProcessExcelFileResult();
 
         for (Form form: formList) {
             if (form.getEstadoEncuesta() == null) {
-                ExcelUtils.validateFormData(form);
-
                 //Validaciones
                 if (!createCredentials) {
                     processExcelFileResult = verifyDuplicateCredentials(form, childList, familyMemberList);
@@ -1511,11 +1510,6 @@ public class CredentialService {
             }
         }//for
         return processExcelFileResult;
-    }
-
-    private <T> List<T> parseKoboSurveyIntoList(XSSFSheet sheet, Class<T> klass){
-        ExcelUtils.formatHeader(sheet);
-        return sheet!=null?Poiji.fromExcel(sheet, klass): new ArrayList<>();
     }
 
     private void createCredentialsFromForm (Form form, List<Child> childList, List<FamilyMember> familyMemberList) throws FileManagerException {

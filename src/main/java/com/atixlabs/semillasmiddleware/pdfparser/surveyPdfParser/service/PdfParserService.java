@@ -44,7 +44,7 @@ public class PdfParserService {
         return pdfsGenerated;
     }
 
-    private static String generateHtmlFromStack(List<String> structure, Map<String, Object> data){
+    private static <T> String generateHtmlFromStack(List<String> structure, Map<String, T> data){
         StringBuilder htmlStack = new StringBuilder();
         fullName = data.get("nombreBeneficiario").toString().concat("_").concat(data.get("apellidoBeneficiario").toString());
 

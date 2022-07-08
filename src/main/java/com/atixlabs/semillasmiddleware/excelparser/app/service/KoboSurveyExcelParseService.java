@@ -56,33 +56,15 @@ public class KoboSurveyExcelParseService{
         XSSFWorkbook workbook = new XSSFWorkbook(fileInput);//Sin Cambios
 
         try{
-            XSSFSheet worksheet = workbook.getSheetAt(0);
-            XSSFSheet childGroupSheet = workbook.getSheet("grupo_hijos");
-            XSSFSheet familyMemberGroupSheet = workbook.getSheet("grupo_datos_miembro");
-            XSSFSheet familyMemberIncomeGroupSheet = workbook.getSheet("grupo_ingresos_miembro");
-            XSSFSheet entrepreneurshipCreditSheet = workbook.getSheet("grupo_creditos_emprendimiento");
-            XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
-
-        /* Aca podemos cambiar el metodo formatHeader por otro,o bien agregarle un nuevo parametro para poder generar las preguntas correspondientes
-            que se mostrararan en el excel, de esta forma podemos reutilizar un poco la logica que armaba el anterior PDF.
-         */
-            ExcelUtils.formatHeader(worksheet);
-            ExcelUtils.formatHeader(childGroupSheet);
-            ExcelUtils.formatHeader(familyMemberGroupSheet);
-            ExcelUtils.formatHeader(familyMemberIncomeGroupSheet);
-            ExcelUtils.formatHeader(entrepreneurshipCreditSheet);
-            ExcelUtils.formatHeader(familyCreditGroupSheet);
-
-            List<FormPDF> formList = Poiji.fromExcel(worksheet,FormPDF.class);
-            List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet, Child.class): new ArrayList<>();
-            List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
-
+            List<FormPDF> formList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheetAt(0), FormPDF.class);
+            List<Child> childList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_hijos"), Child.class);
+            List<FamilyMember> familyMemberList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_datos_miembro"), FamilyMember.class);
             List<FamilyMemberIncome> familyMemberIncomeList =
-                    familyMemberIncomeGroupSheet!=null?Poiji.fromExcel(familyMemberIncomeGroupSheet, FamilyMemberIncome.class):new ArrayList<>();
+                    ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_ingresos_miembro"), FamilyMemberIncome.class);
             List<EntrepreneurshipCredit> entrepreneurshipCreditList =
-                    entrepreneurshipCreditSheet!=null?Poiji.fromExcel(entrepreneurshipCreditSheet, EntrepreneurshipCredit.class):new ArrayList<>();
+                    ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_creditos_emprendimiento"), EntrepreneurshipCredit.class);
             List<FamilyCredit> familyCreditList =
-                    familyCreditGroupSheet!=null?Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class): new ArrayList<>();
+                    ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_creditos_familiares"), FamilyCredit.class);
 
             PDFUtil.setPDFData(formList, childList, familyMemberList, familyMemberIncomeList, entrepreneurshipCreditList, familyCreditList);
 

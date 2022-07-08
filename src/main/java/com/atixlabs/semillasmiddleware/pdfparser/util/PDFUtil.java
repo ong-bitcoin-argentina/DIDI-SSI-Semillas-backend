@@ -68,7 +68,7 @@ public class PDFUtil {
         return tmpLst;
     }
 
-    private static String generateHtml(List<Object> lst){
+    private static <T> String generateHtml(List<T> lst){
         StringBuilder html = new StringBuilder();
         // Obtengo las keys relacionadas a la clase.
         List<String> structure = generateData(lst.get(0).getClass().getDeclaredFields());
@@ -86,7 +86,7 @@ public class PDFUtil {
         return html.toString();
     }
 
-    private static String generateSlot(List<String> structure, Map<String, Object> data){
+    private static <T> String generateSlot(List<String> structure, Map<String, T> data){
         StringBuilder html = new StringBuilder();
         for (String slot: structure) {
             if (data.get(StringUtils.unCapitalize(slot)) != null) html.append(ROWTEMPLATE.replace(QUESTION_PARAM, PDFQuestions.valueOf(slot.toUpperCase()).getQuestion())
@@ -95,7 +95,7 @@ public class PDFUtil {
         return html.toString();
     }
 
-    public static Map<String, Object> generateKeys(Object data){
+    public static <T> Map<String, T> generateKeys(T data){
         ObjectMapper oMapper = new ObjectMapper();
         return oMapper.convertValue(data, TreeMap.class);
     }

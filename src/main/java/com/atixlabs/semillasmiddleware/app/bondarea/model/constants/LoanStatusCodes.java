@@ -24,7 +24,7 @@ public enum LoanStatusCodes {
 
     public static Optional<LoanStatusCodes> getByCode(String code){
         return Arrays.stream(LoanStatusCodes.values())
-                .filter( status_code -> status_code.getCode().equals(code))
+                .filter( statusCode -> statusCode.getCode().equals(code))
                 .findFirst();
     }
 }

@@ -1,9 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.model.credential;
 
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
 import com.atixlabs.semillasmiddleware.security.model.AuditableEntity;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,7 +11,6 @@ import lombok.Setter;
 import lombok.ToString;
 
 import javax.persistence.*;
-import java.io.Serializable;
 import java.time.LocalDateTime;
 
 @NoArgsConstructor

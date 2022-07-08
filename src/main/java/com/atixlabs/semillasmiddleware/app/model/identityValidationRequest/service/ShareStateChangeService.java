@@ -1,9 +1,9 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service;
 
-import com.atixlabs.semillasmiddleware.app.model.Email;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.app.service.MailService;
+import com.atixlabs.semillasmiddleware.app.model.Email;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
 import com.atixlabs.semillasmiddleware.util.EmailTemplatesUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -34,15 +34,11 @@ public class ShareStateChangeService {
 
         Email email = Email.builder()
                 .to(identityValidationRequest.getEmail())
-                .subject(getSubject())
+                .subject(Constants.SUBJECT)
                 .template(getTemplate(identityValidationRequest))
                 .build();
 
         mailService.send(email);
-    }
-
-    private String getSubject(){
-        return "Validación de Identidad a través de Semillas";
     }
 
     private String getTemplate(IdentityValidationRequest identityValidationRequest){
@@ -61,5 +57,9 @@ public class ShareStateChangeService {
         }
 
         return parameters;
+    }
+
+    private static class Constants{
+        public static final String SUBJECT = "Validación de Identidad a través de Semillas";
     }
 }

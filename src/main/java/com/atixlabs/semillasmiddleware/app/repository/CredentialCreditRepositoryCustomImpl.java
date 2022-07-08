@@ -1,11 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
-
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialCredit;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 

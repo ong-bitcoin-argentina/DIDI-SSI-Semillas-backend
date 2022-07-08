@@ -1,16 +1,9 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.service;
 
 import com.atixlabs.semillasmiddleware.app.model.excel.*;
-import com.atixlabs.semillasmiddleware.app.service.CredentialService;
-import com.atixlabs.semillasmiddleware.excelparser.app.categories.AnswerCategoryFactory;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.app.dto.SurveyForm;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorDetail;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ExcelErrorType;
 import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
-import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
-import com.atixlabs.semillasmiddleware.excelparser.service.ExcelParseService;
-import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
 import com.atixlabs.semillasmiddleware.filemanager.service.FileManagerService;
 import com.atixlabs.semillasmiddleware.filemanager.util.FileUtil;
 import com.atixlabs.semillasmiddleware.pdfparser.surveyPdfParser.service.PdfParserService;
@@ -18,7 +11,6 @@ import com.atixlabs.semillasmiddleware.pdfparser.util.PDFUtil;
 import com.poiji.bind.Poiji;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.openxml4j.exceptions.NotOfficeXmlFileException;
-import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,9 +19,9 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Objects;
 
 @Service
 @Slf4j
@@ -61,42 +53,21 @@ public class KoboSurveyExcelParseService{
 
         FileInputStream fileInput = new FileInputStream(xlsxFile);//Sin Cambios
 
-        XSSFWorkbook workbook = new XSSFWorkbook(fileInput);//Sin Cambios
-        try{
-            XSSFSheet worksheet = workbook.getSheetAt(0);
-            XSSFSheet childGroupSheet = workbook.getSheet("grupo_hijos");
-            XSSFSheet familyMemberGroupSheet = workbook.getSheet("grupo_datos_miembro");
-            XSSFSheet familyMemberIncomeGroupSheet = workbook.getSheet("grupo_ingresos_miembro");
-            XSSFSheet entrepreneurshipCreditSheet = workbook.getSheet("grupo_creditos_emprendimiento");
-            XSSFSheet familyCreditGroupSheet = workbook.getSheet("grupo_creditos_familiares");
+        try (XSSFWorkbook workbook = new XSSFWorkbook(fileInput)){
 
-        /* Aca podemos cambiar el metodo formatHeader por otro,o bien agregarle un nuevo parametro para poder generar las preguntas correspondientes
-            que se mostrararan en el excel, de esta forma podemos reutilizar un poco la logica que armaba el anterior PDF.
-         */
-            ExcelUtils.formatHeader(worksheet);
-            ExcelUtils.formatHeader(childGroupSheet);
-            ExcelUtils.formatHeader(familyMemberGroupSheet);
-            ExcelUtils.formatHeader(familyMemberIncomeGroupSheet);
-            ExcelUtils.formatHeader(entrepreneurshipCreditSheet);
-            ExcelUtils.formatHeader(familyCreditGroupSheet);
-
-            List<FormPDF> formList = Poiji.fromExcel(worksheet,FormPDF.class);
-            List<Child> childList = childGroupSheet!=null?Poiji.fromExcel(childGroupSheet,Child.class): new ArrayList<>();
-            List<FamilyMember> familyMemberList = familyMemberGroupSheet!=null?Poiji.fromExcel(familyMemberGroupSheet, FamilyMember.class): new ArrayList<>();
-
+            List<FormPDF> formList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheetAt(0), FormPDF.class);
+            List<Child> childList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_hijos"), Child.class);
+            List<FamilyMember> familyMemberList = ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_datos_miembro"), FamilyMember.class);
             List<FamilyMemberIncome> familyMemberIncomeList =
-                    familyMemberIncomeGroupSheet!=null?Poiji.fromExcel(familyMemberIncomeGroupSheet, FamilyMemberIncome.class):new ArrayList<>();
+                    ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_ingresos_miembro"), FamilyMemberIncome.class);
             List<EntrepreneurshipCredit> entrepreneurshipCreditList =
-                    entrepreneurshipCreditSheet!=null?Poiji.fromExcel(entrepreneurshipCreditSheet, EntrepreneurshipCredit.class):new ArrayList<>();
+                    ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_creditos_emprendimiento"), EntrepreneurshipCredit.class);
             List<FamilyCredit> familyCreditList =
-                    familyCreditGroupSheet!=null?Poiji.fromExcel(familyCreditGroupSheet, FamilyCredit.class): new ArrayList<>();
+                    ExcelUtils.parseKoboSurveyIntoList(workbook.getSheet("grupo_creditos_familiares"), FamilyCredit.class);
 
-            //TODO: Encontrar como hacer la relacion entre la planilla de la encuesta y las sub encuestas.
             PDFUtil.setPDFData(formList, childList, familyMemberList, familyMemberIncomeList, entrepreneurshipCreditList, familyCreditList);
 
             setDownloadableFileName(pdfParserService.generatePDFFromKobo(formList), processExcelFileResult);
-
-            return processExcelFileResult;
         } catch (NotOfficeXmlFileException c) {
             log.error("Invalid file format: " + filePath);
             processExcelFileResult.addRowError(ExcelErrorDetail.builder()
@@ -105,15 +76,16 @@ public class KoboSurveyExcelParseService{
                     .errorType(ExcelErrorType.OTHER)
                     .build()
             );
-            return processExcelFileResult;
         } finally {
-            workbook.close();
+            fileInput.close();
         }
+
+        return processExcelFileResult;
     }
 
-    private static final String ZIP_SUFFIX = "Encuesta_form";
+    private static final String ZIP_SUFFIX = "Encuesta_form-";
 
-    private void setDownloadableFileName(List<String> pdfsGenerated, ProcessExcelFileResult processExcelFileResult){
+    private void setDownloadableFileName(List<String> pdfsGenerated, ProcessExcelFileResult processExcelFileResult) throws IOException {
         if(pdfsGenerated.size() > 1)
             processExcelFileResult.setDownloadableFileName(fileManagerService.zipAll(pdfsGenerated, ZIP_SUFFIX));
         else

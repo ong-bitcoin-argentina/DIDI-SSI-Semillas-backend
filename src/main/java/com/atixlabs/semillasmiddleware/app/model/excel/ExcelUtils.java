@@ -1,6 +1,7 @@
 package com.atixlabs.semillasmiddleware.app.model.excel;
 
 import com.atixlabs.semillasmiddleware.filemanager.exception.FileManagerException;
+import com.poiji.bind.Poiji;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.poi.xssf.usermodel.XSSFCell;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -8,12 +9,14 @@ import org.apache.poi.xssf.usermodel.XSSFSheet;
 
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
-import javax.validation.Validator;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Objects;
-import java.util.Set;
+import java.util.stream.Collectors;
 
 public class ExcelUtils {
+    private ExcelUtils(){}
+
     //Relacionadas a la vivienda
     public static String beneficiaryAddress(Form form){
         return (form.getViviendaDireccionCalle()+" N° "+form.getViviendaDireccionNumero()+" e/ "+form.getViviendaDireccionEntreCalles());
@@ -36,22 +39,33 @@ public class ExcelUtils {
                 String[] splittedCellContent = cell.getStringCellValue().split("#");
                 String title = splittedCellContent[1];
                 String subTitle = splittedCellContent[2].substring(splittedCellContent[2].indexOf("/"));
-                subTitle = subTitle.replaceAll("/span>", "").replaceAll("/", "_"); // clean string
+                subTitle = subTitle.replace("/span>", "").replace("/", "_"); // clean string
                 headerRow.createCell(i);
                 headerRow.getCell(i).setCellValue(title + subTitle);
             }
         }
     }
 
-    public static void validateFormData(Form form) throws FileManagerException {
-        Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
+    public static  <T> List<T> parseKoboSurveyIntoList(XSSFSheet sheet, Class<T> klass){
+        formatHeader(sheet);
+        return sheet!=null? Poiji.fromExcel(sheet, klass): new ArrayList<>();
+    }
 
-        Set<ConstraintViolation<Form>> errors = validator.validate(form);
+    public static void validateFormData(List<Form> forms) throws FileManagerException {
+        for (Form form : forms){
+            if(form.getEstadoEncuesta() == null){
+                List<ConstraintViolation<Form>> errors = Validation.buildDefaultValidatorFactory().getValidator().validate(form).stream().collect(Collectors.toList());
 
-        if (!errors.isEmpty()){
-            throw new FileManagerException("Se encontró un error en la información del Excel, en el campo: "
-                    .concat(errors.stream().findFirst().get().getPropertyPath().toString()).concat(", para el formulario N° "+form.getIndex())
-                    .concat(".\nError: " + errors.stream().findFirst().get().getMessage()).concat(". Favor de revisar y corregir la información."));
+                if (!errors.isEmpty()){
+                    String campo = errors.get(0).getPropertyPath().toString();
+                    String msj = errors.get(0).getMessage();
+
+                    throw new FileManagerException("Se encontró un error en la información del Excel, en el campo: "
+                            .concat(campo).concat(", para el formulario N° "+form.getIndex())
+                            .concat(".\nError: " + msj).concat(". Favor de revisar y corregir la información."));
+                }
+            }
+
         }
     }
 

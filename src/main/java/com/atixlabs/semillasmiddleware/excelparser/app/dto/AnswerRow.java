@@ -1,26 +1,20 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.dto;
 
 import com.atixlabs.semillasmiddleware.excelparser.app.exception.InvalidAnswerCastException;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.exception.InvalidRowException;
 import com.atixlabs.semillasmiddleware.excelparser.row.ExcelRow;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
-import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ss.usermodel.Row;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Map;
 
 @Slf4j
 @Getter
@@ -58,7 +52,6 @@ public class AnswerRow extends ExcelRow {
 
     public boolean isEmpty(Row row){
         return row.getFirstCellNum() < 0;
-        //return surveyFormCode == null || surveyDate == null || pdv == null;
     }
 
     //we only need these fields for getting data, so we validate.
@@ -74,7 +67,7 @@ public class AnswerRow extends ExcelRow {
             return null;
         try { return Double.valueOf(answer);}
         catch (NumberFormatException e){
-            throw new InvalidAnswerCastException(getAnswerAsString(), "valor numérico");
+            throw new InvalidAnswerCastException(getAnswerAsString(), Constants.NUM_VALUE);
         }
     }
     public Long getAnswerAsLong() throws InvalidAnswerCastException {
@@ -83,7 +76,7 @@ public class AnswerRow extends ExcelRow {
 
         try {return Long.valueOf(answer);}
         catch (NumberFormatException e){
-            throw new InvalidAnswerCastException(getAnswerAsString(), "valor numérico");
+            throw new InvalidAnswerCastException(getAnswerAsString(), Constants.NUM_VALUE);
         }
     }
     public Integer getAnswerAsInteger() throws InvalidAnswerCastException {
@@ -91,7 +84,7 @@ public class AnswerRow extends ExcelRow {
             return null;
         try {return Integer.valueOf(answer);}
         catch (NumberFormatException e){
-            throw new InvalidAnswerCastException(getAnswerAsString(), "valor numérico");
+            throw new InvalidAnswerCastException(getAnswerAsString(), Constants.NUM_VALUE);
         }
     }
     public LocalDate getAnswerAsDate(String datePattern) throws InvalidAnswerCastException {
@@ -116,11 +109,11 @@ public class AnswerRow extends ExcelRow {
         String dateString = null;
         String datePattern = "dd/MM/yy";
         try {
-            dateString = getCellStringValue(row, cellIndex, description).replaceAll("'", "").trim();
+            dateString = getCellStringValue(row, cellIndex, description).replace("'", "").trim();
             return LocalDate.parse(dateString, DateTimeFormatter.ofPattern(datePattern));
         }
         catch (Exception e){
-           // throw new InvalidAnswerCastException(getAnswerAsString(), "fecha");
+           log.error("Error :", e.getMessage());
         }
         return null;
     }
@@ -137,8 +130,9 @@ public class AnswerRow extends ExcelRow {
                 return getAnswerAsLong();
             case "java.lang.Integer":
                 return getAnswerAsInteger();
+            default:
+                return null;
         }
-    return null;
     }
 
     public void setAnswer(String answer) {
@@ -159,5 +153,9 @@ public class AnswerRow extends ExcelRow {
                 ", cellIndexName='" + cellIndexName + '\'' +
                 ", cellIndexDescription='" + cellIndexDescription + '\'' +
                 '}';
+    }
+
+    private static class Constants{
+        public static final String NUM_VALUE = "valor numérico";
     }
 }

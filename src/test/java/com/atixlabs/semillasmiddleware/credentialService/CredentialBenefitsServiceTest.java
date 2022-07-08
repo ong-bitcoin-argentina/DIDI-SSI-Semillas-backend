@@ -3,8 +3,10 @@ package com.atixlabs.semillasmiddleware.credentialService;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStateCodes;
 import com.atixlabs.semillasmiddleware.app.bondarea.model.constants.LoanStatusCodes;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.RevocationReason;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.configuration.ParameterConfiguration;
 import com.atixlabs.semillasmiddleware.app.model.configuration.constants.ConfigurationCodes;
@@ -13,13 +15,11 @@ import com.atixlabs.semillasmiddleware.app.model.credential.constants.Credential
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.RevocationReason;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.*;
 import com.atixlabs.semillasmiddleware.app.service.CredentialBenefitService;
 import com.atixlabs.semillasmiddleware.app.service.CredentialStateService;
 import com.atixlabs.semillasmiddleware.app.service.PersonService;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.util.DateUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.Assert;
@@ -93,7 +93,7 @@ public class CredentialBenefitsServiceTest {
         Person holder = this.createPersonMock();
 
         try {
-            CredentialBenefits credentialBenefits =  credentialBenefitsService.buildNewBenefitsCredential(holder,holder,PersonTypesCodes.HOLDER);
+            CredentialBenefits credentialBenefits =  credentialBenefitsService.buildNewBenefitsCredential(holder,holder, PersonTypesCodes.HOLDER);
 
             Assertions.assertEquals(PersonTypesCodes.HOLDER.getCode(), credentialBenefits.getBeneficiaryType());
             Assertions.assertEquals(CredentialCategoriesCodes.BENEFIT.getCode(), credentialBenefits.getCredentialCategory());

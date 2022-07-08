@@ -1,6 +1,5 @@
 package com.atixlabs.semillasmiddleware.app.bondarea.model;
 
-import com.google.gson.annotations.SerializedName;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;

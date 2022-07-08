@@ -1,4 +1,4 @@
-package com.atixlabs.semillasmiddleware.app.model.credentialState.constants;
+package com.atixlabs.semillasmiddleware.app.model.CredentialState.constants;
 
 import java.util.Arrays;
 import java.util.Optional;
@@ -6,11 +6,11 @@ import java.util.Optional;
 public enum RevocationReasonsCodes {
 
     //this reasons are internal reasons
-    UPDATE_INTERNAL("UPDATE", "OTHER"),
-    CANCELLED("CANCELLED", "OTHER"),
+    UPDATE_INTERNAL("UPDATE", Constants.OTHER),
+    CANCELLED("CANCELLED", Constants.OTHER),
     EXPIRED_INFO("Expiracion de datos", "EXPIRATION"),
     UNLINKING("Desvinculacion", "UNLINKING"),
-    DEFAULT("DEFAULT", "OTHER"),
+    DEFAULT("DEFAULT", Constants.OTHER),
     MANUAL_UPDATE("Actualizacion Manual", "MANUAL_UPDATE");
 
 
@@ -25,7 +25,7 @@ public enum RevocationReasonsCodes {
 
     public static Optional<RevocationReasonsCodes> getByCode(String code){
         return Arrays.stream(RevocationReasonsCodes.values())
-                .filter( status_code -> status_code.getCode().equals(code))
+                .filter( statusCode -> statusCode.getCode().equals(code))
                 .findFirst();
     }
 
@@ -33,5 +33,9 @@ public enum RevocationReasonsCodes {
         return this.code;
     }
     public String getDidiCode() { return this.didiCode; }
+
+    private static class Constants{
+        public static final String OTHER = "OTHER";
+    }
 
 }

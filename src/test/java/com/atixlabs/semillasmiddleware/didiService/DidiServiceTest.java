@@ -4,35 +4,26 @@ package com.atixlabs.semillasmiddleware.didiService;
 import com.atixlabs.semillasmiddleware.app.didi.constant.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiCreateCredentialResponse;
 import com.atixlabs.semillasmiddleware.app.didi.dto.DidiCredential;
-import com.atixlabs.semillasmiddleware.app.didi.dto.DidiCredentialData;
 import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
 import com.atixlabs.semillasmiddleware.app.didi.repository.DidiAppUserRepository;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiAppUserService;
 import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
 import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.Ignore;
+import org.junit.Assert;
 import org.junit.Test;
-import org.junit.jupiter.api.Assertions;
-import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.Mockito;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.TestPropertySource;
-import org.springframework.test.context.junit4.SpringRunner;
 
 import java.time.LocalDateTime;
 import java.util.ArrayList;
-
-import static org.mockito.Mockito.*;
 
 //@RunWith(SpringRunner.class)
 @SpringBootTest
@@ -114,12 +105,15 @@ public class DidiServiceTest {
         didiCreateCredentialResponse.setStatus("success");
         ArrayList<DidiCredential> didiCredentials = new ArrayList<>();
         DidiCredential didiCredential = new DidiCredential();
-        didiCredential.set_id("ID-VALIDO-DIDI");
+        didiCredential.setId("ID-VALIDO-DIDI");
         didiCredentials.add(didiCredential);
         didiCreateCredentialResponse.setData(didiCredentials);
         return didiCreateCredentialResponse;
     }
 
-
+    @Test
+    public void getUser(){
+        Assert.assertNotNull(didiAppUserService.getDidiAppUserByDni(getAppUserMockOneMissing().get(1).getDni()));
+    }
 
 }

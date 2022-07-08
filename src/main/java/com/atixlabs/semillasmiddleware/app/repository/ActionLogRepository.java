@@ -1,7 +1,6 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
-import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;

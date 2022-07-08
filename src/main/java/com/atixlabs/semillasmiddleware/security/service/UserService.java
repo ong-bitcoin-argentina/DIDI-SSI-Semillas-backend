@@ -1,16 +1,15 @@
 package com.atixlabs.semillasmiddleware.security.service;
 
-import com.atixlabs.semillasmiddleware.security.dto.FilterUserDto;
-import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
 import com.atixlabs.semillasmiddleware.security.exceptions.ExistUserException;
 import com.atixlabs.semillasmiddleware.security.exceptions.InexistentUserException;
 import com.atixlabs.semillasmiddleware.security.exceptions.PasswordNotMatchException;
-import com.atixlabs.semillasmiddleware.security.model.Role;
-import com.atixlabs.semillasmiddleware.security.model.User;
 import com.atixlabs.semillasmiddleware.security.repository.RoleRepository;
 import com.atixlabs.semillasmiddleware.security.repository.UserRepository;
+import com.atixlabs.semillasmiddleware.security.dto.FilterUserDto;
+import com.atixlabs.semillasmiddleware.security.dto.UserEditRequest;
+import com.atixlabs.semillasmiddleware.security.model.Role;
+import com.atixlabs.semillasmiddleware.security.model.User;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.google.common.base.Strings;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -21,11 +20,9 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.PathVariable;
 
 import javax.persistence.EntityNotFoundException;
 import javax.persistence.criteria.Predicate;
-import javax.validation.constraints.Min;
 import java.util.*;
 
 import static com.atixlabs.semillasmiddleware.security.util.ObjectMapper.mergeObjects;
@@ -33,13 +30,6 @@ import static com.atixlabs.semillasmiddleware.security.util.ObjectMapper.mergeOb
 @Service
 @Slf4j
 public class UserService {
-
-    private static final String role_code_frontend = "role";
-
-    private static final String type_code_frontend = "type";
-
-    private static final String countryOrZone_code_frontend = "selectedKey";
-
     @Autowired
     UserRepository repository;
 
@@ -72,13 +62,13 @@ public class UserService {
         }).orElseThrow(() -> new EntityNotFoundException("User not exist."));
     }
 
-    public User createOrEdit(UserEditRequest userResponse) throws ExistUserException {
+    public User createOrEdit(UserEditRequest userResponse) throws InexistentUserException, ExistUserException, PasswordNotMatchException {
         User user;
         if (userResponse.getId() != null) {
-            user = repository.findById(userResponse.getId()).orElseThrow(() -> new RuntimeException());
+            user = repository.findById(userResponse.getId()).orElseThrow(RuntimeException::new);
             if (isNullOrEmpty(userResponse.getPassword())
                     || !passwordEncoder.matches(userResponse.getPassword(), user.getPassword())) {
-                throw new RuntimeException();
+                throw new InexistentUserException();
             }
         }
 
@@ -92,7 +82,7 @@ public class UserService {
         if (isNullOrEmpty(userResponse.getNewPassword())
                 || isNullOrEmpty(userResponse.getConfirmNewPassword())
                 || !userResponse.getNewPassword().equals(userResponse.getConfirmNewPassword())) {
-            throw new RuntimeException("Password not found or not same.");
+            throw new PasswordNotMatchException("Password not found or not same.");
         }
 
         Role role = roleRepository.findByCode(userResponse.getRole());
@@ -117,10 +107,10 @@ public class UserService {
         Role role = null;
 
         if (id == null || id < 1) return Optional.empty();
-        existentUser = repository.findById(id).orElseThrow(() -> new InexistentUserException());
+        existentUser = repository.findById(id).orElseThrow(InexistentUserException::new);
 
-        if (updates.containsKey(role_code_frontend)) {
-            role = roleRepository.findByCode(updates.get(role_code_frontend).toString());
+        if (updates.containsKey(Constants.ROLE_CODE_FRONTEND)) {
+            role = roleRepository.findByCode(updates.get(Constants.ROLE_CODE_FRONTEND).toString());
         }
 
         if (updates.containsKey("password")
@@ -130,26 +120,24 @@ public class UserService {
                     String.format(
                             "Error changed password. Password not match for user %s",
                             existentUser.getUsername()));
-            throw new PasswordNotMatchException();
+            throw new PasswordNotMatchException("Password not found or not same.");
         }
-        if (updates.containsKey("newPassword") && updates.containsKey("confirmNewPassword")) {
-            if (updates.get("newPassword").equals(updates.get("confirmNewPassword"))) {
-                password = Optional.of(passwordEncoder.encode(updates.get("newPassword").toString()));
-            }
+        if (updates.containsKey(Constants.NEW_PASSWORD) && updates.containsKey(Constants.CONFIRM_PASSWORD)
+                && updates.get(Constants.NEW_PASSWORD).equals(updates.get(Constants.CONFIRM_PASSWORD))) {
+                password = Optional.of(passwordEncoder.encode(updates.get(Constants.NEW_PASSWORD).toString()));
         }
 
-        Optional<User> tempUser = repository.findByUsername(updates.get("username").toString());
-        if (updates.containsKey("username")
+        Optional<User> tempUser = repository.findByUsername(updates.get(Constants.USERNAME).toString());
+        if (updates.containsKey(Constants.USERNAME)
                 && tempUser.isPresent()
-                && updates.get("username").equals(existentUser.getUsername())
+                && updates.get(Constants.USERNAME).equals(existentUser.getUsername())
                 && !tempUser.get().getId().equals(id)) {
             log.warn("Username already exists");
             return Optional.empty();
         }
 
         User updateUser;
-        updates = parseUpdatesForUser(updates);
-        updateUser = new ObjectMapper().convertValue(updates, User.class);
+        updateUser = new ObjectMapper().convertValue(parseUpdatesForUser(updates), User.class);
         if (role != null) updateUser.setRole(role);
         password.ifPresent(updateUser::setPassword);
 
@@ -165,11 +153,11 @@ public class UserService {
     }
 
     private Map<String, Object> parseUpdatesForUser(Map<String, Object> updates) {
-        updates.remove(type_code_frontend);
-        updates.remove(countryOrZone_code_frontend);
-        updates.remove(role_code_frontend);
-        updates.remove("newPassword");
-        updates.remove("confirmNewPassword");
+        updates.remove(Constants.TYPE_CODE_FRONTEND);
+        updates.remove(Constants.COUNTRY_OR_ZONE_CODE_FRONTEND);
+        updates.remove(Constants.ROLE_CODE_FRONTEND);
+        updates.remove(Constants.NEW_PASSWORD);
+        updates.remove(Constants.CONFIRM_PASSWORD);
         return updates;
     }
 
@@ -187,7 +175,7 @@ public class UserService {
                                 cb.or(
                                         cb.like(cb.upper(root.get("name")), search),
                                         cb.like(cb.upper(root.get("lastName")), search),
-                                        cb.like(cb.upper(root.get("username")), search)));
+                                        cb.like(cb.upper(root.get(Constants.USERNAME)), search)));
                     }
                     if (filter.getId().isPresent()) {
                         predicates.add(cb.notEqual(root.get("id"), filter.getId().get()));
@@ -217,6 +205,17 @@ public class UserService {
     }
 
     public User findOne(Long id) {
-        return repository.findById(id).orElseThrow(() -> new RuntimeException());
+        return repository.findById(id).orElseThrow(RuntimeException::new);
+    }
+
+    private static class Constants{
+        public static final String ROLE_CODE_FRONTEND = "role";
+
+        public static final String TYPE_CODE_FRONTEND = "type";
+
+        public static final String COUNTRY_OR_ZONE_CODE_FRONTEND = "selectedKey";
+        public static final String NEW_PASSWORD = "newPassword";
+        public static final String CONFIRM_PASSWORD = "confirmNewPassword";
+        public static final String USERNAME = "username";
     }
 }

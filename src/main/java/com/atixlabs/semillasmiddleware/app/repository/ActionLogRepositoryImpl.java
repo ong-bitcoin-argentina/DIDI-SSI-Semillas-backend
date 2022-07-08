@@ -12,11 +12,12 @@ import javax.persistence.PersistenceContext;
 import javax.persistence.TypedQuery;
 import javax.persistence.criteria.*;
 import java.time.Instant;
-import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 
 public class ActionLogRepositoryImpl implements  ActionLogRepositoryCustom {
+
+    private String executionDateTime = "executionDateTime";
 
     @PersistenceContext
     protected EntityManager em;
@@ -47,24 +48,22 @@ public class ActionLogRepositoryImpl implements  ActionLogRepositoryCustom {
         }
 
         if (dateFrom != null) {
-            predicates.add(cb.greaterThanOrEqualTo(actionLog.get("executionDateTime"), dateFrom));
+            predicates.add(cb.greaterThanOrEqualTo(actionLog.get(executionDateTime), dateFrom));
         }
 
         if (dateTo != null) {
-            predicates.add(cb.lessThanOrEqualTo(actionLog.get("executionDateTime"), dateTo));
+            predicates.add(cb.lessThanOrEqualTo(actionLog.get(executionDateTime), dateTo));
         }
-
-  //      Long quantityResults =  this.getTotalCountWithFilters(credentialType,name, dniBeneficiary, dniHolder,idDidiCredential,  lastUpdate, credentialStates);
 
         cq.where(predicates.toArray(new Predicate[0]));
 
         //order by updated field ASC
-        Order lastUpdateOrder = cb.desc(actionLog.get("executionDateTime"));
+        Order lastUpdateOrder = cb.desc(actionLog.get(executionDateTime));
         cq.orderBy(lastUpdateOrder);
 
         if(page != null) {
             TypedQuery<ActionLog> typedQuery = em.createQuery(cq);
-            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber()) * page.getPageSize()));
+            typedQuery.setFirstResult(Math.toIntExact((page.getPageNumber()) * (long) page.getPageSize()));
             typedQuery.setMaxResults(page.getPageSize());
             return new PageImpl<>(typedQuery.getResultList(), page, 2);
         }else

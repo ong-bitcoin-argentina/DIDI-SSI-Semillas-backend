@@ -5,7 +5,6 @@ import com.poiji.annotation.ExcelRow;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.annotation.Nullable;
 import javax.validation.constraints.*;
 
 @Getter
@@ -147,7 +146,6 @@ public class Form {
     private String parentescoReferente;
 
     @ExcelCellName(value = "Parentesco_Otro_Referente", mandatory = false)
-    @NotBlank @NotEmpty
     private String parentescoOtroReferente;
 
     @ExcelCellName(value = "Telefono_Referente", mandatory = false)
@@ -176,7 +174,6 @@ public class Form {
     private String tieneTalleresBeneficiario;
 
     @ExcelCellName(value = "Taller_Realizado_Beneficiario", mandatory = false)
-    @NotBlank @NotEmpty
     private String tallerRealizadoBeneficiario;
 
     @ExcelCellName(value = "Cursos_Beneficiario", mandatory = false)

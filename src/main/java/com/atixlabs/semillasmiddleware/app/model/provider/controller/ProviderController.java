@@ -9,12 +9,8 @@ import com.atixlabs.semillasmiddleware.app.model.provider.exception.InexistentPr
 import com.atixlabs.semillasmiddleware.app.model.provider.model.Provider;
 import com.atixlabs.semillasmiddleware.app.model.provider.service.ProviderService;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -23,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -31,7 +26,7 @@ import java.util.stream.Collectors;
 @Slf4j
 @RestController
 @RequestMapping(ProviderController.URL_MAPPING)
-@CrossOrigin(origins = "*", methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
+@CrossOrigin(origins = {"http://localhost:8080", "${didi.server.url}"}, methods= {RequestMethod.GET,RequestMethod.POST, RequestMethod.PATCH})
 public class ProviderController {
     public static final String URL_MAPPING = "/providers";
 
@@ -79,7 +74,7 @@ public class ProviderController {
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @GetMapping("/{id}")
     @ResponseStatus(HttpStatus.OK)
-    public ResponseEntity<?> findProvider(@PathVariable @Min(1) Long id){
+    public ResponseEntity<Object> findProvider(@PathVariable @Min(1) Long id){
 
         try {
             ProviderDto provider = providerService.findById(id).toDto();
@@ -91,7 +86,7 @@ public class ProviderController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/disable/{id}")
-    public ResponseEntity<?> disableProvider(@PathVariable @Min(1) Long providerId){
+    public ResponseEntity<String> disableProvider(@PathVariable @Min(1) Long providerId){
         try {
             providerService.disable(providerId);
         }catch (InexistentProviderException ipe){
@@ -104,14 +99,14 @@ public class ProviderController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PatchMapping("/{id}")
-    public ResponseEntity<?> updateProvider(@PathVariable @Min(1) Long id,
+    public ResponseEntity<String> updateProvider(@PathVariable @Min(1) Long id,
                                             @RequestBody ProviderUpdateRequest providerUpdateRequest){
         try {
             providerService.update(id, providerUpdateRequest);
         }catch (InexistentProviderException ipe){
             return ResponseEntity.badRequest().body("There is no provider with id: "+id);
         }catch (InexistentCategoryException ice){
-            return ResponseEntity.badRequest().body("There is no category with id: "+providerUpdateRequest.getCategoryId().get());
+            return ResponseEntity.badRequest().body("There is no category with id: "+providerUpdateRequest.getCategoryId().orElse(null));
         }
 
         return ResponseEntity.ok().body("updated");

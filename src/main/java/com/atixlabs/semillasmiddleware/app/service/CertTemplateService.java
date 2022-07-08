@@ -1,8 +1,8 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
+import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import com.atixlabs.semillasmiddleware.app.didi.model.CertTemplate;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.repository.CertTemplateRepository;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;

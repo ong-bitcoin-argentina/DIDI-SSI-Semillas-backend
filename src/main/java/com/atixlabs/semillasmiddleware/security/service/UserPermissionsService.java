@@ -1,10 +1,10 @@
 package com.atixlabs.semillasmiddleware.security.service;
 
+import com.atixlabs.semillasmiddleware.security.exceptions.InactiveUserException;
 import com.atixlabs.semillasmiddleware.security.dto.AuthenticatedUserDto;
 import com.atixlabs.semillasmiddleware.security.dto.MenuDto;
 import com.atixlabs.semillasmiddleware.security.dto.MenuItemDto;
 import com.atixlabs.semillasmiddleware.security.dto.NavbarUserDto;
-import com.atixlabs.semillasmiddleware.security.exceptions.InactiveUserException;
 import com.atixlabs.semillasmiddleware.security.model.Menu;
 import com.atixlabs.semillasmiddleware.security.model.Permission;
 import com.atixlabs.semillasmiddleware.security.model.Role;

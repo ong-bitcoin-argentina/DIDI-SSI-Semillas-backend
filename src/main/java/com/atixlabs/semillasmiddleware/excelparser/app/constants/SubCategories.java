@@ -4,28 +4,28 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum SubCategories {
-    beneficiario("Domicilio", "Otro Domicilio", "Contacto Referente", "Nivel de Instrucción"),
-    grupoFamiliar("Datos Cónyuge"),
-    Child("Hijo"),
-    FamilyMember("Otro Miembro de la Familia"),
-    FamilyMemberIncome("Ingresos Miembro Familiar"),
-    FamilyCredit("Crédito Familiar Actual"),
-    EntrepreneurshipCredit("Crédito del Emprendimiento"),
+    BENEFICIARIO("Domicilio", "Otro Domicilio", "Contacto Referente", "Nivel de Instrucción"),
+    GRUPOFAMILIAR("Datos Cónyuge"),
+    CHILD("Hijo"),
+    FAMILYMEMBER("Otro Miembro de la Familia"),
+    FAMILYMEMBERINCOME("Ingresos Miembro Familiar"),
+    FAMILYCREDIT("Crédito Familiar Actual"),
+    ENTREPRENEURSHIPCREDIT("Crédito del Emprendimiento"),
 
-    ingresos("Ingresos del Solicitante" ,"Total de Ingresos de la Familia", "Ingresos Totales del Solicitante y su Familia"),
-    vivienda("Servicios Básicos"),
-    datosEmprendimiento("Dirección"),
-    ingresos_egresos("Situación Patrimonial", "Ingresos", "Egresos", "Relación Ingresos/Egresos", "Resumen de Egresos"),
-    finanzasFamiliares("Ingresos Mensuales", "Egresos Familiares", "Créditos Familiares Impagos", "Excedente Familiar", "Resumen Créditos Familiares Actuales"
+    INGRESOS("Ingresos del Solicitante" ,"Total de Ingresos de la Familia", "Ingresos Totales del Solicitante y su Familia"),
+    VIVIENDA("Servicios Básicos"),
+    DATOSEMPRENDIMIENTO("Dirección"),
+    INGRESOS_EGRESOS("Situación Patrimonial", "Ingresos", "Egresos", "Relación Ingresos/Egresos", "Resumen de Egresos"),
+    FINANZASFAMILIARES("Ingresos Mensuales", "Egresos Familiares", "Créditos Familiares Impagos", "Excedente Familiar", "Resumen Créditos Familiares Actuales"
             , "Egresos Mensuales");
 
-    private final List<String> subCategories;
+    private final List<String> subCategoriesLst;
 
     private SubCategories(String... fields){
-        subCategories = Arrays.asList(fields);
+        subCategoriesLst = Arrays.asList(fields);
     }
 
     public String getSubCategories(int index){
-        return subCategories.get(index);
+        return subCategoriesLst.get(index);
     }
 }

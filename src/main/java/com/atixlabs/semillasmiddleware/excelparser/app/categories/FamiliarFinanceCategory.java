@@ -1,10 +1,10 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.FamiliarFinanceQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
@@ -69,7 +69,7 @@ public class FamiliarFinanceCategory implements Category {
         this.exitFit = new AnswerDto(FamiliarFinanceQuestion.EXIT_FIT);
         this.exitTaxes = new AnswerDto(FamiliarFinanceQuestion.EXIT_TAXES);
         this.exitClothing = new AnswerDto(FamiliarFinanceQuestion.EXIT_CLOTHING);
-        this.exitRent = new AnswerDto(FamiliarFinanceQuestion.EXIT_RENT);;
+        this.exitRent = new AnswerDto(FamiliarFinanceQuestion.EXIT_RENT);
         this.exitOil = new AnswerDto(FamiliarFinanceQuestion.EXIT_OIL);
         this.exitCredits = new AnswerDto(FamiliarFinanceQuestion.EXIT_CREDITS);
         this.exitLeisure = new AnswerDto(FamiliarFinanceQuestion.EXIT_LEISURE);
@@ -237,7 +237,5 @@ public class FamiliarFinanceCategory implements Category {
 
     public Boolean isModification() { return true; }
 
-    public void setIsModification(AnswerDto isModification) {
-
-    }
+    public void setIsModification(AnswerDto isModification) {/* ** */}
 }

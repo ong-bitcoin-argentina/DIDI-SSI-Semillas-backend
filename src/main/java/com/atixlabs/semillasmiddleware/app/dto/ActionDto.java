@@ -1,13 +1,10 @@
 package com.atixlabs.semillasmiddleware.app.dto;
 
 import com.atixlabs.semillasmiddleware.app.model.action.ActionLog;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.format.annotation.DateTimeFormat;
 
 import java.time.Instant;
-import java.time.LocalDateTime;
 
 @Getter
 @Setter
@@ -26,7 +23,7 @@ public class ActionDto {
 
     private String message;
 
-    public ActionDto(){};
+    public ActionDto(){}
 
     public ActionDto(ActionLog actionLog){
         this.id = actionLog.getId();

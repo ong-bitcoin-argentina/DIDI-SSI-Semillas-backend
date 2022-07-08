@@ -1,20 +1,16 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
 import com.atixlabs.semillasmiddleware.app.bondarea.model.Loan;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.PersonTypesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.constants.RevocationReasonsCodes;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.model.beneficiary.Person;
+import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.constants.RevocationReasonsCodes;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service
@@ -23,7 +19,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
     protected PersonService personService;
 
     @Autowired
-    public CredentialBenefitCommonService(PersonService personService, CredentialStateService credentialStateService, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository) {
+    protected CredentialBenefitCommonService(PersonService personService, CredentialStateService credentialStateService, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository) {
         super(credentialStateService, didiService, revocationReasonRepository, credentialRepository);
 
         this.personService = personService;
@@ -72,7 +68,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
 
                     credentialBenefitsHolder = opCredentialBenefitsHolder.get();
 
-                    if (this.isCredentialRevoked(credentialBenefitsHolder)) {
+                    if (Boolean.TRUE.equals(this.isCredentialRevoked(credentialBenefitsHolder))) {
 
                         //Holder
                         T newCredentialBenefitsHolder = this.buildNewHolderBenefitsCredential(holder);
@@ -98,7 +94,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
             }
 
         } else { //Holder not exists
-            String message = String.format("Can't create Benefit Credential, Holder dni %d not exists", loan.getDateFirstInstalment());
+            String message = String.format("Can't create Benefit Credential, Holder dni %d not exists", loan.getDniPerson());
             this.getLog().error(message);
             throw new CredentialException(message);
         }
@@ -147,7 +143,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
 
             T credentialBenefits = opCredentialBenefits.get();
 
-            if (!this.isCredentialRevoked(credentialBenefits)) {
+            if (Boolean.FALSE.equals(!this.isCredentialRevoked(credentialBenefits))) {
 
                 this.revokeComplete(credentialBenefits, RevocationReasonsCodes.DEFAULT.getCode());
 
@@ -184,7 +180,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
                 T credentialBenefits = opCredentialBenefitsHolder.get();
 
                 //State of Credential benefit family depends of credential benefit holder, must be the same state, only control holder state
-                if (this.isCredentialRevoked(credentialBenefits)) {
+                if (Boolean.TRUE.equals(this.isCredentialRevoked(credentialBenefits))) {
                     this.createCredentialsBenefitsHolderForNewLoan(loan);
                 }
 
@@ -195,11 +191,7 @@ public abstract class CredentialBenefitCommonService<T extends Credential> exten
 
     abstract Optional<T> getCredentialBenefitsHolder(Long holderDni);
 
-   // abstract Optional<T> getCredentialBenefitsFamiliy(Long holderDni, Long beneficiary);
-
     abstract T buildNewHolderBenefitsCredential(Person holder) throws CredentialException;
-
-   // abstract T buildNewFamiliyBenefitsCredential(Person holder, Person beneficiary) throws CredentialException;
 
     abstract T saveCredentialBenefit(T credential);
 

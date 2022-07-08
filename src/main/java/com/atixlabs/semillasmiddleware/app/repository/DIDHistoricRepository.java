@@ -1,16 +1,15 @@
 package com.atixlabs.semillasmiddleware.app.repository;
 
-import com.atixlabs.semillasmiddleware.app.model.DIDHistoric.DIDHisotoric;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
+import com.atixlabs.semillasmiddleware.app.model.didiHistoric.DidiHistoric;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
 import java.util.Optional;
 
 @Repository
-public interface DIDHistoricRepository extends JpaRepository<DIDHisotoric, Long> {
+public interface DIDHistoricRepository extends JpaRepository<DidiHistoric, Long> {
 
-    Optional<DIDHisotoric> findByIdPersonAndIsActive(Long idPerson, boolean active);
+    Optional<DidiHistoric> findByIdPersonAndIsActive(Long idPerson, boolean active);
 
 
 }

@@ -40,7 +40,7 @@ public class SwaggerConfiguration {
 
     private SecurityContext securityContext() {
         return SecurityContext.builder().securityReferences(defaultAuth())
-                .forPaths(PathSelectors.any()).build();
+                .forPaths(PathSelectors.any()).build();//NOSONAR not used in secure contexts
     }
 
     private List<SecurityReference> defaultAuth() {

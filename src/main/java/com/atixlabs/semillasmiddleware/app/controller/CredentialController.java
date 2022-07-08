@@ -1,12 +1,10 @@
 package com.atixlabs.semillasmiddleware.app.controller;
 
+import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
+import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
 import com.atixlabs.semillasmiddleware.app.dto.ApiResponse;
 import com.atixlabs.semillasmiddleware.app.dto.CredentialDto;
 import com.atixlabs.semillasmiddleware.app.dto.RevokeRequestDto;
-import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.exceptions.CredentialNotExistsException;
-import com.atixlabs.semillasmiddleware.app.exceptions.PersonDoesNotExistsException;
-import com.atixlabs.semillasmiddleware.app.model.credential.Credential;
 import com.atixlabs.semillasmiddleware.app.model.credential.ShareCredentialRequest;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
 import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialTypesCodes;
@@ -31,11 +29,7 @@ import javax.validation.Valid;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
 import java.io.IOException;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @RestController
@@ -85,9 +79,10 @@ public class CredentialController {
                                           @RequestParam(required = false) List<String> credentialState) {
 
         Page<CredentialDto> credentials;
+        List<String> personData = Arrays.asList(new String[]{name, surname, dniBeneficiary, creditHolderDni});
         try {
             log.info("find credentials "+credentialType+" "+name+" "+surname+" "+dniBeneficiary+" "+idDidiCredential+" "+lastUpdate+" "+credentialState.get(0));
-            credentials = credentialService.findCredentials(credentialType, name, surname, dniBeneficiary, creditHolderDni, idDidiCredential, lastUpdate, credentialState, page);
+            credentials = credentialService.findCredentials(credentialType, personData, idDidiCredential, lastUpdate, credentialState, page);
         } catch (Exception e) {
             log.error("There has been an error searching for credentials with the filters "+ credentialType + " " + name + " " + dniBeneficiary + " " + idDidiCredential + " " +
                     credentialState.toString(), e);
@@ -110,7 +105,7 @@ public class CredentialController {
     @GetMapping("/types")
     @ResponseStatus(HttpStatus.OK)
     public List<String> findCredentialTypes() {
-        return Arrays.stream(CredentialTypesCodes.values()).map(state -> state.getCode()).collect(Collectors.toList());
+        return Arrays.stream(CredentialTypesCodes.values()).map(CredentialTypesCodes::getCode).collect(Collectors.toList());
     }
 
     @GetMapping("/revocation-reasons")
@@ -125,33 +120,8 @@ public class CredentialController {
     public ResponseEntity<String> revokeCredential(@PathVariable @NotNull @Min(1) Long idCredential,
                                                    @PathVariable @NotNull @Min(1) Long idReason,
                                                    @RequestBody RevokeRequestDto revokeDto) {
-        Optional<String> opRevocationReason = credentialService.getReasonFromId(idReason);
-        if (opRevocationReason.isPresent()) {
-            Optional<Credential> credentialToRevoke = credentialService.getCredentialById(idCredential);
-            if (credentialToRevoke.isPresent()) {
-                if (credentialToRevoke.get().isManuallyRevocable()) {
-                    //possibilities -> Emprendimiento, Vivienda, identididad familiar, identidad titular (only the last one have a business logic, the others only revoke itself)
-                    boolean revokeOk = false;
-                    try {
-                        revokeOk = credentialService.revokeCredential(idCredential, opRevocationReason.get(), revokeDto.getRevokeOnlyThisCredential());
-                    } catch (CredentialException e) {
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + idCredential);
-                    }
-                    if (revokeOk)
-                        return ResponseEntity.status(HttpStatus.OK).body("Revoked successfully");
-                    else
-                        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("Error trying to revoke credential with id: " + idCredential);
-                } else
-                    return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Credential with id: " + idCredential + " is not manually revocable");
-            } else {
-                log.error("There is no credential with id: " + idCredential);
-                return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("There is no credential with id: " + idCredential);
-            }
-        } else
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Is not possible to revoke with reason " + idReason);
+        return credentialService.revokeCredentialProcess(idReason, idCredential, revokeDto);
     }
-
-
 
     @PostMapping("/generate")
     @ResponseStatus(HttpStatus.OK)
@@ -170,7 +140,7 @@ public class CredentialController {
 
     @PreAuthorize("hasRole('ROLE_ADMIN')")
     @PostMapping("/share")
-    public ResponseEntity notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
+    public ResponseEntity<ApiResponse> notifyProvider(@Valid @RequestBody ShareCredentialRequest shareCredentialRequest){
         if (!shareCredentialRequest.getCustomProviderEmail().isPresent() && !shareCredentialRequest.getProviderId().isPresent())
             return ResponseEntity.badRequest().body(ApiResponse.error()
                     .setBody("You must either specify a provider id or an email")

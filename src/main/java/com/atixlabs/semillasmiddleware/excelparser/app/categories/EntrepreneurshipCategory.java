@@ -1,25 +1,20 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
-import com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.EntrepreneurshipQuestion;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.swing.text.html.Option;
 import java.time.LocalDate;
 import java.util.Arrays;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
-
-import static com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus.IS_MODIFICATION;
 
 @Setter
 @Getter
@@ -162,28 +157,28 @@ public class EntrepreneurshipCategory implements Category {
         switch (questionMatch){
             //headers
             case ENTREPRENEURSHIP_DATA:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.entrepreneurshipData);
             case ACTIVITY_DEV:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.activityDev);
             case WORK_TIME:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.workTime);
             case ENTRY_PER_FORTNIGHT:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.entryPerFortnight);
             case ENTRY_PER_WEEK:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.entryPerWeek);
             case ENTRIES:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.entries);
             case EXITS:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.exits);
             case ENTRIES_EXITS_RELATIONSHIP:
-                answerRow.setAnswer("SUBCATEGORY");
+                answerRow.setAnswer(Constants.SUBCATEGORY);
                 return Optional.of(this.entriesExitsRelationship);
             //Questions
             case TYPE:
@@ -340,9 +335,9 @@ public class EntrepreneurshipCategory implements Category {
                 "workTime='" + workTime + '\'' +
                 "entryPerFortnight='" + entryPerFortnight + '\'' +
                 "entryPerWeek='" + entryPerWeek + '\'' +
-                "entries='" + entries + '\'' +
-                "entries='" + exits + '\'' +
-                "entries='" + entriesExitsRelationship + '\'' +
+                Constants.ENTRIES + entries + '\'' +
+                Constants.ENTRIES + exits + '\'' +
+                Constants.ENTRIES + entriesExitsRelationship + '\'' +
                 ", type=" + type +
                 ", activityStartDate=" + activityStartDate +
                 ", mainActivity=" + mainActivity +
@@ -389,23 +384,25 @@ public class EntrepreneurshipCategory implements Category {
 
     @Override
     public String getHtmlFromTemplate(String rowTemplate, String subCategoryTemplate, String subcategoryParam, String questionParam, String answerParam) {
-        String html="";
+        StringBuilder html= new StringBuilder();
 
         List<AnswerDto> answerDtos = this.getAnswersList();
 
         for (AnswerDto answer : answerDtos) {
 
-            if (answer.getQuestion() != null) {// && answer.getAnswer() != null) {
+            if (answer.getQuestion() != null) {
                 String ans = String.valueOf(Optional.ofNullable(answer.getAnswer()).orElse(""));
-                if (ans.equals("SUBCATEGORY")) {
-                    html += subCategoryTemplate
-                            .replace(subcategoryParam, answer.getQuestion().getQuestionName());
-                } else html += rowTemplate
-                        .replace(questionParam, answer.getQuestion().getQuestionName())
-                        .replace(answerParam, ans);
+                if (ans.equals(Constants.SUBCATEGORY)) {
+                    html.append(subCategoryTemplate
+                            .replace(subcategoryParam, answer.getQuestion().getQuestionName()));
+                } else{
+                    html.append(rowTemplate
+                            .replace(questionParam, answer.getQuestion().getQuestionName())
+                            .replace(answerParam, ans));
+                }
             }
         }
-        return html;
+        return html.toString();
     }
 
     @Override
@@ -421,5 +418,10 @@ public class EntrepreneurshipCategory implements Category {
                 entriesExitsRelationship, totalEntry, totalExit, entryExitRelationship, entryExitRelationshipFortnight,
                 projection, facebook, photo, isModification
         );
+    }
+
+    private static class Constants{
+        public static final String SUBCATEGORY = "SUBCATEGORY";
+        public static final String ENTRIES = "entries='";
     }
 }

@@ -1,12 +1,11 @@
 package com.atixlabs.semillasmiddleware.excelparser.app.categories;
 
+import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.Categories;
 import com.atixlabs.semillasmiddleware.excelparser.app.constants.DidiSyncStatus;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerDto;
 import com.atixlabs.semillasmiddleware.excelparser.app.dto.AnswerRow;
-import com.atixlabs.semillasmiddleware.excelparser.dto.ProcessExcelFileResult;
 import com.atixlabs.semillasmiddleware.util.StringUtil;
-import org.checkerframework.checker.units.qual.A;
 
 import java.util.Arrays;
 import java.util.LinkedList;
@@ -41,7 +40,7 @@ public class DwellingCategory implements Category {
     AnswerDto numberOfEnvironments; //cantidad de ambientes
     AnswerDto rental; //monto alquiler
 
-    public DwellingCategory(String categoryUniqueName, Categories category){
+    public DwellingCategory(String categoryUniqueName){
         this.description = new AnswerDto(DidiSyncStatus.DESCRIPTION);
         this.brick= new AnswerDto(DidiSyncStatus.BRICK);
         this.lock= new AnswerDto(DidiSyncStatus.LOCK);

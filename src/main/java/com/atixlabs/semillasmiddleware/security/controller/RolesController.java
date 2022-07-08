@@ -1,7 +1,7 @@
 package com.atixlabs.semillasmiddleware.security.controller;
 
-import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.atixlabs.semillasmiddleware.security.repository.RoleRepository;
+import com.atixlabs.semillasmiddleware.security.model.Role;
 import com.google.common.collect.Lists;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,7 +16,7 @@ import java.util.Collection;
 @Validated
 @RequestMapping(RolesController.URL_MAPPING)
 @CrossOrigin(
-    origins = "*",
+    origins = {"http://localhost:8080", "${didi.server.url}"},
     methods = {RequestMethod.GET, RequestMethod.POST})
 public class RolesController {
 

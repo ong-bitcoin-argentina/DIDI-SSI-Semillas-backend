@@ -1,17 +1,15 @@
 package com.atixlabs.semillasmiddleware.app.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
 import com.atixlabs.semillasmiddleware.app.exceptions.CredentialException;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialBenefits;
-import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
-import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialStatesCodes;
-import com.atixlabs.semillasmiddleware.app.model.credentialState.CredentialState;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialIdentityRepository;
 import com.atixlabs.semillasmiddleware.app.repository.CredentialRepository;
 import com.atixlabs.semillasmiddleware.app.repository.RevocationReasonRepository;
+import com.atixlabs.semillasmiddleware.app.didi.model.DidiAppUser;
+import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
+import com.atixlabs.semillasmiddleware.app.model.credential.CredentialIdentity;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialCategoriesCodes;
+import com.atixlabs.semillasmiddleware.app.model.credential.constants.CredentialRelationHolderType;
+import com.atixlabs.semillasmiddleware.app.model.CredentialState.CredentialState;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
 import org.springframework.stereotype.Service;
@@ -27,7 +25,7 @@ public class CredentialIdentityService extends CredentialCommonService {
     private CredentialIdentityRepository credentialIdentityRepository;
 
 
-    public CredentialIdentityService( CredentialStateService credentialStateService, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository, CredentialIdentityRepository credentialIdentityRepository){
+    public CredentialIdentityService(CredentialStateService credentialStateService, DidiService didiService, RevocationReasonRepository revocationReasonRepository, CredentialRepository credentialRepository, CredentialIdentityRepository credentialIdentityRepository){
         super(credentialStateService, didiService, revocationReasonRepository, credentialRepository);
         this.credentialIdentityRepository = credentialIdentityRepository;
     }
@@ -88,7 +86,7 @@ public class CredentialIdentityService extends CredentialCommonService {
         List<CredentialIdentity> asHolder = this.getCredentialIdentityActivesForDniAndTypeHolder(dni);
         List<CredentialIdentity> asFamily = this.getCredentialIdentityActivesForDniAndTypeFamiliy(dni);
 
-        List<CredentialIdentity> credentials = new ArrayList<CredentialIdentity>();
+        List<CredentialIdentity> credentials = new ArrayList<>();
 
         if(asHolder != null)
             credentials.addAll(asHolder);
@@ -102,13 +100,13 @@ public class CredentialIdentityService extends CredentialCommonService {
     public List<CredentialIdentity> getCredentialIdentityActivesForDniAndTypeFamiliy(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialIdentityRepository.findByBeneficiaryDniAndCredentialStateAndRelationWithCreditHolder(dni, activeDidiState.get(), CredentialRelationHolderType.KINSMAN.getCode());
+        return credentialIdentityRepository.findByBeneficiaryDniAndCredentialStateAndRelationWithCreditHolder(dni, activeDidiState.orElse(new CredentialState()), CredentialRelationHolderType.KINSMAN.getCode());
     }
 
     public List<CredentialIdentity> getCredentialIdentityActivesForDniAndTypeHolder(Long dni) throws CredentialException {
         Optional<CredentialState> activeDidiState = credentialStateService.getCredentialActiveState();
 
-        return credentialIdentityRepository.findByCreditHolderDniAndCredentialStateAndRelationWithCreditHolder(dni, activeDidiState.get(), CredentialRelationHolderType.HOLDER.getCode());
+        return credentialIdentityRepository.findByCreditHolderDniAndCredentialStateAndRelationWithCreditHolder(dni, activeDidiState.orElse(new CredentialState()), CredentialRelationHolderType.HOLDER.getCode());
     }
 
 

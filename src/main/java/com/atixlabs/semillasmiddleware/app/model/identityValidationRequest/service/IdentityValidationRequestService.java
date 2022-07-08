@@ -1,15 +1,13 @@
 package com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.service;
 
-import com.atixlabs.semillasmiddleware.app.didi.service.DidiService;
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RejectReason;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.constant.RequestState;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
+import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
+import com.atixlabs.semillasmiddleware.app.service.DidiServerService;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationFilter;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.IdentityValidationRequestDto;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.dto.StatusChangeDto;
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.exceptions.InexistentIdentityValidationRequestException;
 import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.model.IdentityValidationRequest;
-import com.atixlabs.semillasmiddleware.app.model.identityValidationRequest.repository.IdentityValidationRequestRepository;
-import com.atixlabs.semillasmiddleware.app.service.DidiServerService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

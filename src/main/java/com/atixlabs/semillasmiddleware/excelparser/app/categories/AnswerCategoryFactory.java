@@ -7,31 +7,20 @@ import org.springframework.stereotype.Service;
 import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @Slf4j
 @Service
 public class AnswerCategoryFactory {
-    /*
-    public static final Integer AMOUNT_CHILDREN = 11;
-    public static final Integer AMOUNT_KINSMAN = 3;
-    public static final String BENEFICIARY_CATEGORY_NAME="DATOS DEL BENEFICIARIO";
-    public static final String SPOUSE_CATEGORY_NAME="DATOS DEL CONYUGE";
-    public static final String CHILD_CATEGORY_NAME="DATOS HIJO";
-    public static final String KINSMAN_CATEGORY_NAME="OTRO MIEMBRO DE LA FAMILIA";
-    public static final String ENTREPRENEURSHIP_CATEGORY_NAME="EMPRENDIMIENTO";
-    public static final String DWELLING_CATEGORY_NAME="VIVIENDA";
-*/
     private Map<String, Class<?>> categoryMap;
 
 
-    public ArrayList<Category> getCategoryList(boolean createCredential){
-
-
+    public List<Category> getCategoryList(boolean createCredential){
         //Keep all Category options.
-        ArrayList<Categories> categoryEnumList = new ArrayList<>(Categories.getCodeList());
+        List<Categories> categoryEnumList = new ArrayList<>(Categories.getCodeList());
         //Keep actual objects to return
-        ArrayList<Category> categoryList = new ArrayList<>();
+        List<Category> categoryList = new ArrayList<>();
 
         //building CATEGORY_MAP
         categoryMap = new HashMap<>();
@@ -50,7 +39,7 @@ public class AnswerCategoryFactory {
         return categoryList;
     }
 
-    private void addCategoryInstancesToList(ArrayList<Category> categoryList, Categories categoryEnum) {
+    private void addCategoryInstancesToList(List<Category> categoryList, Categories categoryEnum) {
 
         Class<?> categoryClass = categoryMap.get(categoryEnum.getCode());
 
@@ -75,29 +64,3 @@ public class AnswerCategoryFactory {
         }
     }
 }
-
-
-/*
-
-CATEGORY_MAP = new HashMap<>() {{
-             put(Categories.BENEFICIARY_CATEGORY_NAME.getCode(), PersonCategory.class);
-             put(Categories.SPOUSE_CATEGORY_NAME.getCode(), PersonCategory.class);
-             put(Categories.CHILD_CATEGORY_NAME.getCode(), PersonCategory.class);
-             put(Categories.KINSMAN_CATEGORY_NAME.getCode(), PersonCategory.class);
-             put(Categories.ENTREPRENEURSHIP_CATEGORY_NAME.getCode(), EntrepreneurshipCategory.class);
-             put(Categories.DWELLING_CATEGORY_NAME.getCode(), DwellingCategory.class);
-         }};
-
-        categoryList.add(new PersonCategory(Categories.BENEFICIARY_CATEGORY_NAME.getCode()));
-        categoryList.add(new PersonCategory(Categories.SPOUSE_CATEGORY_NAME.getCode()));
-
-        for (int i = 1; i < Categories.CHILD_CATEGORY_NAME.getAmount()+1; i++) {
-            categoryList.add(new PersonCategory(Categories.CHILD_CATEGORY_NAME.getCode()+" "+ i));
-        }
-        for (int i = 1; i < Categories.KINSMAN_CATEGORY_NAME.getAmount()+1; i++) {
-            categoryList.add(new PersonCategory(Categories.KINSMAN_CATEGORY_NAME.getCode()+ " " + i));
-        }
-
-        categoryList.add(new EntrepreneurshipCategory(Categories.ENTREPRENEURSHIP_CATEGORY_NAME.getCode()));
-        categoryList.add(new DwellingCategory(Categories.DWELLING_CATEGORY_NAME.getCode()));
-        */
